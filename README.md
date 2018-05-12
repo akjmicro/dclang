@@ -56,11 +56,23 @@ Anyway, due to RPN, things will look like this, when you do math:
 
     1 2 3 5 + 7 16 / .s
     <4> 1 2 8 0.4375 
+
+    begin i 7 < if i else exit endif again
+    .s
+    <7> 0 1 2 3 4 5 6 
+
 ```
 
 Notice the '.' character, which pops/prints the top-of-stack (TOS). This comes
 from FORTH, as does '.s', which non-destructively shows the stack contents.
 This is different from 'dc', where 'p' pops/prints the TOS.
+
+In the looping example, the 'begin/again' block has access to a hiddne
+variable 'i', which you can use to test conditionally and escape the loop.
+This is a weird mixture of the way FORTH uses 'do/loop' and 'begin/again';
+note how unlike traditional FORTH, you manually test the condition inside
+the block yourself. I may change this in the future to be more FORTH-like,
+and have separate 'do/loop' and 'begin/again' constructs.
 
 This project is *far* from complete, but the goal is for it to be a full-blown
 Turing-complete language in the vein of FORTH.

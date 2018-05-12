@@ -7,19 +7,26 @@ static void beginfunc()
 
 static void againfunc()
 {
-  loop_counter[loop_counter_ptr - 1] += 1;
-  token_ptr = return_stack[return_stack_ptr - 1];
+  if (exit_stat == 0) {
+    loop_counter[loop_counter_ptr - 1] += 1;
+    token_ptr = return_stack[return_stack_ptr - 1];
+  } else {
+    /* reset exit flag */
+    exit_stat = 0;
+  }
   /* also must decrement the conditional stack pointer, the assumption will
   be that an if statement was in there */
-  --cond_stack_ptr;
+  //--cond_stack_ptr;*/
   /* keep it from being less than zero, ever: */
-  cond_stack_ptr = cond_stack_ptr < 0 ? 0 : cond_stack_ptr; 
+  //cond_stack_ptr = cond_stack_ptr < 0 ? 0 : cond_stack_ptr;
 }
 
 static void exitfunc()
 {
   loop_counter[--loop_counter_ptr] = 0;
   --return_stack_ptr;
+  /* set exit flag */
+  exit_stat = 1;
 }
 
 static void ifunc()

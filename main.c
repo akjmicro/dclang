@@ -20,6 +20,7 @@ static int return_stack[32];
 static int return_stack_ptr;
 static int loop_counter[3];
 static int loop_counter_ptr;
+static int exit_stat;
 char tokens[MAXWORD][MAXLEN];
 static int token_ptr;
 static int ntokens = 0;
