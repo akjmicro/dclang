@@ -14,11 +14,6 @@ static void againfunc()
     /* reset exit flag */
     exit_stat = 0;
   }
-  /* also must decrement the conditional stack pointer, the assumption will
-  be that an if statement was in there */
-  //--cond_stack_ptr;*/
-  /* keep it from being less than zero, ever: */
-  //cond_stack_ptr = cond_stack_ptr < 0 ? 0 : cond_stack_ptr;
 }
 
 static void exitfunc()
