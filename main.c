@@ -14,13 +14,14 @@ and philosophy.  Born on 2018-05-05 */
 #define MAXLEN 20
 
 static unsigned int truth_val;
-static int cond_stack[16];
-static int cond_stack_ptr;
+static unsigned int cond_state;
+static unsigned int all_true;
 static int return_stack[32];
 static int return_stack_ptr;
 static int loop_counter[3];
 static int loop_counter_ptr;
-static int exit_stat;
+static unsigned int exit_stat;
+// our tokens to be interpreted go here:
 char tokens[MAXWORD][MAXLEN];
 static int token_ptr;
 static int ntokens = 0;
@@ -42,42 +43,26 @@ static void stack_machine(const char *argument)
 
   /* see if we are in a conditional word: */
   if (strcmp("endif", argument) == 0) {
-    --cond_stack_ptr;
-    /* keep it from being less than zero, ever: */
-    cond_stack_ptr = cond_stack_ptr < 0 ? 0 : cond_stack_ptr;
+    cond_state = cond_state >> 1;
+    all_true = all_true >> 1;
     return;
   }
   if (strcmp("if", argument) == 0) {
-    /* only proceed if we have not truth depth yet, or, if we do, and the
-    previous truth value is true */
-    if ((cond_stack_ptr == 0) ||
-        (cond_stack[cond_stack_ptr - 1] != 0)) {
-      /* get current truth-value from the stack */
-      truth_val = (unsigned int) pop();
-    } else {
-      truth_val = 0;
-    }
-    /* update truth stack */
-    cond_stack[cond_stack_ptr++] = truth_val;
-    return;
+    all_true = (all_true << 1) + 1;
+    truth_val = (unsigned int) pop();
+    cond_state = (cond_state << 1) + truth_val;
+    return; 
   }
   if (strcmp("else", argument) == 0) {
-    if ((cond_stack_ptr == 1) ||
-        ((cond_stack_ptr > 1) &&
-         (cond_stack[cond_stack_ptr - 2] != 0))) {
-      /* flip state */   
-      if (cond_stack[cond_stack_ptr - 1] == 0) {      
-        cond_stack[cond_stack_ptr - 1] = 1;
-      } else {
-        cond_stack[cond_stack_ptr - 1] = 0;
-      }
+    if ((cond_state & 0x1) == 1) {
+      --cond_state;
+    } else {
+      ++cond_state;
     }
     return;
   }
   
-  /*const struct op *o = operators;*/
-  if ((cond_stack_ptr == 0) || 
-      (cond_stack[cond_stack_ptr - 1])) {
+  if ((cond_state & all_true) == all_true) {
     /* try to convert to a number first */
     char *endPointer = 0;
     long double d;
@@ -92,8 +77,8 @@ static void stack_machine(const char *argument)
       (*(operators[hash])) ();
       return;
     }
-    /* nothing found, we've reached an error condition, so report the situation
-    and reset the stack */
+    /* nothing found, we've reached an error condition, so report
+    the situation and reset the stack */
     data_stack_ptr = 0;
     printf("%s -- syntax error.\n", argument); 
   }
@@ -103,7 +88,6 @@ static void stack_machine(const char *argument)
 int main(int argc, char **argv)
 { 
   populate_operators();
-  cond_stack[0] = 1;
 
   if (argc <= 1) {    
     while (1) {
