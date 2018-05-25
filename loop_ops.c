@@ -1,28 +1,31 @@
 /* looping */
-static void beginfunc()
+static void dofunc()
 {
   return_stack[return_stack_ptr++] = token_ptr;
   loop_counter_ptr++;
-}
-
-static void againfunc()
-{
-  if (exit_stat == 0) {
-    loop_counter[loop_counter_ptr - 1] += 1;
-    token_ptr = return_stack[return_stack_ptr - 1];
-  } else {
-    /* reset exit flag */
-    exit_stat = 0;
-  }
+  //loop_stat = (loop_stat << 1) + 1;
 }
 
 static void exitfunc()
 {
   loop_counter[--loop_counter_ptr] = 0;
   --return_stack_ptr;
-  /* set exit flag */
-  exit_stat = 1;
+  /* clear LSB loop flag */
+  //loop_stat = loop_stat & 0xfe;
 }
+
+static void redofunc()
+{
+  if ((unsigned int) pop() != 0) {
+    loop_counter[loop_counter_ptr - 1] += 1;
+    token_ptr = return_stack[return_stack_ptr - 1];
+  } else {
+    exitfunc();
+    /* reset exit flag */
+    //loop_stat = loop_stat >> 1;
+  }
+}
+
 
 static void ifunc()
 {

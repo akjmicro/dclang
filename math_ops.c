@@ -32,6 +32,21 @@ static void absfunc()
   push(fabs(pop()));
 }
 
+static void roundfunc()
+{
+  push((long int) round(pop()));
+}
+
+static void floorfunc()
+{
+  push((long int) floor(pop()));
+}
+
+static void ceilfunc()
+{
+  push((long int) ceil(pop()));
+}
+
 /* scientific math words */
 
 static void powerfunc()

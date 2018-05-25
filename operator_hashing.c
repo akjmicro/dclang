@@ -2,11 +2,12 @@
    As the operator list grows, we may have to change the 'hash_modulus'
    variable and recalculate the operator array lookup indices. */
 
-// basically, a reduced (by modulus) djb2 hashing algorithm.
+// basically, djb2 hashing algorithm, reduced by a modulus that accomodates
+// any functions we need.
 static int get_hash(unsigned char *in_str)
 {
   unsigned long int hash = 5381;
-  unsigned long int hash_modulus = 586;
+  unsigned long int hash_modulus = 367;
   unsigned long int c;
   while ((c = *in_str++)) {
     hash = ((hash << 5) + hash) + c;
@@ -15,55 +16,61 @@ static int get_hash(unsigned char *in_str)
 }
 
 // and array of function pointers
-void (*operators[586]) ();
+void (*operators[367]) ();
 
 // a seperate Python script helped me with populating this. The body of this
 // function is generated code.
 void populate_operators()
 {
-  operators[58] = addfunc;
-  operators[60] = subfunc;
-  operators[57] = mulfunc;
-  operators[62] = divfunc;
-  operators[52] = modfunc;
-  operators[499] = absfunc;
-  operators[76] = eqfunc;
-  operators[193] = noteqfunc;
-  operators[75] = ltfunc;
-  operators[77] = gtfunc;
-  operators[192] = ltefunc;
-  operators[258] = gtefunc;
-  operators[294] = andfunc;
-  operators[170] = orfunc;
-  operators[436] = notfunc;
-  operators[190] = xorfunc;
-  operators[194] = pifunc;
-  operators[403] = sinefunc;
-  operators[176] = cosfunc;
-  operators[56] = tanfunc;
-  operators[3] = logfunc;
-  operators[149] = log2func;
-  operators[273] = powerfunc;
-  operators[577] = sqrtfunc;
-  operators[456] = dropfunc;
-  operators[288] = dupfunc;
-  operators[100] = swapfunc;
-  operators[139] = overfunc;
-  operators[104] = rotfunc;
-  operators[234] = nipfunc;
-  operators[518] = tuckfunc;
-  operators[16] = drop2func;
-  operators[470] = dup2func;
-  operators[246] = swap2func;
-  operators[285] = over2func;
-  operators[502] = beginfunc;
-  operators[353] = againfunc;
-  operators[541] = exitfunc;
-  operators[120] = ifunc;
-  operators[121] = jfunc;
-  operators[122] = kfunc;
-  operators[61] = printfunc;
-  operators[370] = printstackfunc;
-  operators[360] = crfunc;
-  operators[245] = clockfunc;
+  operators[355] = addfunc;
+  operators[357] = subfunc;
+  operators[354] = mulfunc;
+  operators[359] = divfunc;
+  operators[349] = modfunc;
+  operators[276] = absfunc;
+  //operators[225] = lshiftfunc;
+  //operators[293] = rshiftfunc;
+  operators[6] = eqfunc;
+  operators[227] = noteqfunc;
+  operators[5] = ltfunc;
+  operators[7] = gtfunc;
+  operators[226] = ltefunc;
+  operators[292] = gtefunc;
+  operators[290] = andfunc;
+  operators[127] = orfunc;
+  operators[183] = notfunc;
+  operators[61] = xorfunc;
+  operators[151] = pifunc;
+  operators[263] = roundfunc;
+  operators[351] = ceilfunc;
+  operators[209] = floorfunc;
+  operators[286] = sinefunc;
+  operators[314] = cosfunc;
+  operators[10] = tanfunc;
+  operators[194] = logfunc;
+  operators[213] = log2func;
+  operators[162] = powerfunc;
+  operators[48] = sqrtfunc;
+  operators[1] = dropfunc;
+  operators[130] = dupfunc;
+  operators[145] = swapfunc;
+  operators[40] = overfunc;
+  operators[135] = rotfunc;
+  operators[348] = nipfunc;
+  operators[201] = tuckfunc;
+  operators[83] = drop2func;
+  operators[303] = dup2func;
+  operators[64] = swap2func;
+  operators[269] = over2func;
+  operators[101] = rot2func;
+  operators[128] = dofunc;
+  operators[121] = redofunc;
+  operators[73] = exitfunc;
+  operators[50] = ifunc;
+  operators[51] = jfunc;
+  operators[52] = kfunc;
+  operators[358] = printfunc;
+  operators[185] = printstackfunc;
+  operators[98] = crfunc;
+  operators[108] = clockfunc;
 }

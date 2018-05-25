@@ -133,3 +133,24 @@ static void over2func()
   push(data_stack[data_stack_ptr - 4]);
   push(data_stack[data_stack_ptr - 4]);
 }
+
+static void rot2func()
+{
+  // ( 6 5 4 3 2 1 -- 4 3 2 1 6 5 )
+  if (data_stack_ptr < 6) {
+    printf("stack underflow! ");
+    return;
+  }
+  long double val1 = pop();
+  long double val2 = pop();
+  long double val3 = pop();
+  long double val4 = pop();
+  long double val5 = pop();
+  long double val6 = pop();
+  push(val4);
+  push(val3);
+  push(val2);
+  push(val1);
+  push(val6);
+  push(val5); 
+}

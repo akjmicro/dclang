@@ -57,9 +57,11 @@ Anyway, due to RPN, things will look like this, when you do math:
     1 2 3 5 + 7 16 / .s
     <4> 1 2 8 0.4375 
 
-    begin i 7 < if i else exit endif again
-    .s
-    <7> 0 1 2 3 4 5 6 
+    1 if 2 2 + else 17 endif .
+    4
+
+    do i . i 7 < redo
+    0 1 2 3 4 5 6 7
 
 ```
 
@@ -67,12 +69,13 @@ Notice the '.' character, which pops/prints the top-of-stack (TOS). This comes
 from FORTH, as does '.s', which non-destructively shows the stack contents.
 This is different from 'dc', where 'p' pops/prints the TOS.
 
-In the looping example, the 'begin/again' block has access to a hiddne
-variable 'i', which you can use to test conditionally and escape the loop.
-This is a weird mixture of the way FORTH uses 'do/loop' and 'begin/again';
-note how unlike traditional FORTH, you manually test the condition inside
-the block yourself. I may change this in the future to be more FORTH-like,
-and have separate 'do/loop' and 'begin/again' constructs.
+In the looping example, the 'do/redo' block has access to a hidden variable
+'i', which you can use to test conditionally and escape the loop.  This is a
+weird mixture of the way FORTH uses 'do/loop' and 'begin/again'; note how
+unlike traditional FORTH, you manually test the condition inside the block
+yourself, just before the 'redo', which tests for a true condition before
+returning to 'do'.  (I may change this in the future to be more FORTH-like,
+and have separate 'do/loop' and 'begin/again' constructs.)
 
 This project is *far* from complete, but the goal is for it to be a full-blown
 Turing-complete language in the vein of FORTH.
@@ -81,25 +84,29 @@ So far, I've implemented:
 
   * +, -, *, /, %, abs
   * pow, sqrt, log, log2
-  * sin, cos, tan
+  * sin, cos, tan, pi
   * and, or, not, xor
   * =, <>, >, <, >=, <= 
   * if-else-endif
-  * begin-again (looping)
-  * drop, dup, swap, over, rot, 2drop, 2dup, 2swap, 2over, 2rot
-  * a clock function so we can time execution
+  * do-redo (looping)
+  * drop, dup, swap, over, rot, nip, tuck, drop2, dup2, swap2, over2, rot2
+  * a clock function ('clock') so we can time execution in nano seconds for
+  benchmarking.
 
 TODO:
 
+  * declaring custom words
+  * constants, variables and arrays
   * open/read/write/close to the filesystem
   * more time functions (e.g. date, sleep, etc.)
   * strings and basic functionality around them
-  * turtle graphics for the kids!
   * just about everything a usuable language will need, or at least, the
   means for someone to hook C-libraries into this enchilada.
   * although it's beating or matching gforth at things like immediate
   floating-point operations, it's pretty slow at looping.  I need to address
-  that at some point.
+  that at some point. This will likely mean getting away from string
+  interpretation and into compiling code fragments.
+  * turtle graphics for the kids!
 
 Everything is on the floating-point stack only at this point.  I will
 obviously have to change/add much in the way of the structure to implement

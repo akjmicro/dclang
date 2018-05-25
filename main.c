@@ -20,7 +20,7 @@ static int return_stack[32];
 static int return_stack_ptr;
 static int loop_counter[3];
 static int loop_counter_ptr;
-static unsigned int exit_stat;
+//static unsigned int loop_stat;
 // our tokens to be interpreted go here:
 char tokens[MAXWORD][MAXLEN];
 static int token_ptr;
@@ -49,7 +49,7 @@ static void stack_machine(const char *argument)
   }
   if (strcmp("if", argument) == 0) {
     all_true = (all_true << 1) + 1;
-    truth_val = (unsigned int) pop();
+    truth_val = (unsigned int) pop() != 0;
     cond_state = (cond_state << 1) + truth_val;
     return; 
   }
