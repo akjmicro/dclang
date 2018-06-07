@@ -89,7 +89,7 @@ So far, I've implemented:
   * =, <>, >, <, >=, <= 
   * skip & exit (a primitive "goto" instead of if-else-endif)
   * do-redo (looping)
-  * drop, dup, swap, over, rot, nip, tuck, drop2, dup2, swap2, over2, rot2
+  * drop, dup, swap, over, rot, nip, tuck, 2drop, 2dup, 2swap, 2over, 2rot
   * a clock function ('clock') so we can time execution in nano seconds for
   benchmarking.
 
