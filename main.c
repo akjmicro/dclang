@@ -13,14 +13,10 @@ and philosophy.  Born on 2018-05-05 */
 #define MAXWORD 16384
 #define MAXLEN 20
 
-static unsigned int truth_val;
-static unsigned int cond_state;
-static unsigned int all_true;
 static int return_stack[32];
 static int return_stack_ptr;
 static int loop_counter[3];
 static int loop_counter_ptr;
-//static unsigned int loop_stat;
 // our tokens to be interpreted go here:
 char tokens[MAXWORD][MAXLEN];
 static int token_ptr;
@@ -29,65 +25,47 @@ static int ntokens = 0;
 #include "stack_ops.c"
 #include "logic_ops.c"
 #include "math_ops.c"
-#include "loop_ops.c"
+#include "branch_ops.c"
 #include "time_ops.c"
 #include "output_ops.c"
-#include "operator_hashing.c"
+#include "operators.c"
 
 static void stack_machine(const char *argument)
 {
+  char *endPointer = 0;
+  long double d;
+  const struct primitive *pr = primitives;
+
   if (argument == 0) {
     printfunc();
     return;
   } 
 
-  /* see if we are in a conditional word: */
-  if (strcmp("endif", argument) == 0) {
-    cond_state = cond_state >> 1;
-    all_true = all_true >> 1;
-    return;
-  }
-  if (strcmp("if", argument) == 0) {
-    all_true = (all_true << 1) + 1;
-    truth_val = (unsigned int) pop() != 0;
-    cond_state = (cond_state << 1) + truth_val;
-    return; 
-  }
-  if (strcmp("else", argument) == 0) {
-    if ((cond_state & 0x1) == 1) {
-      --cond_state;
-    } else {
-      ++cond_state;
-    }
-    return;
-  }
-  
-  if ((cond_state & all_true) == all_true) {
-    /* try to convert to a number first */
-    char *endPointer = 0;
-    long double d;
-    d = strtod(argument, &endPointer);
-    if (endPointer != argument) {
-      push(d);
+  /* search dictionary (list, not hash) entry */
+  while (pr->name != 0) {
+    if (strcmp(pr->name, argument) == 0) {
+      (*(pr->function)) ();
       return;
     }
-    /* next, search via hash for operator */
-    int hash = get_hash((unsigned char *) argument);
-    if (operators[hash]) {
-      (*(operators[hash])) ();
-      return;
-    }
-    /* nothing found, we've reached an error condition, so report
-    the situation and reset the stack */
-    data_stack_ptr = 0;
-    printf("%s -- syntax error.\n", argument); 
+    pr++;
   }
+
+  /* next, try to convert to a number */
+  d = strtod(argument, &endPointer);
+  if (endPointer != argument) {
+    push(d);
+    return;
+  }
+
+  /* nothing found, we've reached an error condition, so report
+  the situation and reset the stack */
+  data_stack_ptr = 0;
+  printf("%s -- syntax error.\n", argument); 
   return;  
 }
 
 int main(int argc, char **argv)
 { 
-  populate_operators();
 
   if (argc <= 1) {    
     while (1) {
