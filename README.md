@@ -57,8 +57,8 @@ Anyway, due to RPN, things will look like this, when you do math:
     1 2 3 5 + 7 16 / .s
     <4> 1 2 8 0.4375 
 
-    1 if 2 2 + else 17 endif .
-    4
+    1 2 4 skip 0 0 0 0 3 4 .
+    1 2 3 4
 
     do i . i 7 < redo
     0 1 2 3 4 5 6 7
@@ -87,7 +87,7 @@ So far, I've implemented:
   * sin, cos, tan, pi
   * and, or, not, xor
   * =, <>, >, <, >=, <= 
-  * if-else-endif
+  * skip & exit (a primitive "goto" instead of if-else-endif)
   * do-redo (looping)
   * drop, dup, swap, over, rot, nip, tuck, drop2, dup2, swap2, over2, rot2
   * a clock function ('clock') so we can time execution in nano seconds for
@@ -103,7 +103,7 @@ TODO:
   * just about everything a usuable language will need, or at least, the
   means for someone to hook C-libraries into this enchilada.
   * although it's beating or matching gforth at things like immediate
-  floating-point operations, it's pretty slow at looping.  I need to address
+  floating-point operations, it's slower at looping.  I need to address
   that at some point. This will likely mean getting away from string
   interpretation and into compiling code fragments.
   * turtle graphics for the kids!
