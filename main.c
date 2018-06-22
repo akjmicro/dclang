@@ -13,6 +13,10 @@ and philosophy.  Born on 2018-05-05 */
 #define MAXWORD 16384
 #define MAXLEN 20
 
+#define IBUFSIZE 128
+char buf[IBUFSIZE];
+int bufused;
+
 static int return_stack[32];
 static int return_stack_ptr;
 static int loop_counter[3];
@@ -28,76 +32,92 @@ static int ntokens = 0;
 #include "branch_ops.c"
 #include "time_ops.c"
 #include "output_ops.c"
+#include "string_ops.c"
 #include "operators.c"
 
 static void stack_machine(const char *argument)
 {
-  char *endPointer = 0;
-  long double d;
-  const struct primitive *pr = primitives;
+    char *endPointer = 0;
+    long double d;
+    const struct primitive *pr = primitives;
 
-  if (argument == 0) {
-    printfunc();
-    return;
-  } 
+    if (argument == 0) {
+        printfunc();
+        return;
+    } 
 
-  /* search dictionary (list, not hash) entry */
-  while (pr->name != 0) {
-    if (strcmp(pr->name, argument) == 0) {
-      (*(pr->function)) ();
-      return;
+    /* search dictionary (list, not hash) entry */
+    while (pr->name != 0) {
+        if (strcmp(pr->name, argument) == 0) {
+            (*(pr->function)) ();
+            return;
+        }
+        pr++;
     }
-    pr++;
-  }
 
-  /* next, try to convert to a number */
-  d = strtod(argument, &endPointer);
-  if (endPointer != argument) {
-    push(d);
-    return;
-  }
+    /* next, try to convert to a number */
+    d = strtod(argument, &endPointer);
+    if (endPointer != argument) {
+        push(d);
+        return;
+    }
 
-  /* nothing found, we've reached an error condition, so report
-  the situation and reset the stack */
-  data_stack_ptr = 0;
-  printf("%s -- syntax error.\n", argument); 
-  return;  
+    /* nothing found, we've reached an error condition, so report
+    the situation and reset the stack */
+    data_stack_ptr = 0;
+    printf("%s -- syntax error.\n", argument); 
+    return;    
 }
 
+void add_to_buf(char ch) { if(bufused < IBUFSIZE - 1) buf[bufused++] = ch; }
+char *buf2str()          { buf[bufused++] = '\0'; return strdup(buf); }
+
+char *get_token() {
+    int ch;
+    bufused = 0;
+    /* skip leading space */
+    do {
+        if((ch = fgetc(stdin)) == EOF) exit(0);
+    } while(isspace(ch)); 
+    add_to_buf(ch);
+    /* grab all the next non-whitespace characters */
+    while (1) {
+        /* check again for EOF */
+        if ((ch = fgetc(stdin)) == EOF) exit(0);
+        if (isspace(ch)) {
+            ungetc(ch, stdin);
+            return buf2str();
+        }
+        add_to_buf(ch);
+    }
+}
+    
 int main(int argc, char **argv)
 { 
-
-  if (argc <= 1) {    
-    while (1) {
-      char buff[BUFSIZ];
-      char *newline_p;
-      /* get a bit of input text */
-      if (fgets(buff, sizeof buff, stdin) != NULL) {
-        if ((newline_p = strchr(buff, '\n')) != NULL) {
-          *newline_p = '\0';
+    if (argc <= 1) {
+        printf("Welcome to dclang! Aaron Krister Johnson, 2018\n");
+        printf("Make sure to peruse README.md to get your bearings!\n");
+        while (1) {
+            /* get next input token */
+            char *token;
+            token = get_token();            
+            strcpy(tokens[ntokens++], token);
+            /* interpret what hasn't been interpreted yet */
+            while (token_ptr < ntokens) {
+                stack_machine(tokens[token_ptr++]);
+            }
         }
-        char *sep = strtok(buff, DELIM);
-        while (sep != NULL ) {
-          strcpy(tokens[ntokens++], sep);
-          sep = strtok(NULL, DELIM);
+    }
+    else {
+        if (*argv[1]=='-')
+            printf("you need help!\n");
+        while (argc >= 2) {
+            stack_machine(argv[1]);
+            argv++;
+            argc--;
         }
-      }
-      /* interpret what hasn't been interpreted yet */
-      while (token_ptr < ntokens) {
-        stack_machine(tokens[token_ptr++]);
-      }
     }
-  }
-  else {
-    if (*argv[1]=='-')
-      printf("you need help!\n");
-    while (argc >= 2) {
-      stack_machine(argv[1]);
-      argv++;
-      argc--;
-    }
-  }
 
-  stack_machine(0);
-  return EXIT_SUCCESS;
+    stack_machine(0);
+    return EXIT_SUCCESS;
 }

@@ -1,5 +1,5 @@
 static long double data_stack[128];
-static unsigned int data_stack_ptr;
+static int data_stack_ptr;
 
 /* stack operations */
 static void push(long double a)
@@ -13,8 +13,9 @@ static void push(long double a)
 
 static long double pop()
 {
-  if (data_stack_ptr == 0) {
+  if (data_stack_ptr <= 0) {
     printf("stack underflow! ");
+    data_stack_ptr = 0;
     return 0;
   }
   return data_stack[--data_stack_ptr];
@@ -27,6 +28,10 @@ static void dropfunc()
 
 static void dupfunc()
 {
+  if (data_stack_ptr < 1) {
+    printf("stack underflow! ");
+    return;
+  }
   long double val = data_stack[data_stack_ptr - 1];
   push(val);
 }
