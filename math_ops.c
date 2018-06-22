@@ -27,6 +27,20 @@ static void modfunc()
   push(fmod(pop(), modulus));
 }
 
+static void lshiftfunc()
+{
+  unsigned int shift_amt = (unsigned int) pop();
+  unsigned int base = (unsigned int) pop();
+  push(base << shift_amt);  
+}
+
+static void rshiftfunc()
+{
+  unsigned int shift_amt = (unsigned int) pop();
+  unsigned int base = (unsigned int) pop();
+  push(base >> shift_amt);  
+}
+
 static void absfunc()
 {
   push(fabs(pop()));
@@ -68,6 +82,11 @@ static void logfunc()
 static void log2func()
 {
   push(log2(pop())); 
+}
+
+static void efunc()
+{
+  push(M_E);
 }
 
 /* Trig, pi, etc. */

@@ -1,0 +1,50 @@
+s" 
+This script will compare some prime numbered EDOs (equal division of the
+octave)
+" type
+
+# load some primes
+2  0 !
+3  1 !
+5  2 !
+7  3 !
+11 4 !
+13 5 !
+17 6 !
+19 7 !
+23 8 !
+29 9 !
+31 10 !
+37 11 ! 
+41 12 !
+43 13 !
+47 14 !
+53 15 !
+# perfect 5th to compare, store in slot 32:
+3 2 / log2 32 !
+
+s" 
+perfect 5th is:" type
+32 @ 1200 * 7 3 .rj s" cents" type cr cr
+
+# edo string -- length is var 20, string pnt is var 19:
+s" \bedo" 20 ! 19 !
+
+# deg string -- length is var 22, string pnt is var 21:
+s" \bdeg " 22 ! 21 !
+
+# print table header:
+s"    edo | deg | cents for 3/2 |   error " type cr
+s" ---------------------------------------" type cr
+
+# loop through data
+do
+    i @ 3 0 .rj 19 @ 20 @ type          # edo
+    32 @ i @ * round dup 33 ! 3 0 .rj   # degree
+        21 @ 22 @ type
+    33 @ i @ / 1200 * dup 34 ! 10 3 .rj  # cents value of 5th
+    34 @ 32 @ 1200 * - 12 3 .rj cr       # difference from pure
+i 15 < redo
+
+# final carriage return:
+cr

@@ -14,6 +14,10 @@ static void stringfunc()
         if (strchr("\\", ch)) {
             /* consume an extra char due to backslash */            
             if ((ch = fgetc(stdin)) == EOF) exit(0);
+            /* backspace */
+            if (strchr("b", ch)) {
+                ch = 8;
+            }
         }
         string_pad[string_here++] = ch;
         if ((ch = fgetc(stdin)) == EOF) exit(0);

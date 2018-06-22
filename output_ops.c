@@ -21,3 +21,11 @@ static void printstackfunc()
     }
     printf("\n");
 }
+
+static void printrjfunc()
+{
+// right-justified for pretty printing!
+    int precision = (int) pop();
+    int width = (int) pop();
+    printf("% *.*Lf ", width, precision, pop());
+}
