@@ -63,6 +63,21 @@ Anyway, due to RPN, things will look like this, when you do math:
     do i . i 7 < redo
     0 1 2 3 4 5 6 7
 
+    # this is a comment
+    s" This is a string!" type
+    This is a string!
+
+    # store a value at slot zero:
+    1.15123 0 !
+    0 @ .
+    1.15123
+
+    # store a value at slot 23:
+    4.132 3 / 23 !
+    23 @ .
+    1.3773333333333333
+
+
 ```
 
 Notice the '.' character, which pops/prints the top-of-stack (TOS). This comes
@@ -96,10 +111,10 @@ So far, I've implemented:
 TODO:
 
   * declaring custom words
-  * constants, variables and arrays
   * open/read/write/close to the filesystem
   * more time functions (e.g. date, sleep, etc.)
-  * strings and basic functionality around them
+  * more string functions, as needed (basic saving and typing is all we have
+  at the moment
   * just about everything a usuable language will need, or at least, the
   means for someone to hook C-libraries into this enchilada.
   * although it's beating or matching gforth at things like immediate

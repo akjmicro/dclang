@@ -1,0 +1,17 @@
+do
+    i 2 = i 3 = or
+    i 6 % 5 = 
+    i 6 % 1 = or
+    or
+    i 1 > and
+    i 5 > 2 * skip
+        6 skip
+        i 5 % 0 <> and
+    i 7 > 2 * skip
+        6 skip
+        i 7 % 0 <> and 
+    2 * skip
+        2 skip
+        i .
+i 100 < redo
+cr

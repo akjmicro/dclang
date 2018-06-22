@@ -33,6 +33,7 @@ static int ntokens = 0;
 #include "time_ops.c"
 #include "output_ops.c"
 #include "string_ops.c"
+#include "variable_ops.c"
 #include "operators.c"
 
 static void stack_machine(const char *argument)
