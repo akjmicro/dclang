@@ -34,13 +34,3 @@ static void typefunc()
     memcpy(dest, (char *)(str_start + 1), str_len);
     printf("%s", dest);        
 }
-
-static void commentfunc()
-{
-    int ch;
-    /* do nothing until a newline */    
-    if ((ch = fgetc(stdin)) == EOF) exit(0);
-    while (! strchr("\n", ch)) {
-        if ((ch = fgetc(stdin)) == EOF) exit(0);
-    }
-}

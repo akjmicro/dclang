@@ -88,7 +88,6 @@ static const struct primitive primitives[] = {
   {"cr", crfunc},
   {"s\"", stringfunc},
   {"type", typefunc},
-  {"#", commentfunc},
   {"clock", clockfunc},
   {0, 0}
 };

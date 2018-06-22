@@ -76,11 +76,23 @@ char *buf2str()          { buf[bufused++] = '\0'; return strdup(buf); }
 char *get_token() {
     int ch;
     bufused = 0;
-    /* skip leading space */
-    do {
-        if((ch = fgetc(stdin)) == EOF) exit(0);
-    } while(isspace(ch)); 
-    add_to_buf(ch);
+    /* skip leading spaces and comments */
+    while (1) {
+        /* skip leading space */
+        do {
+            if((ch = fgetc(stdin)) == EOF) exit(0);
+        } while(isspace(ch));
+        /* if we are starting a comment: */
+        if (strchr("#", ch)) {
+            /* go to the end of the line */
+            do {
+                if((ch = fgetc(stdin)) == EOF) exit(0);
+            } while(! strchr("\n", ch));
+        } else {
+            add_to_buf(ch);
+            break;
+        }
+    }
     /* grab all the next non-whitespace characters */
     while (1) {
         /* check again for EOF */
@@ -92,7 +104,8 @@ char *get_token() {
         add_to_buf(ch);
     }
 }
-    
+
+
 int main(int argc, char **argv)
 { 
     if (argc <= 1) {
@@ -101,7 +114,7 @@ int main(int argc, char **argv)
         while (1) {
             /* get next input token */
             char *token;
-            token = get_token();            
+            token = get_token();
             strcpy(tokens[ntokens++], token);
             /* interpret what hasn't been interpreted yet */
             while (token_ptr < ntokens) {
