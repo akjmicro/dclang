@@ -9,7 +9,7 @@ ____________
     git clone https://github.com/akjmicro/dclang
     cd dclang
     make
-    ./dclang < tests/some_primes.dc
+    ./dclang < examples/some_primes.dc
 ```
 
 * You can also put the executable in /usr/local/bin or what-have-you.

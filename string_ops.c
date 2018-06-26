@@ -22,8 +22,18 @@ static void stringfunc()
         string_pad[string_here++] = ch;
         if ((ch = fgetc(stdin)) == EOF) exit(0);
     }
-    push((long double)((unsigned long int)&string_pad + string_start));
-    push(string_here - string_start);
+    long double string_addy = \
+        (long double)((unsigned long int)&string_pad + string_start);
+    long double string_size = (long double)(string_here - string_start);
+    if (def_mode) {
+        prog[iptr].function.with_param = push;
+        prog[iptr++].param = string_addy;
+        prog[iptr].function.with_param = push;
+        prog[iptr++].param = string_size; 
+    } else {
+        push(string_addy);
+        push(string_size);
+    }
 }
 
 static void printfunc()

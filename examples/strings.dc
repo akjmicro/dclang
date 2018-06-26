@@ -1,0 +1,15 @@
+# notice how we are skipping more than 4 tokens (5, to be precise).
+# this is because s" This is false" evaluates to an address and length,
+# so in fact, it's two tokens.
+
+[ teststr 5 skip 
+    s" This is false" print 3 skip
+    s" This is true" print ]
+teststr
+cr
+
+[ teststr2 0 skip
+    s" This is false" print 3 skip
+    s" This is true" print ]
+teststr2
+cr

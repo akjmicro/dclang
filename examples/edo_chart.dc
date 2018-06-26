@@ -38,9 +38,9 @@ s" ---------------------------------------" print cr
 
 # loop through data
 [ main do
-    i @ 3 0 .rj 19 @ 20 @ print          # edo
+    i @ 3 0 .rj s" \bedo" print          # edo
     32 @ i @ * round dup 33 ! 3 0 .rj    # degree
-        21 @ 22 @ print
+        s" \bdeg" print
     33 @ i @ / 1200 * dup 34 ! 10 3 .rj  # cents value of 5th
     34 @ 32 @ 1200 * - 12 3 .rj cr       # difference from pure
 i 13 < redo ]

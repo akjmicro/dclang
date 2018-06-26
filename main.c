@@ -94,7 +94,12 @@ static void compile_or_interpret(const char *argument)
     while (pr->name != 0) {
         if (strcmp(pr->name, argument) == 0) {
             if (def_mode) {
-                prog[iptr++].function.without_param = pr->function;
+                /* insert function only if its not 's"' for strings: */
+                if (strcmp("s\"", argument) != 0) {
+                    prog[iptr++].function.without_param = pr->function;
+                } else {
+                    (*(pr->function)) ();
+                }
             } else {
                 if (validate(argument)) {
                     (*(pr->function)) ();
