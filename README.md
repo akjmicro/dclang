@@ -9,7 +9,7 @@ ____________
     git clone https://github.com/akjmicro/dclang
     cd dclang
     make
-    ./dclang
+    ./dclang < tests/some_primes.dc
 ```
 
 * You can also put the executable in /usr/local/bin or what-have-you.
@@ -17,6 +17,12 @@ ____________
 * Experiment as you wish with compiler optimizations in the Makefile,
   particularly with floating-point options, since 'dclang' is heavily
   reliant on them.
+
+* For interaction, it's nice to use 'rlwrap' to get readline line-history:
+
+```
+    rlwrap ./dclang
+```
 
 ### ABOUT:
 
