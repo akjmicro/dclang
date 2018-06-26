@@ -18,7 +18,7 @@ char buf[IBUFSIZE];
 int bufused;
 long double data_stack[128];
 register long int data_stack_ptr asm("r15");
-long int return_stack[32];
+long int return_stack[256];
 register long int return_stack_ptr asm("r14");
 long int loop_counter[3];
 long int loop_counter_ptr;
@@ -86,7 +86,7 @@ static void compile_or_interpret(const char *argument)
     const struct primitive *pr = primitives;
 
     if (argument == 0) {
-        printfunc();
+        //printfunc();
         return;
     } 
 

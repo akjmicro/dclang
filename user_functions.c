@@ -56,7 +56,7 @@ static void startdeffunc()
     this_token = get_token();
     /* put name and current location in user_functions lookup array */
     user_functions[num_user_functions].name = this_token;
-    user_functions[num_user_functions].func_start = iptr;
+    user_functions[num_user_functions++].func_start = iptr;
 }
 
 /* respond to ']' token: */
@@ -65,7 +65,7 @@ static void enddeffunc()
     /* Simply insert a return call into 'prog' where 'iptr' now points. */
     prog[iptr++].function.without_param = returnfunc;
     /* we added a function, so increment how many we know exist */
-    ++num_user_functions;
+    //++num_user_functions;
     // for debugging:
     //showdefined();
 }
