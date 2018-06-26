@@ -100,49 +100,49 @@ Turing-complete language in the vein of FORTH.
 
 So far, I've implemented:
 
-    * Math:
-        * +, -, *, /, %, <<, >>
-        * abs, round, ceil, floor
-        * pow, sqrt, log, log2, log10
-        * sin, cos, tan, pi, e
-    * Logic:
-        * and, or, not, xor
-        * =, <>, >, <, >=, <= 
-    * Stack operations:
-        * drop, dup, swap, over, rot, nip, tuck
-        * 2drop, 2dup, 2swap, 2over, 2rot  
-    * Control structures:
-        * skip (a kind of jumping mechanism that replaces if/else/endif)
-        * do/redo (looping)
-        * user-defined words (functions)
-    * Strings:
-        * simple string printing 
-        * fancier right-justified numeric output fields
-        * '#' to end-of-line' for comments
-    * Variables/Arrays:
-        * ! (poke a value to a given slot, e.g. '5 32 !' puts the value 5
-        into slot 32)
-        * @ (peek a value, copy it to the stack, e.g. '32 @' will put our
-        previously saved '5' onto the top of the stack.
-        * Since the variables exist in an giant gloabel array, there really is 
-        no distinction between 'arrays' and 'variables' in dclang. In the
-        future, I make this friendlier, but for now, you can keep track of
-        your variable space by generous commenting in your source code. :D
-    * Timing:
-        * a clock function ('clock') so we can time execution in nanoseconds 
-        for benchmarking.
-        * A hook into CPU-cycle clock, called 'rdtsc'.
-    
+  * Math:
+    * +, -, *, /, %, <<, >>
+    * abs, round, ceil, floor
+    * pow, sqrt, log, log2, log10
+    * sin, cos, tan, pi, e
+  * Logic:
+    * and, or, not, xor
+    * =, <>, >, <, >=, <= 
+  * Stack operations:
+    * drop, dup, swap, over, rot, nip, tuck
+    * 2drop, 2dup, 2swap, 2over, 2rot  
+  * Control structures:
+    * skip (a kind of jumping mechanism that replaces if/else/endif)
+    * do/redo (looping)
+    * user-defined words (functions)
+  * Strings:
+    * simple string printing 
+    * fancier right-justified numeric output fields
+    * '#' to end-of-line' for comments
+  * Variables/Arrays:
+    * ! (poke a value to a given slot, e.g. '5 32 !' puts the value 5
+    into slot 32)
+    * @ (peek a value, copy it to the stack, e.g. '32 @' will put our
+    previously saved '5' onto the top of the stack.
+    * Since the variables exist in an giant gloabel array, there really is 
+    no distinction between 'arrays' and 'variables' in dclang. In the
+    future, I make this friendlier, but for now, you can keep track of
+    your variable space by generous commenting in your source code. :D
+  * Timing:
+    * a clock function ('clock') so we can time execution in nanoseconds 
+    for benchmarking.
+    * A hook into CPU-cycle clock, called 'rdtsc'.
+  
 TODO:
 
-    * open/read/write/close to the filesystem
-    * hashing/hash tables (dictionaries)
-    * more time functions (e.g. date, sleep, etc.)
-    * more string functions, as needed (basic saving and typing is all we have
-    at the moment
-    * just about everything a usuable language will need, or at least, the
-    means for someone to hook C-libraries into this enchilada.
-    * turtle graphics for the kids!
+  * open/read/write/close to the filesystem
+  * hashing/hash tables (dictionaries)
+  * more time functions (e.g. date, sleep, etc.)
+  * more string functions, as needed (basic saving and typing is all we have
+  at the moment
+  * just about everything a usuable language will need, or at least, the
+  means for someone to hook C-libraries into this enchilada.
+  * turtle graphics for the kids!
 
 Everything is on the floating-point stack only at this point.  I will
 obviously have to change/add much in the way of the structure to implement
