@@ -111,8 +111,7 @@ So far, I've implemented:
   * a clock function ('clock') so we can time execution in nano seconds for
   benchmarking. Also, a higher-res clock called 'rdtsc'.
   * simple string printing, as well as fancier right-justified strings
-  * user functions -- still some debugging to do, though, ATM embedding them
-  into one another isn't quite working.
+  * user functions
 
 TODO:
 

@@ -38,15 +38,3 @@ static void skipfunc()
     int skipamt = (int) pop();
     iptr += skipamt;
 }
-
-/* This function will restore 'iptr' to what it was before going on its
-fancy journey into a function.  It won't "Make America Great Again", but it's
-a start.  */
-static void returnfunc()
-{
-    if (return_stack_ptr == 0) {
-        iptr = num_insts;
-    } else {
-        iptr = return_stack[--return_stack_ptr] + 1;
-    }
-}

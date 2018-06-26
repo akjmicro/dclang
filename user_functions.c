@@ -23,6 +23,30 @@ typedef struct {
 user_function user_functions[1024];
 int num_user_functions;
 
+/* debugging */
+static void showdefined()
+{
+    for (int x=0; x < num_user_functions; x++) {
+        printf("Function %i: %s @ %li\n", x, user_functions[x].name,\
+                                            user_functions[x].func_start);
+    }
+}
+
+static void gotofunc(long double where)
+{
+    return_stack[return_stack_ptr++] = iptr;
+    iptr = (long int) where;
+    (*(prog[iptr].function.with_param)) (prog[iptr].param);
+}
+
+/* This function will restore 'iptr' to what it was before going on its
+fancy journey into a function.  It won't "Make America Great Again", but it's
+a start.  */
+static void returnfunc()
+{
+    iptr = return_stack[--return_stack_ptr];
+}
+
 /* respond to '[' token: */
 static void startdeffunc()
 {
@@ -32,19 +56,32 @@ static void startdeffunc()
     this_token = get_token();
     /* put name and current location in user_functions lookup array */
     user_functions[num_user_functions].name = this_token;
-    user_functions[num_user_functions].func_start = num_insts;
+    user_functions[num_user_functions].func_start = iptr;
 }
 
 /* respond to ']' token: */
 static void enddeffunc()
 {
     /* Simply insert a return call into 'prog' where 'iptr' now points. */
-    prog[num_insts++].function.without_param = returnfunc;
+    prog[iptr++].function.without_param = returnfunc;
     /* we added a function, so increment how many we know exist */
     ++num_user_functions;
+    // for debugging:
+    //showdefined();
 }
 
-static void gotofunc(long int where)
-{
-    iptr = where;
-}
+/* 
+     (foo)   push(2);  0
+             *;        1
+             return;   2
+     (bar)   push(3);  3
+             *;        4
+             return;   5
+   (fubar)   push(1);  6
+             -;        7
+             goto(foo); 8     
+             goto(bar); 9
+             return;    10
+             --         11
+
+*/

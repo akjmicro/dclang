@@ -37,7 +37,6 @@ typedef struct {
  i.e. the 'program' will live: */
 inst_struct prog[MAXWORD];
 long int iptr;
-long int num_insts;
 
 /* flag for if we are defining a new word (function) */
 int def_mode;
@@ -95,7 +94,7 @@ static void compile_or_interpret(const char *argument)
     while (pr->name != 0) {
         if (strcmp(pr->name, argument) == 0) {
             if (def_mode) {
-                prog[num_insts++].function.without_param = pr->function;
+                prog[iptr++].function.without_param = pr->function;
             } else {
                 if (validate(argument)) {
                     (*(pr->function)) ();
@@ -120,13 +119,17 @@ static void compile_or_interpret(const char *argument)
     for (int x = 0; x < num_user_functions; x++) {
         if (strcmp(user_functions[x].name, argument) == 0) {
             if (def_mode) {
-                prog[num_insts].function.without_param = gotofunc;
-                prog[num_insts++].param = user_functions[x].func_start;
+                //printf("matching %s in function def\n", argument);
+                prog[iptr].function.with_param = gotofunc;
+                prog[iptr++].param = user_functions[x].func_start;
             } else {
+                long int cur_iptr = iptr;
                 gotofunc(user_functions[x].func_start);
                 /* run the function */
-                while (iptr < num_insts) {               
-                    (*(prog[iptr].function.with_param)) (prog[iptr++].param);
+                while (iptr < cur_iptr) {
+                    iptr += 1;
+                    //printf("Executing instruction %i\n", iptr);               
+                    (*(prog[iptr].function.with_param)) (prog[iptr].param);                    
                 }
             }
             return;
@@ -138,8 +141,8 @@ static void compile_or_interpret(const char *argument)
     d = strtod(argument, &endPointer);
     if (endPointer != argument) {
         if (def_mode) {
-            prog[num_insts].function.with_param = push;
-            prog[num_insts++].param = d;
+            prog[iptr].function.with_param = push;
+            prog[iptr++].param = d;
         } else {
             push(d);    
         }
@@ -176,9 +179,7 @@ int main(int argc, char **argv)
         }
         /* 'compile' it, or interpret it on-the-fly */
         compile_or_interpret(token);
-        //debugging:
-        //printf("num_insts is %i\n", num_insts);
     }
-    compile(0);
+    compile_or_interpret(0);
     return EXIT_SUCCESS;
 }
