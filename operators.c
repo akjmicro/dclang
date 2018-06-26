@@ -48,6 +48,7 @@ static const struct primitive primitives[] = {
   {"floor", floorfunc},
   {"log", logfunc},
   {"log2", log2func},
+  {"log10", log10func},
   {"pow", powerfunc},
   {"sin", sinefunc},
   {"cos", cosfunc},
