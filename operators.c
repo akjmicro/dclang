@@ -16,16 +16,6 @@
   return hash % hash_modulus;
 }*/
 
-/* a dictionary entry will have an arbitrary amount of other dictionary
-entry references (custom words) and primitives. The primitives must all 
-be loop-loaded into the main dictionary. */
-struct dict_entry {
-  void *prev_link;
-  const int name_size;
-  const char name[16];
-  void (*function) (void);
-};
-
 /* we need to populate the dictionary first with primitives */
 struct primitive {
   const char *name;
@@ -90,5 +80,6 @@ static const struct primitive primitives[] = {
   {"s\"", stringfunc},
   {"type", typefunc},
   {"clock", clockfunc},
+  {"rdtsc", rdtscfunc},
   {0, 0}
 };

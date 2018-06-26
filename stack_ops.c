@@ -1,6 +1,3 @@
-static long double data_stack[128];
-static int data_stack_ptr;
-
 /* stack operations */
 static void push(long double a)
 {

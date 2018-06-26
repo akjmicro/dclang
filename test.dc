@@ -1,6 +1,6 @@
 # let's print some primes:
 
-do
+[ small_primes do
     i 2 = i 3 = or
     i 6 % 5 = 
     i 6 % 1 = or
@@ -15,5 +15,7 @@ do
     2 * skip            # test
         2 skip          # false block
         i .             # true block, print number
-i 120 < redo 
+i 120 < redo ]
+
+small_primes
 cr

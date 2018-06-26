@@ -1,5 +1,5 @@
 CC = gcc
-CFLAGS = -c -Wall -fomit-frame-pointer -ffast-math
+CFLAGS = -c -m64 -w -O3 -fcall-saved-r15 -fcall-saved-r14
 LDFLAGS = -lm
 SOURCES = main.c
 OBJECTS = main.o

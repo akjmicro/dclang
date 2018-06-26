@@ -57,10 +57,13 @@ Anyway, due to RPN, things will look like this, when you do math:
     1 2 3 5 + 7 16 / .s
     <4> 1 2 8 0.4375 
 
-    1 2 4 skip 0 0 0 0 3 4 .
+    # a function!
+    [ testskip 1 2 4 skip 0 0 0 0 3 4 . ]
+    testskip
     1 2 3 4
 
-    do i . i 7 < redo
+    [ looptest do i . i 7 < redo ]
+    looptest
     0 1 2 3 4 5 6 7
 
     # this is a comment
@@ -106,21 +109,18 @@ So far, I've implemented:
   * do-redo (looping)
   * drop, dup, swap, over, rot, nip, tuck, 2drop, 2dup, 2swap, 2over, 2rot
   * a clock function ('clock') so we can time execution in nano seconds for
-  benchmarking.
+  benchmarking. Also, a higher-res clock called 'rdtsc'.
+  * simple string printing, as well as fancier right-justified strings
+  * user functions
 
 TODO:
 
-  * declaring custom words
   * open/read/write/close to the filesystem
   * more time functions (e.g. date, sleep, etc.)
   * more string functions, as needed (basic saving and typing is all we have
   at the moment
   * just about everything a usuable language will need, or at least, the
   means for someone to hook C-libraries into this enchilada.
-  * although it's beating or matching gforth at things like immediate
-  floating-point operations, it's slower at looping.  I need to address
-  that at some point. This will likely mean getting away from string
-  interpretation and into compiling code fragments.
   * turtle graphics for the kids!
 
 Everything is on the floating-point stack only at this point.  I will

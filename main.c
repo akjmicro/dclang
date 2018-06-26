@@ -5,27 +5,44 @@ and philosophy.  Born on 2018-05-05 */
 #include <ctype.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <inttypes.h>
 #include <string.h>
 #include <unistd.h>
 #include <math.h>
 
 #define DELIM " "
-#define MAXWORD 16384
-#define MAXLEN 20
+#define MAXWORD 65536
 
 #define IBUFSIZE 128
 char buf[IBUFSIZE];
 int bufused;
+long double data_stack[128];
+register long int data_stack_ptr asm("r15");
+long int return_stack[32];
+register long int return_stack_ptr asm("r14");
+long int loop_counter[3];
+long int loop_counter_ptr;
 
-static int return_stack[32];
-static int return_stack_ptr;
-static int loop_counter[3];
-static int loop_counter_ptr;
-// our tokens to be interpreted go here:
-char tokens[MAXWORD][MAXLEN];
-static int token_ptr;
-static int ntokens = 0;
+// compiled tokens get saved and put into an array of type 'prog_struct'
+typedef union {
+    void (*with_param) (long double);
+    void (*without_param) (void);
+} func_union;
+typedef struct {
+    func_union function;
+    long double param;
+} inst_struct;
 
+/* an array of inst_struct instructions. This is where the user's commands,
+ i.e. the 'program' will live: */
+inst_struct prog[MAXWORD];
+long int iptr;
+long int num_insts;
+
+/* flag for if we are defining a new word (function) */
+int def_mode;
+
+/* inline dclang code */
 #include "stack_ops.c"
 #include "logic_ops.c"
 #include "math_ops.c"
@@ -34,9 +51,36 @@ static int ntokens = 0;
 #include "output_ops.c"
 #include "string_ops.c"
 #include "variable_ops.c"
+#include "token.c"
+#include "user_functions.c"
 #include "operators.c"
 
-static void stack_machine(const char *argument)
+/* function to validate and return an error message if we are using control
+ * structures outside of a definition */
+static int validate(const char *token)
+{
+    int checkval = 1;
+    if (strcmp("do", token) == 0) {
+        printf("Error: 'do' illegal use outside of function definition\n");
+        return 0;
+    }
+    if (strcmp("redo", token) == 0) {
+        printf("Error: 'redo' illegal use outside of function definition\n");
+        return 0;
+    }
+    if (strcmp("exit", token) == 0) {
+        printf("Error: 'exit' illegal use outside of function definition\n");
+        return 0;
+    }
+    if (strcmp("skip", token) == 0) {
+        printf("Error: 'skip' illegal use outside of function definition\n");
+        return 0;
+    }
+    return checkval;
+}
+
+/* function to compile each incoming token */
+static void compile_or_interpret(const char *argument)
 {
     char *endPointer = 0;
     long double d;
@@ -50,19 +94,58 @@ static void stack_machine(const char *argument)
     /* search dictionary (list, not hash) entry */
     while (pr->name != 0) {
         if (strcmp(pr->name, argument) == 0) {
-            (*(pr->function)) ();
+            if (def_mode) {
+                prog[num_insts++].function.without_param = pr->function;
+            } else {
+                if (validate(argument)) {
+                    (*(pr->function)) ();
+                }
+            }
             return;
         }
         pr++;
     }
 
-    /* next, try to convert to a number */
-    d = strtod(argument, &endPointer);
-    if (endPointer != argument) {
-        push(d);
-        return;
+    /* next, search for user-defined procedures.  If found, insert into the
+    'prog' array a built-in function that takes the current 'iptr' location,
+    pushes it onto the return stack, and then takes the function location and
+    jumps to it when it is executed. The pre-defined function, on the other
+    end, have a 'return' function that will pop (restore) the iptr location
+    off the return stack, and so it will be what it was before the jump.
+    
+    Where is the function definition? Inside the 'prog' array, of course! The
+    only thing different about it is that its start location will be noted and
+    saved in a special struct array, similar to the way primitives are looked
+    up, and it will have a 'return' automatically inserted on its tail. */
+    for (int x = 0; x < num_user_functions; x++) {
+        if (strcmp(user_functions[x].name, argument) == 0) {
+            if (def_mode) {
+                prog[num_insts].function.without_param = gotofunc;
+                prog[num_insts++].param = user_functions[x].func_start;
+            } else {
+                gotofunc(user_functions[x].func_start);
+                /* run the function */
+                while (iptr < num_insts) {               
+                    (*(prog[iptr].function.with_param)) (prog[iptr++].param);
+                }
+            }
+            return;
+        }
     }
 
+    /* primitive not found, user definitions not found.  OK, so next, try to
+    convert to a number */
+    d = strtod(argument, &endPointer);
+    if (endPointer != argument) {
+        if (def_mode) {
+            prog[num_insts].function.with_param = push;
+            prog[num_insts++].param = d;
+        } else {
+            push(d);    
+        }
+        return;
+    }
+    
     /* nothing found, we've reached an error condition, so report
     the situation and reset the stack */
     data_stack_ptr = 0;
@@ -70,68 +153,32 @@ static void stack_machine(const char *argument)
     return;    
 }
 
-void add_to_buf(char ch) { if(bufused < IBUFSIZE - 1) buf[bufused++] = ch; }
-char *buf2str()          { buf[bufused++] = '\0'; return strdup(buf); }
 
-char *get_token() {
-    int ch;
-    bufused = 0;
-    /* skip leading spaces and comments */
-    while (1) {
-        /* skip leading space */
-        do {
-            if((ch = fgetc(stdin)) == EOF) exit(0);
-        } while(isspace(ch));
-        /* if we are starting a comment: */
-        if (strchr("#", ch)) {
-            /* go to the end of the line */
-            do {
-                if((ch = fgetc(stdin)) == EOF) exit(0);
-            } while(! strchr("\n", ch));
-        } else {
-            add_to_buf(ch);
-            break;
-        }
-    }
-    /* grab all the next non-whitespace characters */
-    while (1) {
-        /* check again for EOF */
-        if ((ch = fgetc(stdin)) == EOF) exit(0);
-        if (isspace(ch)) {
-            ungetc(ch, stdin);
-            return buf2str();
-        }
-        add_to_buf(ch);
-    }
-}
-
-
+/* Where all the juicy fun begins... */
 int main(int argc, char **argv)
 { 
-    if (argc <= 1) {
-        printf("Welcome to dclang! Aaron Krister Johnson, 2018\n");
-        printf("Make sure to peruse README.md to get your bearings!\n");
-        while (1) {
-            /* get next input token */
-            char *token;
-            token = get_token();
-            strcpy(tokens[ntokens++], token);
-            /* interpret what hasn't been interpreted yet */
-            while (token_ptr < ntokens) {
-                stack_machine(tokens[token_ptr++]);
-            }
+    printf("Welcome to dclang! Aaron Krister Johnson, 2018\n");
+    printf("Make sure to peruse README.md to get your bearings!\n");
+    while (1) {
+        /* get next input token */
+        char *token;
+        token = get_token();
+        /* are we dealing with a function definition? */
+        if (strcmp(token, "[") == 0) {
+            startdeffunc();
+            def_mode = 1;
+            continue; // goto top of loop
         }
-    }
-    else {
-        if (*argv[1]=='-')
-            printf("you need help!\n");
-        while (argc >= 2) {
-            stack_machine(argv[1]);
-            argv++;
-            argc--;
+        if (strcmp(token, "]") == 0) {
+            enddeffunc();
+            def_mode = 0;
+            continue; // goto top of loop
         }
+        /* 'compile' it, or interpret it on-the-fly */
+        compile_or_interpret(token);
+        //debugging:
+        //printf("num_insts is %i\n", num_insts);
     }
-
-    stack_machine(0);
+    compile(0);
     return EXIT_SUCCESS;
 }
