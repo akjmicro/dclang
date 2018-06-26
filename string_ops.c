@@ -26,7 +26,7 @@ static void stringfunc()
     push(string_here - string_start);
 }
 
-static void typefunc()
+static void printfunc()
 {
     if (data_stack_ptr < 2) {
         printf("stack underflow! ");

@@ -67,7 +67,7 @@ Anyway, due to RPN, things will look like this, when you do math:
     0 1 2 3 4 5 6 7
 
     # this is a comment
-    s" This is a string!" type
+    s" This is a string!" print
     This is a string!
 
     # store a value at slot zero:
@@ -111,7 +111,8 @@ So far, I've implemented:
   * a clock function ('clock') so we can time execution in nano seconds for
   benchmarking. Also, a higher-res clock called 'rdtsc'.
   * simple string printing, as well as fancier right-justified strings
-  * user functions
+  * user functions -- still some debugging to do, though, ATM embedding them
+  into one another isn't quite working.
 
 TODO:
 

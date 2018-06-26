@@ -47,6 +47,6 @@ static void returnfunc()
     if (return_stack_ptr == 0) {
         iptr = num_insts;
     } else {
-        iptr = return_stack[--return_stack_ptr];
+        iptr = return_stack[--return_stack_ptr] + 1;
     }
 }

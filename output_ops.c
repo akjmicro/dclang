@@ -1,5 +1,5 @@
 /* output */
-static void printfunc()
+static void showfunc()
 {
     printf("%0.16Lg ", pop());
 }
@@ -9,7 +9,7 @@ static void crfunc()
     printf("\n");
 }
 
-static void printstackfunc()
+static void showstackfunc()
 {
     int x;
     char *joiner;
@@ -22,7 +22,7 @@ static void printstackfunc()
     printf("\n");
 }
 
-static void printrjfunc()
+static void showrjfunc()
 {
 // right-justified for pretty printing!
     int precision = (int) pop();
