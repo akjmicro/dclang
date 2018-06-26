@@ -102,7 +102,7 @@ So far, I've implemented:
 
   * +, -, *, /, %, abs
   * pow, sqrt, log, log2
-  * sin, cos, tan, pi
+  * sin, cos, tan, pi, e
   * and, or, not, xor
   * =, <>, >, <, >=, <= 
   * skip & exit (a primitive "goto" instead of if-else-endif)
