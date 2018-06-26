@@ -1,0 +1,21 @@
+# let's print some primes:
+
+[ small_primes do
+    i 2 = i 3 = or
+    i 6 % 5 = 
+    i 6 % 1 = or
+    or
+    i 1 > and
+    i 5 > 2 * skip      # if true, multiply by enough to skip to true block
+        6 skip          # false block, which says skp OVER true block
+        i 5 % 0 <> and  # true block
+    i 7 > 2 * skip      # again, skip to true block
+        6 skip          # false block, which says skp OVER true block
+        i 7 % 0 <> and  # true block
+    2 * skip            # test
+        2 skip          # false block
+        i .             # true block, print number
+i 120 < redo ]
+
+small_primes
+cr

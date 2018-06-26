@@ -1,0 +1,51 @@
+s" 
+This script will compare some prime numbered EDOs (equal divisions of the
+octave) to compare how close or off the EDO's nearest estimation to a
+perfect 5th (3/2 ratio) is.
+" print
+
+# load some primes
+5  0 !
+7  1 !
+11 2 !
+13 3 !
+17 4 !
+19 5 !
+23 6 !
+29 7 !
+31 8 !
+37 9 ! 
+41 10 !
+43 11 !
+47 12 !
+53 13 !
+# perfect 5th to compare, store in slot 32:
+3 2 / log2 32 !
+
+s" 
+perfect 5th is:" print
+32 @ 1200 * 7 3 .rj s" cents" print cr cr
+
+# save 'edo' string -- length is var 20, string pnt is var 19:
+s" \bedo" 20 ! 19 !
+
+# save 'deg' string -- length is var 22, string pnt is var 21:
+s" \bdeg " 22 ! 21 !
+
+# print table header:
+s"    edo | deg | cents for 3/2 |   error " print cr
+s" ---------------------------------------" print cr
+
+# loop through data
+[ main do
+    i @ 3 0 .rj 19 @ 20 @ print          # edo
+    32 @ i @ * round dup 33 ! 3 0 .rj    # degree
+        21 @ 22 @ print
+    33 @ i @ / 1200 * dup 34 ! 10 3 .rj  # cents value of 5th
+    34 @ 32 @ 1200 * - 12 3 .rj cr       # difference from pure
+i 13 < redo ]
+
+# run program
+main
+# final carriage return:
+cr
