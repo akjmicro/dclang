@@ -68,9 +68,19 @@ Anyway, due to RPN, things will look like this, when you do math:
     testskip
     1 2 3 4
 
+    # do redo, basic, starts at zero, ascends, test is 'manual' at end
     [ looptest do i . i 7 < redo ]
     looptest
     0 1 2 3 4 5 6 7
+
+    # for/next loop, more than twice as fast. Parameters are step/to/start.
+    # Let's add the first 20 million integers!
+    [ for_test 0
+        1 20000001 1 for
+            i +
+        next . cr ]
+    for_test
+    200000010000000
 
     # this is a comment
     s" This is a string!" print

@@ -1,0 +1,31 @@
+[ present_results
+    s" The sum is: " print . cr 
+    swap -
+    s" The time difference is: " print
+    . s" \bns" print cr
+]
+
+[ testdo 
+    clock 0
+    do
+      i +
+    i 20000000  <
+    redo
+    clock  # ( t1 amt t2 )
+    swap   # ( t1 t2 amt )
+]
+
+[ testfor
+    clock 0
+    1 20000001 0 for
+      i +
+    next
+    clock
+    swap
+]
+
+testdo
+present_results
+
+testfor
+present_results

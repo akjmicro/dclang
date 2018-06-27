@@ -71,6 +71,8 @@ static const struct primitive primitives[] = {
   {"do", dofunc},
   {"redo", redofunc},
   {"exit", exitfunc},
+  {"for", forfunc},
+  {"next", nextfunc},
   {"skip", skipfunc},
   {"i", ifunc},
   {"j", jfunc},
