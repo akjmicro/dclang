@@ -129,7 +129,7 @@ So far, I've implemented:
     * 2drop, 2dup, 2swap, 2over, 2rot  
   * Control structures:
     * skip (a kind of jumping mechanism that replaces if/else/endif)
-    * do/redo (looping)
+    * for/next & do/redo (looping)
     * user-defined words (functions)
   * Strings:
     * simple string printing 
