@@ -1,8 +1,7 @@
 [ present_results
     s" The sum is: " print . cr 
     swap -
-    s" The time difference is: " print
-    . s" \bns" print cr
+    s" The time difference is: " print . s" \bns" print cr
 ]
 
 [ testdo 
@@ -17,7 +16,7 @@
 
 [ testfor
     clock 0
-    1 20000001 0 for
+    20000001 0 1 for
       i +
     next
     clock

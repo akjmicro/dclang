@@ -13,11 +13,10 @@ static void dofunc()
     loop_counter_ptr++;
 }
 
-static void exitfunc()
+static void exitdofunc()
 {
     loop_counter[--loop_counter_ptr] = 0;
     --return_stack_ptr;
-    --fl_ptr;
 }
 
 static void redofunc()
@@ -26,7 +25,7 @@ static void redofunc()
         loop_counter[loop_counter_ptr - 1] += 1;
         iptr = return_stack[return_stack_ptr - 1];
     } else {
-        exitfunc();
+        exitdofunc();
     }
 }
 
@@ -44,9 +43,16 @@ static void jfunc()
 static void forfunc()
 {
     return_stack[return_stack_ptr++] = iptr;
+    fl_stack[fl_ptr].step = (long int) pop();
     loop_counter[loop_counter_ptr++] = (long int) pop();
-    fl_stack[fl_ptr].limit = (long int) pop();
-    fl_stack[fl_ptr++].step = (long int) pop(); 
+    fl_stack[fl_ptr++].limit = (long int) pop(); 
+}
+
+static void exitforfunc()
+{
+    loop_counter[--loop_counter_ptr] = 0;
+    --return_stack_ptr;
+    --fl_ptr;    
 }
 
 static void nextfunc()
@@ -57,9 +63,7 @@ static void nextfunc()
             loop_counter[loop_counter_ptr - 1] += fl_stack[fl_ptr - 1].step;
             iptr = return_stack[return_stack_ptr - 1];
         } else {
-            loop_counter[--loop_counter_ptr] = 0;
-            --return_stack_ptr;
-            --fl_ptr;
+            exitforfunc();
         }
     } else {
         if (loop_counter[loop_counter_ptr - 1] > \
@@ -67,9 +71,7 @@ static void nextfunc()
             loop_counter[loop_counter_ptr - 1] += fl_stack[fl_ptr - 1].step;
             iptr = return_stack[return_stack_ptr - 1];
         } else {
-            loop_counter[--loop_counter_ptr] = 0;
-            --return_stack_ptr;
-            --fl_ptr;    
+            exitforfunc();
         }
     }
 }

@@ -73,10 +73,10 @@ Anyway, due to RPN, things will look like this, when you do math:
     looptest
     0 1 2 3 4 5 6 7
 
-    # for/next loop, more than twice as fast. Parameters are step/to/start.
+    # for/next loop, more than twice as fast. Parameters are to/from/step.
     # Let's add the first 20 million integers!
     [ for_test 0
-        1 20000001 1 for
+        20000001 1 1 for
             i +
         next . cr ]
     for_test
