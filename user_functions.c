@@ -64,24 +64,4 @@ static void enddeffunc()
 {
     /* Simply insert a return call into 'prog' where 'iptr' now points. */
     prog[iptr++].function.without_param = returnfunc;
-    /* we added a function, so increment how many we know exist */
-    //++num_user_functions;
-    // for debugging:
-    //showdefined();
 }
-
-/* 
-     (foo)   push(2);  0
-             *;        1
-             return;   2
-     (bar)   push(3);  3
-             *;        4
-             return;   5
-   (fubar)   push(1);  6
-             -;        7
-             goto(foo); 8     
-             goto(bar); 9
-             return;    10
-             --         11
-
-*/

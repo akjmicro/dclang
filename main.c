@@ -54,26 +54,22 @@ int def_mode;
 #include "user_functions.c"
 #include "operators.c"
 
+const char *illegal[] = {"do", "redo", "exitdo", "for", "next", "exitfor",
+                         "skip"};
+int num_illegal = sizeof(illegal) / sizeof(illegal[0]); 
+
 /* function to validate and return an error message if we are using control
  * structures outside of a definition */
 static int validate(const char *token)
 {
     int checkval = 1;
-    if (strcmp("do", token) == 0) {
-        printf("Error: 'do' illegal use outside of function definition\n");
-        return 0;
-    }
-    if (strcmp("redo", token) == 0) {
-        printf("Error: 'redo' illegal use outside of function definition\n");
-        return 0;
-    }
-    if (strcmp("exit", token) == 0) {
-        printf("Error: 'exit' illegal use outside of function definition\n");
-        return 0;
-    }
-    if (strcmp("skip", token) == 0) {
-        printf("Error: 'skip' illegal use outside of function definition\n");
-        return 0;
+    for (int i=0; i < num_illegal; i++) {
+        if(strcmp(token, illegal[i]) == 0) {
+            printf("Error: '%s' -- illegal outside of function def.\n",
+                   illegal[i]);
+            checkval = 0;
+            return checkval;
+        }
     }
     return checkval;
 }
@@ -86,7 +82,6 @@ static void compile_or_interpret(const char *argument)
     const struct primitive *pr = primitives;
 
     if (argument == 0) {
-        //printfunc();
         return;
     } 
 
@@ -124,7 +119,6 @@ static void compile_or_interpret(const char *argument)
     for (int x = 0; x < num_user_functions; x++) {
         if (strcmp(user_functions[x].name, argument) == 0) {
             if (def_mode) {
-                //printf("matching %s in function def\n", argument);
                 prog[iptr].function.with_param = gotofunc;
                 prog[iptr++].param = user_functions[x].func_start;
             } else {
@@ -133,7 +127,6 @@ static void compile_or_interpret(const char *argument)
                 /* run the function */
                 while (iptr < cur_iptr) {
                     iptr += 1;
-                    //printf("Executing instruction %i\n", iptr);               
                     (*(prog[iptr].function.with_param)) (prog[iptr].param);                    
                 }
             }
