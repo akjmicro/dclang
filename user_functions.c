@@ -23,7 +23,7 @@ typedef struct {
 user_function user_functions[1024];
 int num_user_functions;
 
-/* debugging */
+/* for debugging */
 static void showdefined()
 {
     for (int x=0; x < num_user_functions; x++) {

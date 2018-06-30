@@ -117,7 +117,7 @@ static void compile_or_interpret(const char *argument)
     only thing different about it is that its start location will be noted and
     saved in a special struct array, similar to the way primitives are looked
     up, and it will have a 'return' automatically inserted on its tail. */
-    for (int x = 0; x < num_user_functions; x++) {
+    for (int x = num_user_functions - 1; x > -1 ; x--) {
         if (strcmp(user_functions[x].name, argument) == 0) {
             if (def_mode) {
                 prog[iptr].function.with_param = gotofunc;
