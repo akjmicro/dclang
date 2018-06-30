@@ -1,6 +1,6 @@
 /* unused as of yet */
 
-char string_pad[4096];
+char string_pad[1048576];
 int string_here;
 
 static void stringfunc()
@@ -47,4 +47,10 @@ static void printfunc()
     char dest[str_len];
     memcpy(dest, (char *)(str_start + 1), str_len);
     printf("%s", dest);        
+}
+
+static void emitfunc()
+{
+    unsigned int char_code = (int) pop();
+    printf("%lc", char_code);
 }

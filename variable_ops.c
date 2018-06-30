@@ -1,7 +1,7 @@
 /* some simple variable functions, a bare-bones way of storing temp values... 
 Yes, bare-bones, but it works! */
 
-long double myvars[4096];
+long double myvars[65536];
 
 static void pokefunc()
 {
