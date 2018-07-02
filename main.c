@@ -9,7 +9,6 @@ and philosophy.  Born on 2018-05-05 */
 #include <string.h>
 #include <unistd.h>
 #include <math.h>
-#include <locale.h>
 
 #define DELIM " "
 #define MAXWORD 65536
@@ -159,7 +158,7 @@ static void compile_or_interpret(const char *argument)
 /* Where all the juicy fun begins... */
 int main(int argc, char **argv)
 {
-    setlocale(LC_ALL, "");
+    //setlocale(LC_ALL, "");
     printf("Welcome to dclang! Aaron Krister Johnson, 2018\n");
     printf("Make sure to peruse README.md to get your bearings!\n");
     while (1) {

@@ -12,4 +12,4 @@ $(EXECUTABLE): $(OBJECTS)
 	$(CC) $(OBJECTS) -o $@ $(LDFLAGS)
 
 clean:
-	rm -f *.o *~
+	rm -rf examples/*~ *.o *~

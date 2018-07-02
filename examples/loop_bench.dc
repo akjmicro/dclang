@@ -1,7 +1,7 @@
 [ present_results
-    s" The sum is: " print . cr 
+    s" The sum is: " print . cr
     swap -
-    s" The time difference is: " print . s" \bns" print cr
+    s" The time difference is: " print . s" \bns" print cr 
 ]
 
 [ testdo 
@@ -10,8 +10,8 @@
       i +
     i 20000000  <
     redo
-    clock  # ( t1 amt t2 )
-    swap   # ( t1 t2 amt )
+    clock # ( t1 amt t2 )
+    swap  # ( t1 t2 amt )
 ]
 
 [ testfor
