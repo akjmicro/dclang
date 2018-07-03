@@ -14,32 +14,44 @@ and philosophy.  Born on 2018-05-05 */
 #define MAXWORD 65536
 
 #define IBUFSIZE 128
+
+/* These should be changed based on architecture. For instance, on my x86_64
+   system, best performance was squeezed by making the integer type and the
+   float type to both be optimized in alignment to 8-bytes, which turns out
+   to be 'long' for integers, and 'double' for floating-point values. */
+#define MYINT long
+#define MYFLT double
+/* end of data type macros */
+
 char buf[IBUFSIZE];
-int bufused;
-long double data_stack[128];
-register long int data_stack_ptr asm("r15");
-long int return_stack[256];
-register long int return_stack_ptr asm("r14");
-long int loop_counter[3];
-long int loop_counter_ptr;
+MYINT bufused;
+/* data stack */
+MYFLT data_stack[128];
+register MYINT data_stack_ptr asm("r15");
+/* return stack */
+MYINT return_stack[256];
+register MYINT return_stack_ptr asm("r14");
+/* loop 'stack' */
+MYINT loop_counter[3];
+MYINT loop_counter_ptr;
 
 // compiled tokens get saved and put into an array of type 'prog_struct'
 typedef union {
-    void (*with_param) (long double);
+    void (*with_param) (MYFLT);
     void (*without_param) (void);
 } func_union;
 typedef struct {
     func_union function;
-    long double param;
+    MYFLT param;
 } inst_struct;
 
 /* an array of inst_struct instructions. This is where the user's commands,
  i.e. the 'program' will live: */
 inst_struct prog[MAXWORD];
-long int iptr;
+MYINT iptr;
 
 /* flag for if we are defining a new word (function) */
-int def_mode;
+MYINT def_mode;
 
 /* inline dclang code */
 #include "stack_ops.c"
@@ -56,14 +68,14 @@ int def_mode;
 
 const char *illegal[] = {"do", "redo", "exitdo", "for", "next", "exitfor",
                          "skip"};
-int num_illegal = sizeof(illegal) / sizeof(illegal[0]); 
+MYINT num_illegal = sizeof(illegal) / sizeof(illegal[0]); 
 
 /* function to validate and return an error message if we are using control
  * structures outside of a definition */
-static int validate(const char *token)
+static MYINT validate(const char *token)
 {
-    int checkval = 1;
-    for (int i=0; i < num_illegal; i++) {
+    MYINT checkval = 1;
+    for (MYINT i=0; i < num_illegal; i++) {
         if(strcmp(token, illegal[i]) == 0) {
             printf("Error: '%s' -- illegal outside of function def.\n",
                    illegal[i]);
@@ -78,7 +90,7 @@ static int validate(const char *token)
 static void compile_or_interpret(const char *argument)
 {
     char *endPointer = 0;
-    long double d;
+    double d;
     const struct primitive *pr = primitives;
 
     if (argument == 0) {
@@ -116,13 +128,13 @@ static void compile_or_interpret(const char *argument)
     only thing different about it is that its start location will be noted and
     saved in a special struct array, similar to the way primitives are looked
     up, and it will have a 'return' automatically inserted on its tail. */
-    for (int x = num_user_functions - 1; x > -1 ; x--) {
+    for (MYINT x = num_user_functions - 1; x > -1 ; x--) {
         if (strcmp(user_functions[x].name, argument) == 0) {
             if (def_mode) {
                 prog[iptr].function.with_param = gotofunc;
                 prog[iptr++].param = user_functions[x].func_start;
             } else {
-                long int cur_iptr = iptr;
+                MYINT cur_iptr = iptr;
                 gotofunc(user_functions[x].func_start);
                 /* run the function */
                 while (iptr < cur_iptr) {
@@ -156,7 +168,7 @@ static void compile_or_interpret(const char *argument)
 
 
 /* Where all the juicy fun begins... */
-int main(int argc, char **argv)
+MYINT main(MYINT argc, char **argv)
 {
     //setlocale(LC_ALL, "");
     printf("Welcome to dclang! Aaron Krister Johnson, 2018\n");

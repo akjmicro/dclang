@@ -5,11 +5,11 @@
 // basically, djb2 hashing algorithm, reduced by a modulus that accomodates
 // any functions we need. This is probably going to be deprecated, as far as 
 // function lookup is concerned.
-/*static int get_hash(unsigned char *in_str)
+/*static MYINT get_hash(unsigned char *in_str)
 {
-  unsigned long int hash = 5381;
-  unsigned long int hash_modulus = 367;
-  unsigned long int c;
+  unsigned MYINT hash = 5381;
+  unsigned MYINT hash_modulus = 367;
+  unsigned MYINT c;
   while ((c = *in_str++)) {
     hash = ((hash << 5) + hash) + c;
   }
@@ -84,6 +84,7 @@ static const struct primitive primitives[] = {
   {"s\"", stringfunc},
   {"print", printfunc},
   {"emit", emitfunc},
+  {"uemit", uemitfunc},
   {"clock", clockfunc},
   {"rdtsc", rdtscfunc},
   {0, 0}

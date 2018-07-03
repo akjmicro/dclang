@@ -6,7 +6,7 @@ static void addfunc()
 
 static void subfunc()
 {
-    long double subtrahend = pop();
+    MYFLT subtrahend = pop();
     push(pop() - subtrahend);
 }
 
@@ -17,27 +17,27 @@ static void mulfunc()
 
 static void divfunc()
 {
-    long double divisor = pop();
+    MYFLT divisor = pop();
     push(pop() / divisor);
 }
 
 static void modfunc()
 {
-    long double modulus = pop();
+    MYFLT modulus = pop();
     push(fmod(pop(), modulus));
 }
 
 static void lshiftfunc()
 {
-    unsigned int shift_amt = (unsigned int) pop();
-    unsigned int base = (unsigned int) pop();
+    unsigned MYINT shift_amt = (unsigned MYINT) pop();
+    unsigned MYINT base = (unsigned MYINT) pop();
     push(base << shift_amt);    
 }
 
 static void rshiftfunc()
 {
-    unsigned int shift_amt = (unsigned int) pop();
-    unsigned int base = (unsigned int) pop();
+    unsigned MYINT shift_amt = (unsigned MYINT) pop();
+    unsigned MYINT base = (unsigned MYINT) pop();
     push(base >> shift_amt);    
 }
 
@@ -48,24 +48,24 @@ static void absfunc()
 
 static void roundfunc()
 {
-    push((long int) round(pop()));
+    push((MYINT) round(pop()));
 }
 
 static void floorfunc()
 {
-    push((long int) floor(pop()));
+    push((MYINT) floor(pop()));
 }
 
 static void ceilfunc()
 {
-    push((long int) ceil(pop()));
+    push((MYINT) ceil(pop()));
 }
 
 /* scientific math words */
 
 static void powerfunc()
 {
-    long double raise = pop();
+    MYFLT raise = pop();
     push(pow(pop(), raise));
 }
 

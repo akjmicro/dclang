@@ -4,7 +4,7 @@ void add_to_buf(char ch) { if(bufused < IBUFSIZE - 1) buf[bufused++] = ch; }
 char *buf2str()          { buf[bufused++] = '\0'; return strdup(buf); }
 
 char *get_token() {
-    int ch;
+    MYINT ch;
     bufused = 0;
     /* skip leading spaces and comments */
     while (1) {

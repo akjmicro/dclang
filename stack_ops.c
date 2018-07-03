@@ -1,5 +1,5 @@
 /* stack operations */
-static void push(long double a)
+static void push(MYFLT a)
 {
   if (data_stack_ptr >= (sizeof(data_stack) / sizeof(*data_stack))) {
     printf("stack overflow\n");
@@ -8,7 +8,7 @@ static void push(long double a)
   data_stack[data_stack_ptr++] = a;
 }
 
-static long double pop()
+static MYFLT pop()
 {
   if (data_stack_ptr <= 0) {
     printf("stack underflow! ");
@@ -29,7 +29,7 @@ static void dupfunc()
     printf("stack underflow! ");
     return;
   }
-  long double val = data_stack[data_stack_ptr - 1];
+  MYFLT val = data_stack[data_stack_ptr - 1];
   push(val);
 }
 
@@ -39,8 +39,8 @@ static void swapfunc()
     printf("stack underflow! ");
     return;
   }
-  long double val1 = pop();
-  long double val2 = pop();
+  MYFLT val1 = pop();
+  MYFLT val2 = pop();
   push(val1);
   push(val2); 
 }
@@ -60,9 +60,9 @@ static void rotfunc()
     printf("stack underflow! ");
     return;
   }
-  long double c = pop();
-  long double b = pop();
-  long double a = pop();
+  MYFLT c = pop();
+  MYFLT b = pop();
+  MYFLT a = pop();
   push(b);
   push(c);
   push(a);
@@ -74,7 +74,7 @@ static void nipfunc()
     printf("stack underflow! ");
     return;
   }
-  long double b = pop();
+  MYFLT b = pop();
   pop();
   push(b);
 }
@@ -85,8 +85,8 @@ static void tuckfunc()
     printf("stack underflow! ");
     return;
   }
-  long double val1 = pop();
-  long double val2 = pop();
+  MYFLT val1 = pop();
+  MYFLT val2 = pop();
   push(val1);
   push(val2);
   push(data_stack[data_stack_ptr - 2]);
@@ -104,8 +104,8 @@ static void dup2func()
     printf("stack underflow! ");
     return;
   }
-  long double val1 = data_stack[data_stack_ptr - 2];
-  long double val2 = data_stack[data_stack_ptr - 1];
+  MYFLT val1 = data_stack[data_stack_ptr - 2];
+  MYFLT val2 = data_stack[data_stack_ptr - 1];
   push(val1);
   push(val2);
 }
@@ -116,10 +116,10 @@ static void swap2func()
     printf("stack underflow! ");
     return;
   }
-  long double val1 = pop();
-  long double val2 = pop();
-  long double val3 = pop();
-  long double val4 = pop();
+  MYFLT val1 = pop();
+  MYFLT val2 = pop();
+  MYFLT val3 = pop();
+  MYFLT val4 = pop();
   push(val2);
   push(val1);
   push(val4);
@@ -143,12 +143,12 @@ static void rot2func()
     printf("stack underflow! ");
     return;
   }
-  long double val1 = pop();
-  long double val2 = pop();
-  long double val3 = pop();
-  long double val4 = pop();
-  long double val5 = pop();
-  long double val6 = pop();
+  MYFLT val1 = pop();
+  MYFLT val2 = pop();
+  MYFLT val3 = pop();
+  MYFLT val4 = pop();
+  MYFLT val5 = pop();
+  MYFLT val6 = pop();
   push(val4);
   push(val3);
   push(val2);

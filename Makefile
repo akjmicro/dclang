@@ -1,5 +1,5 @@
 CC = gcc
-CFLAGS = -c -m64 -O3 -fcall-saved-r15 -fcall-saved-r14
+CFLAGS = -c -m64 -march=native -mtune=native -Ofast -fcall-saved-r15 -fcall-saved-r14
 LDFLAGS = -lm
 SOURCES = main.c
 OBJECTS = main.o
@@ -12,4 +12,4 @@ $(EXECUTABLE): $(OBJECTS)
 	$(CC) $(OBJECTS) -o $@ $(LDFLAGS)
 
 clean:
-	rm -rf examples/*~ *.o *~
+	rm -rf examples/*~ dclang *.o *~

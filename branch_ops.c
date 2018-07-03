@@ -1,10 +1,10 @@
 typedef struct {
-    long int limit;
-    long int step;
+    MYINT limit;
+    MYINT step;
 } forloop_info;
 
 forloop_info fl_stack[3];
-int fl_ptr;
+MYINT fl_ptr;
 
 /* looping */
 static void dofunc()
@@ -43,9 +43,9 @@ static void jfunc()
 static void forfunc()
 {
     return_stack[return_stack_ptr++] = iptr;
-    fl_stack[fl_ptr].step = (long int) pop();
-    loop_counter[loop_counter_ptr++] = (long int) pop();
-    fl_stack[fl_ptr++].limit = (long int) pop(); 
+    fl_stack[fl_ptr].step = (MYINT) pop();
+    loop_counter[loop_counter_ptr++] = (MYINT) pop();
+    fl_stack[fl_ptr++].limit = (MYINT) pop(); 
 }
 
 static void exitforfunc()
@@ -80,6 +80,6 @@ static void nextfunc()
 replace if/then/else structures. */
 static void skipfunc()
 {
-    int skipamt = (int) pop();
+    MYINT skipamt = (MYINT) pop();
     iptr += skipamt;
 }

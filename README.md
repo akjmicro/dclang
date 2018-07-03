@@ -15,7 +15,7 @@ ____________
 * You can also put the executable in /usr/local/bin or what-have-you.
 
 * Experiment as you wish with compiler optimizations in the Makefile,
-  particularly with floating-point options, since 'dclang' is heavily
+  particularly with float-point options, since 'dclang' is heavily
   reliant on them.
 
 * For interaction, it's nice to use 'rlwrap' to get readline line-history:
@@ -74,7 +74,7 @@ Anyway, due to RPN, things will look like this, when you do math:
     0 1 2 3 4 5 6 7
 
     # for/next loop, more than twice as fast. Parameters are to/from/step.
-    # Let's add the first 20 million integers!
+    # Let's add the first 20 million longegers!
     [ for_test 0
         20000001 1 1 for
             i +
@@ -160,7 +160,7 @@ TODO:
   means for someone to hook C-libraries into this enchilada.
   * turtle graphics for the kids!
 
-Everything is on the floating-point stack only at this point.  I will
+Everything is on the float-point stack only at this point.  I will
 obviously have to change/add much in the way of the structure to implement
 other things.  This is very much ALPHA right now, but it's working great and
 very fun so far.

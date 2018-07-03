@@ -1,7 +1,7 @@
 /* some simple variable functions, a bare-bones way of storing temp values... 
 Yes, bare-bones, but it works! */
 
-long double myvars[65536];
+MYFLT myvars[65536];
 
 static void pokefunc()
 {
@@ -9,8 +9,8 @@ static void pokefunc()
         printf("stack underflow! ");
         return;
     }
-    int idx = (int) pop();
-    long double val = pop();
+    MYINT idx = (MYINT) pop();
+    MYFLT val = pop();
     myvars[idx] = val;
 }
 
@@ -20,6 +20,6 @@ static void peekfunc()
         printf("stack underflow! ");
         return;
     }
-    int idx = (int) pop();
+    MYINT idx = (MYINT) pop();
     push(myvars[idx]);
 }

@@ -17,11 +17,11 @@
 
 typedef struct {
     const char *name;
-    long int func_start;
+    MYINT func_start;
 } user_function;
 
 user_function user_functions[1024];
-int num_user_functions;
+MYINT num_user_functions;
 
 /* for debugging */
 static void showdefined()
@@ -32,10 +32,10 @@ static void showdefined()
     }
 }
 
-static void gotofunc(long double where)
+static void gotofunc(MYFLT where)
 {
     return_stack[return_stack_ptr++] = iptr;
-    iptr = (long int) where;
+    iptr = (MYINT) where;
     (*(prog[iptr].function.with_param)) (prog[iptr].param);
 }
 
