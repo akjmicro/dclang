@@ -31,29 +31,38 @@ static const struct primitive primitives[] = {
   {"abs", absfunc},
   {"<<", lshiftfunc},
   {">>", rshiftfunc},
+  /* comparisons */
   {"=", eqfunc},
   {"<>", noteqfunc},
   {"<", ltfunc},
   {">", gtfunc},
   {"<=", ltefunc},
   {">=", gtefunc},
+  /* logic */
   {"and", andfunc},
   {"or", orfunc},
   {"not", notfunc},
   {"xor", xorfunc},
-  {"pi", pifunc},
-  {"e", efunc},
+  /* fp -> int */
   {"round", roundfunc},
   {"ceil", ceilfunc},
   {"floor", floorfunc},
+  /* higher math */
+  {"pow", powerfunc},
+  {"sqrt", sqrtfunc},
   {"log", logfunc},
   {"log2", log2func},
   {"log10", log10func},
-  {"pow", powerfunc},
+  /* constants */
+  {"pi", pifunc},
+  {"e", efunc},
+  /* trig */
   {"sin", sinefunc},
   {"cos", cosfunc},
   {"tan", tanfunc},
-  {"sqrt", sqrtfunc},
+  /*randomness */
+  {"rand", randfunc},
+  /* stack operators */
   {"drop", dropfunc},
   {"dup", dupfunc},
   {"swap", swapfunc},
@@ -66,8 +75,10 @@ static const struct primitive primitives[] = {
   {"2swap", swap2func},
   {"2over", over2func},
   {"2rot", rot2func},
+  /* variables in memory */
   {"!", pokefunc},
   {"@", peekfunc},
+  /* branching */
   {"do", dofunc},
   {"redo", redofunc},
   {"exitdo", exitdofunc},
@@ -77,6 +88,7 @@ static const struct primitive primitives[] = {
   {"skip", skipfunc},
   {"i", ifunc},
   {"j", jfunc},
+  /* output */
   {".", showfunc},
   {".s", showstackfunc},
   {".rj", showrjfunc},
@@ -85,6 +97,7 @@ static const struct primitive primitives[] = {
   {"print", printfunc},
   {"emit", emitfunc},
   {"uemit", uemitfunc},
+  /* time */
   {"clock", clockfunc},
   {"rdtsc", rdtscfunc},
   {0, 0}

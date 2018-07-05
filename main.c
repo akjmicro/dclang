@@ -9,6 +9,7 @@ and philosophy.  Born on 2018-05-05 */
 #include <string.h>
 #include <unistd.h>
 #include <math.h>
+#include <time.h>
 
 #define DELIM " "
 #define MAXWORD 65536
@@ -56,9 +57,9 @@ MYINT def_mode;
 /* inline dclang code */
 #include "stack_ops.c"
 #include "logic_ops.c"
+#include "time_ops.c"
 #include "math_ops.c"
 #include "branch_ops.c"
-#include "time_ops.c"
 #include "output_ops.c"
 #include "string_ops.c"
 #include "variable_ops.c"
@@ -170,6 +171,7 @@ static void compile_or_interpret(const char *argument)
 /* Where all the juicy fun begins... */
 MYINT main(MYINT argc, char **argv)
 {
+    srand(time(NULL));
     //setlocale(LC_ALL, "");
     printf("Welcome to dclang! Aaron Krister Johnson, 2018\n");
     printf("Make sure to peruse README.md to get your bearings!\n");

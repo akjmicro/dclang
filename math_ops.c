@@ -114,3 +114,9 @@ static void tanfunc()
 {
     push(tan(pop()));
 }
+
+/* randomness */
+static void randfunc()
+{
+    push((double)rand()/(double)RAND_MAX);
+}

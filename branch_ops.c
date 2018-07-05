@@ -59,7 +59,8 @@ static void nextfunc()
 {
     if (fl_stack[fl_ptr - 1].step > 0) {
         if (loop_counter[loop_counter_ptr - 1] < \
-                (fl_stack[fl_ptr - 1].limit - fl_stack[fl_ptr - 1].step)) {
+                (fl_stack[fl_ptr - 1].limit \
+                 - fl_stack[fl_ptr - 1].step)) {
             loop_counter[loop_counter_ptr - 1] += fl_stack[fl_ptr - 1].step;
             iptr = return_stack[return_stack_ptr - 1];
         } else {
@@ -67,7 +68,8 @@ static void nextfunc()
         }
     } else {
         if (loop_counter[loop_counter_ptr - 1] > \
-                (fl_stack[fl_ptr - 1].limit + fl_stack[fl_ptr - 1].step)) {
+                ((fl_stack[fl_ptr - 1].limit) \
+                  - fl_stack[fl_ptr - 1].step)) {
             loop_counter[loop_counter_ptr - 1] += fl_stack[fl_ptr - 1].step;
             iptr = return_stack[return_stack_ptr - 1];
         } else {
