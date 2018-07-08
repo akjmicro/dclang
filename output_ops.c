@@ -1,6 +1,10 @@
 /* output */
 static void showfunc()
 {
+    if (data_stack_ptr < 1) {
+        printf("stack underflow! ");
+        return;
+    }
     printf("%0.16g ", pop());
 }
 
@@ -25,7 +29,7 @@ static void showstackfunc()
 static void showrjfunc()
 {
 // right-justified for pretty printing!
-    int precision = (int) pop();
-    int width = (int) pop();
-    printf("% *.*g ", width, precision, pop());
+    int precision = (MYINT) pop();
+    int width = (MYINT) pop();
+    printf("%*.*g ", width, precision, pop());
 }

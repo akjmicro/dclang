@@ -46,6 +46,22 @@ static void absfunc()
     push(fabs(pop()));
 }
 
+static void minfunc()
+{
+    MYFLT a = pop();
+    MYFLT b = pop();
+    MYFLT c = (a < b) ? a : b;
+    push(c);
+}
+
+static void maxfunc()
+{
+    MYFLT a = pop();
+    MYFLT b = pop();
+    MYFLT c = (a > b) ? a : b;
+    push(c);
+}
+
 static void roundfunc()
 {
     push((MYINT) round(pop()));

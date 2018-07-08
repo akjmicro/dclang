@@ -11,9 +11,10 @@ and philosophy.  Born on 2018-05-05 */
 #include <math.h>
 #include <time.h>
 
+#define DATA_STACK_SIZE 128
+#define RETURN_STACK_SIZE 256
 #define DELIM " "
 #define MAXWORD 65536
-
 #define IBUFSIZE 128
 
 /* These should be changed based on architecture. For instance, on my x86_64
@@ -27,10 +28,10 @@ and philosophy.  Born on 2018-05-05 */
 char buf[IBUFSIZE];
 MYINT bufused;
 /* data stack */
-MYFLT data_stack[128];
+MYFLT data_stack[DATA_STACK_SIZE];
 register MYINT data_stack_ptr asm("r15");
 /* return stack */
-MYINT return_stack[256];
+MYINT return_stack[RETURN_STACK_SIZE];
 register MYINT return_stack_ptr asm("r14");
 /* loop 'stack' */
 MYINT loop_counter[3];
@@ -118,17 +119,7 @@ static void compile_or_interpret(const char *argument)
         pr++;
     }
 
-    /* next, search for user-defined procedures.  If found, insert into the
-    'prog' array a built-in function that takes the current 'iptr' location,
-    pushes it onto the return stack, and then takes the function location and
-    jumps to it when it is executed. The pre-defined function, on the other
-    end, have a 'return' function that will pop (restore) the iptr location
-    off the return stack, and so it will be what it was before the jump.
-    
-    Where is the function definition? Inside the 'prog' array, of course! The
-    only thing different about it is that its start location will be noted and
-    saved in a special struct array, similar to the way primitives are looked
-    up, and it will have a 'return' automatically inserted on its tail. */
+    /* search user-defined functions (words) */
     for (MYINT x = num_user_functions - 1; x > -1 ; x--) {
         if (strcmp(user_functions[x].name, argument) == 0) {
             if (def_mode) {

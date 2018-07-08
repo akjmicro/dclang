@@ -14,6 +14,59 @@
     swap  # ( t1 t2 amt )
 ]
 
+[ sl-helper 
+   # ( sum max cur )
+   rot       # ( max cur sum )
+   over      # ( max cur sum cur )
+   +         # ( max cur sum1 )
+   rot rot   # ( cur sum1 max -- sum1 max cur )
+]   
+
+
+[ test_skiploop
+    clock           # mark clock start
+    0 20000000 0    # sum, max, current
+
+    # start loop here:
+    2dup =
+    5 * skip
+    
+    # false:
+    1 +             # increment current index
+    sl-helper       # stack magic to accumulate
+    -10 skip        # loop back to '2dup'
+
+    # true, exit:
+    2drop           # remove max, current
+    clock
+    swap
+]     
+
+[ recur-loop
+    1 +        # sum cur'
+    swap       # cur' sum
+    over       # cur' sum cur'
+    +          # cur' sum'
+    swap       # sum' cur'
+    dup        # sum' cur' cur'
+    20000000 <>
+    2 * skip
+    
+    # false
+    1 skip
+
+    # true    
+  recur-loop
+]
+
+[ test_recur
+    clock
+    0 0 recur-loop   # clock sum cur func
+    clock            # clock sum cur clock'
+    swap             # clock sum clock' cur
+    drop swap        # clock clock' sum
+]
+
 [ testfor
     clock 0
     20000001 0 1 for
@@ -23,8 +76,38 @@
     swap
 ]
 
+[ testqdo
+    clock 0
+    20000001 qdo
+      i +
+    qredo
+    clock
+    swap
+]
+
+
+s" \nThis will show how various ways of composing loops are more efficient.
+In general, go with the simplest case, and avoid logical and stack operations
+inside of loops, when you can. Hence, the the first 'manual' loop here is the
+worst performer, and the simple 'qdo' loop at the end is the fastest.
+" print 
+
+s" \nTesting loop using manual 'skip' loop\n" print
+test_skiploop
+present_results
+
+s" \nTesting loop using recursion\n" print
+test_recur
+present_results
+
+s" \nTesting loop using 'do'\n" print
 testdo
 present_results
 
+s" \nTesting loop using 'for'\n" print
 testfor
+present_results
+
+s" \nTesting loop using 'qdo'\n" print
+testqdo
 present_results

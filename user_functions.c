@@ -12,7 +12,7 @@
  In the 'prog' array, which is indexed by 'iptr', in effect, a function call
  is simply a jump to the start of that procedure.  When the 'compile'
  function finds that a user-defined bit of code is being referenced, what is
- put into 'prog' is a call to 'goto_func', with the parameter to that call
+ put into 'prog' is a call to 'gotofunc', with the parameter to that call
  being the index in 'prog' where the function resides. */
 
 typedef struct {
@@ -34,7 +34,11 @@ static void showdefined()
 
 static void gotofunc(MYFLT where)
 {
-    return_stack[return_stack_ptr++] = iptr;
+    /* Don't consume more of the return stack if we are going nowhere.
+       This will allow better recursion */
+    if (return_stack[return_stack_ptr - 1] != iptr) {
+        return_stack[return_stack_ptr++] = iptr;
+    }
     iptr = (MYINT) where;
     (*(prog[iptr].function.with_param)) (prog[iptr].param);
 }

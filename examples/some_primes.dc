@@ -1,21 +1,67 @@
 # let's print some primes:
+# we have some helper functions, the main work is done by 'is-prime?' below.
+# Then the primes are printed by a loop-through, and the '.rj' format
+# directive is used to keep them right-aligned.
 
-[ small_primes do
-    i 2 = i 3 = or
-    i 6 % 5 = 
-    i 6 % 1 = or
-    or
-    i 1 > and
-    i 5 > 2 * skip      # if true, multiply by enough to skip to true block
-        6 skip          # false block, which says skp OVER true block
-        i 5 % 0 <> and  # true block
-    i 7 > 2 * skip      # again, skip to true block
-        6 skip          # false block, which says skp OVER true block
-        i 7 % 0 <> and  # true block
-    2 * skip            # test
-        2 skip          # false block
-        i .             # true block, print number
-i 120 < redo ]
+[ is-2-3-5-7?
+    dup dup         # n n n
+    2 =             # n n bool 
+    swap dup        # n bool n n
+    3 =             # n bool n bool
+    swap dup        # n bool bool n n
+    5 =             # n bool bool n bool
+    swap            # n bool bool bool n
+    7 =             # n bool bool bool bool
+    or or or        # n bool
+]
 
-small_primes
-cr
+[ is-not-div-otherwise?
+    dup 
+    sqrt ceil 1 + 6 / ceil # ( add 1 + ?)
+    1 max 1 1
+    for
+        dup i 6 * 1 - % 0 =
+        over i 6 * 1 + % 0 =
+        or
+          2 * skip
+        5 skip                 # false, still not divisible, keep searching
+        drop 0 exitfor 3 skip  # true --
+                               # exit as is-prime? being false,
+                               # b/c number was divisible within
+                               # search range
+    next
+    drop 1
+]
+
+[ is-div-by-2-3-5?
+    dup             # n n 
+    2 % 0 =         # n bool
+    over            # n bool n 
+    3 % 0 =         # n bool bool
+    or over         # n bool n
+    5 % 0 =         # n bool bool
+    or              # n bool
+    3 * skip
+    is-not-div-otherwise? 2 skip  # false
+    drop 0                        # true
+]
+
+[ is-prime
+    is-2-3-5-7?
+    3 * skip
+    is-div-by-2-3-5? 2 skip   # false
+    drop 1                    # true
+]
+
+[ test-primes
+  2048 2 1 for
+      i is-prime
+      2 * skip  
+      4 skip     # false
+      i 4 4 .rj  # true
+  next
+  cr
+]
+
+s"  \n                           #### Some primes! ####\n \b" print
+test-primes

@@ -1,3 +1,4 @@
+/* struct for 'for' loops: */
 typedef struct {
     MYINT limit;
     MYINT step;
@@ -5,6 +6,10 @@ typedef struct {
 
 forloop_info fl_stack[3];
 MYINT fl_ptr;
+
+/* array for q-do loop max amounts: */
+MYINT qdo_info[3];
+MYINT qdo_ptr;
 
 /* looping */
 static void dofunc()
@@ -30,14 +35,25 @@ static void redofunc()
     }
 }
 
-static void ifunc()
+/* quicker version of 'do', consumes a single stack value that represents a
+   maximum range */
+static void qdofunc()
 {
-    push(loop_counter[0]);
+    return_stack[return_stack_ptr++] = iptr;
+    qdo_info[qdo_ptr++] = (MYINT) pop();
+    loop_counter[loop_counter_ptr++] = 0;         
 }
 
-static void jfunc()
+static void qredofunc()
 {
-    push(loop_counter[1]);  
+    if (loop_counter[loop_counter_ptr - 1] < qdo_info[qdo_ptr - 1] - 1) {
+        loop_counter[loop_counter_ptr - 1] += 1;
+        iptr = return_stack[return_stack_ptr - 1];
+    } else {
+        loop_counter[--loop_counter_ptr] = 0;
+        --return_stack_ptr;
+        --qdo_ptr; 
+    }    
 }
 
 /* these 'for' loops are more flexible, allowing from/to/step parameters. */
@@ -51,7 +67,9 @@ static void forfunc()
 
 static void exitforfunc()
 {
-    loop_counter[loop_counter_ptr - 1] = fl_stack[fl_ptr - 1].limit;    
+    fl_ptr = --fl_ptr < 1 ? 1 : fl_ptr;
+    loop_counter[--loop_counter_ptr] = fl_stack[fl_ptr - 1].limit;
+    --return_stack_ptr;
 }
 
 static void nextfunc()
@@ -63,9 +81,7 @@ static void nextfunc()
             loop_counter[loop_counter_ptr - 1] += fl_stack[fl_ptr - 1].step;
             iptr = return_stack[return_stack_ptr - 1];
         } else {
-            loop_counter[--loop_counter_ptr];
-            --return_stack_ptr;
-            fl_ptr = --fl_ptr < 0 ? 0 : fl_ptr;
+            exitforfunc();
         }
     } else {
         if (loop_counter[loop_counter_ptr - 1] > \
@@ -74,11 +90,24 @@ static void nextfunc()
             loop_counter[loop_counter_ptr - 1] += fl_stack[fl_ptr - 1].step;
             iptr = return_stack[return_stack_ptr - 1];
         } else {
-            loop_counter[--loop_counter_ptr];
-            --return_stack_ptr;
-            fl_ptr = --fl_ptr < 0 ? 0 : fl_ptr;
+            exitforfunc();
         }
     }
+}
+
+static void ifunc()
+{
+    push_no_check(loop_counter[loop_counter_ptr - 1]);
+}
+
+static void jfunc()
+{
+    push_no_check(loop_counter[loop_counter_ptr - 2]);  
+}
+
+static void kfunc()
+{
+    push_no_check(loop_counter[loop_counter_ptr - 3]);  
 }
 
 /* Crazy as this may seem, this function below is all that is needed to

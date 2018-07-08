@@ -118,14 +118,14 @@ So far, I've implemented:
 
   * Math:
     * +, -, *, /, %, <<, >>
-    * abs, round, ceil, floor
+    * abs, min, max, round, ceil, floor
     * pow, sqrt, log, log2, log10
     * sin, cos, tan, pi, e
   * Logic:
     * and, or, not, xor
     * =, <>, >, <, >=, <= 
   * Stack operations:
-    * drop, dup, swap, over, rot, nip, tuck
+    * drop, dup, swap, over, rot, -rot, nip, tuck
     * 2drop, 2dup, 2swap, 2over, 2rot  
   * Control structures:
     * skip (a kind of jumping mechanism that replaces if/else/endif)
@@ -160,10 +160,10 @@ TODO:
   means for someone to hook C-libraries into this enchilada.
   * turtle graphics for the kids!
 
-Everything is on the float-point stack only at this point.  I will
-obviously have to change/add much in the way of the structure to implement
-other things.  This is very much ALPHA right now, but it's working great and
-very fun so far.
+Everything is on the float-point stack only at this point.  I will obviously
+have to change/add much in the way of the structure to implement other
+things.  This is very much ALPHAish/BETAish right now, but it's working
+great and very fun so far.
 
 ### contact
 

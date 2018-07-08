@@ -1,61 +1,48 @@
 # cell index
-0 0 !
+[ cell-index 0 ]
+0 cell-index !
+
 # wrap modulus
-52 1 !
+[ NUM-CARDS 52 ]
+
 # starting cell
-3 2 !
-
-# testing populating cells
-# 1 3 !
-# 1 4 !
-# 1 5 !
-# 1 6 !
-
+[ STARTING-CELL 1 ]
 
 [ advance-cell-index
-    # read cell index
-    0 @
-    # add one
-    1 +
-    # read modulus, wrap by it
-    1 @ %
-    # put value back
-    0 !
+    cell-index @     # read cell index
+    1 +              # add one
+    NUM-CARDS %      # read num cards, clock-wrap (mod) by it
+    cell-index !     # put value back
 ]
 
 # get current cell
 [ current-cell
     # read cell index, add offset
-    0 @ 2 @ +
+    cell-index @ STARTING-CELL +
 ]
 
 # mark cell
-[ mark-cell
-    1 current-cell !
-]
+[ mark-cell 1 current-cell ! ]
 
 # function to get next free cell
 [ get-next-free-cell
-  do
-      current-cell @    # see if occupied
-      # dup .
-      1 =        # test
-      4 * skip   # skip to true amount
+    current-cell @      # see if occupied
+    0 =                 # test
+    3 * skip            # skip to true amount
 
-      # if false
-      mark-cell exitdo
-      3 skip    # skip over true
+    # false
+    advance-cell-index  # increment cell index
+    -10 skip            # jump to top of function
 
-      # if true  
-      advance-cell-index
-  1 redo
+    # true
+    mark-cell  
 ]
 
 [ shuffle 
-    52 0 1 for
-        rand 1 @ * floor 0 !
+    NUM-CARDS 0 1 for
+        rand NUM-CARDS * floor cell-index !
         get-next-free-cell
-        0 @ .
+        cell-index @ .
     next
 ]
 

@@ -1,9 +1,13 @@
 [ testfor
-  4 0 1 for
+  5 0 1 for
     0 4 -1 for
-      j 3 < 7 * skip
-        i . j . cr 1 skip
-        exitfor
+      j 4 >
+        1 * skip
+        i 2 <
+          7 * skip
+        j . i . cr 5 skip # false
+        exitfor 2 skip    # true    
+      exitfor exitfor
     next
   next
 ]
