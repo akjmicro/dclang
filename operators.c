@@ -93,6 +93,7 @@ static const struct primitive primitives[] = {
   {"skip", skipfunc},
   {"i", ifunc},
   {"j", jfunc},
+  {"k", kfunc},
   /* output */
   {".", showfunc},
   {".s", showstackfunc},
