@@ -151,8 +151,10 @@ So far, I've implemented:
     myvar @ .
     7.4231 
 ```
-    This work in a similar fashion for something like a stirng variable
+
+    * This works in a similar fashion for something like a string variable
     (which is, in reality an address and a length):
+
 ```
     [ greeting s"Hello there, good people!" ]
     greeting .s
