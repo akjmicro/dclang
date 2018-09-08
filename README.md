@@ -144,24 +144,24 @@ So far, I've implemented:
     future, I make this friendlier, but for now, you can keep track of
     your variable space by generous commenting in your source code, or
     by using a user-defined word to store a variable or constant, e.g.:
-```
-    [ myvar 53 ]
-    # this will store 7.4231 into slot 53
-    7.4231 myvar !
-    myvar @ .
-    7.4231 
-```
+        ```
+        [ myvar 53 ]
+        # this will store 7.4231 into slot 53
+        7.4231 myvar !
+        myvar @ .
+        7.4231 
+        ```
 
     * This works in a similar fashion for something like a string variable
     (which is, in reality an address and a length):
 
-```
-    [ greeting s"Hello there, good people!" ]
-    greeting .s
-    <2> 7888448 21
-    greeting print cr
-    Hello there, people!
-```
+        ```
+        [ greeting s"Hello there, good people!" ]
+        greeting .s
+        <2> 7888448 21
+        greeting print cr
+        Hello there, people!
+        ```
   * Timing:
     * a clock function ('clock') so we can time execution in nanoseconds 
     for benchmarking.
