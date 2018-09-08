@@ -96,7 +96,6 @@ Anyway, due to RPN, things will look like this, when you do math:
     23 @ .
     1.3773333333333333
 
-
 ```
 
 Notice the '.' character, which pops/prints the top-of-stack (TOS). This comes
@@ -140,10 +139,27 @@ So far, I've implemented:
     into slot 32)
     * @ (peek a value, copy it to the stack, e.g. '32 @' will put our
     previously saved '5' onto the top of the stack.
-    * Since the variables exist in an giant gloabel array, there really is 
+    * Since the variables exist in an giant global array, there really is 
     no distinction between 'arrays' and 'variables' in dclang. In the
     future, I make this friendlier, but for now, you can keep track of
-    your variable space by generous commenting in your source code. :D
+    your variable space by generous commenting in your source code, or
+    by using a user-defined word to store a variable or constant, e.g.:
+```
+    [ myvar 53 ]
+    # this will store 7.4231 into slot 53
+    7.4231 myvar !
+    myvar @ .
+    7.4231 
+```
+    This work in a similar fashion for something like a stirng variable
+    (which is, in reality an address and a length):
+```
+    [ greeting s"Hello there, good people!" ]
+    greeting .s
+    <2> 7888448 21
+    greeting print cr
+    Hello there, people!
+```
   * Timing:
     * a clock function ('clock') so we can time execution in nanoseconds 
     for benchmarking.
@@ -169,4 +185,4 @@ great and very fun so far.
 
 Aaron Krister Johnson
 
-Please report bugs and successes to aaron@untwelve.org
+Please report bugs and successes to akjmicro@gmail.com
