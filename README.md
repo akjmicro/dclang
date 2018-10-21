@@ -68,13 +68,13 @@ Anyway, due to RPN, things will look like this, when you do math:
     testskip
     1 2 3 4
 
-    # do redo, basic, starts at zero, ascends, test is 'manual' at end
+    # do/redo -- basic, starts at zero, ascends, test is 'manual' at end
     [ looptest do i . i 7 < redo ]
     looptest
     0 1 2 3 4 5 6 7
 
     # for/next loop, more than twice as fast. Parameters are to/from/step.
-    # Let's add the first 20 million longegers!
+    # Let's add the first 20 million integers!
     [ for_test 0
         20000001 1 1 for
             i +
@@ -129,21 +129,22 @@ So far, I've implemented:
   * Control structures:
     * skip (a kind of jumping mechanism that replaces if/else/endif)
     * for/next & do/redo (looping)
+    * more performant 'quick' do/redo: `N qdo ... qredo`
     * user-defined words (functions)
   * Strings:
     * simple string printing 
     * fancier right-justified numeric output fields
     * '#' to end-of-line' for comments
+    * `uemit`, a unicode-character emitter which can help to contruct
+    strings that need them.
   * Variables/Arrays:
     * ! (poke a value to a given slot, e.g. '5 32 !' puts the value 5
     into slot 32)
     * @ (peek a value, copy it to the stack, e.g. '32 @' will put our
     previously saved '5' onto the top of the stack.
     * Since the variables exist in an giant global array, there really is 
-    no distinction between 'arrays' and 'variables' in dclang. In the
-    future, I make this friendlier, but for now, you can keep track of
-    your variable space by generous commenting in your source code, or
-    by using a user-defined word to store a variable or constant, e.g.:
+    no distinction between 'arrays' and 'variables' in dclang. Named
+    variables or constants can be emulated by makings them words, e.g.:
         ```
         [ myvar 53 ]
         # this will store 7.4231 into slot 53
@@ -160,7 +161,7 @@ So far, I've implemented:
         greeting .s
         <2> 7888448 21
         greeting print cr
-        Hello there, people!
+        Hello there, good people!
         ```
   * Timing:
     * a clock function ('clock') so we can time execution in nanoseconds 
@@ -173,15 +174,13 @@ TODO:
   * hashing/hash tables (dictionaries)
   * more time functions (e.g. date, sleep, etc.)
   * more string functions, as needed (basic saving and typing is all we have
-  at the moment
+  at the moment, so I mean things like splitting, searching, etc.)
   * just about everything a usuable language will need, or at least, the
   means for someone to hook C-libraries into this enchilada.
   * turtle graphics for the kids!
 
-Everything is on the float-point stack only at this point.  I will obviously
-have to change/add much in the way of the structure to implement other
-things.  This is very much ALPHAish/BETAish right now, but it's working
-great and very fun so far.
+Everything is on the float-point stack only at this point. There may be
+separate stacks for integers in the future. Not sure if it's necessary.
 
 ### contact
 
