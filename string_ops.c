@@ -1,5 +1,3 @@
-/* unused as of yet */
-
 char string_pad[1048576];
 unsigned long string_here;
 

@@ -85,6 +85,16 @@
     swap
 ]
 
+[ testqdo-var
+    clock
+    0 0 !
+    20000001 qdo
+      0 @ i + 0 !
+    qredo
+    0 @
+    clock
+    swap
+]
 
 s" \nThis will show how various ways of composing loops are more efficient.
 In general, go with the simplest case, and avoid logical and stack operations
@@ -110,4 +120,8 @@ present_results
 
 s" \nTesting loop using 'qdo'\n" print
 testqdo
+present_results
+
+s" \nTesting loop using 'qdo' and poking/peeking a variable\n" print
+testqdo-var
 present_results

@@ -125,7 +125,7 @@ So far, I've implemented:
     * =, <>, >, <, >=, <= 
   * Stack operations:
     * drop, dup, swap, over, rot, -rot, nip, tuck
-    * 2drop, 2dup, 2swap, 2over, 2rot  
+    * 2drop, 2dup, 2swap, 2over, 2rot, -2rot, 2nip, 2tuck
   * Control structures:
     * skip (a kind of jumping mechanism that replaces if/else/endif)
     * for/next & do/redo (looping)

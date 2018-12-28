@@ -180,3 +180,58 @@ static void rot2func()
     push_no_check(val6);
     push_no_check(val5); 
 }
+
+static void rotneg2func()
+{
+    // ( 6 5 4 3 2 1 -- 2 1 6 5 4 3)
+    if (data_stack_ptr < 6) {
+        printf("stack underflow! ");
+        return;
+    }
+    MYFLT val1 = pop();
+    MYFLT val2 = pop();
+    MYFLT val3 = pop();
+    MYFLT val4 = pop();
+    MYFLT val5 = pop();
+    MYFLT val6 = pop();
+    push_no_check(val2);
+    push_no_check(val1);
+    push_no_check(val6);
+    push_no_check(val5);
+    push_no_check(val4);
+    push_no_check(val3); 
+}
+
+static void nip2func()
+{
+    // ( 4 3 2 1 -- 2 1 )
+    if (data_stack_ptr < 4) {
+        printf("stack underflow! ");
+        return;
+    }
+    MYFLT val1 = pop();
+    MYFLT val2 = pop();
+    pop();
+    pop();
+    push_no_check(val2);
+    push_no_check(val1);
+}
+
+static void tuck2func()
+{
+    // ( 4 3 2 1 -- 2 1 4 3 2 1 )
+    if (data_stack_ptr < 4) {
+        printf("stack underflow! ");
+        return;
+    }
+    MYFLT val1 = pop();
+    MYFLT val2 = pop();
+    MYFLT val3 = pop();
+    MYFLT val4 = pop();
+    push_no_check(val2);
+    push_no_check(val1);
+    push_no_check(val4);
+    push_no_check(val3);
+    push(val2);
+    push(val1);
+}

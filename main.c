@@ -29,15 +29,15 @@ char buf[IBUFSIZE];
 MYINT bufused;
 /* data stack */
 MYFLT data_stack[DATA_STACK_SIZE];
-register MYINT data_stack_ptr asm("r15");
+MYINT data_stack_ptr;
 /* return stack */
 MYINT return_stack[RETURN_STACK_SIZE];
-register MYINT return_stack_ptr asm("r14");
+MYINT return_stack_ptr;
 /* loop 'stack' */
 MYINT loop_counter[3];
 MYINT loop_counter_ptr;
 
-// compiled tokens get saved and put into an array of type 'prog_struct'
+// compiled tokens get saved and put into an array of type 'inst_struct'
 typedef union {
     void (*with_param) (MYFLT);
     void (*without_param) (void);
@@ -68,7 +68,9 @@ MYINT def_mode;
 #include "user_functions.c"
 #include "operators.c"
 
-const char *illegal[] = {"do", "redo", "exitdo", "for", "next", "exitfor",
+const char *illegal[] = {"do", "redo", "exitdo",
+                         "qdo", "qredo",
+                         "for", "next", "exitfor",
                          "skip"};
 MYINT num_illegal = sizeof(illegal) / sizeof(illegal[0]); 
 
@@ -103,7 +105,7 @@ static void compile_or_interpret(const char *argument)
     while (pr->name != 0) {
         if (strcmp(pr->name, argument) == 0) {
             if (def_mode) {
-                /* insert function only if its not 's"' for strings: */
+                /* insert function only if it's not 's"' for strings: */
                 if (strcmp("s\"", argument) != 0) {
                     prog[iptr++].function.without_param = pr->function;
                 } else {
@@ -160,7 +162,7 @@ static void compile_or_interpret(const char *argument)
 
 
 /* Where all the juicy fun begins... */
-MYINT main(MYINT argc, char **argv)
+MYINT main(int argc, char **argv)
 {
     srand(time(NULL));
     //setlocale(LC_ALL, "");

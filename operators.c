@@ -78,6 +78,9 @@ static const struct primitive primitives[] = {
   {"2swap", swap2func},
   {"2over", over2func},
   {"2rot", rot2func},
+  {"-2rot", rotneg2func},
+  {"2nip", nip2func},
+  {"2tuck", tuck2func},
   /* variables in memory */
   {"!", pokefunc},
   {"@", peekfunc},
