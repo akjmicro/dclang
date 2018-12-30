@@ -2,37 +2,9 @@
 
 [ simplify 2dup gcd dup rot swap / -rot / swap ]
 
-[ fracadd
-  # put the numerators and denominators
-  # into some local slots
-  3 ! 2 ! 1 ! 0 !
-  # denominator
-  1 @ 3 @ *
-  # numerator A
-  0 @ 3 @ *
-  # numerator B
-  1 @ 2 @ *
-  # add
-  +
-  swap
-  simplify
-]
+[ fracadd rot 2dup * dup -2rot rot * -rot * + -rot drop simplify ]
 
-[ fracsub
-  # put the numerators and denominators
-  # into some local slots
-  3 ! 2 ! 1 ! 0 !
-  # denominator
-  1 @ 3 @ *
-  # numerator A
-  0 @ 3 @ *
-  # numerator B
-  1 @ 2 @ *
-  # subtract
-  -
-  swap
-  simplify
-]
+[ fracsub swap -1 * swap fracadd ] 
 
 [ fracmul rot * -rot * swap simplify ]
 
