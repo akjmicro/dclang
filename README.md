@@ -167,7 +167,17 @@ So far, I've implemented:
     * a clock function ('clock') so we can time execution in nanoseconds 
     for benchmarking.
     * A hook into CPU-cycle clock, called 'rdtsc'.
-  
+
+  * Importing a file of dclang code:
+    * From the interpreter
+        ```
+        s" examples/some_primes.dc" import
+        ```
+    * On the command-line, then drop to interpreter:
+        ```
+        ./dclang -i examples/some_primes.dc
+        ```
+
 TODO:
 
   * open/read/write/close to the filesystem

@@ -7,11 +7,11 @@ static void stringfunc()
     /* get a starting marker for length */
     unsigned long string_start = string_here;
     
-    if ((ch = fgetc(stdin)) == EOF) exit(0);
+    if ((ch = fgetc(ifp)) == EOF) exit(0);
     while (! strchr("\"", ch)) {
         if (strchr("\\", ch)) {
             /* consume an extra char due to backslash */
-            if ((ch = fgetc(stdin)) == EOF) exit(0);
+            if ((ch = fgetc(ifp)) == EOF) exit(0);
             /* backspace */
             if (strchr("b", ch)) {
                 ch = 8;
@@ -24,7 +24,7 @@ static void stringfunc()
             }
         }
         string_pad[string_here++] = ch;
-        if ((ch = fgetc(stdin)) == EOF) exit(0);
+        if ((ch = fgetc(ifp)) == EOF) exit(0);
     }
     double string_addy = \
         (double)((unsigned long)&string_pad + string_start);

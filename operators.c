@@ -22,7 +22,7 @@ struct primitive {
   void (*function) (void);
 };
 
-static const struct primitive primitives[] = {
+static struct primitive primitives[76] = {
   {"+", addfunc},
   {"-", subfunc},
   {"*", mulfunc},
@@ -33,38 +33,38 @@ static const struct primitive primitives[] = {
   {"max", maxfunc},
   {"<<", lshiftfunc},
   {">>", rshiftfunc},
-  /* comparisons */
+  // comparisons
   {"=", eqfunc},
   {"<>", noteqfunc},
   {"<", ltfunc},
   {">", gtfunc},
   {"<=", ltefunc},
   {">=", gtefunc},
-  /* logic */
+  // logic
   {"and", andfunc},
   {"or", orfunc},
   {"not", notfunc},
   {"xor", xorfunc},
-  /* fp -> int */
+  // float -> int
   {"round", roundfunc},
   {"ceil", ceilfunc},
   {"floor", floorfunc},
-  /* higher math */
+  // higher math
   {"pow", powerfunc},
   {"sqrt", sqrtfunc},
   {"log", logfunc},
   {"log2", log2func},
   {"log10", log10func},
-  /* constants */
+  // constants
   {"pi", pifunc},
   {"e", efunc},
-  /* trig */
+  // trig
   {"sin", sinefunc},
   {"cos", cosfunc},
   {"tan", tanfunc},
-  /*randomness */
+  // randomness
   {"rand", randfunc},
-  /* stack operators */
+  // stack operators
   {"drop", dropfunc},
   {"dup", dupfunc},
   {"swap", swapfunc},
@@ -81,10 +81,10 @@ static const struct primitive primitives[] = {
   {"-2rot", rotneg2func},
   {"2nip", nip2func},
   {"2tuck", tuck2func},
-  /* variables in memory */
+  // variables in memory
   {"!", pokefunc},
   {"@", peekfunc},
-  /* branching */
+  // branching
   {"do", dofunc},
   {"redo", redofunc},
   {"exitdo", exitdofunc},
@@ -97,7 +97,7 @@ static const struct primitive primitives[] = {
   {"i", ifunc},
   {"j", jfunc},
   {"k", kfunc},
-  /* output */
+  // output
   {".", showfunc},
   {".s", showstackfunc},
   {".rj", showrjfunc},
@@ -106,8 +106,11 @@ static const struct primitive primitives[] = {
   {"print", printfunc},
   {"emit", emitfunc},
   {"uemit", uemitfunc},
-  /* time */
+  // time
   {"clock", clockfunc},
   {"rdtsc", rdtscfunc},
-  {0, 0}
+  // input files
+  // {"import", importfunc},
+  // end
+  // {0, 0}
 };

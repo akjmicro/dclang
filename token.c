@@ -2,6 +2,7 @@
 
 void add_to_buf(char ch) { if(bufused < IBUFSIZE - 1) buf[bufused++] = ch; }
 char *buf2str()          { buf[bufused++] = '\0'; return strdup(buf); }
+void setinput(FILE *fp)  { ifp = fp; }
 
 char *get_token() {
     MYINT ch;
@@ -10,13 +11,13 @@ char *get_token() {
     while (1) {
         /* skip leading space */
         do {
-            if((ch = fgetc(stdin)) == EOF) exit(0);
+            if((ch = fgetc(ifp)) == EOF) exit(0);
         } while(isspace(ch));
         /* if we are starting a comment: */
         if (strchr("#", ch)) {
             /* go to the end of the line */
             do {
-                if((ch = fgetc(stdin)) == EOF) exit(0);
+                if((ch = fgetc(ifp)) == EOF) exit(0);
             } while(! strchr("\n", ch));
         } else {
             add_to_buf(ch);
@@ -26,9 +27,9 @@ char *get_token() {
     /* grab all the next non-whitespace characters */
     while (1) {
         /* check again for EOF */
-        if ((ch = fgetc(stdin)) == EOF) exit(0);
+        if ((ch = fgetc(ifp)) == EOF) exit(0);
         if (isspace(ch)) {
-            ungetc(ch, stdin);
+            ungetc(ch, ifp);
             return buf2str();
         }
         add_to_buf(ch);
