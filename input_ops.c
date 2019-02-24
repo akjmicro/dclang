@@ -94,6 +94,12 @@ static void compile_or_interpret(const char *argument)
 void import(char *infilestr) {
     FILE *old_ifp = ifp;
     FILE *infile;
+    // check existence of file:
+    if (access(infilestr, F_OK) == -1) {
+        printf("The file named %s doesn't appear to exist, " \
+               "or cannot be accessed.\n", infilestr);
+        return;
+    }
     infile = fopen(infilestr, "r");
     fseek(infile, 0, SEEK_END);
     long size = ftell(infile);

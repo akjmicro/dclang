@@ -84,6 +84,7 @@ int load_extra_primitives() {
 // Where all the juicy fun begins... 
 int main(int argc, char **argv)
 {
+    setinput(stdin);
     load_extra_primitives();
     srand(time(NULL));
     //setlocale(LC_ALL, "");
@@ -101,7 +102,7 @@ int main(int argc, char **argv)
     }
     if (live_repl) {
         setinput(stdin);
-        printf("Welcome to dclang! Aaron Krister Johnson, 2018\n");
+        printf("Welcome to dclang! Aaron Krister Johnson, 2019\n");
         printf("Make sure to peruse README.md to get your bearings!\n");
         while (1) {
             // get next input token
