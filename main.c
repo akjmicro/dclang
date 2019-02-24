@@ -96,7 +96,6 @@ int main(int argc, char **argv)
             }   
         };
     } else {
-        printf("argc is 1\n");
         live_repl = 1;
     }
     if (live_repl) {
