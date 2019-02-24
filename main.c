@@ -72,12 +72,26 @@ MYINT def_mode;
 #include "operators.c"
 #include "input_ops.c"
 
+
+void show_primitivesfunc() {
+    printf("\n");
+    int prim_size = sizeof(primitives) / sizeof(primitives[0]);
+    for (int x=0; x < (prim_size - 2); x++) {
+        printf("%s ", primitives[x].name);
+    }
+    printf("\n");
+}
+
 // needed so we can add 'import' to primitives
 int load_extra_primitives() {
     primitives[74].name = "import";
     primitives[74].function = importfunc;
-    primitives[75].name = 0;
-    primitives[75].function = 0;
+    primitives[75].name = "show-primitives";
+    primitives[75].function = show_primitivesfunc;
+    primitives[76].name = "show-user-functions";
+    primitives[76].function = showdefined;
+    primitives[77].name = 0;
+    primitives[77].function = 0;
     return 1;
 }
 
