@@ -28,7 +28,7 @@ static void showdefined()
 {
     for (int x=0; x < num_user_functions; x++) {
         printf("Function %i: %s @ %li\n", x, user_functions[x].name,\
-                                            user_functions[x].func_start);
+                                          user_functions[x].func_start);
     }
 }
 
