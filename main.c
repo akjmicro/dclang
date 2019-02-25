@@ -76,7 +76,7 @@ MYINT def_mode;
 void show_primitivesfunc() {
     printf("\n");
     int prim_size = sizeof(primitives) / sizeof(primitives[0]);
-    for (int x=0; x < (prim_size - 2); x++) {
+    for (int x=0; x < (prim_size - 1); x++) {
         printf("%s ", primitives[x].name);
     }
     printf("\n");
@@ -90,8 +90,10 @@ int load_extra_primitives() {
     primitives[75].function = show_primitivesfunc;
     primitives[76].name = "show-user-functions";
     primitives[76].function = showdefined;
-    primitives[77].name = 0;
-    primitives[77].function = 0;
+    primitives[77].name = "repl";
+    primitives[77].function = repl;
+    primitives[78].name = 0;
+    primitives[78].function = 0;
     return 1;
 }
 
@@ -114,28 +116,8 @@ int main(int argc, char **argv)
         live_repl = 1;
     }
     if (live_repl) {
-        setinput(stdin);
         printf("Welcome to dclang! Aaron Krister Johnson, 2019\n");
         printf("Make sure to peruse README.md to get your bearings!\n");
-        while (1) {
-            // get next input token
-            char *token;
-            token = get_token();
-            // are we dealing with a function definition?
-            if (strcmp(token, "[") == 0) {
-                startdeffunc();
-                def_mode = 1;
-                continue; // goto top of loop
-            }
-            if (strcmp(token, "]") == 0) {
-                enddeffunc();
-                def_mode = 0;
-                continue; // goto top of loop
-            }
-            // 'compile' it, or interpret it on-the-fly
-            compile_or_interpret(token);
-        }
-        compile_or_interpret(0);
-        return EXIT_SUCCESS;
+        repl();
     }
 }

@@ -91,7 +91,31 @@ static void compile_or_interpret(const char *argument)
 }
 
 
-void import(char *infilestr) {
+static void repl() {
+    while (1) {
+        // get next input token
+        char *token;
+        token = get_token();
+        // are we dealing with a function definition?
+        if (strcmp(token, "[") == 0) {
+            startdeffunc();
+            def_mode = 1;
+            continue; // goto top of loop
+        }
+        if (strcmp(token, "]") == 0) {
+            enddeffunc();
+            def_mode = 0;
+            continue; // goto top of loop
+        }
+        // 'compile' it, or interpret it on-the-fly
+        compile_or_interpret(token);
+    }
+    compile_or_interpret(0);
+    // return EXIT_SUCCESS;
+}
+
+
+static void import(char *infilestr) {
     FILE *old_ifp = ifp;
     FILE *infile;
     // check existence of file:
@@ -105,11 +129,12 @@ void import(char *infilestr) {
     long size = ftell(infile);
     rewind(infile);
     setinput(infile);
+    printf("Entering file: %s\n", infilestr);
     while((ftell(infile) < (size - 1))) {
-        /* get next input token */
+        // get next input token
         char *token;
         token = get_token();
-        /* are we dealing with a function definition? */
+        // are we dealing with a function definition?
         if (strcmp(token, "[") == 0) {
             startdeffunc();
             def_mode = 1;
@@ -120,13 +145,14 @@ void import(char *infilestr) {
             def_mode = 0;
             continue; // goto top of loop
         }
-        /* 'compile' it, or interpret it on-the-fly */
+        // 'compile' it, or interpret it on-the-fly
         compile_or_interpret(token);
     }
-    fclose(infile);
     compile_or_interpret(0);
+    fclose(infile);
     setinput(old_ifp);
 }
+
 
 static void importfunc() {
     if (data_stack_ptr < 2) {
@@ -139,5 +165,5 @@ static void importfunc() {
     char nullstr[] = "\0";
     memcpy(dest, (char *)(str_start + 1), str_len);
     memcpy(dest + str_len, (char *)nullstr, 1);
-    import(dest);
+    return import(dest);
 }
