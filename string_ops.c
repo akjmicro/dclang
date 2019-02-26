@@ -53,6 +53,7 @@ static void printfunc()
     memcpy(dest, (char *)(str_start + 1), str_len);
     memcpy(dest + str_len, (char *)nullstr, 1);
     printf("%s", dest);
+    fflush(stdout);
 }
 
 static void emitfunc()
@@ -61,6 +62,7 @@ static void emitfunc()
     char charbuf[2] = { char_code, 0 };
     //long res = write(1, charbuf, 1);
     printf("%s", charbuf);
+    fflush(stdout);
 }
 
 /* utf-8 char buffer */
@@ -113,4 +115,5 @@ static void uemitfunc()
     long unsigned long char_code = (long unsigned long) pop();
     long ulen = utf8_encode(utf8_buf, char_code);
     printf("%s", utf8_buf);
+    fflush(stdout);
 }

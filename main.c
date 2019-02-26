@@ -86,18 +86,17 @@ void show_primitivesfunc() {
 }
 
 // needed so we can add 'import' to primitives
-int load_extra_primitives() {
-    primitives[74].name = "import";
-    primitives[74].function = importfunc;
-    primitives[75].name = "show-primitives";
-    primitives[75].function = show_primitivesfunc;
-    primitives[76].name = "show-user-functions";
-    primitives[76].function = showdefined;
-    primitives[77].name = "repl";
-    primitives[77].function = repl;
-    primitives[78].name = 0;
-    primitives[78].function = 0;
-    return 1;
+void load_extra_primitives() {
+    primitives[75].name = "import";
+    primitives[75].function = importfunc;
+    primitives[76].name = "show-primitives";
+    primitives[76].function = show_primitivesfunc;
+    primitives[77].name = "show-user-functions";
+    primitives[77].function = showdefined;
+    primitives[78].name = "repl";
+    primitives[78].function = repl;
+    primitives[79].name = 0;
+    primitives[79].function = 0;
 }
 
 // Where all the juicy fun begins... 

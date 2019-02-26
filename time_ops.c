@@ -17,3 +17,11 @@ static void rdtscfunc() {
         : /* clobbers */ "%rcx");
     push( (uint64_t)lo | (((uint64_t)hi) << 32) );
 }
+
+static void sleepfunc() {
+    MYFLT sleeptime = pop();
+    struct timespec t1, t2;
+    t1.tv_sec = floor(sleeptime);
+    t1.tv_nsec = round(fmod(sleeptime, 1) * 1000000000);
+    nanosleep(&t1, &t2);
+}

@@ -167,6 +167,7 @@ So far, I've implemented:
     * a clock function ('clock') so we can time execution in nanoseconds 
     for benchmarking.
     * A hook into CPU-cycle clock, called 'rdtsc'.
+    * A sleep function (C's `nanosleep` under-the-hood)
 
   * Importing a file of dclang code:
     * From the interpreter
@@ -180,9 +181,9 @@ So far, I've implemented:
 
 TODO:
 
-  * open/read/write/close to the filesystem
+  * open/read/write/close to the filesystem (importing code is implemented)
   * hashing/hash tables (dictionaries)
-  * more time functions (e.g. date, sleep, etc.)
+  * more time functions (e.g. date, calendar stuff, etc.)
   * more string functions, as needed (basic saving and typing is all we have
   at the moment, so I mean things like splitting, searching, etc.)
   * just about everything a usuable language will need, or at least, the
