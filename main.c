@@ -39,6 +39,9 @@ MYINT return_stack_ptr;
 // loop 'stack'
 MYINT loop_counter[3];
 MYINT loop_counter_ptr;
+// file stack for imports
+FILE *file_stack[32];
+MYINT fsp;
 
 // compiled tokens get saved and put into an array of type 'inst_struct'
 typedef union {

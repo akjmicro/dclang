@@ -22,7 +22,7 @@ struct primitive {
   void (*function) (void);
 };
 
-static struct primitive primitives[78] = {
+static struct primitive primitives[79] = {
   {"+", addfunc},
   {"-", subfunc},
   {"*", mulfunc},

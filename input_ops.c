@@ -92,10 +92,8 @@ static void compile_or_interpret(const char *argument)
 
 
 static void repl() {
-    while (1) {
-        // get next input token
-        char *token;
-        token = get_token();
+    char *token;
+    while (strcmp(token = get_token(), "EOF")) {
         // are we dealing with a function definition?
         if (strcmp(token, "[") == 0) {
             startdeffunc();
@@ -116,7 +114,6 @@ static void repl() {
 
 
 static void import(char *infilestr) {
-    FILE *old_ifp = ifp;
     FILE *infile;
     // check existence of file:
     if (access(infilestr, F_OK) == -1) {
@@ -125,32 +122,10 @@ static void import(char *infilestr) {
         return;
     }
     infile = fopen(infilestr, "r");
-    fseek(infile, 0, SEEK_END);
-    long size = ftell(infile);
-    rewind(infile);
     setinput(infile);
     printf("Entering file: %s\n", infilestr);
-    while((ftell(infile) < (size - 1))) {
-        // get next input token
-        char *token;
-        token = get_token();
-        // are we dealing with a function definition?
-        if (strcmp(token, "[") == 0) {
-            startdeffunc();
-            def_mode = 1;
-            continue; // goto top of loop
-        }
-        if (strcmp(token, "]") == 0) {
-            enddeffunc();
-            def_mode = 0;
-            continue; // goto top of loop
-        }
-        // 'compile' it, or interpret it on-the-fly
-        compile_or_interpret(token);
-    }
-    compile_or_interpret(0);
+    repl();
     fclose(infile);
-    setinput(old_ifp);
 }
 
 
