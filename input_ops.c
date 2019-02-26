@@ -123,7 +123,6 @@ static void import(char *infilestr) {
     }
     infile = fopen(infilestr, "r");
     setinput(infile);
-    printf("Entering file: %s\n", infilestr);
     repl();
     fclose(infile);
 }
