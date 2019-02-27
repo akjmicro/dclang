@@ -1,10 +1,11 @@
-[ waves
+[ kaleidoscope
   2048 qdo
     34 qdo
       100 qdo
-        i 100 / sin
-        j  34 / sin
-        *
+        i 100 / 0.5 - dup *
+        j  34 / 0.5 - dup *
+        + sqrt
+        sin
         k * sin 0.5 <
         4 * skip
         64 emit 2 skip
@@ -15,7 +16,7 @@
   qredo
 ]
 
-waves
+kaleidoscope
 
 cr
 s" DONE!!!!!!" print
