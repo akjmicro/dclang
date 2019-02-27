@@ -1,16 +1,16 @@
 [ waves
-  2048 qdo
-    34 qdo
-      100 qdo
+  4096 qdo
+    17 -17 1 for
+      50 -50 1 for
         i 100 / sin
         j  34 / sin
-        *
+        -
         k * sin 0.5 <
         4 * skip
-        64 emit 2 skip
+        42 emit 2 skip
         32 emit 
-      qredo cr
-    qredo
+      next cr
+    next
   0.041667 sleep
   qredo
 ]
