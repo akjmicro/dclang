@@ -71,33 +71,26 @@ MYINT def_mode;
 #include "string_ops.c"
 #include "variable_ops.c"
 #include "token.c"
+#include "file_ops.c"
 #include "user_functions.c"
 #include "operators.c"
 #include "input_ops.c"
 
 
-void show_primitivesfunc() {
-    printf("\n");
-    int prim_size = sizeof(primitives) / sizeof(primitives[0]);
-    for (int x=0; x < (prim_size - 1); x++) {
-        printf("%s ", primitives[x].name);
-    }
-    printf("\n");
-}
-
 // needed so we can add 'import' to primitives
 void load_extra_primitives() {
-    primitives[75].name = "import";
-    primitives[75].function = importfunc;
-    primitives[76].name = "show-primitives";
-    primitives[76].function = show_primitivesfunc;
-    primitives[77].name = "show-user-functions";
-    primitives[77].function = showdefined;
-    primitives[78].name = "repl";
-    primitives[78].function = repl;
-    primitives[79].name = 0;
-    primitives[79].function = 0;
+    primitives[78].name = "show-primitives";
+    primitives[78].function = show_primitivesfunc;
+    primitives[79].name = "import";
+    primitives[79].function = importfunc;
+    primitives[80].name = "repl";
+    primitives[80].function = repl;
+    /* final endpoint must be zeros,
+       and they won't count in the 'count': */
+    primitives[81].name = 0;
+    primitives[81].function = 0;
 }
+
 
 // Where all the juicy fun begins... 
 int main(int argc, char **argv)
@@ -120,6 +113,7 @@ int main(int argc, char **argv)
     if (live_repl) {
         printf("Welcome to dclang! Aaron Krister Johnson, 2019\n");
         printf("Make sure to peruse README.md to get your bearings!\n");
+        show_primitivesfunc();
         repl();
     }
 }

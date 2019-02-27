@@ -22,7 +22,7 @@ struct primitive {
   void (*function) (void);
 };
 
-static struct primitive primitives[80] = {
+static struct primitive primitives[82] = {
   {"+", addfunc},
   {"-", subfunc},
   {"*", mulfunc},
@@ -109,5 +109,21 @@ static struct primitive primitives[80] = {
   // time
   {"clock", clockfunc},
   {"rdtsc", rdtscfunc},
-  {"sleep", sleepfunc}
+  {"sleep", sleepfunc},
+  // file
+  {"open-file", openfilefunc},
+  {"close-file", closefilefunc},
+  // user functions listing
+  {"show-user-functions", showdefined}
 };
+
+
+void show_primitivesfunc() {
+    printf("\n");
+    int prim_size = sizeof(primitives) / sizeof(primitives[0]);
+    printf("There are currently %i primitives implemented:\n", prim_size - 1);
+    for (int x=0; x < (prim_size - 1); x++) {
+        printf("%s ", primitives[x].name);
+    }
+    printf("\n\n");
+}

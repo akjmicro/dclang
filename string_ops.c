@@ -26,19 +26,20 @@ static void stringfunc()
         string_pad[string_here++] = ch;
         if ((ch = fgetc(ifp)) == EOF) exit(0);
     }
-    double string_addy = \
+    double string_addr = \
         (double)((unsigned long)&string_pad + string_start);
     double string_size = (double)(string_here - string_start);
     if (def_mode) {
         prog[iptr].function.with_param = push;
-        prog[iptr++].param = string_addy;
+        prog[iptr++].param = string_addr;
         prog[iptr].function.with_param = push;
         prog[iptr++].param = string_size; 
     } else {
-        push(string_addy);
+        push(string_addr);
         push(string_size);
     }
 }
+
 
 static void printfunc()
 {
@@ -56,17 +57,18 @@ static void printfunc()
     fflush(stdout);
 }
 
+
 static void emitfunc()
 {
     long char_code = (long) pop();
     char charbuf[2] = { char_code, 0 };
-    //long res = write(1, charbuf, 1);
     printf("%s", charbuf);
     fflush(stdout);
 }
 
 /* utf-8 char buffer */
 char utf8_buf[5];
+
 
 static long utf8_encode(char *out, uint64_t utf)
 {
@@ -109,6 +111,7 @@ static long utf8_encode(char *out, uint64_t utf)
         return 3;
     }
 }
+
 
 static void uemitfunc()
 {
