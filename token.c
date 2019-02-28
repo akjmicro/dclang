@@ -17,7 +17,7 @@ void setinput(FILE *fp)  {
 }
 
 void revertinput() {
-    if (ifp->_file == 0) {
+    if (ifp->_fileno == 0) {
         exit(0);
     }
     ifp = file_stack[--fsp];
