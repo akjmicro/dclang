@@ -4,16 +4,6 @@
     s" The time difference is: " print . s" \bns" print cr 
 ]
 
-[ testdo 
-    clock 0
-    do
-      i +
-    i 20000000  <
-    redo
-    clock # ( t1 amt t2 )
-    swap  # ( t1 t2 amt )
-]
-
 [ sl-helper 
    # ( sum max cur )
    rot       # ( max cur sum )
@@ -76,21 +66,21 @@
     swap
 ]
 
-[ testqdo
+[ testdo
     clock 0
-    20000001 qdo
+    20000001 do
       i +
-    qredo
+    redo
     clock
     swap
 ]
 
-[ testqdo-var
+[ testdo-var
     clock
     0 0 !
-    20000001 qdo
+    20000001 do
       0 @ i + 0 !
-    qredo
+    redo
     0 @
     clock
     swap
@@ -99,7 +89,7 @@
 s" \nThis will show how various ways of composing loops are more efficient.
 In general, go with the simplest case, and avoid logical and stack operations
 inside of loops, when you can. Hence, the the first 'manual' loop here is the
-worst performer, and the simple 'qdo' loop at the end is the fastest.
+worst performer, and the simple 'do' loop at the end is the fastest.
 " print 
 
 s" \nTesting loop using manual 'skip' loop\n" print
@@ -110,18 +100,14 @@ s" \nTesting loop using recursion\n" print
 test_recur
 present_results
 
-s" \nTesting loop using 'do'\n" print
-testdo
-present_results
-
 s" \nTesting loop using 'for'\n" print
 testfor
 present_results
 
-s" \nTesting loop using 'qdo'\n" print
-testqdo
+s" \nTesting loop using 'do'\n" print
+testdo
 present_results
 
-s" \nTesting loop using 'qdo' and poking/peeking a variable\n" print
-testqdo-var
+s" \nTesting loop using 'do' and poking/peeking a variable\n" print
+testdo-var
 present_results

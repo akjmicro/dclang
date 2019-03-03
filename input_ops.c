@@ -1,5 +1,4 @@
 const char *illegal[] = {"do", "redo", "exitdo",
-                         "qdo", "qredo",
                          "for", "next", "exitfor",
                          "skip"};
 MYINT num_illegal = sizeof(illegal) / sizeof(illegal[0]); 

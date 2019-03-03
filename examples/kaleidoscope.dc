@@ -1,18 +1,21 @@
+32 0 !
+45 1 !
+43 2 !
+
 [ kaleidoscope
-  4096 qdo
-    34 qdo
-      100 qdo
-        i 100 / 0.5 - dup *   # This is all distance formula stuff:
+  4096 do
+    34 do
+      100 do
+        i  67 / 0.7 - dup *   # This is all distance formula stuff:
         j  34 / 0.5 - dup *   # sqrt(a^2 + b^2)...distance from origin
         + sqrt sin            # (sine of the distance from origin)
-        k * sin 0.5 <         # multiply by 'k' counter; sine; test if < 0.5
-        4 * skip              # conditional skip
-        64 emit 2 skip        # false that stack result < 0.5
-        32 emit               # true that stack result < 0.5
-      qredo cr                # after 100 columns, newline (cr)
-    qredo                     # 34 lines
-  0.041667 sleep              # sleep, 24 FPS redraw
-  qredo
+        k * sin 1.5 * 1.5 + floor
+        @ emit
+      redo 
+      cr                
+    redo                     
+  0.041667 sleep              
+  redo
 ]
 
 kaleidoscope

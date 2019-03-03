@@ -1,4 +1,4 @@
-/* struct for 'for' loops: */
+// struct for 'for' loops:
 typedef struct {
     MYINT limit;
     MYINT step;
@@ -7,15 +7,16 @@ typedef struct {
 forloop_info fl_stack[3];
 MYINT fl_ptr;
 
-/* array for q-do loop max amounts: */
-MYINT qdo_info[3];
-MYINT qdo_ptr;
+// array for 'do' loop max amounts:
+MYINT do_info[3];
+MYINT do_ptr;
 
-/* looping */
+// looping
 static void dofunc()
 {
     return_stack[return_stack_ptr++] = iptr;
-    loop_counter_ptr++;
+    do_info[do_ptr++] = (MYINT) pop();
+    loop_counter[loop_counter_ptr++] = 0;         
 }
 
 static void exitdofunc()
@@ -26,33 +27,13 @@ static void exitdofunc()
 
 static void redofunc()
 {
-    if (pop() != 0) {
+    if (loop_counter[loop_counter_ptr - 1] < do_info[do_ptr - 1] - 1) {
         loop_counter[loop_counter_ptr - 1] += 1;
         iptr = return_stack[return_stack_ptr - 1];
     } else {
         loop_counter[--loop_counter_ptr] = 0;
         --return_stack_ptr;
-    }
-}
-
-/* quicker version of 'do', consumes a single stack value that represents a
-   maximum range */
-static void qdofunc()
-{
-    return_stack[return_stack_ptr++] = iptr;
-    qdo_info[qdo_ptr++] = (MYINT) pop();
-    loop_counter[loop_counter_ptr++] = 0;         
-}
-
-static void qredofunc()
-{
-    if (loop_counter[loop_counter_ptr - 1] < qdo_info[qdo_ptr - 1] - 1) {
-        loop_counter[loop_counter_ptr - 1] += 1;
-        iptr = return_stack[return_stack_ptr - 1];
-    } else {
-        loop_counter[--loop_counter_ptr] = 0;
-        --return_stack_ptr;
-        --qdo_ptr; 
+        --do_ptr; 
     }    
 }
 

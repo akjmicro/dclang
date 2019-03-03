@@ -22,7 +22,7 @@ struct primitive {
   void (*function) (void);
 };
 
-static struct primitive primitives[82] = {
+static struct primitive primitives[80] = {
   {"+", addfunc},
   {"-", subfunc},
   {"*", mulfunc},
@@ -88,8 +88,6 @@ static struct primitive primitives[82] = {
   {"do", dofunc},
   {"redo", redofunc},
   {"exitdo", exitdofunc},
-  {"qdo", qdofunc},
-  {"qredo", qredofunc},
   {"for", forfunc},
   {"next", nextfunc},
   {"exitfor", exitforfunc}, 

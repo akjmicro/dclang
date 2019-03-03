@@ -120,16 +120,16 @@ So far, I've implemented:
     * abs, min, max, round, ceil, floor
     * pow, sqrt, log, log2, log10
     * sin, cos, tan, pi, e
+    * rand
   * Logic:
     * and, or, not, xor
     * =, <>, >, <, >=, <= 
   * Stack operations:
-    * drop, dup, swap, over, rot, -rot, nip, tuck
-    * 2drop, 2dup, 2swap, 2over, 2rot, -2rot, 2nip, 2tuck
+    * drop, dup, over, swap rot, -rot, nip, tuck
+    * 2drop, 2dup, 2over, 2swap, 2rot, -2rot, 2nip, 2tuck
   * Control structures:
     * skip (a kind of jumping mechanism that replaces if/else/endif)
     * for/next & do/redo (looping)
-    * more performant 'quick' do/redo: `N qdo ... qredo`
     * user-defined words (functions)
   * Strings:
     * simple string printing 

@@ -1,0 +1,10 @@
+2019-03-03
+* Got rid of `qdo` and `qredo` in favor of making `do` have that
+  functionality. So, `do` is now a counted loop with `i`, `j`, `k` references.
+* Edited all examples to reflect this change.
+* changed the `stdin` catch logic to be better for cross-platform compiles
+  in the `revertinput` function.
+* expanded the `fractions.dc` example to include multiplication and division
+  of fractions.
+* adding this file.
+* add the `circle.dc` example.

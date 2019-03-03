@@ -22,17 +22,17 @@ cr
 
 [ uuid
   hexrand     # (prime the random number generator first)
-  8 qdo hexrand print qredo
+  8 do hexrand print redo
   45 emit
-  4 qdo hexrand print qredo
+  4 do hexrand print redo
   45 emit
-  4 qdo hexrand print qredo
+  4 do hexrand print redo
   45 emit
-  4 qdo hexrand print qredo
+  4 do hexrand print redo
   45 emit
-  12 qdo hexrand print qredo
+  12 do hexrand print redo
 ]
 
-[ manyuuids 16 qdo uuid cr qredo ]
+[ manyuuids 16 do uuid cr redo ]
 
 manyuuids
