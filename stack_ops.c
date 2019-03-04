@@ -2,7 +2,7 @@
 static void push(MYFLT a)
 {
     if (data_stack_ptr >= DATA_STACK_SIZE) {
-        printf("stack overflow\n");
+        printf("Stack overflow\n");
         data_stack_ptr = 0;
     }
     data_stack[data_stack_ptr++] = a;
@@ -21,7 +21,7 @@ static MYFLT pop()
 static void dropfunc()
 {
     if (data_stack_ptr < 1) {
-        printf("stack underflow! ");
+        printf("Stack underflow!\n");
         return;
     }
     --data_stack_ptr;
@@ -30,7 +30,7 @@ static void dropfunc()
 static void dupfunc()
 {
     if (data_stack_ptr < 1) {
-        printf("stack underflow! ");
+        printf("Stack underflow!\n");
         return;
     }
     MYFLT val = data_stack[data_stack_ptr - 1];
@@ -40,7 +40,7 @@ static void dupfunc()
 static void swapfunc()
 {
     if (data_stack_ptr < 2) {
-        printf("stack underflow! ");
+        printf("Stack underflow!\n");
         return;
     }
     MYFLT val1 = pop();
@@ -52,7 +52,7 @@ static void swapfunc()
 static void overfunc()
 {
     if (data_stack_ptr < 2) {
-        printf("stack underflow! ");
+        printf("Stack underflow!\n");
         return;
     }
     push(data_stack[data_stack_ptr - 2]);
@@ -61,7 +61,7 @@ static void overfunc()
 static void rotfunc()
 {
     if (data_stack_ptr < 3) {
-        printf("stack underflow! ");
+        printf("Stack underflow!\n");
         return;
     }
     /* a b c -- b c a */
@@ -76,7 +76,7 @@ static void rotfunc()
 static void rotnegfunc()
 {
     if (data_stack_ptr < 3) {
-        printf("stack underflow! ");
+        printf("Stack underflow!\n");
         return;
     }
     /* a b c -- c a b */
@@ -91,7 +91,7 @@ static void rotnegfunc()
 static void nipfunc()
 {
     if (data_stack_ptr < 2) {
-        printf("stack underflow! ");
+        printf("Stack underflow!\n");
         return;
     }
     MYFLT b = pop();
@@ -102,7 +102,7 @@ static void nipfunc()
 static void tuckfunc()
 {
     if (data_stack_ptr < 2) {
-        printf("stack underflow! ");
+        printf("Stack underflow!\n");
         return;
     }
     MYFLT val1 = pop();
@@ -115,7 +115,7 @@ static void tuckfunc()
 static void drop2func()
 {
     if (data_stack_ptr < 2) {
-        printf("stack underflow! ");
+        printf("Stack underflow!\n");
         return;
     }
     --data_stack_ptr;
@@ -125,7 +125,7 @@ static void drop2func()
 static void dup2func()
 {
     if (data_stack_ptr < 2) {
-        printf("stack underflow! ");
+        printf("Stack underflow!\n");
         return;
     }
     MYFLT val1 = data_stack[data_stack_ptr - 2];
@@ -137,7 +137,7 @@ static void dup2func()
 static void swap2func()
 {
     if (data_stack_ptr < 4) {
-        printf("stack underflow! ");
+        printf("Stack underflow!\n");
         return;
     }
     MYFLT val1 = pop();
@@ -153,7 +153,7 @@ static void swap2func()
 static void over2func()
 {
     if (data_stack_ptr < 4) {
-        printf("stack underflow! ");
+        printf("Stack underflow!\n");
         return;
     }
     push(data_stack[data_stack_ptr - 4]);
@@ -164,7 +164,7 @@ static void rot2func()
 {
     // ( 6 5 4 3 2 1 -- 4 3 2 1 6 5 )
     if (data_stack_ptr < 6) {
-        printf("stack underflow! ");
+        printf("Stack underflow!\n");
         return;
     }
     MYFLT val1 = pop();
@@ -185,7 +185,7 @@ static void rotneg2func()
 {
     // ( 6 5 4 3 2 1 -- 2 1 6 5 4 3)
     if (data_stack_ptr < 6) {
-        printf("stack underflow! ");
+        printf("Stack underflow!\n");
         return;
     }
     MYFLT val1 = pop();
@@ -206,7 +206,7 @@ static void nip2func()
 {
     // ( 4 3 2 1 -- 2 1 )
     if (data_stack_ptr < 4) {
-        printf("stack underflow! ");
+        printf("Stack underflow!\n");
         return;
     }
     MYFLT val1 = pop();
@@ -221,7 +221,7 @@ static void tuck2func()
 {
     // ( 4 3 2 1 -- 2 1 4 3 2 1 )
     if (data_stack_ptr < 4) {
-        printf("stack underflow! ");
+        printf("Stack underflow!\n");
         return;
     }
     MYFLT val1 = pop();
