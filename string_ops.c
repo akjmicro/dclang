@@ -6,7 +6,9 @@ static void stringfunc()
     long ch;
     /* get a starting marker for length */
     unsigned long string_start = string_here;
-    
+    // get rid of the first space:
+    if ((ch = fgetc(ifp)) == EOF) exit(0);
+    // get the next character, and star the process for real:
     if ((ch = fgetc(ifp)) == EOF) exit(0);
     while (! strchr("\"", ch)) {
         if (strchr("\\", ch)) {
@@ -51,8 +53,8 @@ static void printfunc()
     char *str_start = (char *)((unsigned long) pop());
     char dest[str_len + 1];
     char nullstr[] = "\0";
-    memcpy(dest, (char *)(str_start + 1), str_len);
-    memcpy(dest + str_len, (char *)nullstr, 1);
+    memcpy(dest, (char *)(str_start), str_len);
+    memcpy(dest + str_len + 1, (char *)nullstr, 1);
     printf("%s", dest);
     fflush(stdout);
 }

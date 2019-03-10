@@ -28,7 +28,11 @@ static void showstackfunc()
 
 static void showrjfunc()
 {
-// right-justified for pretty printing!
+    if (data_stack_ptr < 3) {
+        printf("Stack underflow! '.rj' needs: value, width, precision on the stack\n");
+        return;
+    }
+    // right-justified for pretty printing!
     int precision = (MYINT) pop();
     int width = (MYINT) pop();
     printf("%*.*g ", width, precision, pop());
