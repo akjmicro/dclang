@@ -8,3 +8,6 @@
   of fractions.
 * adding this file.
 * add the `circle.dc` example.
+
+2019-04-12
+* fix to an import string bug

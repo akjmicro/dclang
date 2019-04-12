@@ -136,7 +136,7 @@ static void importfunc() {
     char *str_start = (char *)((unsigned long) pop());
     char dest[str_len + 1];
     char nullstr[] = "\0";
-    memcpy(dest, (char *)(str_start + 1), str_len);
+    memcpy(dest, (char *)str_start, str_len);
     memcpy(dest + str_len, (char *)nullstr, 1);
     return import(dest);
 }
