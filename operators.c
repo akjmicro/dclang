@@ -22,7 +22,7 @@ struct primitive {
   void (*function) (void);
 };
 
-static struct primitive primitives[83] = {
+static struct primitive primitives[82] = {
   {"+", addfunc},
   {"-", subfunc},
   {"*", mulfunc},
@@ -106,7 +106,6 @@ static struct primitive primitives[83] = {
   {"uemit", uemitfunc},
   // time
   {"clock", clockfunc},
-  {"rdtsc", rdtscfunc},
   {"sleep", sleepfunc},
   // file
   {"file-open", fileopenfunc},

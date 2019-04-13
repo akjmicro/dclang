@@ -1,5 +1,5 @@
 CC = gcc
-CFLAGS = -c -m64 -march=native -mtune=native -Ofast
+CFLAGS = -c -mcpu=cortex-a53 -mfloat-abi=hard -mfpu=neon-vfpv4 -mtune=cortex-a53 -O3
 # -fcall-saved-r15 -fcall-saved-r14
 LDFLAGS = -lm
 SOURCES = main.c

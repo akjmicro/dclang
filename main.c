@@ -20,7 +20,10 @@ and philosophy.  Born on 2018-05-05 */
 /* These should be changed based on architecture. For instance, on my x86_64
    system, best performance was squeezed by making the integer type and the
    float type to both be optimized in alignment to 8-bytes, which turns out
-   to be 'long' for integers, and 'double' for floating-point values. */
+   to be 'long' for integers, and 'double' for floating-point values.
+   On the Raspberry Pi 3, probably best to use 'long' and 'double' as well.
+   I've found it crawls to a halt on the benchmarks if you use 'float'!
+*/
 #define MYINT long
 #define MYFLT double
 // end of data type macros
@@ -79,16 +82,16 @@ MYINT def_mode;
 
 // needed so we can add 'import' to primitives
 void load_extra_primitives() {
-    primitives[79].name = "show-primitives";
-    primitives[79].function = show_primitivesfunc;
-    primitives[80].name = "import";
-    primitives[80].function = importfunc;
-    primitives[81].name = "repl";
-    primitives[81].function = repl;
+    primitives[78].name = "show-primitives";
+    primitives[78].function = show_primitivesfunc;
+    primitives[79].name = "import";
+    primitives[79].function = importfunc;
+    primitives[80].name = "repl";
+    primitives[80].function = repl;
     /* final endpoint must be zeros,
        and they won't count in the 'count': */
-    primitives[82].name = 0;
-    primitives[82].function = 0;
+    primitives[81].name = 0;
+    primitives[81].function = 0;
 }
 
 
