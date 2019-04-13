@@ -17,12 +17,9 @@ and philosophy.  Born on 2018-05-05 */
 #define MAXWORD 65536
 #define IBUFSIZE 128
 
-/* These should be changed based on architecture. For instance, on my x86_64
-   system, best performance was squeezed by making the integer type and the
-   float type to both be optimized in alignment to 8-bytes, which turns out
-   to be 'long' for integers, and 'double' for floating-point values. 
+/* These should be changed based on architecture. Experiment between 'int' and 'long'
 */
-#define MYINT long
+#define MYINT int
 // end of data type macros
 
 // input buffer and input file (stdin or file input) stuff
