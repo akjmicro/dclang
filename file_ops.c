@@ -41,11 +41,11 @@ void fileclosefunc() {
 void filereadfunc() {
     if (data_stack_ptr < 2) {
         printf("Stack underflow!\n");
-        printf("'file-read' needs <file-pointer> <number-of-bytes> on the stack\n");
+        printf("'file-read' needs <number-of-bytes> <file-pointer> on the stack\n");
         return;
     }
-    MYINT num_bytes = (MYINT) pop();
     FILE *file_to_read = (FILE *)(long int) pop();
+    MYINT num_bytes = (MYINT) pop();
     char *local_buf = malloc(num_bytes);
     fread(local_buf, num_bytes, 1, file_to_read);
     // copy file contents to the string pad
@@ -61,28 +61,28 @@ void filereadfunc() {
 void fileseekfunc() {
     if (data_stack_ptr < 3) {
         printf("Stack underflow!\n");
-        printf("'file-seek' needs <file-pointer> <offset> <whence> on the stack\n");
+        printf("'file-seek' needs <offset> <whence> <file-pointer> on the stack\n");
         printf("'Whence' must be 0 (SEEK_SET), 1 (SEEK_CUR), or 2 (SEEK_END).\n");
         return;
     }
+    FILE *file_to_seek = (FILE *)(long int) pop();
     MYINT whence = (MYINT) pop();
     if (!(whence >= 0 && whence <= 2)) {
         printf("Whence parameter must be between 0 and 2 inclusive!\n");
         return;
     }
     MYINT offset = (MYINT) pop();
-    FILE *file_to_seek = (FILE *)(long int) pop();
     fseek(file_to_seek, offset, whence);
 }
 
 void filewritefunc() {
     if (data_stack_ptr < 3) {
         printf("Stack underflow!\n");
-        printf("'file-write' needs <file-pointer> <string-start> <string-length> on the stack\n");
+        printf("'file-write' needs <string-start> <string-length> <file-pointer> on the stack\n");
         return;
     }
+    FILE *file_to_write = (FILE *)(long int) pop();
     MYINT strlen = (MYINT) pop();
     const void *strstart = (const void *)(long int) pop();
-    FILE *file_to_write = (FILE *)(long int) pop();
     fwrite(strstart, 1, strlen, file_to_write);
 }
