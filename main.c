@@ -21,10 +21,8 @@ and philosophy.  Born on 2018-05-05 */
    system, best performance was squeezed by making the integer type and the
    float type to both be optimized in alignment to 8-bytes, which turns out
    to be 'long' for integers, and 'double' for floating-point values. 
-   On the Raspberry Pi 3, probably best to use 'long' and 'float'.   
 */
 #define MYINT long
-#define MYFLT float
 // end of data type macros
 
 // input buffer and input file (stdin or file input) stuff
