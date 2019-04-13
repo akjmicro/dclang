@@ -12,7 +12,9 @@
    rot rot   # ( cur sum1 max -- sum1 max cur )
 ]   
 
-
+# this is not a good pattern to follow...
+# will probably remove this from the examples
+# file at some point.
 [ test_skiploop
     clock           # mark clock start
     0 20000000 0    # sum, max, current

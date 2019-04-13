@@ -71,7 +71,7 @@ static void compile_or_interpret(const char *argument)
 
     /* primitive not found, user definitions not found.  OK, so next, try to
     convert to a number */
-    num = strtol(argument, &endPointer, 10);
+    num = strtoul(argument, &endPointer, 0);
     if (endPointer != argument) {
         if (def_mode) {
             prog[iptr].function.with_param = push;

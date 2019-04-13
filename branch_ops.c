@@ -15,7 +15,7 @@ MYINT do_ptr;
 static void dofunc()
 {
     return_stack[return_stack_ptr++] = iptr;
-    do_info[do_ptr++] = (MYINT) pop();
+    do_info[do_ptr++] = pop();
     loop_counter[loop_counter_ptr++] = 0;         
 }
 
@@ -33,17 +33,17 @@ static void redofunc()
     } else {
         loop_counter[--loop_counter_ptr] = 0;
         --return_stack_ptr;
-        --do_ptr; 
-    }    
+        --do_ptr;
+    }
 }
 
 /* these 'for' loops are more flexible, allowing from/to/step parameters. */
 static void forfunc()
 {
     return_stack[return_stack_ptr++] = iptr;
-    fl_stack[fl_ptr].step = (MYINT) pop();
-    loop_counter[loop_counter_ptr++] = (MYINT) pop();
-    fl_stack[fl_ptr++].limit = (MYINT) pop(); 
+    fl_stack[fl_ptr].step = pop();
+    loop_counter[loop_counter_ptr++] = pop();
+    fl_stack[fl_ptr++].limit = pop();
 }
 
 static void exitforfunc()
@@ -95,6 +95,6 @@ static void kfunc()
 replace if/then/else structures. */
 static void skipfunc()
 {
-    MYINT skipamt = (MYINT) pop();
+    MYINT skipamt = pop();
     iptr += skipamt;
 }

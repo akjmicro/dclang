@@ -9,7 +9,7 @@ ____________
     git clone https://github.com/akjmicro/dclang
     cd dclang
     make
-    ./dclang < examples/some_primes.dc
+    ./dclang -i examples/some_primes.dc
 ```
 
 * You can also put the executable in /usr/local/bin or what-have-you.
@@ -64,16 +64,17 @@ Anyway, due to RPN, things will look like this, when you do math:
     <4> 1 2 8 0.4375 
 
     # a function!
-    [ testskip 1 2 4 skip 0 0 0 0 3 4 . ]
+    [ testskip 1 2 4 skip 0 0 0 0 3 4 .s drop drop drop drop ]
     testskip
     1 2 3 4
 
-    # do/redo -- basic, starts at zero, ascends, test is 'manual' at end
-    [ looptest do i . i 7 < redo ]
+    # do/redo -- basic, fastest loop type, starts at zero, ascends to cutoff parameter.
+    [ looptest 7 do i . redo ]
     looptest
     0 1 2 3 4 5 6 7
 
-    # for/next loop, more than twice as fast. Parameters are to/from/step.
+    # for/next loop, a little slow than basic 'do', but gives step options.
+    # Parameters are to/from/step.
     # Let's add the first 20 million integers!
     [ for_test 0
         20000001 1 1 for
@@ -117,10 +118,10 @@ So far, I've implemented:
 
   * Math:
     * +, -, *, /, %, <<, >>
-    * abs, min, max, round, ceil, floor
-    * pow, sqrt, log, log2, log10
-    * sin, cos, tan, pi, e
-    * rand
+    * abs, min, max, round, ceil, floor (float-versions only)
+    * pow, sqrt, log, log2, log10       (float-versions only)
+    * sin, cos, tan, pi, e              (float-versions only)
+    * rand                              (float-versions only)
   * Logic:
     * and, or, not, xor
     * =, <>, >, <, >=, <= 
@@ -166,7 +167,7 @@ So far, I've implemented:
   * Timing:
     * a clock function ('clock') so we can time execution in nanoseconds 
     for benchmarking.
-    * A hook into CPU-cycle clock, called 'rdtsc'.
+    * A hook into CPU-cycle clock, called 'rdtsc'. (not available on RPi)
     * A sleep function (C's `nanosleep` under-the-hood)
 
   * Importing a file of dclang code:
@@ -179,19 +180,38 @@ So far, I've implemented:
         ./dclang -i examples/some_primes.dc
         ```
 
+  * Read/write of file:
+    ```
+    s" test_file.txt" s" w+" file-open 0 !  # save the open file ptr to slot 0
+    s" Some text in my file! Woo-hoo!\n"
+    0 @ file-write                          # write a sentence
+    0 @ file-close                          # close the file
+    s" test-file.txt" s" r" file-open 0 !   # re-open for reading
+    30 0 @ file-read                        # read 30 bytes from the file
+    # will print:
+    # Some text in my file! Woo-hoo!
+    0 @ file-close                          # close the file
+    ```
+
 TODO:
 
-  * open/read/write/close to the filesystem (importing code is implemented)
-  * hashing/hash tables (dictionaries)
+  * hashing/hash tables (dictionaries). I actually may forego this and look
+    to hooking in sqlite3 as a general datastore instead.
   * more time functions (e.g. date, calendar stuff, etc.)
   * more string functions, as needed (basic saving and typing is all we have
   at the moment, so I mean things like splitting, searching, etc.)
   * just about everything a usuable language will need, or at least, the
   means for someone to hook C-libraries into this enchilada.
-  * turtle graphics for the kids!
+  * turtle graphics for the kids!?
 
-Everything is on the float-point stack only at this point. There may be
-separate stacks for integers in the future. Not sure if it's necessary.
+There are three branches of this repo:
+  * standard ('master' branch)
+  * rpi-float ('rpi-flt' branch, optimized a bit for Rpi)
+  * rpi-int ('rpi-int' branch, a bit more minimal, an experiment with fixed-point integers, really)
+
+In the standard branch, everything is on the floating-point stack only at this point.
+In the `rpi-int` branch, everything is a `long int` C-type. There may be
+separate stacks for integers in the future. Not sure if it's necessary yet.
 
 ### contact
 
