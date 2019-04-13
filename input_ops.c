@@ -23,7 +23,7 @@ static MYINT validate(const char *token)
 static void compile_or_interpret(const char *argument)
 {
     char *endPointer = 0;
-    double d;
+    MYINT num;
     const struct primitive *pr = primitives;
 
     if (argument == 0) {
@@ -71,13 +71,13 @@ static void compile_or_interpret(const char *argument)
 
     /* primitive not found, user definitions not found.  OK, so next, try to
     convert to a number */
-    d = strtod(argument, &endPointer);
+    num = strtol(argument, &endPointer, 10);
     if (endPointer != argument) {
         if (def_mode) {
             prog[iptr].function.with_param = push;
-            prog[iptr++].param = d;
+            prog[iptr++].param = num;
         } else {
-            push(d);    
+            push(num);    
         }
         return;
     }

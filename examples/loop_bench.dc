@@ -1,7 +1,7 @@
 [ present_results
     s" The sum is: " print . cr
     swap -
-    s" The time difference is: " print . s" \bns" print cr 
+    s" The time difference is: " print . s" \bms" print cr
 ]
 
 [ sl-helper 

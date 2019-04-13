@@ -22,36 +22,36 @@ static void notfunc()
 /* comparison booleans */
 static void eqfunc()
 {
-  MYFLT num2 = pop(); 
+  MYINT num2 = pop(); 
   push(pop() == num2);
 }
 
 static void noteqfunc()
 {
-  MYFLT num2 = pop();
+  MYINT num2 = pop();
   push(pop() != num2);
 }
 
 static void gtfunc()
 {
-  MYFLT num2 = pop(); 
+  MYINT num2 = pop(); 
   push(pop() > num2);
 }
 
 static void ltfunc()
 {
-  MYFLT num2 = pop(); 
+  MYINT num2 = pop(); 
   push(pop() < num2);
 }
 
 static void gtefunc()
 {
-  MYFLT num2 = pop(); 
+  MYINT num2 = pop(); 
   push(pop() >= num2);
 }
 
 static void ltefunc()
 {
-  MYFLT num2 = pop(); 
+  MYINT num2 = pop(); 
   push(pop() <= num2);
 }

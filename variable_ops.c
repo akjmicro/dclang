@@ -1,7 +1,7 @@
 /* some simple variable functions, a bare-bones way of storing temp values... 
 Yes, bare-bones, but it works! */
 
-MYFLT myvars[1048576];
+MYINT myvars[1048576];
 
 static void pokefunc()
 {
@@ -10,7 +10,7 @@ static void pokefunc()
         return;
     }
     MYINT idx = (MYINT) pop();
-    MYFLT val = pop();
+    MYINT val = pop();
     myvars[idx] = val;
 }
 

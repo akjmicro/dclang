@@ -6,7 +6,7 @@ static void addfunc()
 
 static void subfunc()
 {
-    MYFLT subtrahend = pop();
+    MYINT subtrahend = pop();
     push(pop() - subtrahend);
 }
 
@@ -17,13 +17,13 @@ static void mulfunc()
 
 static void divfunc()
 {
-    MYFLT divisor = pop();
+    MYINT divisor = pop();
     push(pop() / divisor);
 }
 
 static void modfunc()
 {
-    MYFLT modulus = pop();
+    MYINT modulus = pop();
     push(fmod(pop(), modulus));
 }
 
@@ -48,17 +48,17 @@ static void absfunc()
 
 static void minfunc()
 {
-    MYFLT a = pop();
-    MYFLT b = pop();
-    MYFLT c = (a < b) ? a : b;
+    MYINT a = pop();
+    MYINT b = pop();
+    MYINT c = (a < b) ? a : b;
     push(c);
 }
 
 static void maxfunc()
 {
-    MYFLT a = pop();
-    MYFLT b = pop();
-    MYFLT c = (a > b) ? a : b;
+    MYINT a = pop();
+    MYINT b = pop();
+    MYINT c = (a > b) ? a : b;
     push(c);
 }
 
@@ -77,7 +77,7 @@ static void ceilfunc()
     push((MYINT) ceil(pop()));
 }
 
-/* scientific math words */
+/* scientific math words
 
 static void powerfunc()
 {
@@ -108,9 +108,9 @@ static void log10func()
 static void efunc()
 {
     push(M_E);
-}
+} */
 
-/* Trig, pi, etc. */
+/* Trig, pi, etc.
 static void pifunc()
 {
     push(M_PI);
@@ -129,10 +129,12 @@ static void cosfunc()
 static void tanfunc()
 {
     push(tan(pop()));
-}
+} 
+*/
 
-/* randomness */
+/* randomness
 static void randfunc()
 {
     push((double)rand()/(double)RAND_MAX);
 }
+*/

@@ -20,9 +20,11 @@ and philosophy.  Born on 2018-05-05 */
 /* These should be changed based on architecture. For instance, on my x86_64
    system, best performance was squeezed by making the integer type and the
    float type to both be optimized in alignment to 8-bytes, which turns out
-   to be 'long' for integers, and 'double' for floating-point values. */
+   to be 'long' for integers, and 'double' for floating-point values. 
+   On the Raspberry Pi 3, probably best to use 'long' and 'float'.   
+*/
 #define MYINT long
-#define MYFLT double
+#define MYFLT float
 // end of data type macros
 
 // input buffer and input file (stdin or file input) stuff
@@ -31,7 +33,7 @@ char buf[IBUFSIZE];
 MYINT bufused;
 MYINT live_repl = 0;
 // data stack
-MYFLT data_stack[DATA_STACK_SIZE];
+MYINT data_stack[DATA_STACK_SIZE];
 MYINT data_stack_ptr;
 // return stack
 MYINT return_stack[RETURN_STACK_SIZE];
@@ -45,12 +47,12 @@ MYINT fsp;
 
 // compiled tokens get saved and put into an array of type 'inst_struct'
 typedef union {
-    void (*with_param) (MYFLT);
+    void (*with_param) (MYINT);
     void (*without_param) (void);
 } func_union;
 typedef struct {
     func_union function;
-    MYFLT param;
+    MYINT param;
 } inst_struct;
 
 /* an array of inst_struct instructions. This is where the user's commands,
@@ -78,25 +80,25 @@ MYINT def_mode;
 
 
 // needed so we can add 'import' to primitives
-void load_extra_primitives() {
-    primitives[79].name = "show-primitives";
-    primitives[79].function = show_primitivesfunc;
-    primitives[80].name = "import";
-    primitives[80].function = importfunc;
-    primitives[81].name = "repl";
-    primitives[81].function = repl;
-    /* final endpoint must be zeros,
-       and they won't count in the 'count': */
-    primitives[82].name = 0;
-    primitives[82].function = 0;
-}
+/* void load_extra_primitives() {
+    primitives[63].name = "show-primitives";
+    primitives[63].function = show_primitivesfunc;
+    primitives[64].name = "import";
+    primitives[64].function = importfunc;
+    primitives[65].name = "repl";
+    primitives[65].function = repl;
+    // final endpoint must be zeros,
+    // and they won't count in the 'count':
+    primitives[66].name = 0;
+    primitives[66].function = 0;
+} */
 
 
 // Where all the juicy fun begins... 
 int main(int argc, char **argv)
 {
     setinput(stdin);
-    load_extra_primitives();
+    // load_extra_primitives();
     srand(time(NULL));
     //setlocale(LC_ALL, "");
     if (argc > 1) {

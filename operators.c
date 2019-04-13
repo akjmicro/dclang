@@ -22,7 +22,7 @@ struct primitive {
   void (*function) (void);
 };
 
-static struct primitive primitives[83] = {
+static struct primitive primitives[67] = {
   {"+", addfunc},
   {"-", subfunc},
   {"*", mulfunc},
@@ -46,6 +46,7 @@ static struct primitive primitives[83] = {
   {"not", notfunc},
   {"xor", xorfunc},
   // float -> int
+  /*
   {"round", roundfunc},
   {"ceil", ceilfunc},
   {"floor", floorfunc},
@@ -64,6 +65,7 @@ static struct primitive primitives[83] = {
   {"tan", tanfunc},
   // randomness
   {"rand", randfunc},
+  */
   // stack operators
   {"drop", dropfunc},
   {"dup", dupfunc},
@@ -106,7 +108,7 @@ static struct primitive primitives[83] = {
   {"uemit", uemitfunc},
   // time
   {"clock", clockfunc},
-  {"rdtsc", rdtscfunc},
+  //{"rdtsc", rdtscfunc},
   {"sleep", sleepfunc},
   // file
   {"file-open", fileopenfunc},

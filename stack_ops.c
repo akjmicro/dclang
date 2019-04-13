@@ -1,5 +1,5 @@
 /* stack operations */
-static void push(MYFLT a)
+static void push(MYINT a)
 {
     if (data_stack_ptr >= DATA_STACK_SIZE) {
         printf("Stack overflow\n");
@@ -8,12 +8,12 @@ static void push(MYFLT a)
     data_stack[data_stack_ptr++] = a;
 }
 
-static void push_no_check(MYFLT a)
+static void push_no_check(MYINT a)
 {
     data_stack[data_stack_ptr++] = a;
 }
 
-static MYFLT pop()
+static MYINT pop()
 {
     return data_stack[--data_stack_ptr];
 }
@@ -33,7 +33,7 @@ static void dupfunc()
         printf("Stack underflow!\n");
         return;
     }
-    MYFLT val = data_stack[data_stack_ptr - 1];
+    MYINT val = data_stack[data_stack_ptr - 1];
     push(val);
 }
 
@@ -43,8 +43,8 @@ static void swapfunc()
         printf("Stack underflow!\n");
         return;
     }
-    MYFLT val1 = pop();
-    MYFLT val2 = pop();
+    MYINT val1 = pop();
+    MYINT val2 = pop();
     push_no_check(val1);
     push_no_check(val2); 
 }
@@ -65,9 +65,9 @@ static void rotfunc()
         return;
     }
     /* a b c -- b c a */
-    MYFLT c = pop();
-    MYFLT b = pop();
-    MYFLT a = pop();
+    MYINT c = pop();
+    MYINT b = pop();
+    MYINT a = pop();
     push_no_check(b);
     push_no_check(c);
     push_no_check(a);
@@ -80,9 +80,9 @@ static void rotnegfunc()
         return;
     }
     /* a b c -- c a b */
-    MYFLT c = pop();
-    MYFLT b = pop();
-    MYFLT a = pop();
+    MYINT c = pop();
+    MYINT b = pop();
+    MYINT a = pop();
     push_no_check(c);
     push_no_check(a);
     push_no_check(b);
@@ -94,7 +94,7 @@ static void nipfunc()
         printf("Stack underflow!\n");
         return;
     }
-    MYFLT b = pop();
+    MYINT b = pop();
     pop();
     push_no_check(b);
 }
@@ -105,8 +105,8 @@ static void tuckfunc()
         printf("Stack underflow!\n");
         return;
     }
-    MYFLT val1 = pop();
-    MYFLT val2 = pop();
+    MYINT val1 = pop();
+    MYINT val2 = pop();
     push_no_check(val1);
     push_no_check(val2);
     push(data_stack[data_stack_ptr - 2]);
@@ -128,8 +128,8 @@ static void dup2func()
         printf("Stack underflow!\n");
         return;
     }
-    MYFLT val1 = data_stack[data_stack_ptr - 2];
-    MYFLT val2 = data_stack[data_stack_ptr - 1];
+    MYINT val1 = data_stack[data_stack_ptr - 2];
+    MYINT val2 = data_stack[data_stack_ptr - 1];
     push(val1);
     push(val2);
 }
@@ -140,10 +140,10 @@ static void swap2func()
         printf("Stack underflow!\n");
         return;
     }
-    MYFLT val1 = pop();
-    MYFLT val2 = pop();
-    MYFLT val3 = pop();
-    MYFLT val4 = pop();
+    MYINT val1 = pop();
+    MYINT val2 = pop();
+    MYINT val3 = pop();
+    MYINT val4 = pop();
     push_no_check(val2);
     push_no_check(val1);
     push_no_check(val4);
@@ -167,12 +167,12 @@ static void rot2func()
         printf("Stack underflow!\n");
         return;
     }
-    MYFLT val1 = pop();
-    MYFLT val2 = pop();
-    MYFLT val3 = pop();
-    MYFLT val4 = pop();
-    MYFLT val5 = pop();
-    MYFLT val6 = pop();
+    MYINT val1 = pop();
+    MYINT val2 = pop();
+    MYINT val3 = pop();
+    MYINT val4 = pop();
+    MYINT val5 = pop();
+    MYINT val6 = pop();
     push_no_check(val4);
     push_no_check(val3);
     push_no_check(val2);
@@ -188,12 +188,12 @@ static void rotneg2func()
         printf("Stack underflow!\n");
         return;
     }
-    MYFLT val1 = pop();
-    MYFLT val2 = pop();
-    MYFLT val3 = pop();
-    MYFLT val4 = pop();
-    MYFLT val5 = pop();
-    MYFLT val6 = pop();
+    MYINT val1 = pop();
+    MYINT val2 = pop();
+    MYINT val3 = pop();
+    MYINT val4 = pop();
+    MYINT val5 = pop();
+    MYINT val6 = pop();
     push_no_check(val2);
     push_no_check(val1);
     push_no_check(val6);
@@ -209,8 +209,8 @@ static void nip2func()
         printf("Stack underflow!\n");
         return;
     }
-    MYFLT val1 = pop();
-    MYFLT val2 = pop();
+    MYINT val1 = pop();
+    MYINT val2 = pop();
     pop();
     pop();
     push_no_check(val2);
@@ -224,10 +224,10 @@ static void tuck2func()
         printf("Stack underflow!\n");
         return;
     }
-    MYFLT val1 = pop();
-    MYFLT val2 = pop();
-    MYFLT val3 = pop();
-    MYFLT val4 = pop();
+    MYINT val1 = pop();
+    MYINT val2 = pop();
+    MYINT val3 = pop();
+    MYINT val4 = pop();
     push_no_check(val2);
     push_no_check(val1);
     push_no_check(val4);

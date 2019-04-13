@@ -5,7 +5,7 @@ static void showfunc()
         printf("stack underflow! ");
         return;
     }
-    printf("%0.16g ", pop());
+    printf("%li ", pop());
 }
 
 static void crfunc()
@@ -21,7 +21,7 @@ static void showstackfunc()
     joiner = x == 0 ? " " : " ... "; 
     printf("<%li>%s", data_stack_ptr, joiner);
     for (x=0; x < data_stack_ptr; x++) {
-        printf("%0.16g ", data_stack[x]);
+        printf("%li ", data_stack[x]);
     }
     printf("\n");
 }

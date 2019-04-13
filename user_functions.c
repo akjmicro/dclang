@@ -32,7 +32,7 @@ static void showdefined()
     }
 }
 
-static void gotofunc(MYFLT where)
+static void gotofunc(MYINT where)
 {
     /* Don't consume more of the return stack if we are going nowhere.
        This will allow better recursion */
