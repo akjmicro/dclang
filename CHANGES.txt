@@ -11,3 +11,7 @@
 
 2019-04-12
 * fix to an import string bug
+
+2019-04-14
+* big change: string now just use "string" double-quotes, not their own
+  `s"` token, which was the old way, derived from Forth.

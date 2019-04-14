@@ -6,14 +6,14 @@ void fileopenfunc() {
     }
     // file mode string
     unsigned long str_len_mode = (unsigned long) pop();
-    char *str_start_mode = (char *)((unsigned long) pop());
+    char *str_start_mode = (char *)((unsigned long)&string_pad + (unsigned long) pop());
     char mode[str_len_mode + 1];
     char nullstr[] = "\0";
     memcpy(mode, (char *)str_start_mode, str_len_mode);
     memcpy(mode + str_len_mode, (char *)nullstr, 1);
     // file path
     unsigned long str_len_path = (unsigned long) pop();
-    char *str_start_path = (char *)((unsigned long) pop());
+    char *str_start_path = (char *)((unsigned long)&string_pad + (unsigned long) pop());
     char filepath[str_len_path + 1];
     memcpy(filepath, (char *)str_start_path, str_len_path);
     memcpy(filepath + str_len_path, (char *)nullstr, 1);
@@ -83,6 +83,6 @@ void filewritefunc() {
     }
     FILE *file_to_write = (FILE *)(long int) pop();
     MYINT strlen = (MYINT) pop();
-    const void *strstart = (const void *)(long int) pop();
+    const void *strstart = (const void *)((unsigned long)&string_pad + (unsigned long) pop());
     fwrite(strstart, 1, strlen, file_to_write);
 }

@@ -84,7 +84,7 @@ Anyway, due to RPN, things will look like this, when you do math:
     200000010000000
 
     # this is a comment
-    s" This is a string!" print
+    "This is a string!" print
     This is a string!
 
     # store a value at slot zero:
@@ -158,7 +158,7 @@ So far, I've implemented:
     (which is, in reality an address and a length):
 
         ```
-        [ greeting s"Hello there, good people!" ]
+        [ greetings "Hello there, good people!" ]
         greeting .s
         <2> 7888448 21
         greeting print cr
@@ -173,7 +173,7 @@ So far, I've implemented:
   * Importing a file of dclang code:
     * From the interpreter
         ```
-        s" examples/some_primes.dc" import
+        "examples/some_primes.dc" import
         ```
     * On the command-line, then drop to interpreter:
         ```
@@ -182,15 +182,14 @@ So far, I've implemented:
 
   * Read/write of file:
     ```
-    s" test_file.txt" s" w+" file-open 0 !  # save the open file ptr to slot 0
-    s" Some text in my file! Woo-hoo!\n"
-    0 @ file-write                          # write a sentence
-    0 @ file-close                          # close the file
-    s" test-file.txt" s" r" file-open 0 !   # re-open for reading
-    30 0 @ file-read                        # read 30 bytes from the file
-    # will print:
-    # Some text in my file! Woo-hoo!
-    0 @ file-close                          # close the file
+    "test_file.txt" "w+" file-open 0 !  # save the open file ptr to slot 0
+    "Some text in my file! Woo-hoo!\n"
+    0 @ file-write                      # write a sentence
+    0 @ file-close                      # close the file
+    "test-file.txt" "r" file-open 0 !   # re-open for reading
+    30 0 @ file-read print              # read 30 bytes from the file
+    # will print: Some text in my file! Woo-hoo!
+    0 @ file-close                      # close the file
     ```
 
 TODO:
