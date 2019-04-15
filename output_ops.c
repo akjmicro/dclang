@@ -54,7 +54,7 @@ static void showstackfunc()
     for (x=0; x < data_stack_ptr; x++) {
         fprintf(ofp, "%li ", data_stack[x]);
     }
-    fprintf("\n");
+    fprintf(ofp, "\n");
 }
 
 static void showunsignedstackfunc()
@@ -65,7 +65,7 @@ static void showunsignedstackfunc()
     joiner = x == 0 ? " " : " ... ";
     fprintf(ofp, "<%lu>%s", data_stack_ptr, joiner);
     for (x=0; x < data_stack_ptr; x++) {
-        printf(ofp, "%lu ", data_stack[x]);
+        fprintf(ofp, "%lu ", data_stack[x]);
     }
     fprintf(ofp, "\n");
 }
@@ -86,7 +86,7 @@ static void showhexstackfunc()
 static void redirectfunc()
 {
     if (data_stack_ptr < 1) {
-        printf("Stack underflow! 'redirect needs an output file pointer before being called\n");
+        printf("Stack underflow! 'redirect' needs an output file pointer before being called\n");
         return;
     }
     ofp = (FILE *)(unsigned long int) pop();

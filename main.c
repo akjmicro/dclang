@@ -75,23 +75,22 @@ MYINT def_mode;
 
 // needed so we can add 'import' to primitives
 void load_extra_primitives() {
-    primitives[66].name = "show-primitives";
-    primitives[66].function = show_primitivesfunc;
-    primitives[67].name = "import";
-    primitives[67].function = importfunc;
+    primitives[68].name = "show-primitives";
+    primitives[68].function = show_primitivesfunc;
+    primitives[69].name = "import";
+    primitives[69].function = importfunc;
     // final endpoint must be zeros,
     // and they won't count in the 'count':
-    primitives[69].name = 0;
-    primitives[69].function = 0;
+    primitives[70].name = 0;
+    primitives[70].function = 0;
 }
-
 
 // Where all the juicy fun begins... 
 int main(int argc, char **argv)
 {
     setinput(stdin);
     resetoutfunc();
-    load_extra_primitives();
+    //load_extra_primitives();
     srand(time(NULL));
     //setlocale(LC_ALL, "");
     if (argc > 1) {
