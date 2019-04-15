@@ -54,12 +54,6 @@ Anyway, due to RPN, things will look like this, when you do math:
     20 5 / .
     4
 
-    0.523 sin .
-    0.4994813555186418
-
-    3 2.54 pow .
-    16.28875859622752
-
     1 2 3 5 + 7 16 / .s
     <4> 1 2 8 0.4375 
 
@@ -88,14 +82,14 @@ Anyway, due to RPN, things will look like this, when you do math:
     This is a string!
 
     # store a value at slot zero:
-    1.15123 0 !
+    227 0 !
     0 @ .
-    1.15123
+    227
 
     # store a value at slot 23:
-    4.132 3 / 23 !
+    44 4 / 23 !
     23 @ .
-    1.3773333333333333
+    11
 
 ```
 
@@ -148,10 +142,10 @@ So far, I've implemented:
     variables or constants can be emulated by makings them words, e.g.:
         ```
         [ myvar 53 ]
-        # this will store 7.4231 into slot 53
-        7.4231 myvar !
+        # this will store 74231 into slot 53
+        74231 myvar !
         myvar @ .
-        7.4231 
+        74231 
         ```
 
     * This works in a similar fashion for something like a string variable
