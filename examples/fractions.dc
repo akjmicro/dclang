@@ -10,26 +10,26 @@
 
 [ fracdiv swap fracmul ]
 
-s" 13/7 + 16/14:" print cr
+"13/7 + 16/14:" print cr
 13 7 16 14 fracadd .s drop drop
 cr
 
-s" 1/3 + 1/4:" print cr
+"1/3 + 1/4:" print cr
 1 3 1 4 fracadd .s drop drop
 cr
 
-s" 2/5 - 1/5:" print cr
+"2/5 - 1/5:" print cr
 2 5 1 5 fracsub .s drop drop
 cr
 
-s" 1/7 - 1/6:" print cr
+"1/7 - 1/6:" print cr
 1 7 1 6 fracsub .s drop drop
 cr
 
-s" 7/6 * 3/2:" print cr
+"7/6 * 3/2:" print cr
 7 6 3 2 fracmul .s drop drop
 cr
 
-s" 14/9 / 4/3:" print cr
+"14/9 / 4/3:" print cr
 14 9 4 3 fracdiv .s drop drop
 cr

@@ -1,22 +1,22 @@
 # notice how we are skipping more than 4 tokens (5, to be precise).
-# this is because s" This is false" evaluates to an address and length,
+# this is because "This is false" evaluates to an address and length,
 # so in fact, it's two tokens.
 
 [ teststr 5 skip 
-    s" This is false" print 3 skip
-    s" This is true" print ]
+    "This is false" print 3 skip
+    "This is true" print ]
 teststr
 cr
 
 [ teststr2 0 skip
-    s" This is false" print 3 skip
-    s" This is true" print ]
+    "This is false" print 3 skip
+    "This is true" print ]
 teststr2
 cr
 
 # since a string is a location and length, we drop the length and keep the
 # location as a reference
-[ uuidset s" 0123456789abcdef" drop ]
+[ uuidset "0123456789abcdef" drop ]
 
 [ hexrand uuidset rand 15 * round + 1 ]
 

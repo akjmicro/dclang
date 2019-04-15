@@ -1,6 +1,5 @@
 CC = gcc
-CFLAGS = -c -m64 -march=native -mtune=native -Ofast
-# -fcall-saved-r15 -fcall-saved-r14
+CFLAGS = -c -march=native -O3
 LDFLAGS = -lm
 SOURCES = main.c
 OBJECTS = main.o

@@ -1,21 +1,3 @@
-/* This work allows operator lookup to be in constant time.
-   As the operator list grows, we may have to change the 'hash_modulus'
-   variable and recalculate the operator array lookup indices. */
-
-// basically, djb2 hashing algorithm, reduced by a modulus that accomodates
-// any functions we need. This is probably going to be deprecated, as far as 
-// function lookup is concerned.
-/*static MYINT get_hash(unsigned char *in_str)
-{
-  unsigned MYINT hash = 5381;
-  unsigned MYINT hash_modulus = 367;
-  unsigned MYINT c;
-  while ((c = *in_str++)) {
-    hash = ((hash << 5) + hash) + c;
-  }
-  return hash % hash_modulus;
-}*/
-
 /* we need to populate the dictionary first with primitives */
 struct primitive {
   const char *name;
@@ -97,16 +79,15 @@ static struct primitive primitives[83] = {
   {"k", kfunc},
   // output
   {".", showfunc},
+  {"..", shownospacefunc},
   {".s", showstackfunc},
   {".rj", showrjfunc},
   {"cr", crfunc},
-  {"s\"", stringfunc},
   {"print", printfunc},
   {"emit", emitfunc},
   {"uemit", uemitfunc},
   // time
   {"clock", clockfunc},
-  {"rdtsc", rdtscfunc},
   {"sleep", sleepfunc},
   // file
   {"file-open", fileopenfunc},
@@ -114,6 +95,8 @@ static struct primitive primitives[83] = {
   {"file-seek", fileseekfunc},
   {"file-write", filewritefunc},
   {"file-close", fileclosefunc},
+  {"redirect", redirectfunc},
+  {"resetout", resetoutfunc},
   // user functions listing
   {"show-user-functions", showdefined}
 };

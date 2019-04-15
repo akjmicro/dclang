@@ -6,9 +6,7 @@ static void stringfunc()
     long ch;
     /* get a starting marker for length */
     unsigned long string_start = string_here;
-    // get rid of the first space:
-    if ((ch = fgetc(ifp)) == EOF) exit(0);
-    // get the next character, and star the process for real:
+    // get the next character, and start the process for real:
     if ((ch = fgetc(ifp)) == EOF) exit(0);
     while (! strchr("\"", ch)) {
         if (strchr("\\", ch)) {
@@ -28,8 +26,7 @@ static void stringfunc()
         string_pad[string_here++] = ch;
         if ((ch = fgetc(ifp)) == EOF) exit(0);
     }
-    double string_addr = \
-        (double)((unsigned long)&string_pad + string_start);
+    double string_addr = (double) string_start;
     double string_size = (double)(string_here - string_start);
     if (def_mode) {
         prog[iptr].function.with_param = push;
@@ -42,35 +39,33 @@ static void stringfunc()
     }
 }
 
-
 static void printfunc()
 {
     if (data_stack_ptr < 2) {
-        printf("stack underflow! ");
+        printf("print -- stack underflow! ");
         return;
     }
     unsigned long str_len = (unsigned long) pop();
-    char *str_start = (char *)((unsigned long) pop());
-    char dest[str_len + 1];
+    char *str_start = (char *)((unsigned long)&string_pad + (unsigned long) pop());
+    char *dest = malloc(str_len + 1);
     char nullstr[] = "\0";
     memcpy(dest, (char *)(str_start), str_len);
     memcpy(dest + str_len, (char *)nullstr, 1);
-    printf("%s", dest);
-    fflush(stdout);
+    fprintf(ofp, "%s", dest);
+    fflush(ofp);
+    free(dest);
 }
-
 
 static void emitfunc()
 {
     long char_code = (long) pop();
     char charbuf[2] = { char_code, 0 };
-    printf("%s", charbuf);
+    fprintf(ofp, "%s", charbuf);
     fflush(stdout);
 }
 
 /* utf-8 char buffer */
 char utf8_buf[5];
-
 
 static long utf8_encode(char *out, uint64_t utf)
 {
@@ -119,6 +114,6 @@ static void uemitfunc()
 {
     long unsigned long char_code = (long unsigned long) pop();
     long ulen = utf8_encode(utf8_buf, char_code);
-    printf("%s", utf8_buf);
-    fflush(stdout);
+    fprintf(ofp, "%s", utf8_buf);
+    fflush(ofp);
 }

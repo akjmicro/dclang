@@ -34,12 +34,7 @@ static void compile_or_interpret(const char *argument)
     while (pr->name != 0) {
         if (strcmp(pr->name, argument) == 0) {
             if (def_mode) {
-                // insert function only if it's not 's"' for strings:
-                if (strcmp("s\"", argument) != 0) {
-                    prog[iptr++].function.without_param = pr->function;
-                } else {
-                    (*(pr->function)) ();
-                }
+                prog[iptr++].function.without_param = pr->function;
             } else {
                 if (validate(argument)) {
                     (*(pr->function)) ();
@@ -129,11 +124,11 @@ static void import(char *infilestr) {
 
 static void importfunc() {
     if (data_stack_ptr < 2) {
-        printf("stack underflow! ");
+        printf("import -- stack underflow! ");
         return;
     }
     unsigned long str_len = (unsigned long) pop();
-    char *str_start = (char *)((unsigned long) pop());
+    char *str_start = (char *)((unsigned long)&string_pad + (unsigned long) pop());
     char dest[str_len + 1];
     char nullstr[] = "\0";
     memcpy(dest, (char *)str_start, str_len);

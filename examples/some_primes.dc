@@ -63,5 +63,5 @@
   cr
 ]
 
-s"  \n                           #### Some primes! ####\n \b" print
+" \n                           #### Some primes! ####\n \b" print
 test-primes

@@ -1,2 +1,2 @@
-s" examples/some_primes.dc" import
-s" examples/fractions.dc" import
+"examples/some_primes.dc" import
+"examples/fractions.dc" import

@@ -5,12 +5,21 @@ static void showfunc()
         printf("stack underflow! ");
         return;
     }
-    printf("%0.16g ", pop());
+    fprintf(ofp, "%0.16g ", pop());
+}
+
+static void shownospacefunc()
+{
+    if (data_stack_ptr < 1) {
+        printf("stack underflow! ");
+        return;
+    }
+    fprintf(ofp, "%0.16g", pop());
 }
 
 static void crfunc()
 {
-    printf("\n");
+    fprintf(ofp, "\n");
 }
 
 static void showstackfunc()
@@ -19,11 +28,13 @@ static void showstackfunc()
     char *joiner;
     x = data_stack_ptr > 16 ? data_stack_ptr - 16 : 0;
     joiner = x == 0 ? " " : " ... "; 
-    printf("<%li>%s", data_stack_ptr, joiner);
+    fprintf(ofp, "<%li>%s", data_stack_ptr, joiner);
+    fflush(ofp);
     for (x=0; x < data_stack_ptr; x++) {
-        printf("%0.16g ", data_stack[x]);
+        fprintf(ofp, "%0.16g ", data_stack[x]);
+        fflush(ofp);
     }
-    printf("\n");
+    fprintf(ofp, "\n");
 }
 
 static void showrjfunc()
@@ -35,5 +46,19 @@ static void showrjfunc()
     // right-justified for pretty printing!
     int precision = (MYINT) pop();
     int width = (MYINT) pop();
-    printf("%*.*g ", width, precision, pop());
+    fprintf(ofp, "%*.*g ", width, precision, pop());
+}
+
+static void redirectfunc()
+{
+    if (data_stack_ptr < 1) {
+        printf("Stack underflow! 'redirect needs an output file pointer before being called\n");
+        return;
+    }
+    ofp = (FILE *)(unsigned long int) pop();
+}
+
+static void resetoutfunc()
+{
+    ofp = stdout;
 }
