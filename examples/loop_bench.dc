@@ -1,7 +1,7 @@
 [ present_results
-    s" The sum is: " print . cr
+    "The sum is: " print . cr
     swap -
-    s" The time difference is: " print . s" \bms" print cr
+    "The time difference is: " print . "ns" print cr
 ]
 
 [ sl-helper 
@@ -88,28 +88,28 @@
     swap
 ]
 
-s" \nThis will show how various ways of composing loops are more efficient.
+"\nThis will show how various ways of composing loops are more efficient.
 In general, go with the simplest case, and avoid logical and stack operations
 inside of loops, when you can. Hence, the the first 'manual' loop here is the
 worst performer, and the simple 'do' loop at the end is the fastest.
 " print 
 
-s" \nTesting loop using manual 'skip' loop\n" print
+"\nTesting loop using manual 'skip' loop\n" print
 test_skiploop
 present_results
 
-s" \nTesting loop using recursion\n" print
+"\nTesting loop using recursion\n" print
 test_recur
 present_results
 
-s" \nTesting loop using 'for'\n" print
+"\nTesting loop using 'for'\n" print
 testfor
 present_results
 
-s" \nTesting loop using 'do'\n" print
+"\nTesting loop using 'do'\n" print
 testdo
 present_results
 
-s" \nTesting loop using 'do' and poking/peeking a variable\n" print
+"\nTesting loop using 'do' and poking/peeking a variable\n" print
 testdo-var
 present_results

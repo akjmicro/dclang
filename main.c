@@ -17,16 +17,15 @@ and philosophy.  Born on 2018-05-05 */
 #define MAXWORD 65536
 #define IBUFSIZE 128
 
-/* These should be changed based on architecture. Experiment between 'int' and 'long'
-*/
+// This should be changed based on architecture. Experiment between 'int' and 'long'
 #define MYINT int
-// end of data type macros
-
 // input buffer and input file (stdin or file input) stuff
 FILE *ifp;
 char buf[IBUFSIZE];
 MYINT bufused;
 MYINT live_repl = 0;
+// output file, usually stdout, but can be redirected with 'redirect'
+FILE *ofp;
 // data stack
 MYINT data_stack[DATA_STACK_SIZE];
 MYINT data_stack_ptr;
@@ -80,8 +79,6 @@ void load_extra_primitives() {
     primitives[66].function = show_primitivesfunc;
     primitives[67].name = "import";
     primitives[67].function = importfunc;
-    primitives[68].name = "repl";
-    primitives[68].function = repl;
     // final endpoint must be zeros,
     // and they won't count in the 'count':
     primitives[69].name = 0;
@@ -93,6 +90,7 @@ void load_extra_primitives() {
 int main(int argc, char **argv)
 {
     setinput(stdin);
+    resetoutfunc();
     load_extra_primitives();
     srand(time(NULL));
     //setlocale(LC_ALL, "");

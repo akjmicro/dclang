@@ -44,6 +44,13 @@ char *get_token() {
                     return "EOF";
                 }
             } while(! strchr("\n", ch));
+            continue;
+        }
+        // is this a string?
+        if (strchr("\"", ch)) {
+            // call the sub-routine to deal with the string:
+            stringfunc();
+            continue;  
         } else {
             add_to_buf(ch);
             break;

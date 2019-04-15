@@ -5,7 +5,18 @@ static void showfunc()
         printf("stack underflow! ");
         return;
     }
-    printf("%li ", pop());
+    fprintf(ofp, "%li ", pop());
+    fflush(ofp);
+}
+
+static void shownospacefunc()
+{
+    if (data_stack_ptr < 1) {
+        printf("stack underflow! ");
+        return;
+    }
+    fprintf(ofp, "%li", pop());
+    fflush(ofp);
 }
 
 static void showunsignedfunc()
@@ -14,7 +25,8 @@ static void showunsignedfunc()
         printf("stack underflow! ");
         return;
     }
-    printf("%lu ", pop());
+    fprintf(ofp, "%lu ", pop());
+    fflush(ofp);
 }
 
 static void showhexfunc()
@@ -23,12 +35,13 @@ static void showhexfunc()
         printf("stack underflow! ");
         return;
     }
-    printf("0x%x ", pop());
+    fprintf(ofp, "0x%x ", pop());
+    fflush(ofp);
 }
 
 static void crfunc()
 {
-    printf("\n");
+    fprintf(ofp, "\n");
 }
 
 static void showstackfunc()
@@ -37,11 +50,11 @@ static void showstackfunc()
     char *joiner;
     x = data_stack_ptr > 16 ? data_stack_ptr - 16 : 0;
     joiner = x == 0 ? " " : " ... ";
-    printf("<%li>%s", data_stack_ptr, joiner);
+    fprintf(ofp, "<%li>%s", data_stack_ptr, joiner);
     for (x=0; x < data_stack_ptr; x++) {
-        printf("%li ", data_stack[x]);
+        fprintf(ofp, "%li ", data_stack[x]);
     }
-    printf("\n");
+    fprintf("\n");
 }
 
 static void showunsignedstackfunc()
@@ -50,11 +63,11 @@ static void showunsignedstackfunc()
     char *joiner;
     x = data_stack_ptr > 16 ? data_stack_ptr - 16 : 0;
     joiner = x == 0 ? " " : " ... ";
-    printf("<%lu>%s", data_stack_ptr, joiner);
+    fprintf(ofp, "<%lu>%s", data_stack_ptr, joiner);
     for (x=0; x < data_stack_ptr; x++) {
-        printf("%lu ", data_stack[x]);
+        printf(ofp, "%lu ", data_stack[x]);
     }
-    printf("\n");
+    fprintf(ofp, "\n");
 }
 
 static void showhexstackfunc()
@@ -65,19 +78,21 @@ static void showhexstackfunc()
     joiner = x == 0 ? " " : " ... ";
     printf("<0x%x>%s", data_stack_ptr, joiner);
     for (x=0; x < data_stack_ptr; x++) {
-        printf("0x%x ", data_stack[x]);
+        fprintf(ofp, "0x%x ", data_stack[x]);
     }
-    printf("\n");
+    fprintf(ofp, "\n");
 }
 
-static void showrjfunc()
+static void redirectfunc()
 {
-    if (data_stack_ptr < 3) {
-        printf("Stack underflow! '.rj' needs: value, width, precision on the stack\n");
+    if (data_stack_ptr < 1) {
+        printf("Stack underflow! 'redirect needs an output file pointer before being called\n");
         return;
     }
-    // right-justified for pretty printing!
-    int precision = (MYINT) pop();
-    int width = (MYINT) pop();
-    printf("%*.*g ", width, precision, pop());
+    ofp = (FILE *)(unsigned long int) pop();
+}
+
+static void resetoutfunc()
+{
+    ofp = stdout;
 }
