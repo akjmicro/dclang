@@ -147,18 +147,21 @@ So far, I've implemented:
     no distinction between 'arrays' and 'variables' in dclang. Named
     variables or constants can be emulated by makings them words, e.g.:
         ```
+        # make 'myvar' an alias for array slot number 53
+        # N.B. this does *not* make myvar = 53; instead it give a name
+        # to the slot that will hold the actual value.
         [ myvar 53 ]
         # this will store 7.4231 into slot 53
         7.4231 myvar !
         myvar @ .
-        7.4231 
+        7.4231
         ```
 
     * This works in a similar fashion for something like a string variable
     (which is, in reality an address and a length):
 
         ```
-        [ greetings "Hello there, good people!" ]
+        [ greeting "Hello there, good people!" ]
         greeting .s
         <2> 7888448 21
         greeting print cr
