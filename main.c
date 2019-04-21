@@ -11,7 +11,7 @@ and philosophy.  Born on 2018-05-05 */
 #include <math.h>
 #include <time.h>
 
-#define DATA_STACK_SIZE 128
+#define DATA_STACK_SIZE 256
 #define RETURN_STACK_SIZE 256
 #define DELIM " "
 #define MAXWORD 65536
@@ -28,13 +28,13 @@ MYINT live_repl = 0;
 FILE *ofp;
 // data stack
 MYINT data_stack[DATA_STACK_SIZE];
-MYINT data_stack_ptr;
+register int data_stack_ptr asm("r7");
 // return stack
 MYINT return_stack[RETURN_STACK_SIZE];
-MYINT return_stack_ptr;
+register int return_stack_ptr asm("r8");
 // loop 'stack'
 MYINT loop_counter[3];
-MYINT loop_counter_ptr;
+register int loop_counter_ptr asm("r9");
 // file stack for imports
 FILE *file_stack[32];
 MYINT fsp;
