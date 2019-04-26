@@ -88,10 +88,12 @@ void load_extra_primitives() {
     primitives[80].function = show_primitivesfunc;
     primitives[81].name = "import";
     primitives[81].function = importfunc;
+    primitives[82].name = "input";
+    primitives[82].function = inputfunc;
     /* final endpoint must be zeros,
        and they won't count in the 'count': */
-    primitives[82].name = 0;
-    primitives[82].function = 0;
+    primitives[83].name = 0;
+    primitives[83].function = 0;
 }
 
 

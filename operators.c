@@ -4,7 +4,7 @@ struct primitive {
   void (*function) (void);
 };
 
-static struct primitive primitives[83] = {
+static struct primitive primitives[84] = {
   {"+", addfunc},
   {"-", subfunc},
   {"*", mulfunc},

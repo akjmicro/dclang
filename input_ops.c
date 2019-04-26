@@ -135,3 +135,45 @@ static void importfunc() {
     memcpy(dest + str_len, (char *)nullstr, 1);
     return import(dest);
 }
+
+
+static void grabinput() {
+    char ch;
+    // get a starting marker for length
+    unsigned long string_start = string_here;
+    // bypass leading whitespace
+    do {
+        if((ch = fgetc(ifp)) == EOF) {
+            exit(0);
+        }
+    } while(isspace(ch));
+    while (! strchr("\n", ch)) {
+        if (strchr("\\", ch)) {
+            // consume an extra char due to backslash
+            if ((ch = getchar()) == EOF) exit(0);
+            // backspace
+            if (strchr("b", ch)) {
+                ch = 8;
+            }
+            if (strchr("n", ch)) {
+                ch = 10;
+            }
+            if (strchr("t", ch)) {
+                ch = 9;
+            }
+        }
+        string_pad[string_here++] = ch;
+        if ((ch = getchar()) == EOF) exit(0);
+    }
+    double string_addr = (double) string_start;
+    double string_size = (double)(string_here - string_start);
+    push(string_addr);
+    push(string_size);
+}
+
+
+static void inputfunc() {
+    if (!def_mode) {
+        grabinput();
+    }
+}
