@@ -211,9 +211,10 @@ There are three branches of this repo:
   * rpi-float ('rpi-flt' branch, optimized a bit for Rpi)
   * rpi-int ('rpi-int' branch, a bit more minimal, an experiment with fixed-point integers, really)
 
-In the standard branch, everything is on the floating-point stack only at this point.
-In the `rpi-int` branch, everything is a `long int` C-type. There may be
-separate stacks for integers in the future. Not sure if it's necessary yet.
+In the standard branch, everything is on the floating-point stack only at
+this point.  In the `rpi-int` branch, everything is a `long int` C-type. 
+There may be separate stacks for integers in the future.  Not sure if it's
+necessary yet (but I am exploring the issue).
 
 ### contact
 
