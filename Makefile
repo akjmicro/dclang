@@ -1,5 +1,5 @@
 CC = gcc
-CFLAGS = -c -march=native -O3
+CFLAGS = -c -mcpu=cortex-a53 -mfloat-abi=hard -mfpu=neon-vfpv4 -mtune=cortex-a53 -O3
 LDFLAGS = -lm
 SOURCES = main.c
 OBJECTS = main.o
