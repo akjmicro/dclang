@@ -1,7 +1,9 @@
 const char *illegal[] = {"do", "redo", "exitdo",
-                         "for", "next", "exitfor",
-                         "skip"};
+                         "for", "next", "exitfor"};
 MYINT num_illegal = sizeof(illegal) / sizeof(illegal[0]); 
+
+const char *special[] = {"if", "else", "endif"};
+MYINT num_special = sizeof(special) / sizeof(special[0]);
 
 /* function to validate and return an error message if we are using control
  * structures outside of a definition */
@@ -9,10 +11,25 @@ static MYINT validate(const char *token)
 {
     MYINT checkval = 1;
     for (MYINT i=0; i < num_illegal; i++) {
-        if(strcmp(token, illegal[i]) == 0) {
+        if (strcmp(token, illegal[i]) == 0) {
             printf("Error: '%s' -- illegal outside of function def.\n",
                    illegal[i]);
             checkval = 0;
+            return checkval;
+        }
+    }
+    return checkval;
+}
+
+
+/* conditionals are 'special forms' that need to be handled in a certain
+   way by the compilation process: */
+static MYINT is_special_form(const char *token)
+{
+    MYINT checkval = 0;
+    for (MYINT i=0; i < num_special; i++) {
+        if (strcmp(token, special[i]) == 0) {
+            checkval = 1;
             return checkval;
         }
     }
@@ -33,7 +50,7 @@ static void compile_or_interpret(const char *argument)
     // search dictionary (list, not hash) entry
     while (pr->name != 0) {
         if (strcmp(pr->name, argument) == 0) {
-            if (def_mode) {
+            if ((def_mode) && (!is_special_form(pr->name))) {
                 prog[iptr++].function.without_param = pr->function;
             } else {
                 if (validate(argument)) {
@@ -49,15 +66,15 @@ static void compile_or_interpret(const char *argument)
     for (MYINT x = num_user_functions - 1; x > -1 ; x--) {
         if (strcmp(user_functions[x].name, argument) == 0) {
             if (def_mode) {
-                prog[iptr].function.with_param = gotofunc;
+                prog[iptr].function.with_param = callfunc;
                 prog[iptr++].param = user_functions[x].func_start;
             } else {
                 MYINT cur_iptr = iptr;
-                gotofunc(user_functions[x].func_start);
+                callfunc(user_functions[x].func_start);
                 // run the function
                 while (iptr < cur_iptr) {
                     iptr += 1;
-                    (*(prog[iptr].function.with_param)) (prog[iptr].param);                    
+                    (*(prog[iptr].function.with_param)) (prog[iptr].param);
                 }
             }
             return;

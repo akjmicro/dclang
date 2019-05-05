@@ -55,3 +55,12 @@ static void ltefunc()
   MYFLT num2 = pop(); 
   push(pop() <= num2);
 }
+
+// assertions
+static void assertfunc()
+{
+  MYFLT truth = pop();
+  if (!truth) {
+      printf("ASSERT FAIL!\n");
+  }
+}
