@@ -6,9 +6,7 @@
         j  34 / sin
         -
         k * sin 0.5 <
-        4 * skip
-        42 emit 2 skip
-        32 emit 
+        if 32 else 42 endif emit
       next cr
     next
   0.041667 sleep

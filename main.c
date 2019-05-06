@@ -37,13 +37,13 @@ MYINT live_repl = 0;
 FILE *ofp;
 // data stack
 MYFLT data_stack[DATA_STACK_SIZE];
-register int data_stack_ptr asm("r7");
+int data_stack_ptr;
 // return stack
 MYINT return_stack[RETURN_STACK_SIZE];
-register int return_stack_ptr asm("r8");
+int return_stack_ptr;
 // loop 'stack'
 MYINT loop_counter[3];
-register int loop_counter_ptr asm("r9");
+int loop_counter_ptr;
 // file stack for imports
 FILE *file_stack[32];
 MYINT fsp;

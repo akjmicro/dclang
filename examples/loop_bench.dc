@@ -12,26 +12,6 @@
    rot rot   # ( cur sum1 max -- sum1 max cur )
 ]   
 
-
-[ test_skiploop
-    clock           # mark clock start
-    0 20000000 0    # sum, max, current
-
-    # start loop here:
-    2dup =
-    5 * skip
-    
-    # false:
-    1 +             # increment current index
-    sl-helper       # stack magic to accumulate
-    -10 skip        # loop back to '2dup'
-
-    # true, exit:
-    2drop           # remove max, current
-    clock
-    swap
-]     
-
 [ recur-loop
     1 +        # sum cur'
     swap       # cur' sum
@@ -40,13 +20,9 @@
     swap       # sum' cur'
     dup        # sum' cur' cur'
     20000000 <>
-    2 * skip
-    
-    # false
-    1 skip
-
-    # true    
-  recur-loop
+    if
+      recur-loop
+    endif
 ]
 
 [ test_recur
@@ -86,15 +62,12 @@
     swap
 ]
 
-"\nThis will show how various ways of composing loops are more efficient.
-In general, go with the simplest case, and avoid logical and stack operations
-inside of loops, when you can. Hence, the the first 'manual' loop here is the
-worst performer, and the simple 'do' loop at the end is the fastest.
+"\nThis will show how various ways of composing loops are more efficient. 
+In general, go with the simplest case, and avoid logical and stack
+operations inside of loops, when you can.  Hence, the the first 'manual'
+loop here, using indexing via recursion, is the worst performer, and the
+simple 'do' loop at the end is the fastest.
 " print 
-
-"\nTesting loop using manual 'skip' loop\n" print
-test_skiploop
-present_results
 
 "\nTesting loop using recursion\n" print
 test_recur
