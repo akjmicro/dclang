@@ -27,15 +27,13 @@
 # function to get next free cell
 [ get-next-free-cell
     current-cell @      # see if occupied
-    0 =                 # test
-    3 * skip            # skip to true amount
-
-    # false
-    advance-cell-index  # increment cell index
-    -10 skip            # jump to top of function
-
-    # true
-    mark-cell  
+    0 =
+    if
+      mark-cell
+    else
+      advance-cell-index
+      get-next-free-cell
+    endif
 ]
 
 [ shuffle 

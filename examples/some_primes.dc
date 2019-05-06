@@ -15,50 +15,61 @@
     or or or        # n bool
 ]
 
-[ is-not-div-otherwise?
-    dup 
-    sqrt ceil 1 + 6 / ceil # ( add 1 + ?)
-    1 max 1 1
-    for
-        dup i 6 * 1 - % 0 =
-        over i 6 * 1 + % 0 =
-        or
-          2 * skip
-        5 skip                 # false, still not divisible, keep searching
-        drop 0 exitfor 3 skip  # true --
-                               # exit as is-prime? being false,
-                               # b/c number was divisible within
-                               # search range
-    next
-    drop 1
+[ check-higher-than-49
+  dup                             # n n
+  sqrt ceil 1 +  6 /              # n n
+  ceil 6 * 12 6 for
+    dup i 1 - % 0 =
+    over i 1 + % 0 =
+    or if
+      drop 0 exitfor
+    else
+      next drop 1
+    endif
 ]
 
-[ is-div-by-2-3-5?
+[ is-not-div-otherwise?
+  dup                         # n n
+  49 < if                     # n bool
+    drop 1
+  else
+    check-higher-than-49
+  endif
+]
+
+[ is-not-div-by-2-3-5-7?
     dup             # n n 
     2 % 0 =         # n bool
     over            # n bool n 
     3 % 0 =         # n bool bool
     or over         # n bool n
     5 % 0 =         # n bool bool
-    or              # n bool
-    3 * skip
-    is-not-div-otherwise? 2 skip  # false
-    drop 0                        # true
+    or over         # n bool n
+    7 % 0 =         # n bool bool
+    or
+    if
+      drop 0
+    else
+      is-not-div-otherwise?
+    endif
 ]
 
 [ is-prime
     is-2-3-5-7?
-    3 * skip
-    is-div-by-2-3-5? 2 skip   # false
-    drop 1                    # true
+    if
+      drop 1
+    else
+      is-not-div-by-2-3-5-7?
+    endif
 ]
 
 [ test-primes
   2048 2 1 for
-      i is-prime
-      2 * skip  
-      4 skip     # false
-      i 4 4 .rj  # true
+    i is-prime
+    if
+      i 4 4 .rj
+    else
+    endif
   next
   cr
 ]

@@ -3,10 +3,8 @@
     -20 21 -1 for
       63 -62 1 for
         i 84 / dup * j 42 / dup * + sqrt
-        0.005 k 32 / pi * cos 0.23 * 0.23 + +  <
-        4 * skip
-        32 emit 2 skip 
-        42 emit
+        0.005 k 32 / pi * cos 0.23 * 0.23 + +
+        < if 42 else 32 endif emit
       next
     next
   0.04166 sleep
