@@ -64,9 +64,9 @@ Anyway, due to RPN, things will look like this, when you do math:
     <4> 1 2 8 0.4375 
 
     # a function!
-    [ testskip 1 2 4 skip 0 0 0 0 3 4 .s drop drop drop drop ]
-    testskip
-    1 2 3 4
+    [ testif 1 if "true" else "false" endif print cr ]
+    testif
+    true
 
     # do/redo -- basic, fastest loop type, starts at zero, ascends to cutoff parameter.
     [ looptest 7 do i . redo ]
@@ -129,7 +129,7 @@ So far, I've implemented:
     * drop, dup, over, swap rot, -rot, nip, tuck
     * 2drop, 2dup, 2over, 2swap, 2rot, -2rot, 2nip, 2tuck
   * Control structures:
-    * skip (a kind of jumping mechanism that replaces if/else/endif)
+    * if-else-endif
     * for/next & do/redo (looping)
     * user-defined words (functions)
   * Strings:
