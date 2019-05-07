@@ -1,16 +1,20 @@
-# notice how we are skipping more than 4 tokens (5, to be precise).
-# this is because "This is false" evaluates to an address and length,
-# so in fact, it's two tokens.
-
-[ teststr 5 skip 
-    "This is false" print 3 skip
-    "This is true" print ]
+[ teststr
+  1 if
+    "This is true" print
+  else
+    "This is false" print 
+  endif
+]
 teststr
 cr
 
-[ teststr2 0 skip
-    "This is false" print 3 skip
-    "This is true" print ]
+[ teststr2
+  0 if
+    "This is true" print
+  else
+    "This is false" print
+  endif
+]
 teststr2
 cr
 

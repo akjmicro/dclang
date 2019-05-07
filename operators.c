@@ -4,7 +4,7 @@ struct primitive {
   void (*function) (void);
 };
 
-static struct primitive primitives[71] = {
+static struct primitive primitives[75] = {
   {"+", addfunc},
   {"-", subfunc},
   {"*", mulfunc},
@@ -22,6 +22,7 @@ static struct primitive primitives[71] = {
   {">", gtfunc},
   {"<=", ltefunc},
   {">=", gtefunc},
+  {"assert", assertfunc},
   // logic
   {"and", andfunc},
   {"or", orfunc},
@@ -53,11 +54,14 @@ static struct primitive primitives[71] = {
   {"exitdo", exitdofunc},
   {"for", forfunc},
   {"next", nextfunc},
-  {"exitfor", exitforfunc}, 
-  {"skip", skipfunc},
+  {"exitfor", exitforfunc},
+  {"return", returnfunc},
   {"i", ifunc},
   {"j", jfunc},
   {"k", kfunc},
+  {"if", iffunc},
+  {"else", elsefunc},
+  {"endif", endiffunc},
   // output
   {".", showfunc},
   {"..", shownospacefunc},

@@ -1,4 +1,4 @@
-[ gcd swap over % dup 0 <> -9 * skip drop ]
+[ gcd swap over % dup 0 <> if gcd else drop endif ]
 
 [ simplify 2dup gcd dup rot swap / -rot / swap ]
 

@@ -91,10 +91,52 @@ static void kfunc()
     push_no_check(loop_counter[loop_counter_ptr - 3]);  
 }
 
-/* Crazy as this may seem, this function below is all that is needed to
-replace if/then/else structures. */
-static void skipfunc()
+
+// jump if zero (false)
+static void jumpzfunc()
 {
-    MYINT skipamt = pop();
-    iptr += skipamt;
+    MYINT where = (MYINT) pop();
+    MYINT truth = (MYINT) pop();
+    if (!truth) {
+        iptr = where;
+    }
+}
+
+// unconditional jump
+static void jumpufunc()
+{
+    MYINT where = (MYINT) pop();
+    iptr = where;
+}
+
+// if-else-endif
+static void iffunc()
+{
+    // mark our location
+    return_stack[return_stack_ptr++] = iptr;
+    prog[iptr].function.with_param = push;
+    prog[iptr++].param = 0;
+    prog[iptr++].function.without_param = jumpzfunc;
+}
+
+static void elsefunc()
+{
+    // get the last 'if' value
+    MYINT if_val = return_stack[--return_stack_ptr];
+    // replace the return stack location value with 'here'
+    // so, we are re-marking our location
+    return_stack[return_stack_ptr++] = iptr;
+    // push the next unconditional jump value, starting with a dummy
+    prog[iptr].function.with_param = push;
+    prog[iptr++].param = 0;
+    prog[iptr++].function.without_param = jumpufunc;
+    // update old if val goto:
+    prog[if_val].param = iptr - 1;
+}
+
+
+static void endiffunc()
+{
+    MYINT last_val = return_stack[--return_stack_ptr];
+    prog[last_val].param = iptr - 1;
 }
