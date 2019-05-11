@@ -1,5 +1,5 @@
 [ circle-draw
-  1024 do
+  1024 times
     -20 21 -1 for
       63 -62 1 for
         i 84 / dup * j 42 / dup * + sqrt
@@ -8,7 +8,7 @@
       next
     next
   0.04166 sleep
-  redo
+  again
 ]
 
 circle-draw

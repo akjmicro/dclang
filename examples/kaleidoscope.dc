@@ -3,19 +3,19 @@
 43 2 !
 
 [ kaleidoscope
-  4096 do
-    34 do
-      100 do
+  4096 times
+    34 times
+      100 times
         i  67 / 0.7 - dup *   # This is all distance formula stuff:
         j  34 / 0.5 - dup *   # sqrt(a^2 + b^2)...distance from origin
         + sqrt sin            # (sine of the distance from origin)
         k * sin 1.5 * 1.5 + floor
         @ emit
-      redo 
+      again
       cr                
-    redo                     
+    again
   0.041667 sleep              
-  redo
+  again
 ]
 
 kaleidoscope

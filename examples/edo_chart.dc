@@ -38,13 +38,13 @@ perfect 5th is:" print
 
 # loop through data
 [ main
-  13 do
-    i @ 4 3 .rj "\bedo" print              # edo
+  13 times
+    i @ 4 3 .rj "\bedo" print            # edo
     32 @ i @ * round dup 33 ! 3 3 .rj    # degree
         "\bdeg" print
     33 @ i @ / 1200 * dup 34 ! 10 3 .rj  # cents value of 5th
     34 @ 32 @ 1200 * - 13 3 .rj cr       # difference from pure
-  redo 
+  again
 ]
 
 # run program

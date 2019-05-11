@@ -84,16 +84,16 @@ MYINT def_mode;
 
 // needed so we can add 'import' to primitives
 void load_extra_primitives() {
-    primitives[84].name = "show-primitives";
-    primitives[84].function = show_primitivesfunc;
-    primitives[85].name = "import";
-    primitives[85].function = importfunc;
-    primitives[86].name = "input";
-    primitives[86].function = inputfunc;
+    primitives[86].name = "show-primitives";
+    primitives[86].function = show_primitivesfunc;
+    primitives[87].name = "import";
+    primitives[87].function = importfunc;
+    primitives[88].name = "input";
+    primitives[88].function = inputfunc;
     /* final endpoint must be zeros,
        and they won't count in the 'count': */
-    primitives[87].name = 0;
-    primitives[87].function = 0;
+    primitives[89].name = 0;
+    primitives[89].function = 0;
 }
 
 

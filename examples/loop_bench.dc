@@ -42,21 +42,21 @@
     swap
 ]
 
-[ testdo
+[ testtimes
     clock 0
-    20000001 do
+    20000001 times
       i +
-    redo
+    again
     clock
     swap
 ]
 
-[ testdo-var
+[ testtimes-var
     clock
     0 0 !
-    20000001 do
+    20000001 times
       0 @ i + 0 !
-    redo
+    again
     0 @
     clock
     swap
@@ -66,7 +66,7 @@
 In general, go with the simplest case, and avoid logical and stack
 operations inside of loops, when you can.  Hence, the the first 'manual'
 loop here, using indexing via recursion, is the worst performer, and the
-simple 'do' loop at the end is the fastest.
+simple 'times' loop at the end is the fastest.
 " print 
 
 "\nTesting loop using recursion\n" print
@@ -77,10 +77,10 @@ present_results
 testfor
 present_results
 
-"\nTesting loop using 'do'\n" print
-testdo
+"\nTesting loop using 'times'\n" print
+testtimes
 present_results
 
-"\nTesting loop using 'do' and poking/peeking a variable\n" print
-testdo-var
+"\nTesting loop using 'times' and poking/peeking a variable\n" print
+testtimes-var
 present_results

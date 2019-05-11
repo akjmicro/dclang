@@ -68,8 +68,8 @@ Anyway, due to RPN, things will look like this, when you do math:
     testif
     true
 
-    # do/redo -- basic, fastest loop type, starts at zero, ascends to cutoff parameter.
-    [ looptest 7 do i . redo ]
+    # times/again -- basic, fastest loop type, starts at zero, ascends to cutoff parameter.
+    [ looptest 7 times i . again ]
     looptest
     0 1 2 3 4 5 6 7
 
@@ -130,7 +130,7 @@ So far, I've implemented:
     * 2drop, 2dup, 2over, 2swap, 2rot, -2rot, 2nip, 2tuck
   * Control structures:
     * if-else-endif
-    * for/next & do/redo (looping)
+    * times/again & for/next (looping)
     * user-defined words (functions)
   * Strings:
     * simple string printing 

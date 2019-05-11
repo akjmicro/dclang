@@ -1,5 +1,5 @@
 [ waves
-  4096 do
+  4096 times
     17 -17 1 for
       50 -50 1 for
         i 100 / sin
@@ -10,7 +10,7 @@
       next cr
     next
   0.041667 sleep
-  redo
+  again
 ]
 
 waves

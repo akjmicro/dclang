@@ -1,66 +1,71 @@
 /* logical words */
 static void andfunc()
 {
-  push((unsigned MYINT) pop() & (unsigned MYINT) pop());
+  push((MYINT) pop() & (MYINT) pop());
 }
 
 static void orfunc()
 {
-  push((unsigned MYINT) pop() | (unsigned MYINT) pop());
+  push((MYINT) pop() | (MYINT) pop());
 }
 
 static void xorfunc()
 {
-  push((unsigned MYINT) pop() ^ (unsigned MYINT) pop());
+  push((MYINT) pop() ^ (MYINT) pop());
 }
 
 static void notfunc()
 {
-  push(~(unsigned MYINT) pop());
+  push(~(MYINT) pop());
 }
 
 /* comparison booleans */
 static void eqfunc()
 {
-  MYFLT num2 = pop(); 
-  push(pop() == num2);
+  push((MYINT) pop() == (MYINT) pop());
 }
 
 static void noteqfunc()
 {
-  MYFLT num2 = pop();
-  push(pop() != num2);
+  push((MYINT) pop() != (MYINT) pop());
 }
 
 static void gtfunc()
 {
-  MYFLT num2 = pop(); 
-  push(pop() > num2);
+  push((MYINT) pop() < (MYINT) pop());
 }
 
 static void ltfunc()
 {
-  MYFLT num2 = pop(); 
-  push(pop() < num2);
+  push((MYINT) pop() > (MYINT) pop());
 }
 
 static void gtefunc()
 {
-  MYFLT num2 = pop(); 
-  push(pop() >= num2);
+  push((MYINT) pop() <= (MYINT) pop());
 }
 
 static void ltefunc()
 {
-  MYFLT num2 = pop(); 
-  push(pop() <= num2);
+  push((MYINT) pop() >= (MYINT) pop());
 }
 
 // assertions
 static void assertfunc()
 {
-  MYFLT truth = pop();
+  MYINT truth = pop();
   if (!truth) {
       printf("ASSERT FAIL!\n");
   }
+}
+
+// true/false syntactic sugar
+static void truefunc()
+{
+  push(-1);
+}
+
+static void falsefunc()
+{
+  push(0);
 }
