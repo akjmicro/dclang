@@ -26,17 +26,17 @@ cr
 
 [ uuid
   hexrand     # (prime the random number generator first)
-  8 do hexrand print redo
+  8 times hexrand print again
   45 emit
-  4 do hexrand print redo
+  4 times hexrand print again
   45 emit
-  4 do hexrand print redo
+  4 times hexrand print again
   45 emit
-  4 do hexrand print redo
+  4 times hexrand print again
   45 emit
-  12 do hexrand print redo
+  12 times hexrand print again
 ]
 
-[ manyuuids 16 do uuid cr redo ]
+[ manyuuids 16 times uuid cr again ]
 
 manyuuids
