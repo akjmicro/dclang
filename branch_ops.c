@@ -8,33 +8,33 @@ forloop_info fl_stack[3];
 MYINT fl_ptr;
 
 // array for 'do' loop max amounts:
-MYINT do_info[3];
-MYINT do_ptr;
+MYINT times_info[3];
+MYINT times_ptr;
 
 // looping
-static void dofunc()
+static void timesfunc()
 {
     return_stack[return_stack_ptr++] = iptr;
-    do_info[do_ptr++] = pop();
+    times_info[times_ptr++] = (MYINT) pop();
     loop_counter[loop_counter_ptr++] = 0;         
 }
 
-static void exitdofunc()
+static void exittimesfunc()
 {
     loop_counter[--loop_counter_ptr] = 0;
     --return_stack_ptr;
 }
 
-static void redofunc()
+static void againfunc()
 {
-    if (loop_counter[loop_counter_ptr - 1] < do_info[do_ptr - 1] - 1) {
+    if (loop_counter[loop_counter_ptr - 1] < times_info[times_ptr - 1] - 1) {
         loop_counter[loop_counter_ptr - 1] += 1;
         iptr = return_stack[return_stack_ptr - 1];
     } else {
         loop_counter[--loop_counter_ptr] = 0;
         --return_stack_ptr;
-        --do_ptr;
-    }
+        --times_ptr;
+    }    
 }
 
 /* these 'for' loops are more flexible, allowing from/to/step parameters. */

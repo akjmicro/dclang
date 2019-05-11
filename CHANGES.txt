@@ -1,3 +1,22 @@
+2019-05-11
+* logic_ops simplification/refactor.
+* adding 'true' and 'false' constants
+* adding a logic_ops test in the 'examples' folder
+
+2019-05-07
+* 'do/redo' is now 'times/again' - again, distinguishing ourselves
+  from Forth
+
+2019-05-05
+* finished implementation of 'if-else-endif'
+
+2019-04-14
+* big change: string now just use "string" double-quotes, not their own
+  `s"` token, which was the old way, derived from Forth.
+
+2019-04-12
+* fix to an import string bug
+
 2019-03-03
 * Got rid of `qdo` and `qredo` in favor of making `do` have that
   functionality. So, `do` is now a counted loop with `i`, `j`, `k` references.
@@ -8,10 +27,3 @@
   of fractions.
 * adding this file.
 * add the `circle.dc` example.
-
-2019-04-12
-* fix to an import string bug
-
-2019-04-14
-* big change: string now just use "string" double-quotes, not their own
-  `s"` token, which was the old way, derived from Forth.

@@ -1,0 +1,60 @@
+# and
+0 0 and 0 = assert
+0 1 and 0 = assert
+1 0 and 0 = assert
+1 1 and 1 = assert
+15 3 and 3 = assert
+
+# or
+0 0 or 0 = assert
+0 1 or 1 = assert
+1 0 or 1 = assert
+1 1 or 1 = assert
+12 3 or 15 = assert
+
+# xor
+0 0 xor 0 = assert
+0 1 xor 1 = assert
+1 0 xor 1 = assert
+1 1 xor 0 = assert
+
+# not
+0  not -1 = assert
+-1 not  0 = assert
+
+# equal
+1 1 = assert
+-1 -1 = assert
+0 0 = assert
+
+# not equal
+1 0 <> assert
+1 0 <> assert
+-1 1 <> assert
+0 0 <> not -1 = assert
+
+# greater than
+1 0 > assert
+0 1 > not true = assert
+256 16 > assert
+
+# less than
+0 1 < assert
+1 0 < not true = assert
+15 16 < assert
+
+# greater than or equal
+0 0 >= assert
+1 0 >= assert
+16 15 >= assert
+15 15 >= assert
+14 15 >= not true = assert
+
+# less than or equal
+0 0 <= assert
+-1 0 <= assert
+15 16 <= assert
+16 16 <= assert
+15 14 <= not true = assert
+
+"If you are only seeing this msg, all tests have passed!" print cr
