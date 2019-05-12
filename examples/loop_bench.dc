@@ -1,7 +1,7 @@
 [ present_results
     "The sum is: " print . cr
     swap -
-    "The time difference is: " print . "ns" print cr
+    "The time difference is: " print .. "μs" print cr
 ]
 
 [ sl-helper 
