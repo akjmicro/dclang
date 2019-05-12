@@ -1,0 +1,88 @@
+"
+0 1 2 2 2  2  2  2
+0 1 1 3 7 17 41 99
+1 0 1 2 5 12 29 70
+"
+drop drop
+
+# initial values of indices
+3 0 !
+4 1 !
+5 2 !
+# initial data values
+0 3 !
+0 4 !
+1 5 !
+1 6 !   # <---- expansion proper starts here
+1 7 !
+0 8 !
+
+[ expansion-index 0 ]
+[ numerator-index 1 ]
+[ denominator-index 2 ]
+[ advance     
+  dup      # ( addr addr )
+  @ 3 +    # ( addr val )
+  swap     # ( val addr )
+  !
+]
+[ expansion-get expansion-index @ @ ]
+[ expansion-put expansion-index @ ! ]
+[ numerator-get numerator-index @ @ ]
+[ numerator-lag numerator-index @ 3 - @ ]
+[ numerator-lead-put numerator-index @ 3 + ! ]
+[ denominator-get denominator-index @ @ ]
+[ denominator-lag denominator-index @ 3 - @ ]
+[ denominator-lead-put denominator-index @ 3 + ! ]
+[ advance-indices
+  expansion-index advance
+  numerator-index advance
+  denominator-index advance
+]
+
+[ show-frac
+    # do numerator
+    expansion-get
+    numerator-get *
+    numerator-lag +
+    dup ..           
+    numerator-lead-put
+
+    "/" print
+
+    # do denominator
+    expansion-get
+    denominator-get *
+    denominator-lag +
+    dup .
+    denominator-lead-put
+]
+
+[ continued-fraction
+  6 expansion-index !
+  7 numerator-index !
+  8 denominator-index !
+  # no. of times will be grabbed from the stack!
+  times
+    dup               # ( num num )
+    floor dup         # ( num fl fl )
+    expansion-put     # ( num fl )
+    show-frac         # ( num f1 )
+    - 1 swap /        # ( newnum )
+    advance-indices
+  again
+  cr
+]
+
+# show the expansion for pi
+"The continued fraction expansion of PI is: " print cr
+pi 7 continued-fraction
+
+# show the expansion for sqrt of 2
+"The continued fraction expansion of the square-root of 2 is: " print cr
+2 sqrt 12 continued-fraction
+
+# show the expansion of phi
+"The continued fraction expansion of Phi is: " print cr
+[ phi 1 5 sqrt + 2 / ]
+phi 16 continued-fraction
