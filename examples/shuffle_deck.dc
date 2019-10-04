@@ -1,3 +1,5 @@
+# N.B. this is a newer, more efficient algorithm, simply using swaps
+
 [ TEMP-SLOT 0 ]
 [ DECK-START 1 ]
 [ NUM-CARDS 52 ]
