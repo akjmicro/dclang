@@ -1,50 +1,41 @@
-# cell index
-[ cell-index 0 ]
-0 cell-index !
-
-# wrap modulus
+[ TEMP-SLOT 0 ]
+[ DECK-START 1 ]
 [ NUM-CARDS 52 ]
 
-# starting cell
-[ STARTING-CELL 1 ]
-
-[ advance-cell-index
-    cell-index @     # read cell index
-    1 +              # add one
-    NUM-CARDS %      # read num cards, clock-wrap (mod) by it
-    cell-index !     # put value back
+[ deck-setup
+  NUM-CARDS 0 1 for
+    i i DECK-START + ! 
+  next
 ]
 
-# get current cell
-[ current-cell
-    # read cell index, add offset
-    cell-index @ STARTING-CELL +
+[ cell-swap
+  2dup
+  @ TEMP-SLOT !
+  @ swap !
+  TEMP-SLOT @ swap !
 ]
 
-# mark cell
-[ mark-cell 1 current-cell ! ]
 
-# function to get next free cell
-[ get-next-free-cell
-    current-cell @      # see if occupied
-    0 =
-    if
-      mark-cell
-    else
-      advance-cell-index
-      get-next-free-cell
-    endif
+[ shuffle-deck
+  0 TEMP-SLOT !
+  NUM-CARDS times
+      i DECK-START +
+      rand NUM-CARDS * floor DECK-START +
+      cell-swap
+  again
 ]
 
-[ shuffle 
-    NUM-CARDS 0 1 for
-        rand NUM-CARDS * floor cell-index !
-        get-next-free-cell
-        cell-index @ .
-    next
+[ printout-deck
+  NUM-CARDS times
+    i DECK-START + @ .
+  again
+  cr
 ]
 
-# get-next-free-cell
+[ do-shuffle
+  deck-setup
+  shuffle-deck
+  printout-deck
+]
 
-shuffle
-cr
+do-shuffle
