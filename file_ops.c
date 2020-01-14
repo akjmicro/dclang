@@ -1,30 +1,21 @@
 void fileopenfunc() {
-    if (data_stack_ptr < 4) {
+    if (data_stack_ptr < 2) {
         printf("Stack underflow!\n");
         printf("'file-open' needs <filename> <open-mode> on the stack\n");
         return;
     }
     // file mode string
-    unsigned long str_len_mode = (unsigned long) pop();
-    char *str_start_mode = (char *)((unsigned long)&string_pad + (unsigned long) pop());
-    char mode[str_len_mode + 1];
-    char nullstr[] = "\0";
-    memcpy(mode, (char *)str_start_mode, str_len_mode);
-    memcpy(mode + str_len_mode, (char *)nullstr, 1);
+    char *mode = (char *)(unsigned long) pop();
     // file path
-    unsigned long str_len_path = (unsigned long) pop();
-    char *str_start_path = (char *)((unsigned long)&string_pad + (unsigned long) pop());
-    char filepath[str_len_path + 1];
-    memcpy(filepath, (char *)str_start_path, str_len_path);
-    memcpy(filepath + str_len_path, (char *)nullstr, 1);
+    char *path = (char *)(unsigned long) pop();
     FILE *openfptr;
     // if mode is read or append, file must exist:
-    if ( (access(filepath, F_OK) == -1)
+    if ( (access(path, F_OK) == -1)
          && ( !strcmp("r", mode) || !strcmp("r+", mode) ) ) {
         printf("The file named %s doesn't appear to exist, " \
-               "or cannot be accessed.\n", filepath);
+               "or cannot be accessed.\n", path);
     }
-    openfptr = fopen(filepath, mode);
+    openfptr = fopen(path, mode);
     push((MYINT)openfptr);
 }
 
@@ -46,16 +37,10 @@ void filereadfunc() {
     }
     FILE *file_to_read = (FILE *)(long int) pop();
     MYINT num_bytes = (MYINT) pop();
-    char *local_buf = malloc(num_bytes);
-    fread(local_buf, num_bytes, 1, file_to_read);
-    // copy file contents to the string pad
-    memcpy(&string_pad[string_here], local_buf, num_bytes);
+    char *buf = malloc(num_bytes);
+    fread(buf, num_bytes, 1, file_to_read);
     // push the address of our new string and length
-    push((MYINT)&string_pad[string_here]);
-    push(num_bytes);
-    // update end of string pad:
-    string_here += num_bytes;
-    free(local_buf);
+    push((MYINT)&buf);
 }
 
 void fileseekfunc() {
@@ -76,13 +61,12 @@ void fileseekfunc() {
 }
 
 void filewritefunc() {
-    if (data_stack_ptr < 3) {
+    if (data_stack_ptr < 2) {
         printf("Stack underflow!\n");
-        printf("'file-write' needs <string-start> <string-length> <file-pointer> on the stack\n");
+        printf("'file-write' needs <string-address> <file-pointer> on the stack\n");
         return;
     }
     FILE *file_to_write = (FILE *)(long int) pop();
-    MYINT strlen = (MYINT) pop();
-    const void *strstart = (const void *)((unsigned long)&string_pad + (unsigned long) pop());
-    fwrite(strstart, 1, strlen, file_to_write);
+    const void *str = (const void *)(unsigned long) pop();
+    fwrite(str, 1, sizeof(str), file_to_write);
 }

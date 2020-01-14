@@ -26,34 +26,40 @@ static void stringfunc()
         string_pad[string_here++] = ch;
         if ((ch = fgetc(ifp)) == EOF) exit(0);
     }
-    double string_addr = (double) string_start;
-    double string_size = (double)(string_here - string_start);
+    unsigned long string_addr = (unsigned long) string_start;
+    unsigned long string_size = (unsigned long)(string_here - string_start);
+    char *string_dest = malloc(string_size + 1);
+    // number for stack needs to be a double:
+    double string_dest_dbl = (double)(unsigned long) string_dest;
+    char nullstr[] = "\0";
+    memcpy(string_dest, (char *)((unsigned long)&string_pad[0] + string_addr), string_size);
     if (def_mode) {
         prog[iptr].function.with_param = push;
-        prog[iptr++].param = string_addr;
-        prog[iptr].function.with_param = push;
-        prog[iptr++].param = string_size; 
+        prog[iptr++].param = string_dest_dbl;
     } else {
-        push(string_addr);
-        push(string_size);
+        push(string_dest_dbl);
     }
 }
 
 static void printfunc()
 {
-    if (data_stack_ptr < 2) {
+    if (data_stack_ptr < 1) {
         printf("print -- stack underflow! ");
         return;
     }
-    unsigned long str_len = (unsigned long) pop();
-    char *str_start = (char *)((unsigned long)&string_pad + (unsigned long) pop());
-    char *dest = malloc(str_len + 1);
-    char nullstr[] = "\0";
-    memcpy(dest, (char *)(str_start), str_len);
-    memcpy(dest + str_len, (char *)nullstr, 1);
-    fprintf(ofp, "%s", dest);
+    unsigned long string_dest = (unsigned long) pop();
+    fprintf(ofp, "%s", (char *)string_dest);
     fflush(ofp);
-    free(dest);
+}
+
+static void freefunc()
+{
+    if (data_stack_ptr < 1) {
+        printf("free -- stack underflow! ");
+        return;
+    }
+    char *string_loc = (char *)(unsigned long) pop();
+    free(string_loc);
 }
 
 static void emitfunc()
@@ -99,9 +105,9 @@ static long utf8_encode(char *out, uint64_t utf)
         out[4] = 0;
         return 4;
     }
-    else { 
+    else {
         // error - use replacement character
-        out[0] = (char) 0xEF;    
+        out[0] = (char) 0xEF;
         out[1] = (char) 0xBF;
         out[2] = (char) 0xBD;
         out[3] = 0;

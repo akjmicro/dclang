@@ -16,7 +16,7 @@ static void timesfunc()
 {
     return_stack[return_stack_ptr++] = iptr;
     times_info[times_ptr++] = (MYINT) pop();
-    loop_counter[loop_counter_ptr++] = 0;         
+    loop_counter[loop_counter_ptr++] = 0;
 }
 
 static void exittimesfunc()
@@ -34,7 +34,7 @@ static void againfunc()
         loop_counter[--loop_counter_ptr] = 0;
         --return_stack_ptr;
         --times_ptr;
-    }    
+    }
 }
 
 /* these 'for' loops are more flexible, allowing from/to/step parameters. */
@@ -43,7 +43,7 @@ static void forfunc()
     return_stack[return_stack_ptr++] = iptr;
     fl_stack[fl_ptr].step = (MYINT) pop();
     loop_counter[loop_counter_ptr++] = (MYINT) pop();
-    fl_stack[fl_ptr++].limit = (MYINT) pop(); 
+    fl_stack[fl_ptr++].limit = (MYINT) pop();
 }
 
 static void exitforfunc()
@@ -83,12 +83,12 @@ static void ifunc()
 
 static void jfunc()
 {
-    push_no_check(loop_counter[loop_counter_ptr - 2]);  
+    push_no_check(loop_counter[loop_counter_ptr - 2]);
 }
 
 static void kfunc()
 {
-    push_no_check(loop_counter[loop_counter_ptr - 3]);  
+    push_no_check(loop_counter[loop_counter_ptr - 3]);
 }
 
 

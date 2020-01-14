@@ -1,6 +1,8 @@
-/* dclang, an RPN calculator that has dreams of being a full-blown
-Turing-complete programming language, a descendant of FORTH in minimalism
-and philosophy.  Born on 2018-05-05 */
+/* dclang, an RPN programming language.
+
+'True refinement seeks simplicity.' - Bruce Lee
+
+Born on 2018-05-05 */
 
 #include <ctype.h>
 #include <stdio.h>
@@ -17,13 +19,15 @@ and philosophy.  Born on 2018-05-05 */
 #define MAXWORD 65536
 #define IBUFSIZE 128
 
-/* These should be changed based on architecture. For instance, on my x86_64
+/*
+   These should be changed based on architecture. For instance, on my x86_64
    system, best performance was squeezed by making the integer type and the
    float type to both be optimized in alignment to 8-bytes, which turns out
    to be 'long' for integers, and 'double' for floating-point values.
    On the Raspberry Pi 3, probably best to use 'long' and 'double' as well.
    I've found it crawls to a halt on the benchmarks if you use 'float'!
 */
+
 #define MYINT long
 #define MYFLT double
 // end of data type macros
@@ -84,20 +88,20 @@ MYINT def_mode;
 
 // needed so we can add 'import' to primitives
 void load_extra_primitives() {
-    primitives[86].name = "show-primitives";
-    primitives[86].function = show_primitivesfunc;
-    primitives[87].name = "import";
-    primitives[87].function = importfunc;
-    primitives[88].name = "input";
-    primitives[88].function = inputfunc;
+    primitives[87].name = "show-primitives";
+    primitives[87].function = show_primitivesfunc;
+    primitives[88].name = "import";
+    primitives[88].function = importfunc;
+    primitives[89].name = "input";
+    primitives[89].function = inputfunc;
     /* final endpoint must be zeros,
        and they won't count in the 'count': */
-    primitives[89].name = 0;
-    primitives[89].function = 0;
+    primitives[90].name = 0;
+    primitives[90].function = 0;
 }
 
 
-// Where all the juicy fun begins... 
+// Where all the juicy fun begins...
 int main(int argc, char **argv)
 {
     setinput(stdin);
@@ -111,14 +115,16 @@ int main(int argc, char **argv)
                 live_repl = 1;
             } else {
                 import(argv[opt]);
-            }   
+            }
         };
     } else {
         live_repl = 1;
     }
     if (live_repl) {
-        printf("Welcome to dclang! Aaron Krister Johnson, 2019\n");
+        printf("Welcome to dclang! Aaron Krister Johnson, 2020\n");
         printf("Make sure to peruse README.md to get your bearings!\n");
+        printf("You can type 'show-primitives' to see a list of all the primitive (c-builtin) words.\n");
+        printf("You can type 'show-user-functions' to see a list of functions defined within dclang.\n");
         show_primitivesfunc();
         repl();
     }

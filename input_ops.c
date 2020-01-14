@@ -1,9 +1,10 @@
-const char *illegal[] = {"do", "redo", "exitdo",
+const char *illegal[] = {"times", "again", "exittimes",
                          "for", "next", "exitfor"};
-MYINT num_illegal = sizeof(illegal) / sizeof(illegal[0]); 
+MYINT num_illegal = sizeof(illegal) / sizeof(illegal[0]);
 
 const char *special[] = {"if", "else", "endif"};
 MYINT num_special = sizeof(special) / sizeof(special[0]);
+
 
 /* function to validate and return an error message if we are using control
  * structures outside of a definition */
@@ -45,7 +46,7 @@ static void compile_or_interpret(const char *argument)
 
     if (argument == 0) {
         return;
-    } 
+    }
 
     // search dictionary (list, not hash) entry
     while (pr->name != 0) {
@@ -89,16 +90,16 @@ static void compile_or_interpret(const char *argument)
             prog[iptr].function.with_param = push;
             prog[iptr++].param = d;
         } else {
-            push(d);    
+            push(d);
         }
         return;
     }
-    
+
     /* nothing found, we've reached an error condition, so report
     the situation and reset the stack */
     data_stack_ptr = 0;
-    printf("%s -- syntax error.\n", argument); 
-    return;    
+    printf("%s -- syntax error.\n", argument);
+    return;
 }
 
 
@@ -140,17 +141,12 @@ static void import(char *infilestr) {
 
 
 static void importfunc() {
-    if (data_stack_ptr < 2) {
+    if (data_stack_ptr < 1) {
         printf("import -- stack underflow! ");
         return;
     }
-    unsigned long str_len = (unsigned long) pop();
-    char *str_start = (char *)((unsigned long)&string_pad + (unsigned long) pop());
-    char dest[str_len + 1];
-    char nullstr[] = "\0";
-    memcpy(dest, (char *)str_start, str_len);
-    memcpy(dest + str_len, (char *)nullstr, 1);
-    return import(dest);
+    char *importfile = (char *)(unsigned long) pop();
+    return import(importfile);
 }
 
 
@@ -182,12 +178,15 @@ static void grabinput() {
         string_pad[string_here++] = ch;
         if ((ch = getchar()) == EOF) exit(0);
     }
-    double string_addr = (double) string_start;
-    double string_size = (double)(string_here - string_start);
-    push(string_addr);
-    push(string_size);
+    unsigned long string_addr = (unsigned long) string_start;
+    unsigned long string_size = (unsigned long)(string_here - string_start);
+    char *string_dest = malloc(string_size + 1);
+    // number for stack needs to be a double:
+    double string_dest_dbl = (double)(unsigned long) string_dest;
+    char nullstr[] = "\0";
+    memcpy(string_dest, (char *)((unsigned long)&string_pad[0] + string_addr), string_size);
+    push(string_dest_dbl);
 }
-
 
 static void inputfunc() {
     if (!def_mode) {
