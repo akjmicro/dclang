@@ -163,10 +163,11 @@ So far, I've implemented:
         ```
         [ greeting "Hello there, good people!" ]
         greeting .s
-        <2> 7888448 21
+        <1> 94123539921536
         greeting print cr
         Hello there, good people!
         ```
+
   * Timing:
     * a clock function ('clock') so we can time execution in nanoseconds 
     for benchmarking.
