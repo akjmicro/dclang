@@ -73,7 +73,7 @@ Anyway, due to RPN, things will look like this, when you do math:
     looptest
     0 1 2 3 4 5 6 7
 
-    # for/next loop, a little slow than basic 'do', but gives step options.
+    # for/next loop, a little slower than basic 'times/again', but gives step options.
     # Parameters are to/from/step.
     # Let's add the first 20 million integers!
     [ for_test 0
@@ -103,18 +103,14 @@ Notice the '.' character, which pops/prints the top-of-stack (TOS). This comes
 from FORTH, as does '.s', which non-destructively shows the stack contents.
 This is different from 'dc', where 'p' pops/prints the TOS.
 
-In the looping example, the 'do/redo' block has access to a hidden variable
-'i', which you can use to test conditionally and escape the loop.  This is a
-weird mixture of the way FORTH uses 'do/loop' and 'begin/again'; note how
-unlike traditional FORTH, you manually test the condition inside the block
-yourself, just before the 'redo', which tests for a true condition before
-returning to 'do'.  (I may change this in the future to be more FORTH-like,
-and have separate 'do/loop' and 'begin/again' constructs.)
+In the looping examples, the block has access to up to 3 hidden variables,
+'i', 'j', and 'k' which you can use to test conditionally and escape the loop.
+This allows nested loops up to three counters deep. Going any futher is a
+code-smell anyway, and you should refactor to a different implementation if
+you need something more.
 
-This project is *far* from complete, but the goal is for it to be a full-blown
-Turing-complete language in the vein of FORTH.
 
-So far, I've implemented:
+Implemented thus far:
 
   * Math:
     * +, -, *, /, %, <<, >>
