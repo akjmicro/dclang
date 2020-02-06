@@ -64,22 +64,22 @@ Anyway, due to RPN, things will look like this, when you do math:
     <4> 1 2 8 0.4375 
 
     # a function!
-    [ testif 1 if "true" else "false" endif print cr ]
+    : testif 1 if "true" else "false" endif print cr ;
     testif
     true
 
     # times/again -- basic, fastest loop type, starts at zero, ascends to cutoff parameter.
-    [ looptest 7 times i . again ]
+    : looptest 7 times i . again ;
     looptest
     0 1 2 3 4 5 6 7
 
     # for/next loop, a little slower than basic 'times/again', but gives step options.
     # Parameters are to/from/step.
     # Let's add the first 20 million integers!
-    [ for_test 0
+    : for_test 0
         20000001 1 1 for
             i +
-        next . cr ]
+        next . cr ;
     for_test
     200000010000000
 
@@ -146,7 +146,7 @@ Implemented thus far:
         # make 'myvar' an alias for array slot number 53
         # N.B. this does *not* make myvar = 53; instead it give a name
         # to the slot that will hold the actual value.
-        [ myvar 53 ]
+        : myvar 53 ;
         # this will store 7.4231 into slot 53
         7.4231 myvar !
         myvar @ .
@@ -157,7 +157,7 @@ Implemented thus far:
     (which is, in reality an address and a length):
 
         ```
-        [ greeting "Hello there, good people!" ]
+        : greeting "Hello there, good people!" ;
         greeting .s
         <1> 94123539921536
         greeting print cr

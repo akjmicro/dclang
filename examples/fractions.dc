@@ -1,14 +1,14 @@
-[ gcd swap over % dup 0 <> if gcd else drop endif ]
+: gcd swap over % dup 0 <> if gcd else drop endif ;
 
-[ simplify 2dup gcd dup rot swap / -rot / swap ]
+: simplify 2dup gcd dup rot swap / -rot / swap ;
 
-[ fracadd rot 2dup * dup -2rot rot * -rot * + -rot drop simplify ]
+: fracadd rot 2dup * dup -2rot rot * -rot * + -rot drop simplify ;
 
-[ fracsub swap -1 * swap fracadd ] 
+: fracsub swap -1 * swap fracadd ; 
 
-[ fracmul rot * -rot * swap simplify ]
+: fracmul rot * -rot * swap simplify ;
 
-[ fracdiv swap fracmul ]
+: fracdiv swap fracmul ;
 
 "13/7 + 16/14:" print cr
 13 7 16 14 fracadd .s drop drop

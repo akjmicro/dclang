@@ -1,5 +1,5 @@
-[ foo 2 * .s ]
-[ bar 3 * .s ]
-[ fubar 1 - foo bar ]
+: foo 2 * .s ;
+: bar 3 * .s ;
+: fubar 1 - foo bar ;
 5 fubar "The answer is: " print . cr
 7 fubar fubar "The 2nd answer is: " print . cr

@@ -107,12 +107,12 @@ static void repl() {
     char *token;
     while (strcmp(token = get_token(), "EOF")) {
         // are we dealing with a function definition?
-        if (strcmp(token, "[") == 0) {
+        if (strcmp(token, ":") == 0) {
             startdeffunc();
             def_mode = 1;
             continue; // goto top of loop
         }
-        if (strcmp(token, "]") == 0) {
+        if (strcmp(token, ";") == 0) {
             enddeffunc();
             def_mode = 0;
             continue; // goto top of loop

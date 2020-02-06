@@ -1,4 +1,4 @@
-[ jump_test_false
+: jump_test_false
 0 if
   1 2 3 4 .s
 else
@@ -7,9 +7,9 @@ endif
 8 = assert
 2drop drop
 # should show "5 6 7 8" on stack before assert
-]
+;
 
-[ jump_test_true
+: jump_test_true
 1 if
   1 2 3 4 .s
 else
@@ -18,13 +18,13 @@ endif
 4 = assert
 2drop drop
 # should show "1 2 3 4" on stack before assert
-]
+;
 
 jump_test_false
 
 jump_test_true
 
-[ test_nested_if
+: test_nested_if
 0 if
   1 2 3 .s
 else
@@ -36,11 +36,11 @@ else
 endif
 6 = assert
 2drop
-]
+;
 
 test_nested_if
 
-[ test_nested_if2
+: test_nested_if2
 1 if
   0 if
     1 2 3 .s
@@ -52,11 +52,11 @@ else
 endif
 6 = assert
 2drop
-]
+;
 
 test_nested_if2
 
-[ test_nested_if3
+: test_nested_if3
 0 if
   0 if
     1 2 3 .s
@@ -72,6 +72,6 @@ else
 endif
 12 = assert
 2drop
-]
+;
 
 test_nested_if3

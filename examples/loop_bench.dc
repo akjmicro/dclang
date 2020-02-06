@@ -1,18 +1,18 @@
-[ present_results
+: present_results
     "The sum is: " print . cr
     swap -
     "The time difference is: " print .. "μs" print cr
-]
+;
 
-[ sl-helper 
+: sl-helper 
    # ( sum max cur )
    rot       # ( max cur sum )
    over      # ( max cur sum cur )
    +         # ( max cur sum1 )
    rot rot   # ( cur sum1 max -- sum1 max cur )
-]   
+;   
 
-[ recur-loop
+: recur-loop
     1 +        # sum cur'
     swap       # cur' sum
     over       # cur' sum cur'
@@ -23,35 +23,35 @@
     if
       recur-loop
     endif
-]
+;
 
-[ test_recur
+: test_recur
     clock
     0 0 recur-loop   # clock sum cur func
     clock            # clock sum cur clock'
     swap             # clock sum clock' cur
     drop swap        # clock clock' sum
-]
+;
 
-[ testfor
+: testfor
     clock 0
     20000001 0 1 for
       i +
     next
     clock
     swap
-]
+;
 
-[ testtimes
+: testtimes
     clock 0
     20000001 times
       i +
     again
     clock
     swap
-]
+;
 
-[ testtimes-var
+: testtimes-var
     clock
     0 0 !
     20000001 times
@@ -60,7 +60,7 @@
     0 @
     clock
     swap
-]
+;
 
 "\nThis will show how various ways of composing loops are more efficient. 
 In general, go with the simplest case, and avoid logical and stack

@@ -1,4 +1,4 @@
-[ waves
+: waves
   4096 times
     17 -17 1 for
       50 -50 1 for
@@ -11,7 +11,7 @@
     next
   0.041667 sleep
   again
-]
+;
 
 waves
 

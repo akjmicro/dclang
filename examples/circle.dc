@@ -1,4 +1,4 @@
-[ circle-draw
+: circle-draw
   1024 times
     -20 21 -1 for
       63 -62 1 for
@@ -9,6 +9,6 @@
     next
   0.04166 sleep
   again
-]
+;
 
 circle-draw

@@ -1,30 +1,30 @@
-[ teststr
+: teststr
   1 if
     "This is true" print
   else
     "This is false" print 
   endif
-]
+;
 teststr
 cr
 
-[ teststr2
+: teststr2
   0 if
     "This is true" print
   else
     "This is false" print
   endif
-]
+;
 teststr2
 cr
 
 # since a string is a location and length, we drop the length and keep the
 # location as a reference
-[ uuidset "0123456789abcdef" drop ]
+: uuidset "0123456789abcdef" drop ;
 
-[ hexrand uuidset rand 15 * round + 1 ]
+: hexrand uuidset rand 15 * round + 1 ;
 
-[ uuid
+: uuid
   hexrand     # (prime the random number generator first)
   8 times hexrand print again
   45 emit
@@ -35,8 +35,8 @@ cr
   4 times hexrand print again
   45 emit
   12 times hexrand print again
-]
+;
 
-[ manyuuids 16 times uuid cr again ]
+: manyuuids 16 times uuid cr again ;
 
 manyuuids

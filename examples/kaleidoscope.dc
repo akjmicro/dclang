@@ -2,7 +2,7 @@
 45 1 !
 43 2 !
 
-[ kaleidoscope
+: kaleidoscope
   4096 times
     34 times
       100 times
@@ -16,7 +16,7 @@
     again
   0.041667 sleep              
   again
-]
+;
 
 kaleidoscope
 

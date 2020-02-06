@@ -1,43 +1,43 @@
 # N.B. this is a newer, more efficient algorithm, simply using swaps
 
-[ TEMP-SLOT 0 ]
-[ DECK-START 1 ]
-[ NUM-CARDS 52 ]
+: TEMP-SLOT 0 ;
+: DECK-START 1 ;
+: NUM-CARDS 52 ;
 
-[ deck-setup
+: deck-setup
   NUM-CARDS 0 1 for
     i i DECK-START + ! 
   next
-]
+;
 
-[ cell-swap
+: cell-swap
   2dup
   @ TEMP-SLOT !
   @ swap !
   TEMP-SLOT @ swap !
-]
+;
 
 
-[ shuffle-deck
+: shuffle-deck
   0 TEMP-SLOT !
   NUM-CARDS times
       i DECK-START +
       rand NUM-CARDS * floor DECK-START +
       cell-swap
   again
-]
+;
 
-[ printout-deck
+: printout-deck
   NUM-CARDS times
     i DECK-START + @ .
   again
   cr
-]
+;
 
-[ do-shuffle
+: do-shuffle
   deck-setup
   shuffle-deck
   printout-deck
-]
+;
 
 do-shuffle

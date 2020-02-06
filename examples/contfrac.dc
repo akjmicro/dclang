@@ -17,30 +17,30 @@ drop drop
 1 7 !
 0 8 !
 
-[ expansion-index 0 ]
-[ numerator-index 1 ]
-[ denominator-index 2 ]
-[ advance     
+: expansion-index 0 ;
+: numerator-index 1 ;
+: denominator-index 2 ;
+: advance     
   dup      # ( addr addr )
   @ 3 +    # ( addr val )
   swap     # ( val addr )
   !
-]
-[ expansion-get expansion-index @ @ ]
-[ expansion-put expansion-index @ ! ]
-[ numerator-get numerator-index @ @ ]
-[ numerator-lag numerator-index @ 3 - @ ]
-[ numerator-lead-put numerator-index @ 3 + ! ]
-[ denominator-get denominator-index @ @ ]
-[ denominator-lag denominator-index @ 3 - @ ]
-[ denominator-lead-put denominator-index @ 3 + ! ]
-[ advance-indices
+;
+: expansion-get expansion-index @ @ ;
+: expansion-put expansion-index @ ! ;
+: numerator-get numerator-index @ @ ;
+: numerator-lag numerator-index @ 3 - @ ;
+: numerator-lead-put numerator-index @ 3 + ! ;
+: denominator-get denominator-index @ @ ;
+: denominator-lag denominator-index @ 3 - @ ;
+: denominator-lead-put denominator-index @ 3 + ! ;
+: advance-indices
   expansion-index advance
   numerator-index advance
   denominator-index advance
-]
+;
 
-[ show-frac
+: show-frac
     # do numerator
     expansion-get
     numerator-get *
@@ -56,9 +56,9 @@ drop drop
     denominator-lag +
     dup .
     denominator-lead-put
-]
+;
 
-[ continued-fraction
+: continued-fraction
   6 expansion-index !
   7 numerator-index !
   8 denominator-index !
@@ -72,7 +72,7 @@ drop drop
     advance-indices
   again
   cr
-]
+;
 
 # show the expansion for pi
 "The continued fraction expansion of PI is: " print cr
@@ -84,5 +84,5 @@ pi 7 continued-fraction
 
 # show the expansion of phi
 "The continued fraction expansion of Phi is: " print cr
-[ phi 1 5 sqrt + 2 / ]
+: phi 1 5 sqrt + 2 / ;
 phi 16 continued-fraction
