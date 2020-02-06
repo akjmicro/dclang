@@ -134,6 +134,8 @@ Implemented thus far:
     * '#' to end-of-line' for comments
     * `uemit`, a unicode-character emitter which can help to contruct
     strings that need them.
+    * convert character bytes to equivalent numerical value with `ord`
+    * convert integers to hex-string with `tohex`.
   * Variables/Arrays:
     * ! (poke a value to a given slot, e.g. '5 32 !' puts the value 5
     into slot 32)

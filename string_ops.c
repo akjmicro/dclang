@@ -91,8 +91,8 @@ static long utf8_encode(char *out, uint64_t utf)
     else if (utf <= 0xFFFF) {
         // 3-byte unicode
         out[0] = (char) (((utf >> 12) & 0x0F) | 0xE0);
-        out[1] = (char) (((utf >>    6) & 0x3F) | 0x80);
-        out[2] = (char) (((utf >>    0) & 0x3F) | 0x80);
+        out[1] = (char) (((utf >>  6) & 0x3F) | 0x80);
+        out[2] = (char) (((utf >>  0) & 0x3F) | 0x80);
         out[3] = 0;
         return 3;
     }
@@ -100,8 +100,8 @@ static long utf8_encode(char *out, uint64_t utf)
         // 4-byte unicode
         out[0] = (char) (((utf >> 18) & 0x07) | 0xF0);
         out[1] = (char) (((utf >> 12) & 0x3F) | 0x80);
-        out[2] = (char) (((utf >>    6) & 0x3F) | 0x80);
-        out[3] = (char) (((utf >>    0) & 0x3F) | 0x80);
+        out[2] = (char) (((utf >>  6) & 0x3F) | 0x80);
+        out[3] = (char) (((utf >>  0) & 0x3F) | 0x80);
         out[4] = 0;
         return 4;
     }
@@ -115,11 +115,23 @@ static long utf8_encode(char *out, uint64_t utf)
     }
 }
 
-
 static void uemitfunc()
 {
     long unsigned long char_code = (long unsigned long) pop();
     long ulen = utf8_encode(utf8_buf, char_code);
     fprintf(ofp, "%s", utf8_buf);
+    fflush(ofp);
+}
+
+static void ordfunc()
+{
+    char *string_loc = (char *)(unsigned long) pop();
+    push((int) *string_loc);
+}
+
+static void tohexfunc()
+{
+    long unsigned int val = (long unsigned int) pop();
+    fprintf(ofp, "0x%.2x", val);
     fflush(ofp);
 }

@@ -4,7 +4,7 @@ struct primitive {
   void (*function) (void);
 };
 
-static struct primitive primitives[91] = {
+static struct primitive primitives[93] = {
   {"+", addfunc},
   {"-", subfunc},
   {"*", mulfunc},
@@ -92,6 +92,8 @@ static struct primitive primitives[91] = {
   {"print", printfunc},
   {"emit", emitfunc},
   {"uemit", uemitfunc},
+  {"ord", ordfunc},
+  {"tohex", tohexfunc},
   {"free", freefunc},
   // time
   {"clock", clockfunc},
@@ -116,7 +118,6 @@ void show_primitivesfunc() {
     for (int x=0; x < (prim_size - 1); x++) {
         printf("%s ", primitives[x].name);
     }
-    printf(" [ ] ");
-    printf("\n\n");
+    printf(": ;\n\n");
     printf("Strings are written by simply typing a string literal in double-quotes, e.g. \"Hello there!\".\n\n");
 }
