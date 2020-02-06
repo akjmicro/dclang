@@ -1,20 +1,22 @@
+# run this in an 80x24 terminal
+
 32 0 !
 45 1 !
 43 2 !
 
 : kaleidoscope
   4096 times
-    34 times
-      100 times
-        i  67 / 0.7 - dup *   # This is all distance formula stuff:
-        j  34 / 0.5 - dup *   # sqrt(a^2 + b^2)...distance from origin
+    24 times
+      80 times
+        i  60 / 0.64 - dup *   # This is all distance formula stuff:
+        j  24 / 0.5 - dup *   # sqrt(a^2 + b^2)...distance from origin
         + sqrt sin            # (sine of the distance from origin)
         k * sin 1.5 * 1.5 + floor
         @ emit
       again
-      cr                
+      cr           
     again
-  0.0416 sleep
+  0.055 sleep
   again
 ;
 
