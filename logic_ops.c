@@ -22,32 +22,32 @@ static void notfunc()
 /* comparison booleans */
 static void eqfunc()
 {
-  push((MYINT) pop() == (MYINT) pop());
+  push((MYFLT) pop() == (MYFLT) pop());
 }
 
 static void noteqfunc()
 {
-  push((MYINT) pop() != (MYINT) pop());
+  push((MYFLT) pop() != (MYFLT) pop());
 }
 
 static void gtfunc()
 {
-  push((MYINT) pop() < (MYINT) pop());
+  push((MYFLT) pop() < (MYFLT) pop());
 }
 
 static void ltfunc()
 {
-  push((MYINT) pop() > (MYINT) pop());
+  push((MYFLT) pop() > (MYFLT) pop());
 }
 
 static void gtefunc()
 {
-  push((MYINT) pop() <= (MYINT) pop());
+  push((MYFLT) pop() <= (MYFLT) pop());
 }
 
 static void ltefunc()
 {
-  push((MYINT) pop() >= (MYINT) pop());
+  push((MYFLT) pop() >= (MYFLT) pop());
 }
 
 // assertions

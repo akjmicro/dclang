@@ -1,13 +1,14 @@
 : circle-draw
   1024 times
-    -20 21 -1 for
-      63 -62 1 for
-        i 84 / dup * j 42 / dup * + sqrt
+    -12 11 -1 for
+      39 -40 1 for
+        i 47 / dup * j 24 / dup * + sqrt
+        # radius 
         0.005 k 32 / pi * cos 0.23 * 0.23 + +
         < if 42 else 32 endif emit
-      next
+      next cr
     next
-  0.04166 sleep
+  0.055 sleep
   again
 ;
 
