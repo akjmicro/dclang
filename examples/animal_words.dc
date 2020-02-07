@@ -1,0 +1,34 @@
+# This example shows how to build up word logic
+
+# First we lay out some memory, reserving slot 0 as an
+# index tracker for an array of strings (string pointers)
+: idx 0 ;
+
+# Next, our string array itself starts at slot 1
+: str_arr_start 1 ;
+
+# Load the index tracker with slot 1 as a value to start with,
+# since our first string pointer should land at slot 1
+str_arr_start idx !
+
+# Define a comma function as a way to iteratively load some strings
+: , idx @ swap over ! 1 + idx ! ;
+
+# A shortcut word for fetching and printing a string
+: getstr str_arr_start + @ print ;
+
+# Load strings into an array:
+"cat" , "dog" , "parrot" , "lizard" , "snake" , "ferret" , "parakeet" , "fish" ,
+
+# Dynamically sense how many string we've loaded; create a value we
+# can multiply by to stay in range.
+: scale idx @ 1 - * floor ;
+
+# A "loop over the animals" function
+: rand_animals
+1024 times rand scale getstr " " print again
+cr
+;
+
+# Do it!
+rand_animals

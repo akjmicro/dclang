@@ -27,7 +27,7 @@ static void showstackfunc()
     MYINT x;
     char *joiner;
     x = data_stack_ptr > 16 ? data_stack_ptr - 16 : 0;
-    joiner = x == 0 ? " " : " ... "; 
+    joiner = x == 0 ? " " : " ... ";
     fprintf(ofp, "<%i>%s", data_stack_ptr, joiner);
     fflush(ofp);
     for (x=0; x < data_stack_ptr; x++) {
