@@ -2,13 +2,13 @@
  procedures (functions). The idea is to have a struct that contains:
  1) a string naming the function
  2) the position of that function in the 'prog' array.
- 
+
  The difference between this and the already defined primitives is that the
  2nd element in the primitives struct was a function pointer.  Here, it is
  an index (which is also a pointer) to the start of a procedure, which
  itself may contain other procedures that the code may jump to, or simply
- resolve to some primitives. 
- 
+ resolve to some primitives.
+
  In the 'prog' array, which is indexed by 'iptr', in effect, a function call
  is simply a jump to the start of that procedure.  When the 'compile'
  function finds that a user-defined bit of code is being referenced, what is
@@ -51,7 +51,7 @@ static void returnfunc()
     iptr = return_stack[--return_stack_ptr];
 }
 
-/* respond to '[' token: */
+/* respond to ':' token: */
 static void startdeffunc()
 {
     /* grab name */
@@ -63,7 +63,7 @@ static void startdeffunc()
     user_functions[num_user_functions++].func_start = iptr;
 }
 
-/* respond to ']' token: */
+/* respond to ';' token: */
 static void enddeffunc()
 {
     /* Simply insert a return call into 'prog' where 'iptr' now points. */
