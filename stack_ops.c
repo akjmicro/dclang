@@ -46,7 +46,7 @@ static void swapfunc()
     MYFLT val1 = pop();
     MYFLT val2 = pop();
     push_no_check(val1);
-    push_no_check(val2); 
+    push_no_check(val2);
 }
 
 static void overfunc()
@@ -147,7 +147,7 @@ static void swap2func()
     push_no_check(val2);
     push_no_check(val1);
     push_no_check(val4);
-    push_no_check(val3); 
+    push_no_check(val3);
 }
 
 static void over2func()
@@ -178,7 +178,7 @@ static void rot2func()
     push_no_check(val2);
     push_no_check(val1);
     push_no_check(val6);
-    push_no_check(val5); 
+    push_no_check(val5);
 }
 
 static void rotneg2func()
@@ -199,7 +199,7 @@ static void rotneg2func()
     push_no_check(val6);
     push_no_check(val5);
     push_no_check(val4);
-    push_no_check(val3); 
+    push_no_check(val3);
 }
 
 static void nip2func()
