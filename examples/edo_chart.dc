@@ -19,18 +19,18 @@ perfect 5th (3/2 ratio) is.
 43 11 !
 47 12 !
 53 13 !
-# perfect 5th to compare, store in slot 32:
-3 2 / log2 32 !
+
+# perfect 5th to compare, store in slot 14:
+3 2 / log2 14 !
+
+: fifth 14 ;
+: degree 15 ;
+: fifth-cents 16 ;
+: diff 17 ;
 
 "
-perfect 5th is:" print
-32 @ 1200 * 7 3 .rj "cents" print cr cr
-
-# save 'edo' string -- length is var 20, string pnt is var 19:
-"\bedo" 20 ! 19 !
-
-# save 'deg' string -- length is var 22, string pnt is var 21:
-"\bdeg" 22 ! 21 !
+perfect 5th is: " print
+fifth @ 1200 * 7 6 .rj "cents" print cr cr
 
 # print table header:
 "   edo | deg | cents for 3/2 |   error " print cr
@@ -39,11 +39,11 @@ perfect 5th is:" print
 # loop through data
 : main
   13 times
-    i @ 4 3 .rj "\bedo" print            # edo
-    32 @ i @ * round dup 33 ! 3 3 .rj    # degree
+    i @ 4 3 .rj "\bedo" print                         # edo
+    fifth @ i @ * round dup degree ! 3 3 .rj          # degree
         "\bdeg" print
-    33 @ i @ / 1200 * dup 34 ! 10 3 .rj  # cents value of 5th
-    34 @ 32 @ 1200 * - 13 3 .rj cr       # difference from pure
+    degree @ i @ / 1200 * dup fifth-cents ! 12 6 .rj  # cents value of 5th
+    fifth-cents @ fifth @ 1200 * - 12 6 .rj cr        # difference from pure
   again
 ;
 
