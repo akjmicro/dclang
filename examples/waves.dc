@@ -9,7 +9,7 @@
         if 32 else 42 endif emit
       next cr
     next
-  0.041667 sleep
+  0.055 sleep
   again
 ;
 

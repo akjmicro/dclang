@@ -48,8 +48,8 @@ static void forfunc()
 
 static void exitforfunc()
 {
-    fl_ptr = --fl_ptr < 1 ? 1 : fl_ptr;
-    loop_counter[--loop_counter_ptr] = fl_stack[fl_ptr - 1].limit;
+    --fl_ptr;
+    loop_counter[--loop_counter_ptr] = 0;
     --return_stack_ptr;
 }
 
