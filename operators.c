@@ -4,7 +4,11 @@ struct primitive {
   void (*function) (void);
 };
 
-static struct primitive primitives[93] = {
+static struct primitive primitives[100] = {
+  // null
+  {"null", nullfunc},
+  {"isnull", isnullfunc},
+  // basic arithmetic
   {"+", addfunc},
   {"-", subfunc},
   {"*", mulfunc},
@@ -83,7 +87,7 @@ static struct primitive primitives[93] = {
   {"else", elsefunc},
   {"endif", endiffunc},
   {"return", returnfunc},
-  // output
+  // output and string ops
   {".", showfunc},
   {"..", shownospacefunc},
   {".s", showstackfunc},
@@ -95,6 +99,11 @@ static struct primitive primitives[93] = {
   {"ord", ordfunc},
   {"tohex", tohexfunc},
   {"free", freefunc},
+  {"strlen", strlenfunc},
+  {"str=", streqfunc},
+  {"str<", strltfunc},
+  {"str>", strgtfunc},
+  {"strfind", strfindfunc},
   // time
   {"clock", clockfunc},
   {"sleep", sleepfunc},

@@ -26,7 +26,8 @@ ____________
 
 ### ABOUT:
 
-"dclang" is modelled on the grand ol' RPN calculator "dc", which is an
+"dclang" is an RPN, stack-based language with near-zero syntax. It is in the
+spirit and tradition of FORTH and the grand ol' RPN calculator "dc", which is
 oft-found on a UNIX/LINUX system near you!
 
 RPN means "Reverse Polish Notation".  That means everything uses a

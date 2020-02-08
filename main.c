@@ -72,6 +72,7 @@ MYINT def_mode;
 
 // inline dclang code
 #include "stack_ops.c"
+#include "null_ops.c"
 #include "logic_ops.c"
 #include "time_ops.c"
 #include "math_ops.c"
@@ -88,16 +89,16 @@ MYINT def_mode;
 
 // needed so we can add 'import' to primitives
 void load_extra_primitives() {
-    primitives[89].name = "show-primitives";
-    primitives[89].function = show_primitivesfunc;
-    primitives[90].name = "import";
-    primitives[90].function = importfunc;
-    primitives[91].name = "input";
-    primitives[91].function = inputfunc;
+    primitives[96].name = "show-primitives";
+    primitives[96].function = show_primitivesfunc;
+    primitives[97].name = "import";
+    primitives[97].function = importfunc;
+    primitives[98].name = "input";
+    primitives[98].function = inputfunc;
     /* final endpoint must be zeros,
        and they won't count in the 'count': */
-    primitives[92].name = 0;
-    primitives[92].function = 0;
+    primitives[99].name = 0;
+    primitives[99].function = 0;
 }
 
 

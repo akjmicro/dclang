@@ -48,6 +48,10 @@ static void printfunc()
         return;
     }
     unsigned long string_dest = (unsigned long) pop();
+    if (string_dest == NULL) {
+        printf("print -- Nothing to print.");
+        return;
+    }
     fprintf(ofp, "%s", (char *)string_dest);
     fflush(ofp);
 }
@@ -64,6 +68,10 @@ static void freefunc()
 
 static void emitfunc()
 {
+    if (data_stack_ptr < 1) {
+        printf("emit -- stack underflow! ");
+        return;
+    }
     long char_code = (long) pop();
     char charbuf[2] = { char_code, 0 };
     fprintf(ofp, "%s", charbuf);
@@ -117,6 +125,10 @@ static long utf8_encode(char *out, uint64_t utf)
 
 static void uemitfunc()
 {
+    if (data_stack_ptr < 1) {
+        printf("uemit -- stack underflow! ");
+        return;
+    }
     long unsigned long char_code = (long unsigned long) pop();
     long ulen = utf8_encode(utf8_buf, char_code);
     fprintf(ofp, "%s", utf8_buf);
@@ -125,13 +137,75 @@ static void uemitfunc()
 
 static void ordfunc()
 {
+    if (data_stack_ptr < 1) {
+        printf("ord -- stack underflow! ");
+        return;
+    }
     char *string_loc = (char *)(unsigned long) pop();
     push((int) *string_loc);
 }
 
 static void tohexfunc()
 {
+    if (data_stack_ptr < 1) {
+        printf("tohex -- stack underflow! ");
+        return;
+    }
     long unsigned int val = (long unsigned int) pop();
     fprintf(ofp, "0x%.2x", val);
     fflush(ofp);
+}
+
+static void strlenfunc()
+{
+    if (data_stack_ptr < 1) {
+        printf("strlen -- stack underflow! ");
+        return;
+    }
+    long unsigned int val = (long unsigned int) pop();
+    push((MYINT) strlen((char *)val));
+}
+
+static void streqfunc()
+{
+    if (data_stack_ptr < 2) {
+        printf("str= -- stack underflow! ");
+        return;
+    }
+    long unsigned int str2 = (long unsigned int) pop();
+    long unsigned int str1 = (long unsigned int) pop();
+    push((MYINT) strcmp((char *)str1, (char *)str2) == 0);
+}
+
+static void strltfunc()
+{
+    if (data_stack_ptr < 2) {
+        printf("str< -- stack underflow! ");
+        return;
+    }
+    long unsigned int str2 = (long unsigned int) pop();
+    long unsigned int str1 = (long unsigned int) pop();
+    push((MYINT) strcmp((char *)str1, (char *)str2) < 0);
+}
+
+static void strgtfunc()
+{
+    if (data_stack_ptr < 2) {
+        printf("str> -- stack underflow! ");
+        return;
+    }
+    long unsigned int str2 = (long unsigned int) pop();
+    long unsigned int str1 = (long unsigned int) pop();
+    push((MYINT) strcmp((char *)str1, (char *)str2) > 0);
+}
+
+static void strfindfunc()
+{
+    if (data_stack_ptr < 2) {
+        printf("strfind -- stack underflow! ");
+        return;
+    }
+    long unsigned int str2 = (long unsigned int) pop();
+    long unsigned int str1 = (long unsigned int) pop();
+    push((MYINT) strstr((char *)str1, (char *)str2));
 }
