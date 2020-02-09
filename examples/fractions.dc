@@ -4,7 +4,7 @@
 
 : fracadd rot 2dup * dup -2rot rot * -rot * + -rot drop simplify ;
 
-: fracsub swap -1 * swap fracadd ; 
+: fracsub swap -1 * swap fracadd ;
 
 : fracmul rot * -rot * swap simplify ;
 

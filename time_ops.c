@@ -3,7 +3,7 @@
 struct timeval tval;
 
 static void clockfunc()
-{  
+{
     gettimeofday(&tval, NULL);
     MYFLT now = (tval.tv_sec * 1000000) + tval.tv_usec;
     push(now);

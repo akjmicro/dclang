@@ -2,7 +2,7 @@
   1 if
     "This is true" print
   else
-    "This is false" print 
+    "This is false" print
   endif
 ;
 teststr

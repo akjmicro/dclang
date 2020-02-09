@@ -4,13 +4,13 @@
     "The time difference is: " print .. "μs" print cr
 ;
 
-: sl-helper 
+: sl-helper
    # ( sum max cur )
    rot       # ( max cur sum )
    over      # ( max cur sum cur )
    +         # ( max cur sum1 )
    rot rot   # ( cur sum1 max -- sum1 max cur )
-;   
+;
 
 : recur-loop
     1 +        # sum cur'
@@ -36,7 +36,7 @@
 : testfor
     clock 0
     20000001 0 1 for
-      i +
+      i
     next
     clock
     swap
@@ -45,7 +45,7 @@
 : testtimes
     clock 0
     20000001 times
-      i +
+      i
     again
     clock
     swap
@@ -62,12 +62,12 @@
     swap
 ;
 
-"\nThis will show how various ways of composing loops are more efficient. 
+"\nThis will show how various ways of composing loops are more efficient.
 In general, go with the simplest case, and avoid logical and stack
 operations inside of loops, when you can.  Hence, the the first 'manual'
 loop here, using indexing via recursion, is the worst performer, and the
 simple 'times' loop at the end is the fastest.
-" print 
+" print
 
 "\nTesting loop using recursion\n" print
 test_recur

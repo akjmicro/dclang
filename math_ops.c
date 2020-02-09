@@ -31,14 +31,14 @@ static void lshiftfunc()
 {
     unsigned MYINT shift_amt = (unsigned MYINT) pop();
     unsigned MYINT base = (unsigned MYINT) pop();
-    push(base << shift_amt);    
+    push(base << shift_amt);
 }
 
 static void rshiftfunc()
 {
     unsigned MYINT shift_amt = (unsigned MYINT) pop();
     unsigned MYINT base = (unsigned MYINT) pop();
-    push(base >> shift_amt);    
+    push(base >> shift_amt);
 }
 
 static void absfunc()
@@ -97,7 +97,7 @@ static void logfunc()
 
 static void log2func()
 {
-    push(log2(pop())); 
+    push(log2(pop()));
 }
 
 static void log10func()

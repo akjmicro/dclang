@@ -50,7 +50,7 @@ char *get_token() {
         if (strchr("\"", ch)) {
             // call the sub-routine to deal with the string:
             stringfunc();
-            continue;  
+            continue;
         } else {
             add_to_buf(ch);
             break;

@@ -6,7 +6,7 @@
 
 : deck-setup
   NUM-CARDS 0 1 for
-    i i DECK-START + ! 
+    i i DECK-START + !
   next
 ;
 
@@ -21,8 +21,8 @@
 : shuffle-deck
   0 TEMP-SLOT !
   NUM-CARDS times
-      i DECK-START +
-      rand NUM-CARDS * floor DECK-START +
+      i DECK-START
+      rand NUM-CARDS * floor DECK-START
       cell-swap
   again
 ;

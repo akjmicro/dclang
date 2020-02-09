@@ -1,4 +1,4 @@
-: fibo-setup 
+: fibo-setup
   0 1     # ( n 0 1 )
   rot     # ( 0 1 n )
   0 1     # ( 0 1 n 0 1 )
@@ -7,7 +7,7 @@
 : fibonacci
   fibo-setup   # ( 0 1 to from step ) ; 'to' is put in front of 'fibo-setup'
   for
-    tuck +
+    tuck
     swap dup . swap    # output
   next
 ;

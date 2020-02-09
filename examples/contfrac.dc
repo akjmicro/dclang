@@ -20,7 +20,7 @@ drop drop
 : expansion-index 0 ;
 : numerator-index 1 ;
 : denominator-index 2 ;
-: advance     
+: advance
   dup      # ( addr addr )
   @ 3 +    # ( addr val )
   swap     # ( val addr )
@@ -45,7 +45,7 @@ drop drop
     expansion-get
     numerator-get *
     numerator-lag +
-    dup ..           
+    dup ..
     numerator-lead-put
 
     "/" print

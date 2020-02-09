@@ -14,7 +14,7 @@
         k * sin 1.5 * 1.5 + floor
         @ emit
       again
-      cr           
+      cr
     again
   0.055 sleep
   again
