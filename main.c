@@ -29,6 +29,7 @@ Born on 2018-05-05 */
 */
 
 #define MYINT long
+#define MYUINT long
 #define MYFLT double
 // end of data type macros
 

@@ -8,7 +8,7 @@ EXECUTABLE = dclang
 %.o: %.c
 	$(CC) -c -o $@ $< $(CFLAGS)
 
-$(EXECUTABLE): $(OBJECTS) 
+$(EXECUTABLE): $(OBJECTS)
 	$(CC) $(OBJECTS) -o $@ $(LDFLAGS)
 
 clean:

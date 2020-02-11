@@ -1,0 +1,21 @@
+: timesq
+  10 times
+    10 times
+      0 j =
+      9 j =
+        or
+      0 i =
+      9 i =
+        or
+      or
+      if
+        8987 uemit
+      else
+        8986 uemit
+      endif
+    again
+    cr
+  again
+;
+
+timesq
