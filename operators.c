@@ -4,7 +4,7 @@ struct primitive {
   void (*function) (void);
 };
 
-static struct primitive primitives[100] = {
+static struct primitive primitives[102] = {
   // null
   {"null", nullfunc},
   {"isnull", isnullfunc},
@@ -112,9 +112,11 @@ static struct primitive primitives[100] = {
   {"file-read", filereadfunc},
   {"file-seek", fileseekfunc},
   {"file-write", filewritefunc},
+  {"file-flush", fileflushfunc},
   {"file-close", fileclosefunc},
   {"redirect", redirectfunc},
   {"resetout", resetoutfunc},
+  {"flush", flushoutfunc},
   // user functions listing
   {"show-user-functions", showdefined}
 };

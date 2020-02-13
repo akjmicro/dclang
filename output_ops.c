@@ -55,10 +55,15 @@ static void redirectfunc()
         printf("Stack underflow! 'redirect needs an output file pointer before being called\n");
         return;
     }
-    ofp = (FILE *)(unsigned long int) pop();
+    ofp = (FILE *)(MYUINT) pop();
 }
 
 static void resetoutfunc()
 {
     ofp = stdout;
+}
+
+static void flushoutfunc()
+{
+    fflush(ofp);
 }

@@ -71,3 +71,14 @@ void filewritefunc() {
     fwrite(str, 1, strlen(str), file_to_write);
     fflush(file_to_write);
 }
+
+void fileflushfunc()
+{
+    if (data_stack_ptr < 2) {
+        printf("Stack underflow!\n");
+        printf("'file-write' needs <string-address> <file-pointer> on the stack\n");
+        return;
+    }
+    FILE *file_to_flush = (FILE *)(MYUINT) pop();
+    fflush(file_to_flush);
+}

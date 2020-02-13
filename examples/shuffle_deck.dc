@@ -20,12 +20,13 @@
 
 : shuffle-deck
   0 TEMP-SLOT !
-  NUM-CARDS times
-      i DECK-START
-      rand NUM-CARDS * floor DECK-START
+  NUM-CARDS 1 + times
+      i
+      rand NUM-CARDS * floor
       cell-swap
   again
 ;
+
 
 : printout-deck
   NUM-CARDS times
