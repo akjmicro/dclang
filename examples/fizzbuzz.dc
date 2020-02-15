@@ -1,0 +1,28 @@
+# Inspired by https://blog.codinghorror.com/why-cant-programmers-program/
+
+# Note how to make a "case/switch" style structure, using if/else/endif,
+# I simply refused to indent, because the terms are mutually-exclusive.
+# Just follow the structure with the correct number of 'endif' words
+# to close it all off...
+
+: fizzbuzz
+101 1 1 for
+	i 3 % 0 =
+	i 5 % 0 = and
+	if
+	  "FizzBuzz " print
+	else
+	i 3 % 0 =
+	if
+	  "Fizz " print
+	else
+	i 5 % 0 =
+	if
+	  "Buzz " print
+	else
+	  i .
+    endif endif endif
+next
+;
+
+fizzbuzz cr

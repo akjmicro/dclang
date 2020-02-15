@@ -1,6 +1,9 @@
 char string_pad[1048576];
 unsigned long string_here;
 
+MYUINT MIN_STR = 0;
+MYUINT MAX_STR = 0;
+
 static void stringfunc()
 {
     long ch;
@@ -30,14 +33,20 @@ static void stringfunc()
     unsigned long string_size = (unsigned long)(string_here - string_start);
     char *string_dest = malloc(string_size + 1);
     // number for stack needs to be a double:
-    double string_dest_dbl = (double)(unsigned long) string_dest;
+    MYUINT string_dest_uint = (MYUINT) string_dest;
+    if (string_dest_uint < MIN_STR || MIN_STR == 0) {
+        MIN_STR = string_dest_uint;
+    }
+    if (string_dest_uint + string_size + 1 > MAX_STR || MAX_STR == 0) {
+        MAX_STR = string_dest_uint + string_size + 1;
+    }
     char nullstr[] = "\0";
-    memcpy(string_dest, (char *)((unsigned long)&string_pad[0] + string_addr), string_size);
+    memcpy(string_dest, (char *)((MYUINT)&string_pad[0] + string_addr), string_size);
     if (def_mode) {
         prog[iptr].function.with_param = push;
-        prog[iptr++].param = string_dest_dbl;
+        prog[iptr++].param = string_dest_uint;
     } else {
-        push(string_dest_dbl);
+        push(string_dest_uint);
     }
 }
 
@@ -50,6 +59,10 @@ static void printfunc()
     MYUINT string_dest = (MYUINT) pop();
     if (string_dest == NULL) {
         printf("print -- Nothing to print.");
+        return;
+    }
+    if (string_dest < MIN_STR || string_dest > MAX_STR) {
+        perror("print -- String address out-of-range.");
         return;
     }
     fprintf(ofp, "%s", (char *)string_dest);
