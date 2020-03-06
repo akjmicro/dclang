@@ -1,3 +1,5 @@
+#!/usr/local/bin/dclang
+
 # Inspired by https://blog.codinghorror.com/why-cant-programmers-program/
 
 # Note how to make a "case/switch" style structure, using if/else/endif,
