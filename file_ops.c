@@ -36,9 +36,15 @@ void filereadfunc() {
     }
     FILE *file_to_read = (FILE *)(MYUINT) pop();
     MYINT num_bytes = (MYUINT) pop();
-    char *buf = malloc(num_bytes + 1);
+    char *buf = malloc(num_bytes);
     MYUINT num_bytes_read = fread(buf, num_bytes, 1, file_to_read);
-    buf[num_bytes_read + 1] = "\0";
+    // update print safety:
+    if ((MYUINT)buf < MIN_STR || MIN_STR == 0) {
+        MIN_STR = (MYUINT)buf;
+    }
+    if ((MYUINT)buf + num_bytes_read + 1 > MAX_STR || MAX_STR == 0) {
+        MAX_STR = (MYUINT)buf + num_bytes_read + 1;
+    }
     // push the address of our new string and length
     push((MYUINT)buf);
 }
@@ -58,6 +64,17 @@ void fileseekfunc() {
     }
     MYINT offset = (MYINT) pop();
     fseek(file_to_seek, offset, whence);
+}
+
+void filetellfunc() {
+    if (data_stack_ptr < 1) {
+        printf("Stack underflow!\n");
+        printf("'file-tell' needs a <file-pointer> on the stack\n");
+        return;
+    }
+    FILE *file_to_tell = (FILE *)(MYUINT) pop();
+    MYUINT mylen = ftell(file_to_tell);
+    push((MYUINT) mylen);
 }
 
 void filewritefunc() {

@@ -1,0 +1,27 @@
+: _hash_djb2
+  # Implementation of djb2 hashing algorithm...
+  # Can be used in conjunction with peek and poke
+  # ( @ and ! ) to implement a hashing table.
+  # On the stack should be a string (address)
+  5381 over
+  strlen 0 1 for      
+    dup 5 << + over i + ord +
+    # Since dclang uses a float stack, we want to fold
+    # the values to be under 2^32 - 1:
+    0xffffffff and
+  next
+  swap drop
+;
+
+# sets up an alias. If we have other hashing algorithms,
+# we can change what 'hash' points to.
+: hash _hash_djb2 ;
+
+###############################################
+# Here's how you might try out the hash word. #
+# You can experiment with folding into a      #
+# smaller space, (256 slots in the example)   # 
+###############################################
+
+# 31217 "myvalue" hash 256 % !
+# "myvalue" hash 256 % @ 31217 = assert
