@@ -136,7 +136,6 @@ static void import(char *infilestr) {
     infile = fopen(infilestr, "r");
     setinput(infile);
     repl();
-    fclose(infile);
 }
 
 

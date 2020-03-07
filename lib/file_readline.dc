@@ -1,5 +1,5 @@
 : file-readline-loop
-  over 1 swap file-read
+  1 2 pick file-read
   dup
   ord 10 =
   if
@@ -15,6 +15,6 @@
   dup file-tell
   file-readline-loop
   over file-tell over -
-  -rot 0 2over swap drop
-  file-seek file-read
+  -rot 0 2 pick file-seek
+  tuck file-read
 ;
