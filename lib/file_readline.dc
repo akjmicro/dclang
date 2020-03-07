@@ -18,12 +18,3 @@
   -rot 0 2over swap drop
   file-seek file-read
 ;
-
-: file-rl-strip
-  # same as the above, but do not include the newline itself.
-  dup file-tell
-  file-readline-loop
-  over file-tell over - 1 -
-  -rot 0 2over swap drop
-  file-seek file-read
-;
