@@ -1,0 +1,20 @@
+: file-readline-loop
+  over 1 swap file-read
+  dup
+  ord 10 =
+  if
+    free   
+  else
+    free
+    file-readline-loop
+  endif
+;
+
+: file-readline
+  # put a file-pointer on the stack
+  dup file-tell
+  file-readline-loop
+  over file-tell over -
+  -rot 0 2over swap drop
+  file-seek file-read
+;

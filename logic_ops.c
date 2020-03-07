@@ -54,7 +54,7 @@ static void ltefunc()
 static void assertfunc()
 {
   MYINT truth = pop();
-  if (!truth) {
+  if (truth == 0) {
       printf("ASSERT FAIL!\n");
   }
 }

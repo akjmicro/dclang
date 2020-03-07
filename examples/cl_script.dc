@@ -1,0 +1,3 @@
+#!/usr/local/bin/dclang
+
+"Hello, world!" print cr
