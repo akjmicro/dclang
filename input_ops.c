@@ -64,14 +64,14 @@ static void compile_or_interpret(const char *argument)
     }
 
     // search user-defined functions (words)
-    for (MYINT x = num_user_functions - 1; x > -1 ; x--) {
-        if (strcmp(user_functions[x].name, argument) == 0) {
+    for (MYINT x = num_user_words - 1; x > -1 ; x--) {
+        if (strcmp(user_words[x].name, argument) == 0) {
             if (def_mode) {
                 prog[iptr].function.with_param = callfunc;
-                prog[iptr++].param = user_functions[x].func_start;
+                prog[iptr++].param = user_words[x].word_start;
             } else {
                 MYINT cur_iptr = iptr;
-                callfunc(user_functions[x].func_start);
+                callfunc(user_words[x].word_start);
                 // run the function
                 while (iptr < cur_iptr) {
                     iptr += 1;

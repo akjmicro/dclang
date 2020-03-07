@@ -235,3 +235,23 @@ static void tuck2func()
     push(val2);
     push(val1);
 }
+
+static void pickfunc()
+{
+    if (data_stack_ptr < 1) {
+         printf("pick -- stack underflow!\n");
+         return;
+    }
+    MYUINT pick_idx = (MYUINT) pop();
+    if (data_stack_ptr < (pick_idx + 1)) {
+        printf("pick -- stack not deep enough!\n");
+        return;
+    }
+    push(data_stack[data_stack_ptr - (pick_idx + 1)]);
+}
+
+static void clearfunc()
+{
+    // clears the stack!
+    data_stack_ptr = 0;
+}

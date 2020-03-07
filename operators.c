@@ -4,7 +4,7 @@ struct primitive {
   void (*function) (void);
 };
 
-static struct primitive primitives[103] = {
+static struct primitive primitives[105] = {
   // null
   {"null", nullfunc},
   {"isnull", isnullfunc},
@@ -54,18 +54,20 @@ static struct primitive primitives[103] = {
   // randomness
   {"rand", randfunc},
   // stack operators
+  {"clear", clearfunc},
   {"drop", dropfunc},
   {"dup", dupfunc},
-  {"swap", swapfunc},
   {"over", overfunc},
+  {"pick", pickfunc},
+  {"swap", swapfunc},
   {"rot", rotfunc},
   {"-rot", rotnegfunc},
   {"nip", nipfunc},
   {"tuck", tuckfunc},
   {"2drop", drop2func},
   {"2dup", dup2func},
-  {"2swap", swap2func},
   {"2over", over2func},
+  {"2swap", swap2func},
   {"2rot", rot2func},
   {"-2rot", rotneg2func},
   {"2nip", nip2func},
@@ -119,7 +121,7 @@ static struct primitive primitives[103] = {
   {"resetout", resetoutfunc},
   {"flush", flushoutfunc},
   // user functions listing
-  {"show-user-functions", showdefined}
+  {"show-user-words", showdefined}
 };
 
 
