@@ -2,10 +2,19 @@
 static void showfunc()
 {
     if (data_stack_ptr < 1) {
-        printf("stack underflow! ");
+        printf(". (pop) -- stack underflow! ");
         return;
     }
     fprintf(ofp, "%0.16g ", pop());
+}
+
+static void showhexfunc()
+{
+    if (data_stack_ptr < 1) {
+        printf("h. (hexpop) -- stack underflow! ");
+        return;
+    }
+    fprintf(ofp, "%a ", pop());
 }
 
 static void shownospacefunc()

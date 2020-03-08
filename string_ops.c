@@ -57,7 +57,7 @@ static void printfunc()
         return;
     }
     MYUINT string_dest = (MYUINT) pop();
-    if (string_dest == NULL) {
+    if (string_dest == 0) {
         printf("print -- Nothing to print.");
         return;
     }
@@ -85,10 +85,9 @@ static void emitfunc()
         printf("emit -- stack underflow! ");
         return;
     }
-    long char_code = (long) pop();
-    char charbuf[2] = { char_code, 0 };
-    fprintf(ofp, "%s", charbuf);
-    fflush(stdout);
+    char char_code = (char) pop();
+    fprintf(ofp, "%c", char_code);
+    fflush(ofp);
 }
 
 /* utf-8 char buffer */
@@ -164,8 +163,8 @@ static void tohexfunc()
         printf("tohex -- stack underflow! ");
         return;
     }
-    MYUINT val = (MYUINT) pop();
-    fprintf(ofp, "0x%.2x", val);
+    MYINT val = (MYINT) pop();
+    fprintf(ofp, "0x%.2lx", val);
     fflush(ofp);
 }
 
@@ -221,4 +220,20 @@ static void strfindfunc()
     MYUINT str2 = (MYUINT) pop();
     MYUINT str1 = (MYUINT) pop();
     push((MYINT) strstr((char *)str1, (char *)str2));
+}
+
+static void bytes32func()
+{
+    MYINT32 val = (MYINT32) pop();
+    char low = (char) val & 0xff;
+    val >>= 8;
+    char lowmid = (char) val & 0xff;
+    val >>= 8;
+    char highmid = (char) val & 0xff;
+    val >>= 8;
+    char high = (char) val & 0xff;
+    fputc(low, ofp);
+    fputc(lowmid, ofp);
+    fputc(highmid, ofp);
+    fputc(high, ofp);
 }

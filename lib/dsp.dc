@@ -1,0 +1,103 @@
+# definition of 2pi
+: 2PI 6.283185307179586 ;
+# definition of 2 / pi
+: PI_DIV_2 1.570796326794897 ;
+# sample rate and bit depth here
+# can be 8000e, 44100e, etc. etc
+: SAMPLE_RATE 48000 ;
+# more efficient, for multiplication:
+: INV_SAMPLE_RATE 0.000020833333333333333 ;
+# useful in normalized frequency calculations:
+: 2PIDSR 0.0001308996938995747 ;
+# 32-bit audio sample depth
+: BIT_DEPTH 0x3fffffff ;
+
+# some shortcuts:
+: & and ;
+: | or ;
+: ^ xor ;
+: sq dup * ;
+
+# setup timestamp; unit will be samples.
+: SAMPLE_CLOCK 0 ;
+0 SAMPLE_CLOCK !
+# setup channels
+: LCHAN 1 ;
+: RCHAN 2 ;
+
+# We need to create a common, general space for phasor accumulators.
+# that happens here:
+# phasor count idx lives at addy 1
+: _PHASOR_COUNT 3 ;
+# array lives at addy 2
+: _PHASOR_ARRAY 4 ;
+
+: _reset_phasor_count
+  0 _PHASOR_COUNT !
+;
+
+: _advance_phasor_count
+  _PHASOR_COUNT @ 1 + _PHASOR_COUNT !
+;
+
+: seconds2samples 
+  SAMPLE_RATE * round ;
+
+: freq2sample_phase INV_SAMPLE_RATE * ;
+
+: phasor-pointer
+  _PHASOR_ARRAY _PHASOR_COUNT @ +
+;
+
+: phasor
+  # get current phase; wrap around 0-1:
+  freq2sample_phase
+  # grab the accumulator value:
+  phasor-pointer @
+  # add, wrap-around from 0.0-1.0
+  + 1.0 %
+  # write back current value:
+  dup phasor-pointer !
+  # update count reference (this will be reset by the clock advance) :
+  _advance_phasor_count
+;
+
+# phase --> sine
+: sine phasor 2PI * sin ;
+
+# sample clock (timestamp) and channel routines here
+: t SAMPLE_CLOCK @ ;
+: lcget LCHAN @ ;
+: lcset LCHAN ! ;
+: rcget RCHAN @ ;
+: rcset RCHAN ! ;
+: _clear_channels
+  0.0 lcset 0.0 rcset
+;
+
+: t+
+  # advance the clock
+  1 SAMPLE_CLOCK @ + SAMPLE_CLOCK !
+  _clear_channels 
+  _reset_phasor_count
+;
+
+# will send out to global L and R channels 
+# ( sig pan -- )
+: panmix
+  2dup
+  PI_DIV_2 * sin
+  * lcget + lcset
+  PI_DIV_2 * cos
+  * rcget + rcset
+;
+
+# sending out the signal
+: sendout
+  BIT_DEPTH * round bytes32
+;
+
+: stereo-out
+  lcget sendout
+  rcget sendout
+;

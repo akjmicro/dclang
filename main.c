@@ -28,8 +28,10 @@ Born on 2018-05-05 */
    I've found it crawls to a halt on the benchmarks if you use 'float'!
 */
 
+#define MYINT32 int
+#define MYUINT32 unsigned int
 #define MYINT long
-#define MYUINT long
+#define MYUINT unsigned long
 #define MYFLT double
 // end of data type macros
 
@@ -90,16 +92,16 @@ MYINT def_mode;
 
 // needed so we can add 'import' to primitives
 void load_extra_primitives() {
-    primitives[101].name = "show-primitives";
-    primitives[101].function = show_primitivesfunc;
-    primitives[102].name = "import";
-    primitives[102].function = importfunc;
-    primitives[103].name = "input";
-    primitives[103].function = inputfunc;
+    primitives[103].name = "show-primitives";
+    primitives[103].function = show_primitivesfunc;
+    primitives[104].name = "import";
+    primitives[104].function = importfunc;
+    primitives[105].name = "input";
+    primitives[105].function = inputfunc;
     /* final endpoint must be zeros,
        and they won't count in the 'count': */
-    primitives[104].name = 0;
-    primitives[104].function = 0;
+    primitives[106].name = 0;
+    primitives[106].function = 0;
 }
 
 

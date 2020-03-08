@@ -29,16 +29,16 @@ static void modfunc()
 
 static void lshiftfunc()
 {
-    unsigned MYINT shift_amt = (unsigned MYINT) pop();
-    unsigned MYINT base = (unsigned MYINT) pop();
-    push(base << shift_amt);
+    MYUINT shift_amt = (MYUINT) pop();
+    MYUINT base = (MYUINT) pop();
+    push((MYUINT) base << shift_amt);
 }
 
 static void rshiftfunc()
 {
-    unsigned MYINT shift_amt = (unsigned MYINT) pop();
-    unsigned MYINT base = (unsigned MYINT) pop();
-    push(base >> shift_amt);
+    MYUINT shift_amt = (MYUINT) pop();
+    MYUINT base = (MYUINT) pop();
+    push((MYUINT) base >> shift_amt);
 }
 
 static void absfunc()
