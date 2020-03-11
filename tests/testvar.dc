@@ -1,0 +1,50 @@
+"testing global create" print cr
+
+create something 456 , 789 ,
+something @ 456 = assert
+something 1 + @ 789 = assert
+
+"Testing `create` from a function" print cr
+: test-create
+create 100 , 200 ,
+;
+
+test-create creation
+creation @ 100 = assert
+creation 1 + @ 200 = assert
+
+"Testing global variables" print cr
+var foo
+var bar
+
+"Testing `var` setting from a function" print cr
+: testvar 20 foo ! 30 bar ! ;
+
+testvar
+
+foo @ 20 = assert
+bar @ 30 = assert
+
+
+"Testing setting variables from a function" print cr
+: testfuncvar 1 drop var 4 allot ;
+
+testfuncvar alpha
+2632.12 alpha !
+alpha @ 2632.12 = assert
+"Address of alpha: " print alpha . cr
+
+testfuncvar beta
+1111 beta !
+beta @ 1111 = assert
+"Address of beta: " print beta . cr
+
+
+"Testing distance between variable addresses" print cr
+beta alpha - 4 = assert
+
+: showvars 16 times i @ . again ;
+
+showvars cr
+
+words

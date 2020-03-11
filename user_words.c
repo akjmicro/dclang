@@ -17,11 +17,11 @@
 
 typedef struct {
     const char *name;
-    MYINT word_start;
+    MYUINT word_start;
 } user_word;
 
 user_word user_words[1024];
-MYINT num_user_words;
+MYUINT num_user_words;
 
 /* for debugging */
 static void showdefined()
@@ -52,7 +52,7 @@ static void returnfunc()
 }
 
 /* respond to ':' token: */
-static void startdeffunc()
+static void startword()
 {
     /* grab name */
     char *this_token;
@@ -64,8 +64,9 @@ static void startdeffunc()
 }
 
 /* respond to ';' token: */
-static void enddeffunc()
+static void endword()
 {
     /* Simply insert a return call into 'prog' where 'iptr' now points. */
-    prog[iptr++].function.without_param = returnfunc;
+    prog[iptr].function.without_param = returnfunc;
+    max_iptr = iptr++;
 }

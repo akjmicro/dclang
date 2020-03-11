@@ -4,7 +4,7 @@ struct primitive {
   void (*function) (void);
 };
 
-static struct primitive primitives[107] = {
+static struct primitive primitives[112] = {
   // null
   {"null", nullfunc},
   {"isnull", isnullfunc},
@@ -72,9 +72,6 @@ static struct primitive primitives[107] = {
   {"-2rot", rotneg2func},
   {"2nip", nip2func},
   {"2tuck", tuck2func},
-  // variables in memory
-  {"!", pokefunc},
-  {"@", peekfunc},
   // branching
   {"times", timesfunc},
   {"again", againfunc},
@@ -122,8 +119,16 @@ static struct primitive primitives[107] = {
   {"redirect", redirectfunc},
   {"resetout", resetoutfunc},
   {"flush", flushoutfunc},
-  // user functions listing
-  {"show-user-words", showdefined}
+  // raw variables in memory
+  {"!", pokefunc},
+  {"@", peekfunc},
+  // named constants & variables
+  {"const", constantfunc},
+  {"var", variablefunc},
+  {"allot", allotfunc},
+  {"create", createfunc},
+  {",", commafunc},
+  {"words", showdefined}
 };
 
 

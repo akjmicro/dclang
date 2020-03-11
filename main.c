@@ -14,7 +14,7 @@ Born on 2018-05-05 */
 #include <time.h>
 
 #define DATA_STACK_SIZE 128
-#define RETURN_STACK_SIZE 256
+#define RETURN_STACK_SIZE 128
 #define DELIM " "
 #define MAXWORD 65536
 #define IBUFSIZE 128
@@ -69,6 +69,7 @@ typedef struct {
  i.e. the 'program' will live: */
 inst_struct prog[MAXWORD];
 MYINT iptr;
+MYUINT max_iptr;
 
 // flag for if we are defining a new word (function)
 MYINT def_mode;
@@ -82,26 +83,26 @@ MYINT def_mode;
 #include "branch_ops.c"
 #include "output_ops.c"
 #include "string_ops.c"
-#include "variable_ops.c"
 #include "token.c"
 #include "file_ops.c"
 #include "user_words.c"
+#include "variable_ops.c"
 #include "operators.c"
 #include "input_ops.c"
 
 
 // needed so we can add 'import' to primitives
 void load_extra_primitives() {
-    primitives[103].name = "show-primitives";
-    primitives[103].function = show_primitivesfunc;
-    primitives[104].name = "import";
-    primitives[104].function = importfunc;
-    primitives[105].name = "input";
-    primitives[105].function = inputfunc;
+    primitives[108].name = "primitives";
+    primitives[108].function = show_primitivesfunc;
+    primitives[109].name = "import";
+    primitives[109].function = importfunc;
+    primitives[110].name = "input";
+    primitives[110].function = inputfunc;
     /* final endpoint must be zeros,
        and they won't count in the 'count': */
-    primitives[106].name = 0;
-    primitives[106].function = 0;
+    primitives[111].name = 0;
+    primitives[111].function = 0;
 }
 
 
@@ -127,8 +128,8 @@ int main(int argc, char **argv)
     if (live_repl) {
         printf("Welcome to dclang! Aaron Krister Johnson, 2020\n");
         printf("Make sure to peruse README.md to get your bearings!\n");
-        printf("You can type 'show-primitives' to see a list of all the primitive (c-builtin) words.\n");
-        printf("You can type 'show-user-functions' to see a list of functions defined within dclang.\n");
+        printf("You can type 'primitives' to see a list of all the primitive (c-builtin) words.\n");
+        printf("You can type 'words' to see a list of functions defined within dclang.\n");
         show_primitivesfunc();
         repl();
     }

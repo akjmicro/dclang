@@ -1,0 +1,27 @@
+"../lib/dsp.dc" import
+
+0.09 0.75 create-port-struct myport
+
+: mymetronome
+  300 sine
+  2.01 metro 0.7 *
+  myport port *
+  0.4 panmix
+
+  350.11 sine
+  2.51 metro 0.7 *
+  myport port *
+  0.3 sine * 0.4 0.4 +
+  panmix
+
+  450.231 sine
+  3.01 metro 0.7 *
+  myport port *
+  0.6 panmix
+  stereo-out
+  t+
+  mymetronome
+;
+
+mymetronome
+

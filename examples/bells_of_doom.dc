@@ -1,0 +1,36 @@
+"../lib/dsp.dc" import
+
+# portamento vars
+0.04 3 create-port-struct port-struct
+0.05 1.5 create-port-struct port-struct-two
+
+: bells_of_doom
+  # FM oscillator:
+  230 6.37 sine 0.015 * 0.5723 + 0.9 fm
+  # trigger for portamento envelope
+  0.2 metro 0.35 *
+  # reference array for port and portamento call
+  port-struct port *
+  # moving pan signal
+  0.13 sine 0.4 * 0.41 +
+  panmix
+
+  # another FM oscillator:
+  164 0.7 0.9 fm
+  # trigger for 2nd portamento envelope
+  0.5 metro 0.4 *
+  # reference array for port and portamento call
+  port-struct-two port *
+  # another moving pan signal:
+  0.1 sine 0.4 * 0.41 + abs
+  panmix
+
+  # send outputs:
+  stereo-out
+  # advance sample clock, clear channels
+  t+
+  # recur
+  bells_of_doom
+;
+
+bells_of_doom

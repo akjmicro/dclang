@@ -73,7 +73,7 @@ static void compile_or_interpret(const char *argument)
                 MYINT cur_iptr = iptr;
                 callfunc(user_words[x].word_start);
                 // run the function
-                while (iptr < cur_iptr) {
+                while (iptr < max_iptr) {
                     iptr += 1;
                     (*(prog[iptr].function.with_param)) (prog[iptr].param);
                 }
@@ -108,12 +108,12 @@ static void repl() {
     while (strcmp(token = get_token(), "EOF")) {
         // are we dealing with a function definition?
         if (strcmp(token, ":") == 0) {
-            startdeffunc();
+            startword();
             def_mode = 1;
             continue; // goto top of loop
         }
         if (strcmp(token, ";") == 0) {
-            enddeffunc();
+            endword();
             def_mode = 0;
             continue; // goto top of loop
         }
