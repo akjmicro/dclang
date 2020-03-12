@@ -107,25 +107,24 @@ DELAY_HEADER_SIZE 6SEC_STORAGE_SIZE + const DELAY_STRUCT_SIZE
 : _set-delay-value         dup _get-delay-position DELAY_HEADER_SIZE + + ! ;
 : _read-delay-pos-wrapped  over @ % DELAY_HEADER_SIZE + + @ ;
 
-: _get-floor-val floor _read-delay-pos-wrapped ;
+: _get-floor-val
+  2dup floor _read-delay-pos-wrapped
+;
 
-: _get-ceil-val ceil _read-delay-pos-wrapped ;
+: _get-ceil-val
+  2 pick 2 pick ceil _read-delay-pos-wrapped
+;
 
 : _interpolate
   # ( real-val floor-val ceil-val -- interpolated_val )
-  dup rot - rot 1.0 % * -
+  over - rot 1.0 % * +
 ;
 
 : delay-read
   # ( delay-struct time -- delsig )
   # calculate real time offset, and integer time offset in samples:
   SAMPLE_RATE *
-  # where are we on the circular buffer 'clock'?
-  2dup _get-floor-val
-  2 pick 2 pick _get-ceil-val
-  # average the two values by linear 'distance' interpolation:
-  _interpolate
-  # ( delay-struct sigout )
+  _get-floor-val _get-ceil-val _interpolate
   swap drop
 ;
 
