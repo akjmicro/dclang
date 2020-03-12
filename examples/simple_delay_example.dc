@@ -1,0 +1,32 @@
+"../lib/dsp.dc" import
+
+# create a delay line
+create-delay-line my-delay-line
+my-delay-line init-delay-line
+
+0.03 0.6 create-port-struct my-port-struct
+
+# example function
+: simple-delay-example
+
+  440 sine
+  0.4333 metro 0.8 *
+  my-port-struct port *
+  my-delay-line 0.4462 delay-read 0.75 *
+  2dup +
+  my-delay-line delay-write
+  0.5 * +
+  ##########
+  # OUTPUT #
+  ##########
+  # center pan
+  0.5 panmix
+  # output
+  stereo-out
+  # advance the clock
+  t+
+  # loop
+  simple-delay-example
+;
+
+simple-delay-example

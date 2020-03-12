@@ -86,26 +86,28 @@ var _PHASOR_ARRAY 64 allot
 # delay stuff #
 ###############
 
-SAMPLE_RATE 3 * const 6SEC_STORAGE_SIZE
+SAMPLE_RATE 8 * const 8SEC_STORAGE_SIZE
 2 const DELAY_HEADER_SIZE
-DELAY_HEADER_SIZE 6SEC_STORAGE_SIZE + const DELAY_STRUCT_SIZE
+DELAY_HEADER_SIZE 8SEC_STORAGE_SIZE + const DELAY_STRUCT_SIZE
 
 : create-delay-line var DELAY_STRUCT_SIZE allot ;
 
 : init-delay-line
   # ( delay-struct -- )
-  6SEC_STORAGE_SIZE over !
+  8SEC_STORAGE_SIZE over !
   0 over 1 + !
-  6SEC_STORAGE_SIZE times
+  8SEC_STORAGE_SIZE times
     0.0 over i + DELAY_HEADER_SIZE + !
   again
   drop
 ;
 
+: %abs 2dup % over + swap % swap drop ;
+
 : _get-delay-position      1 + @ ;
 : _set-delay-position      1 + ! ;
 : _set-delay-value         dup _get-delay-position DELAY_HEADER_SIZE + + ! ;
-: _read-delay-pos-wrapped  over @ % DELAY_HEADER_SIZE + + @ ;
+: _read-delay-pos-wrapped  over @ %abs DELAY_HEADER_SIZE + + @ ;
 
 : _get-floor-val
   2dup floor _read-delay-pos-wrapped
@@ -122,8 +124,10 @@ DELAY_HEADER_SIZE 6SEC_STORAGE_SIZE + const DELAY_STRUCT_SIZE
 
 : delay-read
   # ( delay-struct time -- delsig )
-  # calculate real time offset, and integer time offset in samples:
+  # convert time offset to samples:
   SAMPLE_RATE *
+  # add distance from write offset:
+  over _get-delay-position swap -
   _get-floor-val _get-ceil-val _interpolate
   swap drop
 ;
