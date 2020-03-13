@@ -1,23 +1,30 @@
 # definition of 2pi
 pi 2 * const 2PI
+
 # definition of 2 / pi
 pi 2 / const PI_DIV_2
+
 # sample rate and bit depth here
 # can be 8000e, 44100e, etc. etc
 48000 const SAMPLE_RATE
+
 # more efficient, for multiplication
 1 SAMPLE_RATE / const INV_SAMPLE_RATE
+
 # useful in normalized frequency calculations:
 2PI SAMPLE_RATE / const 2PIDSR
+
 # 32-bit audio sample depth
 0x7fffffff const BIT_DEPTH
 
 # setup timestamp; unit will be samples.
 var SAMPLE_CLOCK
 0 SAMPLE_CLOCK !
+
 # setup channels
 var LCHAN
 var RCHAN
+
 # We need to create a common, general space for phasor accumulators.
 # that happens here:
 var _PHASOR_COUNT
@@ -65,7 +72,7 @@ var _PHASOR_ARRAY 64 allot
 
 # a simple metronome trigger:
   # ( freq -- sig )
-: metro phasor 0.001 <= if 1 else 0 endif ;
+: metro phasor 0.001 <= ;
 
 # a gate signal:
 # ( width freq -- sig )
@@ -152,10 +159,10 @@ DELAY_HEADER_SIZE 8SEC_STORAGE_SIZE + const DELAY_STRUCT_SIZE
 #   * fetch the current signal (call it the 'sig')
 #   * if the previous sample is lower than the current signal, add:
 #       sig oldsig - 0.5 * rise-time-in-samples /
-#       and save it to the accumulator
+#       and +/save it to the accumulator
 #   * if the previous sample is higher than the current signal, add:
 #       sig oldsig - 0.5 * fall-time-in-samples /
-#       ...and save it to the accumulator
+#       ...and +/save it to the accumulator
 # Neat bonus: this 'port' ugen can be used to make envelopes!
 # See the example file 'bell_of_doom.fs' for an example.
 
