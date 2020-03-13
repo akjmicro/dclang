@@ -188,6 +188,75 @@ DELAY_HEADER_SIZE 8SEC_STORAGE_SIZE + const DELAY_STRUCT_SIZE
   swap drop over @ + tuck swap !
 ;
 
+##########################
+# filters (non-resonant) #
+##########################
+# Implementation of 1st-order allpass, and derived low- and highpass
+# filters as side-effects. These are filters w/o Q (resonant peaks).
+
+: xt1-allpass 0 + ;
+: yt1-allpass 1 + ;
+: xt2-allpass 2 + ;
+: yt2-allpass 3 + ;
+: prvcf-allpass 4 + ;
+: c-param-allpass 5 + ;
+
+: make-allpass-struct create 6 allot ;
+: make-lowpass-struct make-allpass-struct ;
+: make-highpass-struct make-allpass-struct ;
+
+: reinit-allpass
+  # ( struct -- )
+  0 over xt1-allpass !
+  0 over yt1-allpass !
+  0 over xt2-allpass !      # unused in 1st order
+  0 over yt2-allpass !      # unused in 1st order
+  0 over prvcf-allpass !
+  0 over c-param-allpass !
+;
+
+: _get-c-factor freq2sample_phase pi * tan ;
+
+: calc-c
+  # ( freq -- coeff )
+  _get-c-factor
+  dup 1 - swap 1 + /
+;
+
+: allpass1
+  # ( sig cf struct reinit -- output-sig )
+  {reinit} if
+    {struct} reinit-allpass
+  endif
+  # if cutoff frequency has changed:
+  {struct} prvcf-allpass @ cf <> if
+    cf calc-c {struct} c-param-allpass !
+  endif
+  {struct} c-param-allpass @ { F: c-factor }
+  c-factor sig *
+  {struct} xt1-allpass @ +
+  c-factor {struct} yt1-allpass @ * - { F: y }
+  # UPDATE:
+  {cf} {struct} prvcf-allpass f!
+  y {struct} yt1-allpass f!
+  sig {struct} xt1-allpass f!
+  y ;
+
+: lowpass1
+  # ( sig cf struct reinit -- output-sig )
+  {reinit} if
+    {struct} reinit-allpass
+  endif
+  {sig} {sig} {struct} {reinit} {cf} allpass1 + 0.5 *
+;
+
+: highpass1
+  # ( sig cf struct reinit -- output-sig )
+  reinit if
+    struct reinit-allpass
+  endif
+  sig sig struct reinit cf allpass1 - 0.5 * ;
+
 ##########
 # OUTPUT #
 ##########
