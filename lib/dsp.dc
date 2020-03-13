@@ -71,7 +71,7 @@ var _PHASOR_ARRAY 64 allot
 ;
 
 # a simple metronome trigger:
-  # ( freq -- sig )
+# ( freq -- sig )
 : metro phasor 0.001 <= ;
 
 # a gate signal:
