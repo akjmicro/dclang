@@ -1,4 +1,4 @@
-"../lib/dsp.dc" import
+"dsp.dc" import
 
 # portamento vars
 0.04 2.5 create-port-struct port-struct

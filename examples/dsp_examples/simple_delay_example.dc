@@ -1,4 +1,4 @@
-"../lib/dsp.dc" import
+"dsp.dc" import
 
 # create a delay line
 create-delay-line my-delay-line

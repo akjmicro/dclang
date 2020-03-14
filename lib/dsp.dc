@@ -1,3 +1,7 @@
+###############
+# DCLANG DSP! #
+###############
+
 # definition of 2pi
 pi 2 * const 2PI
 
@@ -57,6 +61,10 @@ var _PHASOR_ARRAY 64 allot
   _PHASOR_ARRAY _PHASOR_COUNT @ +
 ;
 
+###############
+# OSCILLATORS #
+###############
+
 : phasor
   # get current phase; wrap around 0-1:
   freq2sample_phase
@@ -89,9 +97,38 @@ var _PHASOR_ARRAY 64 allot
   2PI * sin
 ;
 
-###############
-# delay stuff #
-###############
+#########
+# NOISE #
+#########
+
+var div_by 0xffffffff 1 >> div_by !
+
+var last_num clock 0xffffffff and last_num !
+
+: bit32mask 0xffffffff and ;
+
+: xorshift-rand
+  last_num @
+  dup 13 << bit32mask xor
+  dup 17 >> bit32mask xor
+  dup  5 << bit32mask xor
+  dup last_num !
+;
+
+: noise
+  # ( -- sig )
+  xorshift-rand div_by / 1.0 % 2 * 1.0 -
+;
+
+: randint
+  # ( range -- int )
+  noise abs * floor
+;
+
+
+#########
+# DELAY #
+#########
 
 SAMPLE_RATE 8 * const 8SEC_STORAGE_SIZE
 2 const DELAY_HEADER_SIZE
@@ -147,11 +184,10 @@ DELAY_HEADER_SIZE 8SEC_STORAGE_SIZE + const DELAY_STRUCT_SIZE
   t over @ % swap _set-delay-position
 ;
 
-########
-# port #
-########
-
-# A portamento can be roughly done by grabbing and saving a previous sample,
+##############
+# PORT (lag) #
+##############
+# A portamento (or lag) can be roughly done by grabbing and saving a previous sample,
 # considering that a starting point for the next sample 'target', and making
 # the decision: is this a rising slope or a falling slope? We have half-way
 # point parameters for both. The algorithm is basically:
@@ -189,7 +225,7 @@ DELAY_HEADER_SIZE 8SEC_STORAGE_SIZE + const DELAY_STRUCT_SIZE
 ;
 
 ##########################
-# filters (non-resonant) #
+# FILTERS (non-resonant) #
 ##########################
 # Implementation of 1st-order allpass, and derived low- and highpass
 # filters as side-effects. These are filters w/o Q (resonant peaks).
@@ -225,37 +261,39 @@ DELAY_HEADER_SIZE 8SEC_STORAGE_SIZE + const DELAY_STRUCT_SIZE
 
 : allpass1
   # ( sig cf struct reinit -- output-sig )
-  {reinit} if
-    {struct} reinit-allpass
+  if
+    dup reinit-allpass
   endif
   # if cutoff frequency has changed:
-  {struct} prvcf-allpass @ cf <> if
-    cf calc-c {struct} c-param-allpass !
+  dup prvcf-allpass @ over <> if
+    over calc-c dup c-param-allpass !
   endif
-  {struct} c-param-allpass @ { F: c-factor }
-  c-factor sig *
-  {struct} xt1-allpass @ +
-  c-factor {struct} yt1-allpass @ * - { F: y }
+  dup c-param-allpass @
+  3 pick over *
+  over xt1-allpass @ +
+  dup yt1-allpass @ * -
   # UPDATE:
-  {cf} {struct} prvcf-allpass f!
-  y {struct} yt1-allpass f!
-  sig {struct} xt1-allpass f!
-  y ;
+  rot 2 pick prvcf-allpass !
+  2dup yt1-allpass !
+  -rot xt1-allpass !
+;
 
 : lowpass1
   # ( sig cf struct reinit -- output-sig )
-  {reinit} if
-    {struct} reinit-allpass
-  endif
-  {sig} {sig} {struct} {reinit} {cf} allpass1 + 0.5 *
+  2 over 2 over
+  allpass1
+  -rot 2drop swap drop
+  + 0.5 *
 ;
 
 : highpass1
   # ( sig cf struct reinit -- output-sig )
-  reinit if
-    struct reinit-allpass
-  endif
-  sig sig struct reinit cf allpass1 - 0.5 * ;
+  2 over 2 over
+  allpass1
+  -rot 2drop swap drop
+  - 0.5 *
+;
+
 
 ##########
 # OUTPUT #

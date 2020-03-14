@@ -126,16 +126,36 @@ static void repl() {
 
 
 static void import(char *infilestr) {
-    FILE *infile;
+    char *prefix = getenv("DCLANG_LIBS");
     // check existence of file:
-    if (access(infilestr, F_OK) == -1) {
-        printf("The file named %s doesn't appear to exist, " \
-               "or cannot be accessed.\n", infilestr);
+    if (access(infilestr, F_OK) == 0) {
+        FILE *infile;
+        infile = fopen(infilestr, "r");
+        setinput(infile);
+        repl();
         return;
     }
-    infile = fopen(infilestr, "r");
-    setinput(infile);
-    repl();
+    char *buf = malloc(strlen(prefix) + 1 + strlen(infilestr) + 1);
+    char *slash = "/";
+    char *ending = "\0";
+    strcat(buf, prefix);
+    strcat(buf, slash);
+    strcat(buf, infilestr);
+    char *final = strcat(buf, ending);
+    if (access(final, F_OK) == 0) {
+        FILE *infile = fopen(final, "r");
+        free(buf);
+        setinput(infile);
+        repl();
+        return;
+    }
+    printf(
+        "The file named %s doesn't appear to exist in the current " \
+        "directory, or under %s, or cannot be accessed.\n"
+        "You may want to check its existence and permissions!\n",
+        infilestr, prefix
+    );
+    return;
 }
 
 

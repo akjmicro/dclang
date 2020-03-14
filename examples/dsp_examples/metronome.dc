@@ -1,4 +1,4 @@
-"../lib/dsp.dc" import
+"dsp.dc" import
 
 0.09 0.75 create-port-struct myport
 

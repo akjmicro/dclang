@@ -1,0 +1,24 @@
+"dsp.dc" import
+
+make-allpass-struct ap_struct
+ap_struct reinit-allpass
+
+: lowpass_example
+  # some noise
+  0.3 noise
+  # notice how make make a decending sawtooth by mirroring the phasor
+  # via "1 - phasor signal": 
+  1 0.5 phasor - dup * 10000 * 20 +
+  ap_struct false lowpass1
+
+  # mix into center
+  0.5 panmix
+  # put to output
+  stereo-out
+  # advance counter 
+  t+
+  # recur (loop)
+  lowpass_example
+;
+
+lowpass_example
