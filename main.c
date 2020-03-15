@@ -45,6 +45,8 @@ FILE *ofp;
 // data stack
 MYFLT data_stack[DATA_STACK_SIZE];
 int data_stack_ptr;
+MYFLT save_data_stack[DATA_STACK_SIZE];
+int save_data_stack_ptr;
 // return stack
 MYINT return_stack[RETURN_STACK_SIZE];
 int return_stack_ptr;
@@ -93,16 +95,16 @@ MYINT def_mode;
 
 // needed so we can add 'import' to primitives
 void load_extra_primitives() {
-    primitives[108].name = "primitives";
-    primitives[108].function = show_primitivesfunc;
-    primitives[109].name = "import";
-    primitives[109].function = importfunc;
-    primitives[110].name = "input";
-    primitives[110].function = inputfunc;
+    primitives[110].name = "primitives";
+    primitives[110].function = show_primitivesfunc;
+    primitives[111].name = "import";
+    primitives[111].function = importfunc;
+    primitives[112].name = "input";
+    primitives[112].function = inputfunc;
     /* final endpoint must be zeros,
        and they won't count in the 'count': */
-    primitives[111].name = 0;
-    primitives[111].function = 0;
+    primitives[113].name = 0;
+    primitives[113].function = 0;
 }
 
 

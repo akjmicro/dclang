@@ -9,7 +9,7 @@
 var fmamp 0 fmamp !
 
 # delay setup:
-create-delay-line mydelay
+make-delay-line mydelay
 mydelay init-delay-line
 
 # filter setup:

@@ -4,7 +4,7 @@ struct primitive {
   void (*function) (void);
 };
 
-static struct primitive primitives[112] = {
+static struct primitive primitives[114] = {
   // null
   {"null", nullfunc},
   {"isnull", isnullfunc},
@@ -72,6 +72,9 @@ static struct primitive primitives[112] = {
   {"-2rot", rotneg2func},
   {"2nip", nip2func},
   {"2tuck", tuck2func},
+  // extra stack
+  {"savepush", savepush},
+  {"savepop", savepop},
   // branching
   {"times", timesfunc},
   {"again", againfunc},

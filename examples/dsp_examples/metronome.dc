@@ -1,6 +1,6 @@
 "dsp.dc" import
 
-0.09 0.75 create-port-struct myport
+0.09 0.75 make-port myport
 
 : mymetronome
   300 sine

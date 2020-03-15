@@ -33,8 +33,7 @@ static void dupfunc()
         printf("dup -- stack underflow!\n");
         return;
     }
-    MYFLT val = data_stack[data_stack_ptr - 1];
-    push(val);
+    push(data_stack[data_stack_ptr - 1]);
 }
 
 static void swapfunc()
@@ -128,10 +127,9 @@ static void dup2func()
         printf("2dup -- stack underflow!\n");
         return;
     }
-    MYFLT val1 = data_stack[data_stack_ptr - 2];
     MYFLT val2 = data_stack[data_stack_ptr - 1];
-    push(val1);
-    push(val2);
+    push(data_stack[data_stack_ptr - 2]);
+    push(data_stack[data_stack_ptr - 2]);
 }
 
 static void swap2func()
@@ -254,4 +252,23 @@ static void clearfunc()
 {
     // clears the stack!
     data_stack_ptr = 0;
+}
+
+/////////////////////
+// save data stack //
+/////////////////////
+static void savepush()
+{
+    if (save_data_stack_ptr >= DATA_STACK_SIZE) {
+        printf("savepush -- stack overflow!\n");
+        save_data_stack_ptr = 0;
+    }
+    MYFLT val = pop();
+    save_data_stack[save_data_stack_ptr++] = val;
+}
+
+static void savepop()
+{
+    MYFLT val = save_data_stack[--save_data_stack_ptr];
+    push_no_check(val);
 }

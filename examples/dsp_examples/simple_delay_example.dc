@@ -1,20 +1,20 @@
 "dsp.dc" import
 
 # create a delay line
-create-delay-line my-delay-line
-my-delay-line init-delay-line
+make-delay-line mydelay
+mydelay init-delay-line
 
-0.03 0.6 create-port-struct my-port-struct
+0.03 0.6 make-port myport
 
 # example function
 : simple-delay-example
 
   440 sine
   0.4333 metro 0.8 *
-  my-port-struct port *
-  my-delay-line 0.4462 delay-read 0.75 *
+  myport port *
+  mydelay 0.4462 delay-read 0.75 *
   2dup +
-  my-delay-line delay-write
+  mydelay delay-write
   0.5 * +
   ##########
   # OUTPUT #
