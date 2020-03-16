@@ -269,191 +269,129 @@ DELAY_HEADER_SIZE 8SEC_STORAGE_SIZE + const DELAY_STRUCT_SIZE
   # ( new_y )
 ;
 
-#################
-# BIQUAD FILTER #
-#################
+#########################
+# BIQUAD LOWPASS FILTER #
+#########################
 
-: xt1_bq 0 + ;
-: yt1_bq 1 + ;
-: xt2_bq 2 + ;
-: yt2_bq 3 + ;
-: fcon_bq 4 + ;
-: resonance_bq 5 + ;
-: alpha_bq 6 + ;
-: beta_bq 7 + ;
-: gamma_bq 8 + ;
-: denom_bq 9 + ;
-: b0_bq 10 + ;
-: b1_bq 11 + ;
-: b2_bq 12 + ;
-: a0_bq 13 + ;
-: a1_bq 14 + ;
-: a2_bq 15 + ;
+: cutoff 0 + ;
+: res 1 + ;
+: theta 2 + ;
+: alpha 3 + ;
+: beta 4 + ;
+: gamma 5 + ;
+: xt1 6 + ;
+: yt1 7 + ;
+: xt2 8 + ;
+: yt2 9 + ;
+: reinit 10 + ;
 
-: make-biquad create 16 allot ;
-
-: calc_fcon
-  # ( cutoff -- fcon )
-  2PI INV_SAMPLE_RATE * *
+: reinit_biquad
+  # ( struct )
+  0.0 over xt1 !
+  0.0 over xt2 !
+  0.0 over yt1 !
+  0.0 over yt2 !
+  # ( struct )
 ;
 
-: calc_alpha
-  # ( res fcon -- alpha }
-  1 2 pick 2 * 2 pick cos dup * *
-  # ( res fcon 1 res*2*cos(fcon)*cos(fcon)
-  3 pick dup *
-  # ( res fcon 1 res*2*cos(fcon)*cos(fcon) res*res
-  3 pick 2 *
-  # ( res fcon 1 res*2*cos(fcon)*cos(fcon) res*res fcon*2
-  cos * + -
-  # ( res fcon 1-(res*2*cos(fcon)*cos(fcon))+(res*res*cos(fcon*2))
-  -rot 2drop
-  # ( alpha )
+: set_cf_res_reinit
+  # ( struct reinit cutoff res )
+  3 pick res !
+  2 pick cutoff !
+  over reinit !
+  # ( struct )
+;
+
+: calc_theta
+  # ( struct -- struct )
+  dup cutoff @ 2PIDSR *
+  over theta !
+  # ( struct )
 ;
 
 : calc_beta
-  # ( res fcon -- beta )
-  over dup
-  # ( res fcon res res)
-  * over 2 * sin *
-  # ( res fcon res*res*sin(fcon*2) )
-  2 pick 2 * 2 pick dup cos swap sin * * -
-  # ( res fcon (res*res*sin(fcon*2))-(res*2*cos(fcon)*sin(fcon)) )
-  -rot 2drop
+  # ( struct -- struct )
+  dup theta @ over res @
+  # ( struct theta res )
+  over sin 0.5 *
+  # ( struct theta res sin(theta)*0.5 )
+  over swap - -rot
+  # ( struct res-sin(theta)*0.5 theta res )
+  swap sin 0.5 * +
+  # ( struct res-sin(theta)*0.5 res+sin(theta)*0.5 )
+  /
+  # ( struct res-sin(theta)*0.5 / res+sin(theta)*0.5 )
+  over beta !
+  # struct
 ;
 
 : calc_gamma
-  # ( fcon -- gamma)
-  cos 1 +
+  # ( struct -- struct )
+  dup beta @ 1 + over theta @ cos *
+  # ( struct (beta+1)*cos(theta) )
+  over gamma !
+  # ( struct )
 ;
 
-: calc_m1
-  # ( fcon beta gamma alpha -- denom )
-  * rot sin rot * +
-  # ( gamma*alpha+sin(fcon)*beta )
+: calc_alpha
+  # ( struct -- struct )
+  dup beta @ 1 + over gamma @ -1 * + 0.5 *
+  # ( struct beta+1+(-gamma)*0.5 )
+  over alpha !
+  # ( struct )
 ;
 
-: calc_m2
-  # ( fcon beta gamma alpha -- denom )
-  * rot sin rot * -
-  # ( gamma*alpha+sin(fcon)*beta )
+: init_biquad
+  # ( struct reinit cutoff res )
+  set_cf_res_reinit calc_theta
+  calc_beta calc_gamma calc_alpha
+  # check if we should reinit!
+  dup reinit @ if reinit_biquad else endif
 ;
-
-: calc_denominator
-  # ( fcon beta gamma alpha -- den )
-  2over 2over calc_m1 dup * savepush
-  calc_m2 dup * savepop + sqrt
 
 : biquad_compute
   # ( sig struct -- sig-out )
   over savepush
   # ( sig struct )  ( sig )
   # the actual transformative equation:
-  dup b0_bq @ rot *
-  # ( struct b0bq*sig )  ( sig )
-  swap
-  # ( b0bq*sig struct )  ( sig )
-  dup b1_bq @ over xt1_bq @ * rot +
-  # ( struct b1bq*xt1+b0bq*sig )  ( sig )
-  savepush
-  # ( struct )  ( b1bq*xt1+b0bq*sig sig )
-  dup b2_bq @
-  # ( struct b2bq )  ( b1bq*xt1+b0bq*sig sig )
-  over xt2_bq @ *
-  # ( struct b2bq+xt2bq )  ( b1bq*xt1+b0bq*sig sig )
-  savepush
-  # ( struct )  ( b2bq+xt2bq  b1bq*xt1+b0bq*sig sig )
-  dup a1_bq @ over yt1_bq @ * -1 *
-  # ( struct -a1bq*yt1bq )  ( b2bq+xt2bq  b1bq*xt1+b0bq*sig sig )
-  savepush
-  # ( struct )  ( -a1bq*yt1bq  b2bq+xt2bq  b1bq*xt1+b0bq*sig sig )
-  dup a2_bq @ over yt2_bq @ * -1 *
-  # ( struct -a2bq*yt2bq )  ( -a1bq*yt1bq  b2bq+xt2bq
-                             # b1bq*xt1+b0bq*sig  sig )
-  savepop savepop savepop + + +
-  # ( struct partial_sig )  ( sig )
-  over a0_bq @ /
-  # ( struct sig-out )  ( sig )
-  # update state:
-  over xt1_bq @ 2 pick xt2_bq !
-  # ( struct sig-out )  ( sig )
-  savepop 2 pick xt1_bq !
-  # ( struct sig-out )  ( )
-  over yt1_bq @ 2 pick yt2_bq !
-  # ( struct sig-out )  ( )
-  tuck swap yt1_bq !
+  over over xt1 @ 2 * 2 pick xt2 @ + +
+  # ( sig struct sig+2*xt1+xt2 )  ( sig )
+  over alpha @ *
+  # ( sig struct alpha*(sig+2*xt1+xt2) )  ( sig )
+  over gamma @ 2 pick yt1 @ *
+  # ( sig struct alpha*(sig+2*xt1+xt2) gamma*yt1 )  ( sig )
+  2 pick beta @ 3 pick yt2 @ * - +
+  # ( sig struct alpha*(sig+2*xt1+xt2)+gamma*yt1-beta*yt2 )  ( sig )
+  # ( sig struct sig-out )  ( sig )
+  # UPDATE:
+  -rot dup xt1 @ over xt2 !
+  # ( sig-out sig struct )  ( sig )
+  savepop over xt1 !
+  # ( sig-out sig struct )  ( )
+  dup yt1 @ over yt2 !
+  # ( sig-out sig struct )  ( )
+  nip over swap yt1 !
   # ( sig-out )  ( )
 ;
 
-: reinit_biquad
-  # ( struct )
-  0.0 over xt1_bq !
-  0.0 over xt2_bq !
-  0.0 over yt1_bq !
-  0.0 over yt2_bq !
-  drop
+: make-biquad
+  create
+  0 , 0 , 0 , 0 , 0 , 0 , 0 , 0 , 0 , 0 , 0 ,
 ;
 
-: biquad_helper
-  # ( sig struct reinit res flc -- sig-out )
-  over 4 pick resonance_bq !
-  # ( sig struct reinit res flc )
-  dup 4 pick fcon_bq !
-  # ( sig struct reinit res flc )
-  2dup calc_alpha 4 pick alpha_bq !
-  # ( sig struct reinit res flc )
-  2dup calc_beta 4 pick beta_bq !
-  # ( sig struct reinit res flc )
-  dup calc_gamma 4 pick gamma_bq !
-  # ( sig struct reinit res flc )
-  3 pick dup
-  # ( sig struct reinit res flc struct struct )
-  fcon_bq @ swap dup
-  # ( sig struct reinit res flc fcnbq struct struct )
-  beta_bq @ swap dup
-  # ( sig struct reinit res flc fcnbq betabq struct struct )
-  gamma_bq @ swap
-  # ( sig struct reinit res flc fcnbq betabq gammabq struct )
-  alpha_bq @
-  # ( sig struct reinit res flc fcnbq betabq gammabq alphabq )
-  calc_denominator 3 pick denom_bq !
-  # ( sig struct reinit res flc )
-  # put b0 into struct:
-  3 pick alpha_bq @ dup * 4 pick beta_bq @ dup * + 1.5 *
-  # ( sig struct reinit res flc 1.5*alphabq*alphabq+betabq*betabq )
-  4 pick denom_bq @ / 4 pick b0_bq !
-  # ( sig struct reinit res flc )
-  # put b1 into struct:
-  3 pick b0_bq @ 4 pick b1_bq !
-  # ( sig struct reinit res flc )
-  2drop swap
-  # ( sig reinit struct )
-  # put b2 into struct:
-  0.0 over b2_bq !
-  # put a0 into struct:
-  1.0 over a0_bq !
-  # put a1 into struct:
-  -2.0 over resonance_bq @ *
-  # ( sig reinit struct -2*resbqval )
-  over fcon_bq @ cos *
-  # ( sig reinit struct -2*resbqval*cos(fconbqval) )
-  over a1_bq !
-  # ( sig reinit struct )
-  # put a2 into struct:
-  dup resonance_bq @ dup *
-  # ( sig reinit struct resbqval*resbqval )
-  over a2_bq !
-  # ( sig reinit struct )
-  # reinit?
-  swap if dup reinit_biquad endif
-  ## ( sig struct  )
-  # activate actual transformational equations:
+: biquad-lp
+  # ( sig struct reinit cutoff res -- sig-out )
+  3 pick cutoff @ 2 pick <>
+  # ( sig struct reinit cutoff res bool_cfdiff  )
+  4 pick res @ 2 pick <>
+  # ( sig struct reinit cutoff res bool_cfdiff bool_resdiff )
+  or if
+  # ( sig struct reinit cutoff res )
+    init_biquad
+  else
+    2drop drop
+  endif
   biquad_compute
-;
-
-: biquad
-  # ( sig struct reinit res cutoff -- sig-out )
-  calc_fcon biquad_helper
 ;
 #####################
 # END BIQUAD FILTER #
