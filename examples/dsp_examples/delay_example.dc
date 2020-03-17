@@ -1,63 +1,69 @@
 "dsp.dc" import
-"../primes.dc" import
 
 # a local constant for 'change-frequency'
-0.7575 1.333333 * constant CHANGE_FREQ
+0.7575 1.333333 * const CHANGE_FREQ
 
 # amp envelope stuff:
-0.001 0.5 create-port-struct port-struct
+0.05 0.9 make-port env-port
 var fmamp 0 fmamp !
+0.02 0.03 make-port pitch-port
+
+# filter setup:
+make-biquad lpstruct
 
 # delay setup:
 make-delay-line mydelay
 mydelay init-delay-line
 
-# filter setup:
-#make-lowpass-struct lpstruct
-#lpstruct reinit-allpass
-
 # random pitch setup:
-create pitch-choices 120 , 140 , 105 , 160 ,
-var current-pitch 120 current-pitch !
-0.02 0.03 create-port-struct port-struct2
-var last_phase 0.0 last_phase !
+# A Wilson CPS hexany (2, 3, 5, 9)
+create pitch-choices 2 3 * , 2 5 * , 2 9 * , 3 5 * , 3 9 * , 5 9 * , 
+var current-pitch    6 current-pitch !
+var lasttrig
+var curtrig
+var rntrg
+
+: octfac 2 swap log2 1.0 % pow ;
 
 : delay-example
-  # add some time-based interest, ala 'BYTEBEAT':
-  t 1149 * t 107 * - 219893 * 219889 % t xor 219829 and 219889 /
-  # trigger for portamento envelope 
-  t 20 <<  1 + is-prime * 5.0 * 1.0e %
-  0.001 CHANGE_FREQ gate 
+  # random trigger
+  43 randtrig dup curtrig !
   # reference array for port and portamento call
-  port-struct port
+  env-port port
   # route to 'fmamp' variable:
-  fmamp f!
+  fmamp !
 
-  # change the pitch variable randomly, in sync with metronome freq:
-  CHANGE_FREQ 1.618 * phasor { F: cur_phase }
-  cur_phase last_phase @ < if
-    pitch-choices 4 randint + @ current-pitch !
-  else 4 randint drop 
-  endif cur_phase last_phase !
+  # change the pitch variable randomly, in sync with the trigger:
+  curtrig @ lasttrig @ >
+  if
+    pitch-choices 6 randint + @ current-pitch !
+  else
+  endif
   # FM oscillator:
-  current-pitch @ 1.5217 0.99 fm
-  fmamp @ port-struct2 port
+  current-pitch @ octfac 440 * 3 * 0.5 *
+  pitch-port port  
+  1.501 0.19
+  fm fmamp @ *
   # cut the highs a bit:
-  #lpstruct false 2500e lowpass1
-
-  # write fm signal and feedback variable to delay,
-  # original signal is copied and stays on stack:
-  mydelay delay-write 0.4 *
-  CHANGE_FREQ 0.5 * sinewave 0.3 * 
-  0.5 + panmix
-
-  # tap the delay to get a second signal; indicate feedback amount, too:
-  mydelay 0.3 0.6 delay-read
-  CHANGE_FREQ 1.618 / sine 0.15 *
-  0.3 panmix
-
+  lpstruct
+  false
+  #curtrig @ lasttrig @ >   
+  700 2.6 biquad-lp
+  mydelay 0.65 delay-read
+  2dup
+  # delay ampilcation
+  0.65 *
+  # osc/filter amplification
+  2.8 *
+  0.35 panmix
+  0.65 panmix
   # output
-  stereo_out
+  stereo-out
+  # 89% feedback
+  + 0.89 * mydelay delay-write
+  # update trigger state
+  curtrig @ lasttrig !
+  # update clock
   t+
   delay-example
 ;
