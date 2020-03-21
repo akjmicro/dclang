@@ -131,7 +131,7 @@ var max-saw-value
 : table-interpolate
   # ( table idx wrap -- val )
   over 1 % savepush
-  # ( table idx wrap )  ( frac_idx ) 
+  # ( table idx wrap )  ( frac_idx )
   over ceil over and -rot
   # ( table ceil-idx-wrapped idx wrap )  ( frac_idx )
   swap floor swap and
@@ -370,7 +370,7 @@ DELAY_HEADER_SIZE STORAGE_SIZE + const DELAY_STRUCT_SIZE
   if
      1.0 over chi !
     -2.0 over mu !
-     1.0 over sigma ! 
+     1.0 over sigma !
   else
   over 2 =
   if
@@ -520,7 +520,7 @@ DELAY_HEADER_SIZE STORAGE_SIZE + const DELAY_STRUCT_SIZE
 # OUTPUT #
 ##########
 
-# will send out to global L and R channels 
+# will send out to global L and R channels
 # ( sig pan -- )
 : panmix
   2dup

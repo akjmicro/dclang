@@ -17,7 +17,7 @@ mydelay init-delay-line
 
 # random pitch setup:
 # A Wilson CPS hexany (2, 3, 5, 9)
-create pitch-choices 2 3 * , 2 5 * , 2 9 * , 3 5 * , 3 9 * , 5 9 * , 
+create pitch-choices 2 3 * , 2 5 * , 2 9 * , 3 5 * , 3 9 * , 5 9 * ,
 var current-pitch    6 current-pitch !
 var lasttrig
 var curtrig
@@ -41,13 +41,13 @@ var rntrg
   endif
   # FM oscillator:
   current-pitch @ octfac 440 * 3 * 0.5 *
-  pitch-port port  
+  pitch-port port
   1.501 0.19
   fm fmamp @ *
   # cut the highs a bit:
   lpstruct
   false
-  #curtrig @ lasttrig @ >   
+  #curtrig @ lasttrig @ >
   700 2.6 biquad-lp
   mydelay 0.95 delay-read
   2dup

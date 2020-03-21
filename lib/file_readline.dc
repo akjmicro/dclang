@@ -3,7 +3,7 @@
   dup
   ord 10 =
   if
-    free   
+    free
   else
     free
     file-readline-loop

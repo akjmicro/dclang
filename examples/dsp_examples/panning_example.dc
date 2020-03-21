@@ -1,7 +1,7 @@
 "dsp.dc" import
 
 : dsp-panning-example
-  300.0 sine 0.4 * 
+  300.0 sine 0.4 *
   400.0 sine 0.4 *
   +
   0.1 sine 0.4 * 0.5 + panmix

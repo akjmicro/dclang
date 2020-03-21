@@ -26,6 +26,6 @@ make-biquad mylp2
   stereo-out
   t+
   fm-example
-; 
+;
 
 fm-example

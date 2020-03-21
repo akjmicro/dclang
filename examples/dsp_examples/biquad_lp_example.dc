@@ -45,7 +45,7 @@ make-biquad myflt4
   0.95 panmix
   # put to output
   stereo-out
-  # advance counter 
+  # advance counter
   t+
   # recur (loop)
   biquad-example

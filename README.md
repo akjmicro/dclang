@@ -51,7 +51,7 @@ Anyway, due to RPN, things will look like this, when you do math:
 ```
     4 5 + .
     9
-    
+
     20 5 / .
     4
 
@@ -62,7 +62,7 @@ Anyway, due to RPN, things will look like this, when you do math:
     16.28875859622752
 
     1 2 3 5 + 7 16 / .s
-    <4> 1 2 8 0.4375 
+    <4> 1 2 8 0.4375
 
     # a function!
     : testif 1 if "true" else "false" endif print cr ;
@@ -121,7 +121,7 @@ Implemented thus far:
     * rand                              (float-versions only)
   * Logic:
     * and, or, not, xor
-    * =, <>, >, <, >=, <= 
+    * =, <>, >, <, >=, <=
   * Stack operations:
     * drop, dup, over, swap rot, -rot, nip, tuck
     * 2drop, 2dup, 2over, 2swap, 2rot, -2rot, 2nip, 2tuck
@@ -130,7 +130,7 @@ Implemented thus far:
     * times/again & for/next (looping)
     * user-defined words (functions)
   * Strings:
-    * simple string printing 
+    * simple string printing
     * fancier right-justified numeric output fields
     * '#' to end-of-line' for comments
     * `uemit`, a unicode-character emitter which can help to contruct
@@ -142,7 +142,7 @@ Implemented thus far:
     into slot 32)
     * @ (peek a value, copy it to the stack, e.g. '32 @' will put our
     previously saved '5' onto the top of the stack.
-    * Since the variables exist in an giant global array, there really is 
+    * Since the variables exist in an giant global array, there really is
     no distinction between 'arrays' and 'variables' in dclang. Named
     variables or constants can be emulated by makings them words, e.g.:
         ```
@@ -168,7 +168,7 @@ Implemented thus far:
         ```
 
   * Timing:
-    * a clock function ('clock') so we can time execution in nanoseconds 
+    * a clock function ('clock') so we can time execution in nanoseconds
     for benchmarking.
     * A hook into CPU-cycle clock, called 'rdtsc'. (not available on RPi)
     * A sleep function (C's `nanosleep` under-the-hood)
@@ -212,7 +212,7 @@ There are three branches of this repo:
   * rpi-int ('rpi-int' branch, a bit more minimal, an experiment with fixed-point integers, really)
 
 In the standard branch, everything is on the floating-point stack only at
-this point.  In the `rpi-int` branch, everything is a `long int` C-type. 
+this point.  In the `rpi-int` branch, everything is a `long int` C-type.
 There may be separate stacks for integers in the future.  Not sure if it's
 necessary yet (but I am exploring the issue).
 
