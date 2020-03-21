@@ -1,0 +1,25 @@
+"dsp.dc" import
+
+make-biquad myflt
+
+: biquad-example
+  # some noise
+  noise 0.1 *
+  myflt
+  false
+  0.2 sine 500 * 1500 +
+  29.99
+  biquad-hp
+  # scale down, it's louder
+  0.07 *
+  # mix into center
+  0.5 panmix
+  # put to output
+  stereo-out
+  # advance counter 
+  t+
+  # recur (loop)
+  biquad-example
+;
+
+biquad-example

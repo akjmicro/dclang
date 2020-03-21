@@ -69,11 +69,11 @@ var _PHASOR_ARRAY 64 allot
   # get current phase; wrap around 0-1:
   freq2sample_phase
   # grab the accumulator value:
-  phasor-pointer @
+  phasor-pointer @ tuck
   # add, wrap-around from 0.0-1.0
   + 1.0 %
   # write back current value:
-  dup phasor-pointer !
+  phasor-pointer !
   # update count reference (this will be reset by the clock advance) :
   _advance_phasor_count
 ;
@@ -97,56 +97,99 @@ var _PHASOR_ARRAY 64 allot
   2PI * sin
 ;
 
+# band-limited sawtooth wavetable ( 16 harmonics )
+create bl_saw_table 65536 allot
+: make-sawtooth
+  13 1 1 for
+    65536 times
+      i j * 65536 % 65536 / 2PI * sin
+      bl_saw_table i + @
+      +
+      bl_saw_table i + !
+    again
+  next
+;
+
+var max-saw-value
+: normalize-saw-table
+  65536 times
+    bl_saw_table i + @
+    max-saw-value @
+    >
+    if
+      bl_saw_table i + @
+      max-saw-value !
+    endif
+  again
+  65536 times
+    bl_saw_table i + @
+    max-saw-value @ /
+    bl_saw_table i + !
+  again
+;
+
+: table-interpolate
+  # ( table idx wrap -- val )
+  over 1 % savepush
+  # ( table idx wrap )  ( frac_idx ) 
+  over ceil over and -rot
+  # ( table ceil-idx-wrapped idx wrap )  ( frac_idx )
+  swap floor swap and
+  # ( table ceil-idx-wrapped floor-idx-wrapped )  ( frac_idx )
+  2 pick + @
+  # ( table ceil-idx-wrapped floor_val )  ( frac_idx )
+  swap 2 pick + @ over
+  # ( table floor_val ceil_val floor_val )  ( frac_idx )
+  - savepop * + nip
+  # ( floor_val+(ceil_val-floor_val)*frac_idx )  ( )
+;
+
+make-sawtooth
+#normalize-saw-table
+# band-limited sawtooth oscillator:
+: saw
+  phasor 65536 * bl_saw_table swap 0xffff table-interpolate
+;
+
 #########
 # NOISE #
 #########
-
-var div_by 0x80000000 div_by !
-
-var last_num clock 0xffffffff and last_num !
-
-: bit32mask 0xffffffff and ;
-
-: xorshift-rand
-  last_num @
-  dup 13 << bit32mask xor
-  dup 17 >> bit32mask xor
-  dup  5 << bit32mask xor
-  dup last_num !
-;
+# TODO: implement a better random primitive in dclang itself
+# Right now, it's using `rand()`, which has problems. However,
+# the randomness we were using here had its own problems, so...
 
 : noise
   # ( -- sig )
-  xorshift-rand div_by / 1.0 % 2 * 1.0 -
+  rand 2 * 1.0 -
 ;
 
 : randint
   # ( range -- int )
-  dup noise abs * floor swap %
+  rand * floor
 ;
 
 var smp
 var cmp
 : randtrig
   cmp !
-  t 2400 % 0 =
+  t 0xff and 0 =
   if
-    cmp @ randint 0 = if 1 else 0 endif dup smp !
+    rand cmp @ < dup smp !
   else
-    t 2400 % 30 <
+    t 0xff and 30 <
     if
       smp @
     else
       0
     endif
   endif
-; 
+;
 
 #########
 # DELAY #
 #########
 
-SAMPLE_RATE 8 * const STORAGE_SIZE
+262144 const STORAGE_SIZE
 2 const DELAY_HEADER_SIZE
 DELAY_HEADER_SIZE STORAGE_SIZE + const DELAY_STRUCT_SIZE
 
@@ -285,9 +328,9 @@ DELAY_HEADER_SIZE STORAGE_SIZE + const DELAY_STRUCT_SIZE
   # ( new_y )
 ;
 
-#########################
-# BIQUAD LOWPASS FILTER #
-#########################
+##################
+# BIQUAD FILTERS #
+##################
 
 : cutoff 0 + ;
 : res 1 + ;
@@ -295,11 +338,14 @@ DELAY_HEADER_SIZE STORAGE_SIZE + const DELAY_STRUCT_SIZE
 : alpha 3 + ;
 : beta 4 + ;
 : gamma 5 + ;
-: xt1 6 + ;
-: yt1 7 + ;
-: xt2 8 + ;
-: yt2 9 + ;
-: reinit 10 + ;
+: chi 6 + ;
+: mu 7 + ;
+: sigma 8 + ;
+: xt1 9 + ;
+: yt1 10 + ;
+: xt2 11 + ;
+: yt2 12 + ;
+: reinit 13 + ;
 
 : reinit_biquad
   # ( struct )
@@ -308,6 +354,31 @@ DELAY_HEADER_SIZE STORAGE_SIZE + const DELAY_STRUCT_SIZE
   0.0 over yt1 !
   0.0 over yt2 !
   # ( struct )
+;
+
+: set_bq_type
+  # ( struct reinit cutoff res type -- struct reinit cutoff res )
+  4 pick
+  # ( *  type struct )
+  over 0 =
+  if
+     -1.0 over chi !
+      2.0 over mu !
+      1.0 over sigma !
+  else
+  over 1 =
+  if
+     1.0 over chi !
+    -2.0 over mu !
+     1.0 over sigma ! 
+  else
+  over 2 =
+  if
+     1.0 over chi !
+     0.0 over mu !
+    -1.0 over sigma !
+  endif endif endif
+  2drop
 ;
 
 : set_cf_res_reinit
@@ -351,15 +422,15 @@ DELAY_HEADER_SIZE STORAGE_SIZE + const DELAY_STRUCT_SIZE
 
 : calc_alpha
   # ( struct -- struct )
-  dup beta @ 1 + over gamma @ -1 * + 0.5 *
-  # ( struct beta+1+(-gamma)*0.5 )
+  dup beta @ 1 + over gamma @ 2 pick chi @ * + 0.5 *
+  # ( struct beta+1+gamma_v*chi_v*0.5 )
   over alpha !
   # ( struct )
 ;
 
 : init_biquad
-  # ( struct reinit cutoff res )
-  set_cf_res_reinit calc_theta
+  # ( struct reinit cutoff res type -- struct )
+  set_bq_type set_cf_res_reinit calc_theta
   calc_beta calc_gamma calc_alpha
   # check if we should reinit!
   dup reinit @ if reinit_biquad else endif
@@ -370,14 +441,15 @@ DELAY_HEADER_SIZE STORAGE_SIZE + const DELAY_STRUCT_SIZE
   over savepush
   # ( sig struct )  ( sig )
   # the actual transformative equation:
-  over over xt1 @ 2 * 2 pick xt2 @ + +
-  # ( sig struct sig+2*xt1+xt2 )  ( sig )
+  2dup dup mu @ swap xt1 @ * 2 pick dup sigma @ swap xt2 @ * + +
+  # ( sig struct sig+mu*xt1+sigma*xt2 )
+  # ( sig struct sig+mu*xt1+sigma*xt2 )  ( sig )
   over alpha @ *
-  # ( sig struct alpha*(sig+2*xt1+xt2) )  ( sig )
+  # ( sig struct alpha*(sig+mu*xt1+sigma*xt2) )  ( sig )
   over gamma @ 2 pick yt1 @ *
-  # ( sig struct alpha*(sig+2*xt1+xt2) gamma*yt1 )  ( sig )
+  # ( sig struct alpha*(sig+mu*xt1+sigma*xt2) gamma*yt1 )  ( sig )
   2 pick beta @ 3 pick yt2 @ * - +
-  # ( sig struct alpha*(sig+2*xt1+xt2)+gamma*yt1-beta*yt2 )  ( sig )
+  # ( sig struct alpha*(sig+mu*xt1+sigma*xt2)+gamma*yt1-beta*yt2 )  ( sig )
   # ( sig struct sig-out )  ( sig )
   # UPDATE:
   -rot dup xt1 @ over xt2 !
@@ -392,7 +464,7 @@ DELAY_HEADER_SIZE STORAGE_SIZE + const DELAY_STRUCT_SIZE
 
 : make-biquad
   create
-  0 , 0 , 0 , 0 , 0 , 0 , 0 , 0 , 0 , 0 , 0 ,
+  0 , 0 , 0 , 0 , 0 , 0 , 0 , 0 , 0 , 0 , 0 , 0 , 0 , 0 ,
 ;
 
 : biquad-lp
@@ -403,16 +475,46 @@ DELAY_HEADER_SIZE STORAGE_SIZE + const DELAY_STRUCT_SIZE
   # ( sig struct reinit cutoff res bool_cfdiff bool_resdiff )
   or if
   # ( sig struct reinit cutoff res )
-    init_biquad
+    0 init_biquad
   else
     2drop drop
   endif
   biquad_compute
 ;
+
+: biquad-hp
+  # ( sig struct reinit cutoff res -- sig-out )
+  3 pick cutoff @ 2 pick <>
+  # ( sig struct reinit cutoff res bool_cfdiff  )
+  4 pick res @ 2 pick <>
+  # ( sig struct reinit cutoff res bool_cfdiff bool_resdiff )
+  or if
+  # ( sig struct reinit cutoff res )
+    1 init_biquad
+  else
+    2drop drop
+  endif
+  biquad_compute
+;
+
+: biquad-bp
+  # ( sig struct reinit cutoff res -- sig-out )
+  3 pick cutoff @ 2 pick <>
+  # ( sig struct reinit cutoff res bool_cfdiff  )
+  4 pick res @ 2 pick <>
+  # ( sig struct reinit cutoff res bool_cfdiff bool_resdiff )
+  or if
+  # ( sig struct reinit cutoff res )
+    2 init_biquad
+  else
+    2drop drop
+  endif
+  biquad_compute
+;
+
 #####################
 # END BIQUAD FILTER #
 #####################
-
 
 ##########
 # OUTPUT #

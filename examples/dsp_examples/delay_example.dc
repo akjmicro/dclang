@@ -27,7 +27,7 @@ var rntrg
 
 : delay-example
   # random trigger
-  43 randtrig dup curtrig !
+  23 randtrig dup curtrig !
   # reference array for port and portamento call
   env-port port
   # route to 'fmamp' variable:
@@ -49,18 +49,18 @@ var rntrg
   false
   #curtrig @ lasttrig @ >   
   700 2.6 biquad-lp
-  mydelay 0.65 delay-read
+  mydelay 0.95 delay-read
   2dup
   # delay ampilcation
   0.65 *
   # osc/filter amplification
-  2.8 *
+  1.8 *
   0.35 panmix
   0.65 panmix
   # output
   stereo-out
   # 89% feedback
-  + 0.89 * mydelay delay-write
+  + 0.5 * mydelay delay-write
   # update trigger state
   curtrig @ lasttrig !
   # update clock

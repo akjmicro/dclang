@@ -1,0 +1,15 @@
+"dsp.dc" import
+
+0.01 1.6 make-port myport
+
+: randtrig-example
+  440 sine
+  0.003 randtrig 0.5 *
+  myport port *
+  0.5 panmix
+  stereo-out
+  t+
+  randtrig-example
+;
+
+randtrig-example
