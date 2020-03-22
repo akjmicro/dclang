@@ -8,9 +8,12 @@ pi 2 * const 2PI
 # definition of 2 / pi
 pi 2 / const PI_DIV_2
 
+# 1 / 2pi
+1 2 pi * / const INV_2PI
+
 # sample rate and bit depth here
 # can be 8000e, 44100e, etc. etc
-48000 const SAMPLE_RATE
+44100 const SAMPLE_RATE
 
 # more efficient, for multiplication
 1 SAMPLE_RATE / const INV_SAMPLE_RATE
@@ -97,58 +100,13 @@ var _PHASOR_ARRAY 64 allot
   2PI * sin
 ;
 
-# band-limited sawtooth wavetable ( 16 harmonics )
-create bl_saw_table 65536 allot
-: make-sawtooth
-  13 1 1 for
-    65536 times
-      i j * 65536 % 65536 / 2PI * sin
-      bl_saw_table i + @
-      +
-      bl_saw_table i + !
-    again
-  next
-;
-
-var max-saw-value
-: normalize-saw-table
-  65536 times
-    bl_saw_table i + @
-    max-saw-value @
-    >
-    if
-      bl_saw_table i + @
-      max-saw-value !
-    endif
-  again
-  65536 times
-    bl_saw_table i + @
-    max-saw-value @ /
-    bl_saw_table i + !
-  again
-;
-
-: table-interpolate
-  # ( table idx wrap -- val )
-  over 1 % savepush
-  # ( table idx wrap )  ( frac_idx )
-  over ceil over and -rot
-  # ( table ceil-idx-wrapped idx wrap )  ( frac_idx )
-  swap floor swap and
-  # ( table ceil-idx-wrapped floor-idx-wrapped )  ( frac_idx )
-  2 pick + @
-  # ( table ceil-idx-wrapped floor_val )  ( frac_idx )
-  swap 2 pick + @ over
-  # ( table floor_val ceil_val floor_val )  ( frac_idx )
-  - savepop * + nip
-  # ( floor_val+(ceil_val-floor_val)*frac_idx )  ( )
-;
-
-make-sawtooth
-#normalize-saw-table
-# band-limited sawtooth oscillator:
-: saw
-  phasor 65536 * bl_saw_table swap 0xffff table-interpolate
+# sineloop, a feedback sine wave
+: sineloop
+  # ( mem freq fb )
+  2 pick @ * INV_2PI * swap phasor + 2PI * sin
+  # ( mem sin((fb*memv+phs)*2PI) )
+  tuck swap !
+  # ( out )
 ;
 
 #########
@@ -515,6 +473,36 @@ DELAY_HEADER_SIZE STORAGE_SIZE + const DELAY_STRUCT_SIZE
 #####################
 # END BIQUAD FILTER #
 #####################
+
+###########################
+# Hal Chamberlin's filter #
+###########################
+: hc_del1 0 + ;
+: hc_del2 1 + ;
+
+: make-hc-filter
+  create 0 , 0 ,
+;
+
+: hc-lowpass
+  # ( sig struct fc res -- out )
+  2 pick hc_del1 @ 2 pick * 3 pick hc_del2 @ +
+  # ( sig struct fc res hc_del1v*fc+hc_del2v )
+  # ( sig struct fc res del2new del2new )
+  dup 5 pick swap - rot 4 pick hc_del1 @ * - 0.997 *
+  # ( sig struct fc del2new sig-del2new-res*hc_del1v )
+  # ( sig struct fc del2new highpass )
+  rot * 2 pick hc_del1 @ +
+  # ( sig struct del2new highpass*fc+hc_del1 )
+  # ( sig struct del2new del1new )
+  1.0002 * 2 pick hc_del1 !
+  # ( sig struct del2new )
+  1.0002 * dup rot hc_del2 !
+  # ( sig del2new )
+  # drop all else:
+  nip
+  # del2new
+;
 
 ##########
 # OUTPUT #

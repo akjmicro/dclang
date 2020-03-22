@@ -1,0 +1,25 @@
+"dsp.dc" import
+
+var sl1
+var sl2
+var modwave
+make-hc-filter mylp
+make-hc-filter mylp2
+
+: sineloop-example
+  0.1 sine 0.5 * 0.5 + 0.5 * 0.6 + modwave !
+  # left channel
+  sl1 60 modwave @ sineloop 0.99 *
+  mylp 1200 2PIDSR * 1 hc-lowpass 0.3 *
+  0.02 panmix
+  # right channel
+  sl2 89.751 modwave @ sineloop 0.99 *
+  mylp2 1205 2PIDSR * 1 hc-lowpass 0.3 *
+  0.98 panmix
+  # output
+  stereo-out
+  t+
+  sineloop-example
+;
+
+sineloop-example
