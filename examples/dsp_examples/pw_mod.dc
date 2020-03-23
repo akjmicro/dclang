@@ -1,0 +1,15 @@
+"dsp.dc" import
+
+make-hc-filter mylp
+
+: pw-mod-example
+  0.1 sine 0.5 * 0.5 + 0.8 * 0.1 + 120 pulse 0.9 *
+  mylp 800 0.1 hc-lowpass 0.17 *
+  # mix and output
+  0.5 panmix
+  stereo-out
+  t+
+  pw-mod-example
+;
+
+pw-mod-example

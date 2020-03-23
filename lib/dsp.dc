@@ -89,6 +89,12 @@ var _PHASOR_ARRAY 64 allot
 # ( width freq -- sig )
 : gate phasor > ;
 
+# like a gate, but over -1 to 1 range
+# ( width freq -- sig )
+: pulse
+  phasor > if 1 else -1 endif
+;
+
 # phase --> sine
 : sine phasor 2PI * sin ;
 
@@ -486,12 +492,16 @@ DELAY_HEADER_SIZE STORAGE_SIZE + const DELAY_STRUCT_SIZE
 
 : hc-lowpass
   # ( sig struct fc res -- out )
+  1.995 * 2 swap -
+  # ( sig struct fc qres )
+  swap 2PIDSR * swap
+  # ( sig struct fcf qres )
   2 pick hc_del1 @ 2 pick * 3 pick hc_del2 @ +
-  # ( sig struct fc res hc_del1v*fc+hc_del2v )
-  # ( sig struct fc res del2new del2new )
+  # ( sig struct fcf qres hc_del1v*fc+hc_del2v )
+  # ( sig struct fcf qres del2new )
   dup 5 pick swap - rot 4 pick hc_del1 @ * - 0.997 *
-  # ( sig struct fc del2new sig-del2new-res*hc_del1v )
-  # ( sig struct fc del2new highpass )
+  # ( sig struct fcf del2new sig-del2new-qres*hc_del1v )
+  # ( sig struct fcf del2new highpass )
   rot * 2 pick hc_del1 @ +
   # ( sig struct del2new highpass*fc+hc_del1 )
   # ( sig struct del2new del1new )

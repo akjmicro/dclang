@@ -12,9 +12,9 @@ var slmem
 : hc-lowpass-example
   # sweeping mod
   # do from 0.08 - 0.02
-  0.2 sine 200 * 600 + 2PIDSR *
+  0.2 sine 200 * 600 +
   modwave !
-  0.8 res !
+  0.1 res !
   ### LEFT ###
   #47 phasor 2 * 1 - 0.5 *
   slmem 47 0.14 sineloop 0.8 *
