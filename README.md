@@ -28,10 +28,11 @@ ____________
 
 "dclang" is an RPN, stack-based language with near-zero syntax. It is in the
 spirit and tradition of FORTH and the grand ol' RPN calculator "dc", which is
-oft-found on a UNIX/LINUX system near you!
+oft-found on a UNIX/LINUX system near you! You can think of it as a dialect of
+FORTH, much in the same way Scheme is a leaner dialect of Lisp.
 
 RPN means "Reverse Polish Notation".  That means everything uses a
-'point-free-form', and there are no parenthesis, since there is a complete
+'point-free-form', and there are no parenthesis, since there is a completely
 level order of operation.  Operators operate on stack operands immediately,
 and leave the result on the stack immediately.  This makes the
 interpreter/parser not only simple but faster than one that has to do
@@ -43,8 +44,16 @@ language, but there will be operations to create variables and other data
 structures like lists and hashes (dictionaries) and so on, but they will be
 manually destroyed in memory to make room for other structures with other
 keywords ('free').  No garbage collection means things are kept simple, and
-the programmer is assumed to be a thoughtful and responsible adult.  :)
-FORTH is a great language, and I mean to follow that lead.
+the programmer is assumed to be a thoughtful and responsible adult. :)
+FORTH is a great language, and I mean to follow that lead, even as I simplify
+certain aspects of the FORTH standard in this dialect.
+
+The trade-off for that simplicity is that one has to get used to how order of
+operations work in this world (everything being immediate and w/o parenthesis).
+And also, one has to get used to manipulating the stack such that defined words
+make sensible, efficient use of the stack. It takes some getting used to. I direct
+the user to the internet or books to search for things relating to the fine art
+of programming FORTH, etc. Everything sadi there applies here.
 
 Anyway, due to RPN, things will look like this, when you do math:
 
@@ -123,7 +132,7 @@ Implemented thus far:
     * and, or, not, xor
     * =, <>, >, <, >=, <=
   * Stack operations:
-    * drop, dup, over, swap rot, -rot, nip, tuck
+    * drop, dup, over, swap rot, -rot, nip, tuck, pick
     * 2drop, 2dup, 2over, 2swap, 2rot, -2rot, 2nip, 2tuck
   * Control structures:
     * if-else-endif
@@ -138,6 +147,35 @@ Implemented thus far:
     * convert character bytes to equivalent numerical value with `ord`
     * convert integers to hex-string with `tohex`.
   * Variables/Arrays:
+    * Declare a constant with `const`:
+        ```
+        1 pi 2 * / const INV2PI
+        ```
+    * Declare a variable with `var`:
+        ```
+        var myvar
+        ```
+        or
+        ```
+        # This declares _and_ initializes:
+        var myvar 42 myvar !
+        ```
+        or
+        ```
+        # Declare a variable and advance the variable pointer such
+        # that the variable owns 16 slots, making it an array. You
+        # are responsible for knowing the bounds of the array yourself.
+        # there are no protections keeping you from writing into neighboring
+        # cells:
+        var myarr 16 allot
+        ```
+        There is also `create`, which does something similar, but is paired typically
+        with `,` which is an operator to place a stack value immediately into a storage
+        location. So, to initialize an array of four values to `1`, you'd do:
+        ```
+        create myarr 1 , 1 , 1 , 1 ,
+        ```
+        Note that the comma operator is an actual operator-word, it's not a delimiter!
     * ! (poke a value to a given slot, e.g. '5 32 !' puts the value 5
     into slot 32)
     * @ (peek a value, copy it to the stack, e.g. '32 @' will put our
@@ -185,32 +223,34 @@ Implemented thus far:
 
   * Read/write of file:
     ```
-    "test_file.txt" "w+" file-open 0 !  # save the open file ptr to slot 0
+    var myfile
+    "test_file.txt" "w+" file-open  myfile !  # save the open file ptr to a var slot
     "Some text in my file! Woo-hoo!\n"
-    0 @ file-write                      # write a sentence
-    0 @ file-close                      # close the file
-    "test-file.txt" "r" file-open 0 !   # re-open for reading
-    30 0 @ file-read print              # read 30 bytes from the file
+    myfile @ file-write                       # write a sentence
+    myfile @ file-close                       # close the file
+    "test-file.txt" "r" file-open myfile !    # re-open for reading
+    30 myfile @ file-read print               # read 30 bytes from the file
     # will print: Some text in my file! Woo-hoo!
-    0 @ file-close                      # close the file
+    myfile @ file-close                       # close the file
     ```
 
 TODO:
 
-  * hashing/hash tables (dictionaries). I actually may forego this and look
-    to hooking in sqlite3 as a general datastore instead.
-  * more time functions (e.g. date, calendar stuff, etc.)
-  * more string functions, as needed (basic saving and typing is all we have
-  at the moment, so I mean things like splitting, searching, etc.)
-  * just about everything a usuable language will need, or at least, the
-  means for someone to hook C-libraries into this enchilada.
-  * turtle graphics for the kids!?
+  * Hashing/hash tables (dictionaries). Some work on this has started in `/lib`,
+    But there is more to do...
+  * More time functions (e.g. date, calendar stuff, etc.)
+  * More string functions, as needed (basic saving and typing is all we have
+    at the moment, so I mean things like splitting, searching, etc.)
+  * Turtle graphics for the kids!?
+  * The `dsp.dc` lib has a good start! But it is growing still...this is an active
+    area for my interests!
 
 There are three branches of this repo:
-  * standard ('master' branch)
-  * rpi-float ('rpi-flt' branch, optimized a bit for Rpi)
-  * rpi-int ('rpi-int' branch, a bit more minimal, an experiment with fixed-point integers, really)
+  * Standard ('master' branch)
+  * (not active for a while) rpi-float ('rpi-flt' branch, optimized a bit for Rpi)
+  * (almost dead?) rpi-int ('rpi-int' branch, a bit more minimal, an experiment with fixed-point integers, really)
 
+(Quasi-deprecated note about branches):
 In the standard branch, everything is on the floating-point stack only at
 this point.  In the `rpi-int` branch, everything is a `long int` C-type.
 There may be separate stacks for integers in the future.  Not sure if it's
