@@ -48,21 +48,6 @@ static void compile_or_interpret(const char *argument)
         return;
     }
 
-    // search dictionary (list, not hash) entry
-    while (pr->name != 0) {
-        if (strcmp(pr->name, argument) == 0) {
-            if ((def_mode) && (!is_special_form(pr->name))) {
-                prog[iptr++].function.without_param = pr->function;
-            } else {
-                if (validate(argument)) {
-                    (*(pr->function)) ();
-                }
-            }
-            return;
-        }
-        pr++;
-    }
-
     // search user-defined functions (words)
     for (MYINT x = num_user_words - 1; x > -1 ; x--) {
         if (strcmp(user_words[x].name, argument) == 0) {
@@ -80,6 +65,21 @@ static void compile_or_interpret(const char *argument)
             }
             return;
         }
+    }
+
+    // search dictionary (list, not hash) entry
+    while (pr->name != 0) {
+        if (strcmp(pr->name, argument) == 0) {
+            if ((def_mode) && (!is_special_form(pr->name))) {
+                prog[iptr++].function.without_param = pr->function;
+            } else {
+                if (validate(argument)) {
+                    (*(pr->function)) ();
+                }
+            }
+            return;
+        }
+        pr++;
     }
 
     /* primitive not found, user definitions not found.  OK, so next, try to

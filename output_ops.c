@@ -5,7 +5,7 @@ static void showfunc()
         printf(". (pop) -- stack underflow! ");
         return;
     }
-    fprintf(ofp, "%0.16g ", pop());
+    fprintf(ofp, "%0.19g ", pop());
 }
 
 static void showhexfunc()
@@ -23,7 +23,7 @@ static void shownospacefunc()
         printf("stack underflow! ");
         return;
     }
-    fprintf(ofp, "%0.16g", pop());
+    fprintf(ofp, "%0.19g", pop());
 }
 
 static void crfunc()
@@ -40,7 +40,7 @@ static void showstackfunc()
     fprintf(ofp, "<%i>%s", data_stack_ptr, joiner);
     fflush(ofp);
     for (x=0; x < data_stack_ptr; x++) {
-        fprintf(ofp, "%0.16g ", data_stack[x]);
+        fprintf(ofp, "%0.19g ", data_stack[x]);
         fflush(ofp);
     }
     fprintf(ofp, "\n");

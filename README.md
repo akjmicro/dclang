@@ -224,14 +224,14 @@ Implemented thus far:
   * Read/write of file:
     ```
     var myfile
-    "test_file.txt" "w+" file-open  myfile !  # save the open file ptr to a var slot
+    "test_file.txt" "w+" fopen  myfile !  # save the open file ptr to a var slot
     "Some text in my file! Woo-hoo!\n"
-    myfile @ file-write                       # write a sentence
-    myfile @ file-close                       # close the file
-    "test-file.txt" "r" file-open myfile !    # re-open for reading
-    30 myfile @ file-read print               # read 30 bytes from the file
+    myfile @ fwrite                       # write a sentence
+    myfile @ fclose                       # close the file
+    "test-file.txt" "r" fopen myfile !    # re-open for reading
+    30 myfile @ fread print               # read 30 bytes from the file
     # will print: Some text in my file! Woo-hoo!
-    myfile @ file-close                       # close the file
+    myfile @ fclose                       # close the file
     ```
 
 TODO:

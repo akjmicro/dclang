@@ -1,7 +1,7 @@
 void fileopenfunc() {
     if (data_stack_ptr < 2) {
         printf("Stack underflow!\n");
-        printf("'file-open' needs <filename> <open-mode> on the stack\n");
+        printf("'fopen' needs <filename> <open-mode> on the stack\n");
         return;
     }
     // file mode string
@@ -21,7 +21,7 @@ void fileopenfunc() {
 void fileclosefunc() {
     if (data_stack_ptr < 1) {
         printf("Stack underflow!\n");
-        printf("'file-close' needs <file-pointer> on the stack\n");
+        printf("'fclose' needs <fpointer> on the stack\n");
         return;
     }
     FILE *file_to_close = (FILE *)(MYUINT) pop();
@@ -31,7 +31,7 @@ void fileclosefunc() {
 void filereadfunc() {
     if (data_stack_ptr < 2) {
         printf("Stack underflow!\n");
-        printf("'file-read' needs <number-of-bytes> <file-pointer> on the stack\n");
+        printf("'fread' needs <number-of-bytes> <fpointer> on the stack\n");
         return;
     }
     FILE *file_to_read = (FILE *)(MYUINT) pop();
@@ -52,7 +52,7 @@ void filereadfunc() {
 void fileseekfunc() {
     if (data_stack_ptr < 3) {
         printf("Stack underflow!\n");
-        printf("'file-seek' needs <offset> <whence> <file-pointer> on the stack\n");
+        printf("'fseek' needs <offset> <whence> <fpointer> on the stack\n");
         printf("'Whence' must be 0 (SEEK_SET), 1 (SEEK_CUR), or 2 (SEEK_END).\n");
         return;
     }
@@ -69,7 +69,7 @@ void fileseekfunc() {
 void filetellfunc() {
     if (data_stack_ptr < 1) {
         printf("Stack underflow!\n");
-        printf("'file-tell' needs a <file-pointer> on the stack\n");
+        printf("'ftell' needs a <fpointer> on the stack\n");
         return;
     }
     FILE *file_to_tell = (FILE *)(MYUINT) pop();
@@ -80,7 +80,7 @@ void filetellfunc() {
 void filewritefunc() {
     if (data_stack_ptr < 2) {
         printf("Stack underflow!\n");
-        printf("'file-write' needs <string-address> <file-pointer> on the stack\n");
+        printf("'fwrite' needs <string-address> <fpointer> on the stack\n");
         return;
     }
     FILE *file_to_write = (FILE *)(MYUINT) pop();
@@ -93,7 +93,7 @@ void fileflushfunc()
 {
     if (data_stack_ptr < 2) {
         printf("Stack underflow!\n");
-        printf("'file-write' needs <string-address> <file-pointer> on the stack\n");
+        printf("'fwrite' needs <string-address> <fpointer> on the stack\n");
         return;
     }
     FILE *file_to_flush = (FILE *)(MYUINT) pop();
