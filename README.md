@@ -123,24 +123,27 @@ you need something more.
 Implemented thus far:
 
   * Math:
-    * +, -, *, /, %, <<, >>
-    * abs, min, max, round, ceil, floor (float-versions only)
-    * pow, sqrt, log, log2, log10       (float-versions only)
-    * sin, cos, tan, pi, e              (float-versions only)
-    * rand                              (float-versions only)
+    * `+`, `-`, `*`, `/`, `%`, `<<`, `>>`
+    * `abs`, `min`, `max`, `round`, `ceil`, `floor` (float-versions only)
+    * `pow`, `sqrt`, `log`, `log2`, `log10`         (float-versions only)
+    * `sin`, `cos`, `tan`, `pi`, `e`                (float-versions only)
+    * `rand`                                        (float-versions only)
   * Logic:
-    * and, or, not, xor
-    * =, <>, >, <, >=, <=
+    * `and`, `or`, `not`, `xor`
+    * `=`, `<>`, `>`, `<`, `>=`, `<=`
   * Stack operations:
-    * drop, dup, over, swap rot, -rot, nip, tuck, pick
-    * 2drop, 2dup, 2over, 2swap, 2rot, -2rot, 2nip, 2tuck
+    * `drop`, `dup`, `over`, `swap`, `rot`, `-rot`, `nip`, `tuck`, `pick`
+    * `2drop`, `2dup`, `2over`, `2swap`, `2rot`, `-2rot`, `2nip`, `2tuck`
   * Control structures:
-    * if-else-endif
-    * times/again & for/next (looping)
+    * `if`-`else`-`endif`
+    * `times`/`again`; `for`/`next` (looping)
     * user-defined words (functions)
   * Strings:
-    * simple string printing
-    * fancier right-justified numeric output fields
+    * simple string printing w/ `print`
+    * fancier right-justified numeric output fields: `.rj`
+    * `strcat`, `strcpy`, `strtok`, `memcpy`
+    * strong comparison with: `strlen`, `str=`, `str<`, `str>`
+    * find a substring with `strfind`
     * '#' to end-of-line' for comments
     * `uemit`, a unicode-character emitter which can help to contruct
     strings that need them.
@@ -176,9 +179,9 @@ Implemented thus far:
         create myarr 1 , 1 , 1 , 1 ,
         ```
         Note that the comma operator is an actual operator-word, it's not a delimiter!
-    * ! (poke a value to a given slot, e.g. '5 32 !' puts the value 5
-    into slot 32)
-    * @ (peek a value, copy it to the stack, e.g. '32 @' will put our
+    * `!` (poke a value to a given slot, e.g. `5 funvar !` puts the value 5
+      into `funvar`)
+    * `@` (peek a value, copy it to the stack, e.g. `funvar @` will put our
     previously saved '5' onto the top of the stack.
     * Since the variables exist in an giant global array, there really is
     no distinction between 'arrays' and 'variables' in dclang. Named
@@ -224,7 +227,7 @@ Implemented thus far:
   * Read/write of file:
     ```
     var myfile
-    "test_file.txt" "w+" fopen  myfile !  # save the open file ptr to a var slot
+    "test_file.txt" "w+" fopen myfile !  # save the open file ptr to a var slot
     "Some text in my file! Woo-hoo!\n"
     myfile @ fwrite                       # write a sentence
     myfile @ fclose                       # close the file

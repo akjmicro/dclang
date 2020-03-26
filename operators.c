@@ -4,7 +4,7 @@ struct primitive {
   void (*function) (void);
 };
 
-static struct primitive primitives[114] = {
+static struct primitive primitives[118] = {
   // null
   {"null", nullfunc},
   {"isnull", isnullfunc},
@@ -108,6 +108,10 @@ static struct primitive primitives[114] = {
   {"str<", strltfunc},
   {"str>", strgtfunc},
   {"strfind", strfindfunc},
+  {"strcat", strcatfunc},
+  {"strcpy", strcpyfunc},
+  {"strtok", strtokfunc},
+  {"memset", memsetfunc},
   // time
   {"clock", clockfunc},
   {"sleep", sleepfunc},

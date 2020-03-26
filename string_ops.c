@@ -214,12 +214,58 @@ static void strgtfunc()
 static void strfindfunc()
 {
     if (data_stack_ptr < 2) {
-        printf("strfind -- stack underflow! ");
+        printf("strfind -- needs <haystack> <needle> string pointers on stack! ");
         return;
     }
     MYUINT str2 = (MYUINT) pop();
     MYUINT str1 = (MYUINT) pop();
     push((MYINT) strstr((char *)str1, (char *)str2));
+}
+
+// destructive/creative string functions:
+static void strcatfunc()
+{
+    if (data_stack_ptr < 2) {
+        printf("strcat -- needs <dest> <source> string pointers on stack! ");
+        return;
+    }
+    MYUINT str2 = (MYUINT) pop();
+    MYUINT str1 = (MYUINT) pop();
+    push((MYINT) strcat((char *)str1, (char *)str2));
+}
+
+static void strcpyfunc()
+{
+    if (data_stack_ptr < 2) {
+        printf("strcpy -- needs <dest> <source> string pointers on stack! ");
+        return;
+    }
+    MYUINT str2 = (MYUINT) pop();
+    MYUINT str1 = (MYUINT) pop();
+    push((MYINT) strcpy((char *)str1, (char *)str2));
+}
+
+static void strtokfunc()
+{
+    if (data_stack_ptr < 2) {
+        printf("strtok -- needs <str> <delim> string pointers on stack! ");
+        return;
+    }
+    MYUINT str2 = (MYUINT) pop();
+    MYUINT str1 = (MYUINT) pop();
+    push((MYINT) strtok((char *)str1, (char *)str2));
+}
+
+static void memsetfunc()
+{
+    if (data_stack_ptr < 3) {
+        printf("memset -- needs <str-pointer> <char-int> <times-int> on stack! ");
+        return;
+    }
+    MYUINT times = (MYUINT) pop();
+    MYUINT chr = (MYUINT) pop();
+    MYUINT strng = (MYUINT) pop();
+    push((MYINT) memset((char *)strng, (int)chr, (int)times));
 }
 
 static void bytes32func()
