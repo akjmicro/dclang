@@ -139,7 +139,7 @@ void readfunc()
 {
     if (data_stack_ptr < 1) {
         printf("Stack_underflow!\n");
-        printf("'read' needs <fpointer> on the stack\n");
+        printf("'read' needs <fpointer> <buffer-pointer> <numbytes> on the stack\n");
         return;
     }
     MYUINT numbytes = (MYUINT) pop();
