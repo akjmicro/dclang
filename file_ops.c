@@ -13,6 +13,7 @@ void fileopenfunc() {
          && ( !strcmp("r", mode) || !strcmp("r+", mode) ) ) {
         printf("The file named %s doesn't appear to exist, " \
                "or cannot be accessed.\n", path);
+        return;
     }
     FILE *openfptr = fopen(path, mode);
     push((MYUINT)openfptr);
@@ -98,4 +99,52 @@ void fileflushfunc()
     }
     FILE *file_to_flush = (FILE *)(MYUINT) pop();
     fflush(file_to_flush);
+}
+
+// lower-level OS calls:
+
+void openfunc()
+{
+    if (data_stack_ptr < 2) {
+        printf("Stack_underflow!\n");
+        printf("'open' needs <filestr> <flagint> on the stack\n");
+        return;
+    }
+    MYUINT flagint = (MYUINT) pop();
+    char *path = (char *)(MYUINT)pop();
+    int fd = open(path, flagint);
+    push((MYUINT) fd);
+}
+
+void mkbuffunc()
+{
+    if (data_stack_ptr < 1) {
+        printf("Stack_underflow!\n");
+        printf("'mkbuf' needs <size-as-integer> on the stack\n");
+    }
+    MYUINT size = (MYUINT) pop();
+    void *buf = malloc(size);
+    // update print safety:
+    if ((MYUINT)buf < MIN_STR || MIN_STR == 0) {
+        MIN_STR = (MYUINT)buf;
+    }
+    if ((MYUINT)buf + size + 1 > MAX_STR || MAX_STR == 0) {
+        MAX_STR = (MYUINT)buf + size + 1;
+    }
+    // done updating
+    push((MYUINT)buf);
+}
+
+void readfunc()
+{
+    if (data_stack_ptr < 1) {
+        printf("Stack_underflow!\n");
+        printf("'read' needs <fpointer> on the stack\n");
+        return;
+    }
+    MYUINT numbytes = (MYUINT) pop();
+    void *buf = (void *)(MYUINT)pop();
+    MYUINT fd = (MYUINT) pop();
+    int res = read(fd, buf, numbytes);
+    push((int)res);
 }

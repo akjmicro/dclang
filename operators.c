@@ -4,7 +4,7 @@ struct primitive {
   void (*function) (void);
 };
 
-static struct primitive primitives[118] = {
+static struct primitive primitives[121] = {
   // null
   {"null", nullfunc},
   {"isnull", isnullfunc},
@@ -126,6 +126,10 @@ static struct primitive primitives[118] = {
   {"redirect", redirectfunc},
   {"resetout", resetoutfunc},
   {"flush", flushoutfunc},
+  // low-level (OS) file ops:
+  {"open", openfunc},
+  {"mkbuf", mkbuffunc},
+  {"read", readfunc},
   // raw variables in memory
   {"!", pokefunc},
   {"@", peekfunc},

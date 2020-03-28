@@ -1,0 +1,44 @@
+"dsp.dc" import
+"midi.dc" import
+
+var sl1
+var sl2
+make-hc-filter mylp
+make-hc-filter mylp2
+
+# use 31-edo
+: octpitch 2 swap 31 / pow 50 * ;
+
+: midi-sineloop-example
+  # get a midi control signal every 32 samples
+  t 0x1f and 0 =
+  if
+    refresh_midictl
+  endif
+  # left channel
+    sl1
+    21 midictl octpitch
+    22 midictl 127 / 0.9 * 0.3 +
+  sineloop 0.99 *
+    mylp
+    25 midictl 127 / 3500 * 50 +
+    26 midictl 127 / 0.8 * 0.01 +
+  hc-lowpass 0.23 *
+  0.02 panmix
+  # right channel
+    sl2
+    23 midictl octpitch
+    24 midictl 127 / 0.9 * 0.3 +
+  sineloop 0.99 *
+    mylp2
+    27 midictl 127 / 3500 * 50 +
+    28 midictl 127 / 0.8 * 0.01 +
+  hc-lowpass 0.23 *
+  0.98 panmix
+  # output
+  stereo-out
+  t+
+  midi-sineloop-example
+;
+
+midi-sineloop-example

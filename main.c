@@ -12,6 +12,7 @@ Born on 2018-05-05 */
 #include <unistd.h>
 #include <math.h>
 #include <time.h>
+#include <fcntl.h>
 
 #define DATA_STACK_SIZE 128
 #define RETURN_STACK_SIZE 128
@@ -95,16 +96,16 @@ MYINT def_mode;
 
 // needed so we can add 'import' to primitives
 void load_extra_primitives() {
-    primitives[114].name = "primitives";
-    primitives[114].function = show_primitivesfunc;
-    primitives[115].name = "import";
-    primitives[115].function = importfunc;
-    primitives[116].name = "input";
-    primitives[116].function = inputfunc;
+    primitives[117].name = "primitives";
+    primitives[117].function = show_primitivesfunc;
+    primitives[118].name = "import";
+    primitives[118].function = importfunc;
+    primitives[119].name = "input";
+    primitives[119].function = inputfunc;
     /* final endpoint must be zeros,
        and they won't count in the 'count': */
-    primitives[117].name = 0;
-    primitives[117].function = 0;
+    primitives[120].name = 0;
+    primitives[120].function = 0;
 }
 
 

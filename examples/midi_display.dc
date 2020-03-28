@@ -1,0 +1,18 @@
+"midi.dc" import
+
+: midi_listen
+  refresh_midictl
+  21 midictl .
+  22 midictl .
+  23 midictl .
+  24 midictl .
+  25 midictl .
+  26 midictl .
+  27 midictl .
+  28 midictl .
+  cr
+  0.01 sleep
+  midi_listen
+;
+
+midi_listen

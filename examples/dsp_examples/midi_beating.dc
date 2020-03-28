@@ -1,0 +1,52 @@
+"dsp.dc" import
+"midi.dc" import
+
+1 127 / const MIDINORM
+60 const BASE
+
+var sl1
+var sl2
+var sl3
+var sl4
+
+: overtone_ctl midictl MIDINORM * 16 * ceil BASE * ;
+
+: beat_ctl midictl MIDINORM * 0.1 * 0.95 + ;
+
+: bright_ctl midictl MIDINORM * 1.2 * 0.1 + ;
+
+: vol_ctl midictl MIDINORM * 0.2 * ;
+
+: midi_beating
+  # get a midi control signal every 32 samples
+  t 0x1f and 0 =
+  if
+    refresh_midictl
+  endif
+    sl1
+    21 overtone_ctl 41 beat_ctl *
+    25 bright_ctl
+  sineloop 45 vol_ctl *
+  0.4 panmix
+    sl2
+    22 overtone_ctl 42 beat_ctl *
+    26 bright_ctl
+  sineloop 46 vol_ctl *
+  0.6 panmix
+    sl3
+    23 overtone_ctl 43 beat_ctl *
+    27 bright_ctl
+  sineloop 47 vol_ctl *
+  0.05 panmix
+    sl4
+    24 overtone_ctl 44 beat_ctl *
+    28 bright_ctl
+  sineloop 48 vol_ctl *
+  0.95 panmix
+  # output
+  stereo-out
+  t+
+  midi_beating
+;
+
+midi_beating

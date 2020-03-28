@@ -523,9 +523,9 @@ DELAY_HEADER_SIZE STORAGE_SIZE + const DELAY_STRUCT_SIZE
 : panmix
   2dup
   PI_DIV_2 * sin
-  * lcget + lcset
-  PI_DIV_2 * cos
   * rcget + rcset
+  PI_DIV_2 * cos
+  * lcget + lcset
 ;
 
 # sending out the signal
