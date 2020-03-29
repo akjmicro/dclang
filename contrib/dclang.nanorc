@@ -4,25 +4,38 @@ syntax "dclang" "\.dc$"
 header "^#!.*(dclang[-0-9_]*)"
 comment "#"
 
-# Strings.
-color brightyellow ""(\\.|[^"])*""
-
-# keywords
-color green "(^|[[:space:]])([-+*/%]($|[[:space:]]))*"
-color green "(^|[[:space:]])((null|isnull|abs|min|max|<<|>>|=|<>|<|>|<=|>=|assert|true|false|and|or|not|xor|round|ceil|floor|pow|sqrt)($|[[:space:]]))*"
-color green "(^|[[:space:]])((log|log2|log10|pi|e|sin|cos|tan|rand)($|[[:space:]]))*"
-color blue "(^|[[:space:]])((clear|drop|dup|over|pick|swap|rot|-rot|nip|tuck|2drop|2dup|2over|2swap|2rot|-2rot|2nip|2tuck|savepush|savepop)($|[[:space:]]))*"
-color brightblue "(^|[[:space:]])((times|again|exittimes|for|next|exitfor|i|j|k|if|else|endif|return)($|[[:space:]]))*"
-color yellow "(^|[[:space:]])((\.|h\.|\.\.|\.s|\.rj|cr|print|emit|uemit|ord|tohex|bytes32|free|strlen|str=|str<|str>|strfind|strcat|strcpy|strtok|memset|clock|sleep)($|[[:space:]]))*"
-color yellow "(^|[[:space:]])((fopen|fread|fseek|ftell|fwrite|fflush|fclose|redirect|resetout|flush|open|mkbuf|read)($|[[:space:]]))*"
-color yellow "(^|[[:space:]])((\! |\@|const|var|allot|create|\,|words|primitives|import|input)($|[[:space:]]))*"
+# general constants
+color magenta "(^|[[:space:]])(([_A-Z0-9]+)($|[[:space:]]))*"
+# general names
+color green "(^|[[:space:]])(([_a-z0-9]*[-_a-z0-9]+)($|[[:space:]]))*"
+# decimal numeric
+color white,black "(^|[[:space:]])((-?[0-9]+\.?[0-9]*)($|[[:space:]]))*"
+# hexidecimal numeric
+color white,black "(^|[[:space:]])((-?0[x|X][0-9a-fA-F]+)($|[[:space:]]))*"
+# escaped chars
+color white,black "(^|[[:space:]])((\\.)($|[[:space:]]))*"
+# strings
+color yellow start="\"" end="\""
+# defined primitive constants
+color brightmagenta "(^|[[:space:]])((null|false|true|pi|e)($|[[:space:]]))*"
+# operators
+color brightyellow "(^|[[:space:]])((\+|-|\*|\/|\%|abs|min|max|<<|>>)($|[[:space:]]))*"
+color brightyellow "(^|[[:space:]])((=|<>|<|>|<=|>=|assert|isnull|and|or|not|xor)($|[[:space:]]))*"
+color brightyellow "(^|[[:space:]])((round|ceil|floor|pow|sqrt|log|log2|log10|sin|cos|tan|rand)($|[[:space:]]))*"
+# stack operators
+color brightblue "(^|[[:space:]])((clear|drop|dup|over|pick|swap|rot|-rot|nip|tuck|2drop|2dup|2over|2swap|2rot|-2rot|2nip|2tuck|savepush|savepop)($|[[:space:]]))*"
+# memory words
+color brightred "(^|[[:space:]])((\!|\@|const|var|allot|create|\,)($|[[:space:]]))*"
+# control words
+color brightgreen "(^|[[:space:]])((times|again|exittimes|for|next|exitfor|i|j|k|if|else|endif|return)($|[[:space:]]))*"
+# other words
+color cyan "(^|[[:space:]])((\.|h\.|\.\.|\.s|\.rj|cr|print|emit|uemit|ord|tohex|bytes32|free|strlen|str=|str<|str>|strfind|strcat|strcpy|strtok|memset|clock|sleep)($|[[:space:]]))*"
+color cyan "(^|[[:space:]])((fopen|fread|fseek|ftell|fwrite|fflush|fclose|redirect|resetout|flush|open|mkbuf|read)($|[[:space:]]))*"
+color yellow "(^|[[:space:]])((words|primitives|import|input)($|[[:space:]]))*"
 # definition delimiters
-color red "(^|[[:space:]])(\: +\S+|\;)($|[[:space:]])"
+color brightred "(^|[[:space:]])((\:|;)($|[[:space:]]))*"
+# comments
+color white,black "(^|[[:space:]])#.*$"
+# trailing whitespace.
+color ,red "[[:space:]]+$"
 
-# Comments.
-color cyan "(^|[[:space:]])#.*$"
-
-color brightgreen "^[0-9A-Z_]+\(\)"
-
-# Trailing whitespace.
-color ,green "[[:space:]]+$"

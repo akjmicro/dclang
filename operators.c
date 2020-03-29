@@ -5,9 +5,12 @@ struct primitive {
 };
 
 static struct primitive primitives[121] = {
-  // null
+  // constants
   {"null", nullfunc},
-  {"isnull", isnullfunc},
+  {"false", falsefunc},
+  {"true", truefunc},
+  {"pi", pifunc},
+  {"e", efunc},
   // basic arithmetic
   {"+", addfunc},
   {"-", subfunc},
@@ -26,10 +29,9 @@ static struct primitive primitives[121] = {
   {">", gtfunc},
   {"<=", ltefunc},
   {">=", gtefunc},
-  {"assert", assertfunc},
   // logic
-  {"true", truefunc},
-  {"false", falsefunc},
+  {"assert", assertfunc},
+  {"isnull", isnullfunc},
   {"and", andfunc},
   {"or", orfunc},
   {"not", notfunc},
@@ -44,9 +46,6 @@ static struct primitive primitives[121] = {
   {"log", logfunc},
   {"log2", log2func},
   {"log10", log10func},
-  // constants
-  {"pi", pifunc},
-  {"e", efunc},
   // trig
   {"sin", sinefunc},
   {"cos", cosfunc},
@@ -75,6 +74,14 @@ static struct primitive primitives[121] = {
   // extra stack
   {"savepush", savepush},
   {"savepop", savepop},
+  // constants & variables
+  {"!", pokefunc},
+  {"@", peekfunc},
+  {"const", constantfunc},
+  {"var", variablefunc},
+  {"allot", allotfunc},
+  {"create", createfunc},
+  {",", commafunc},
   // branching
   {"times", timesfunc},
   {"again", againfunc},
@@ -112,9 +119,6 @@ static struct primitive primitives[121] = {
   {"strcpy", strcpyfunc},
   {"strtok", strtokfunc},
   {"memset", memsetfunc},
-  // time
-  {"clock", clockfunc},
-  {"sleep", sleepfunc},
   // file
   {"fopen", fileopenfunc},
   {"fread", filereadfunc},
@@ -130,16 +134,11 @@ static struct primitive primitives[121] = {
   {"open", openfunc},
   {"mkbuf", mkbuffunc},
   {"read", readfunc},
-  // raw variables in memory
-  {"!", pokefunc},
-  {"@", peekfunc},
-  // named constants & variables
-  {"const", constantfunc},
-  {"var", variablefunc},
-  {"allot", allotfunc},
-  {"create", createfunc},
-  {",", commafunc},
-  {"words", showdefined}
+  // time
+  {"clock", clockfunc},
+  {"sleep", sleepfunc},
+  // show defined words!
+  {"words", showdefined},
 };
 
 

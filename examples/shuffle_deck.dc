@@ -17,7 +17,6 @@
   TEMP-SLOT @ swap !
 ;
 
-
 : shuffle-deck
   0 TEMP-SLOT !
   NUM-CARDS 1 + times
@@ -26,7 +25,6 @@
       cell-swap
   again
 ;
-
 
 : printout-deck
   NUM-CARDS times
