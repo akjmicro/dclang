@@ -247,51 +247,6 @@ DELAY_HEADER_SIZE STORAGE_SIZE + const DELAY_STRUCT_SIZE
   swap drop over @ + tuck swap !
 ;
 
-###########
-# FILTERS #
-###########
-
-: _xt0_coef 0 + ;
-: _xt1_val 1 + ;
-: _xt1_coef 2 + ;
-: _yt1_val 3 + ;
-: _yt1_coef 4 + ;
-
-: _reinit-filter1 5 times 0 over i + ! again drop ;
-
-: make-filter1 create 5 allot ;
-
-: update-filter1
-  # This is where you give your filter its coefficients
-  # ( flt yt1cf xt1cf xt0cf -- )
-  3 pick _xt0_coef !
-  2 pick _xt1_coef !
-  swap _yt1_coef !
-;
-
-: filter1
-  # This is actually the signal processor
-  # ( sig flt reinit -- output-sig )
-  if
-    dup _reinit-filter1
-  endif
-  # ( sig flt )
-  dup _xt0_coef @ 2 pick *
-  # ( sig flt xt0cf*sig )
-  over dup _xt1_val @ swap _xt1_coef @ *
-  # ( sig flt xt0cf*sig xt1val*xt1cd  )
-  3 pick 3 pick _xt1_val !
-  # ( sig flt xt0cf*sig xt1val*xt1cd  )
-  2 pick dup _yt1_val @ swap _yt1_coef @ *
-  # ( sig flt xt0 xt1 yt1*yt1cf )
-  -1 * + +
-  # ( sig flt new_y )
-  swap 2dup _yt1_val !
-  # ( sig new_y flt )
-  rot drop drop
-  # ( new_y )
-;
-
 ##################
 # BIQUAD FILTERS #
 ##################
@@ -485,12 +440,11 @@ DELAY_HEADER_SIZE STORAGE_SIZE + const DELAY_STRUCT_SIZE
 ###########################
 : hc_del1 0 + ;
 : hc_del2 1 + ;
+: hc_hp 2 + ;
 
-: make-hc-filter
-  create 0 , 0 ,
-;
+: make-hc-filter create 0 , 0 , 0 , ;
 
-: hc-lowpass
+: _hc_common
   # ( sig struct fc res -- out )
   1.995 * 2 swap -
   # ( sig struct fc qres )
@@ -498,21 +452,36 @@ DELAY_HEADER_SIZE STORAGE_SIZE + const DELAY_STRUCT_SIZE
   # ( sig struct fcf qres )
   2 pick hc_del1 @ 2 pick * 3 pick hc_del2 @ +
   # ( sig struct fcf qres hc_del1v*fc+hc_del2v )
-  # ( sig struct fcf qres del2new )
+  # ( sig struct fcf qres lpsig )
   dup 5 pick swap - rot 4 pick hc_del1 @ * - 0.997 *
-  # ( sig struct fcf del2new sig-del2new-qres*hc_del1v )
-  # ( sig struct fcf del2new highpass )
+  # ( sig struct fcf lpsig sig-lpsig-qres*hc_del1v )
+  # ( sig struct fcf lpsig hpsig )
+  dup 4 pick hc_hp !
+  # ( sig struct fcf lpsig hpsig )
   rot * 2 pick hc_del1 @ +
-  # ( sig struct del2new highpass*fc+hc_del1 )
-  # ( sig struct del2new del1new )
+  # ( sig struct lpsig hpsig*fc+hc_del1v )
+  # ( sig struct lpsig bpsig )
   1.0002 * 2 pick hc_del1 !
-  # ( sig struct del2new )
-  1.0002 * dup rot hc_del2 !
-  # ( sig del2new )
-  # drop all else:
-  nip
-  # del2new
+  # ( sig struct lpsig )
+  1.0002 * dup 2 pick hc_del2 !
+  # ( sig struct lpsig )
 ;
+
+: hc-lowpass
+  # ( sig struct lpsig )
+  _hc_common nip nip
+;
+
+: hc-highpass
+  # ( sig struct lpsig )
+  _hc_common drop nip hc_hp @
+;
+
+: hc-bandpass
+  # ( sig struct lpsig )
+  _hc_common drop nip hc_del1 @
+;
+
 
 ##########
 # OUTPUT #

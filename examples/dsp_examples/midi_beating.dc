@@ -11,7 +11,7 @@ var sl4
 
 : overtone_ctl midictl MIDINORM * 16 * ceil BASE * ;
 
-: beat_ctl midictl MIDINORM * 0.1 * 0.95 + ;
+: beat_ctl midictl MIDINORM * 0.04 * 0.98 + ;
 
 : bright_ctl midictl MIDINORM * 1.2 * 0.1 + ;
 
