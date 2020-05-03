@@ -168,6 +168,9 @@ static void importfunc() {
     return import(importfile);
 }
 
+// a small buffer for use by `grabinput`
+char string_pad[512];
+int string_here;
 
 static void grabinput() {
     char ch;
@@ -197,14 +200,19 @@ static void grabinput() {
         string_pad[string_here++] = ch;
         if ((ch = getchar()) == EOF) exit(0);
     }
-    unsigned long string_addr = (unsigned long) string_start;
-    unsigned long string_size = (unsigned long)(string_here - string_start);
+    MYUINT string_addr = (MYUINT) string_start;
+    MYUINT string_size = (MYUINT)(string_here - string_start);
     char *string_dest = malloc(string_size + 1);
-    // number for stack needs to be a double:
-    double string_dest_dbl = (double)(unsigned long) string_dest;
     char nullstr[] = "\0";
-    memcpy(string_dest, (char *)((unsigned long)&string_pad[0] + string_addr), string_size);
-    push(string_dest_dbl);
+    memcpy(string_dest, (char *)((MYUINT)&string_pad[0] + string_addr), string_size);
+    MYUINT string_dest_uint = (MYUINT) string_dest;
+    if (string_dest_uint < MIN_STR || MIN_STR == 0) {
+        MIN_STR = string_dest_uint;
+    }
+    if (string_dest_uint + string_size + 1 > MAX_STR || MAX_STR == 0) {
+        MAX_STR = string_dest_uint + string_size + 1;
+    }
+    push(string_dest_uint);
 }
 
 static void inputfunc() {

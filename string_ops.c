@@ -1,14 +1,67 @@
-char string_pad[1048576];
-unsigned long string_here;
-
 MYUINT MIN_STR = 0;
 MYUINT MAX_STR = 0;
 
+/* utf-8 char buffer */
+char utf8_buf[5];
+
+static long utf8_encode(char *out, uint64_t utf)
+{
+    if (utf <= 0x7F) {
+        // Plain ASCII
+        out[0] = (char) utf;
+        out[1] = 0;
+        return 1;
+    }
+    else if (utf <= 0x07FF) {
+        // 2-byte unicode
+        out[0] = (char) (((utf >> 6) & 0x1F) | 0xC0);
+        out[1] = (char) (((utf >> 0) & 0x3F) | 0x80);
+        out[2] = 0;
+        return 2;
+    }
+    else if (utf <= 0xFFFF) {
+        // 3-byte unicode
+        out[0] = (char) (((utf >> 12) & 0x0F) | 0xE0);
+        out[1] = (char) (((utf >>  6) & 0x3F) | 0x80);
+        out[2] = (char) (((utf >>  0) & 0x3F) | 0x80);
+        out[3] = 0;
+        return 3;
+    }
+    else if (utf <= 0x10FFFF) {
+        // 4-byte unicode
+        out[0] = (char) (((utf >> 18) & 0x07) | 0xF0);
+        out[1] = (char) (((utf >> 12) & 0x3F) | 0x80);
+        out[2] = (char) (((utf >>  6) & 0x3F) | 0x80);
+        out[3] = (char) (((utf >>  0) & 0x3F) | 0x80);
+        out[4] = 0;
+        return 4;
+    }
+    else {
+        // error - use replacement character
+        out[0] = (char) 0xEF;
+        out[1] = (char) 0xBF;
+        out[2] = (char) 0xBD;
+        out[3] = 0;
+        return 3;
+    }
+}
+
+int get_unicode_by_hex(char *c, int usize)
+{
+    char numstr[usize];
+    long int status = (long int)fgets(numstr, usize, ifp);
+    int ucode = strtol(numstr, NULL, 16);
+    int num_bytes_ret = utf8_encode(c, ucode);
+    return status;
+}
+
 static void stringfunc()
 {
-    long ch;
-    /* get a starting marker for length */
-    unsigned long string_start = string_here;
+    char ch;
+    char chbuf[5];
+    char *buf;
+    long unsigned bufsize = 2;
+    buf = (char *)malloc(bufsize);
     // get the next character, and start the process for real:
     if ((ch = fgetc(ifp)) == EOF) exit(0);
     while (! strchr("\"", ch)) {
@@ -17,31 +70,51 @@ static void stringfunc()
             if ((ch = fgetc(ifp)) == EOF) exit(0);
             /* backspace */
             if (strchr("b", ch)) {
-                ch = 8;
+                chbuf[0] = 8;
+                chbuf[1] = 0;
             }
-            if (strchr("n", ch)) {
-                ch = 10;
-            }
+            /* tab */
             if (strchr("t", ch)) {
-                ch = 9;
+                chbuf[0] = 9;
+                chbuf[1] = 0;
             }
+            /* newline */
+            if (strchr("n", ch)) {
+                chbuf[0] = 10;
+                chbuf[1] = 0;
+            }
+            /* 2-byte unicode */
+            if (strchr("u", ch)) {
+                int stat = get_unicode_by_hex(chbuf, 5);
+                if (stat == 0) {
+                    printf("Illegal 2-byte unicode entry in string.\n");
+                    return;
+                }
+            }
+            /* 4-byte unicode */
+            if (strchr("U", ch)) {
+                int stat = get_unicode_by_hex(chbuf, 9);
+                if (stat == 0) {
+                    printf("Illegal 4-byte unicode entry in string.\n");
+                }
+            }
+        } else {
+            chbuf[0] = ch;
+            chbuf[1] = 0;
         }
-        string_pad[string_here++] = ch;
+        bufsize += (strlen(chbuf) + 1);
+        buf = (char *) realloc(buf, bufsize);
+        strcat(buf, chbuf);
         if ((ch = fgetc(ifp)) == EOF) exit(0);
     }
-    unsigned long string_addr = (unsigned long) string_start;
-    unsigned long string_size = (unsigned long)(string_here - string_start);
-    char *string_dest = malloc(string_size + 1);
     // number for stack needs to be a double:
-    MYUINT string_dest_uint = (MYUINT) string_dest;
+    MYUINT string_dest_uint = (MYUINT) buf;
     if (string_dest_uint < MIN_STR || MIN_STR == 0) {
         MIN_STR = string_dest_uint;
     }
-    if (string_dest_uint + string_size + 1 > MAX_STR || MAX_STR == 0) {
-        MAX_STR = string_dest_uint + string_size + 1;
+    if (string_dest_uint + bufsize + 1 > MAX_STR || MAX_STR == 0) {
+        MAX_STR = string_dest_uint + bufsize + 1;
     }
-    char nullstr[] = "\0";
-    memcpy(string_dest, (char *)((MYUINT)&string_pad[0] + string_addr), string_size);
     if (def_mode) {
         prog[iptr].function.with_param = push;
         prog[iptr++].param = string_dest_uint;
@@ -88,51 +161,6 @@ static void emitfunc()
     char char_code = (char) pop();
     fprintf(ofp, "%c", char_code);
     fflush(ofp);
-}
-
-/* utf-8 char buffer */
-char utf8_buf[5];
-
-static long utf8_encode(char *out, uint64_t utf)
-{
-    if (utf <= 0x7F) {
-        // Plain ASCII
-        out[0] = (char) utf;
-        out[1] = 0;
-        return 1;
-    }
-    else if (utf <= 0x07FF) {
-        // 2-byte unicode
-        out[0] = (char) (((utf >> 6) & 0x1F) | 0xC0);
-        out[1] = (char) (((utf >> 0) & 0x3F) | 0x80);
-        out[2] = 0;
-        return 2;
-    }
-    else if (utf <= 0xFFFF) {
-        // 3-byte unicode
-        out[0] = (char) (((utf >> 12) & 0x0F) | 0xE0);
-        out[1] = (char) (((utf >>  6) & 0x3F) | 0x80);
-        out[2] = (char) (((utf >>  0) & 0x3F) | 0x80);
-        out[3] = 0;
-        return 3;
-    }
-    else if (utf <= 0x10FFFF) {
-        // 4-byte unicode
-        out[0] = (char) (((utf >> 18) & 0x07) | 0xF0);
-        out[1] = (char) (((utf >> 12) & 0x3F) | 0x80);
-        out[2] = (char) (((utf >>  6) & 0x3F) | 0x80);
-        out[3] = (char) (((utf >>  0) & 0x3F) | 0x80);
-        out[4] = 0;
-        return 4;
-    }
-    else {
-        // error - use replacement character
-        out[0] = (char) 0xEF;
-        out[1] = (char) 0xBF;
-        out[2] = (char) 0xBD;
-        out[3] = 0;
-        return 3;
-    }
 }
 
 static void uemitfunc()
