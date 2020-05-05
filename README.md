@@ -53,7 +53,7 @@ operations work in this world (everything being immediate and w/o parenthesis).
 And also, one has to get used to manipulating the stack such that defined words
 make sensible, efficient use of the stack. It takes some getting used to. I direct
 the user to the internet or books to search for things relating to the fine art
-of programming FORTH, etc. Everything sadi there applies here.
+of programming FORTH, etc. Everything said there applies here.
 
 Anyway, due to RPN, things will look like this, when you do math:
 
