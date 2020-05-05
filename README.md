@@ -208,6 +208,7 @@ Implemented thus far:
         Hello there, good people!
         ```
   * A global hash table (string keys and string values only). This is in the spirit of `redis`, in a way:
+  
         ```
         "some value" "mykey" h!
         "mykey" h@ print cr
