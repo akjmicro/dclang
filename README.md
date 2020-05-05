@@ -243,13 +243,13 @@ Implemented thus far:
 TODO:
 
   * More time functions (e.g. date, calendar stuff, etc.)
-  * More string functions, as needed (basic saving and typing is all we have
-    at the moment, so I mean things like splitting, searching, etc.)
-  * Turtle graphics for the kids!?
+  * More string functions, as needed. We have most of the basic `string.h` C-level functions. What could be implemented
+  would be things like search/replace and `regex`.
   * The `dsp.dc` lib has a good start! But it is growing still...this is an active
     area for my interests!
   * A socket layer for networking would be nice.
   * More OS-level integration (file system interaction, directories, permissions, etc.)
+  * Turtle graphics for the kids!?
 
 There are three branches of this repo:
   * Standard ('master' branch)
