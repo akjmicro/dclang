@@ -13,6 +13,7 @@ Born on 2018-05-05 */
 #include <math.h>
 #include <time.h>
 #include <fcntl.h>
+#include <search.h>
 
 #define DATA_STACK_SIZE 128
 #define RETURN_STACK_SIZE 128
@@ -96,16 +97,16 @@ MYINT def_mode;
 
 // needed so we can add 'import' to primitives
 void load_extra_primitives() {
-    primitives[117].name = "primitives";
-    primitives[117].function = show_primitivesfunc;
-    primitives[118].name = "import";
-    primitives[118].function = importfunc;
-    primitives[119].name = "input";
-    primitives[119].function = inputfunc;
+    primitives[118].name = "primitives";
+    primitives[118].function = show_primitivesfunc;
+    primitives[119].name = "import";
+    primitives[119].function = importfunc;
+    primitives[120].name = "input";
+    primitives[120].function = inputfunc;
     /* final endpoint must be zeros,
        and they won't count in the 'count': */
-    primitives[120].name = 0;
-    primitives[120].function = 0;
+    primitives[121].name = 0;
+    primitives[121].function = 0;
 }
 
 
@@ -116,6 +117,8 @@ int main(int argc, char **argv)
     resetoutfunc();
     load_extra_primitives();
     srand(time(NULL));
+    // create the global hash table
+    hcreate(1048576);
     //setlocale(LC_ALL, "");
     if (argc > 1) {
         for(int opt = 1; opt < argc; opt++) {

@@ -57,7 +57,7 @@ static void variablefunc()
         max_iptr = iptr;
         // restore function position
         iptr = return_stack[--return_stack_ptr];
-        // restore return stack to new hishest position
+        // restore return stack to new highest position
         return_stack[return_stack_ptr++] = max_iptr;
     } else {
         startword();
@@ -91,43 +91,46 @@ static void commafunc()
     myvars[varsidx++] = val;
 }
 
-/*
+/* global hash space, a la 'redis', but in local memory */
 
-00 - (def1)
-01 -
-02 -
-03 return
-04 - (def2)
-05 def1
-06 -
-07 return
-08 - (def3)
-09 -
-10 var
-11 -
-12 return
-13 new-var-func (was last HERE (now "varname"))
-14 return
-15 HERE
+static void hashsetfunc()
+{
+    if (data_stack_ptr < 2) {
+        printf("h! -- stack underflow! ");
+        return;
+    }
+    /* grab the key */
+    char *key = (char *)(MYUINT)pop();
+    /* grab the value */
+    char *data = (char *)(MYUINT) pop();
+    ENTRY item = {key, data};
+    /* see if we have an entry for the given key first */
+    ENTRY *entry = hsearch(item, FIND);
+    if (entry == NULL) {
+        hsearch(item, ENTER);
+    } else {
+        free(entry);
+        hsearch(item, ENTER);
+    }
+}
 
-00 - (def1)
-01 -
-02 -
-03 return
-04 - (def2)
-05 def1
-06 -
-07 return
-08 - (def3)
-09 -
-10 create
-11 -
-12 return
-13 new-create-func (was last HERE (now "varname"))
-14 return
-15 new-var-name-push (var)
-16 return
 
-return stack (top is rightmost): 15
-
-*/
+static void hashgetfunc()
+{
+    if (data_stack_ptr < 1) {
+        printf("h@ -- stack underflow! ");
+        return;
+    }
+    /* grab the key */
+    char *key = (char *)(MYUINT)pop();
+    /* grab the value */
+    char *data = "\0";
+    ENTRY item = {key, data};
+    /* see if we have an entry for the given key first */
+    ENTRY *entry = hsearch(item, FIND);
+    if (entry == NULL) {
+        push(0);
+    } else {
+        push((MYUINT)(char *)entry->data);
+    }
+}

@@ -8,15 +8,6 @@ static void showfunc()
     fprintf(ofp, "%0.19g ", pop());
 }
 
-static void showhexfunc()
-{
-    if (data_stack_ptr < 1) {
-        printf("h. (hexpop) -- stack underflow! ");
-        return;
-    }
-    fprintf(ofp, "%a ", pop());
-}
-
 static void shownospacefunc()
 {
     if (data_stack_ptr < 1) {
