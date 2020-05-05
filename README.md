@@ -207,7 +207,12 @@ Implemented thus far:
         greeting print cr
         Hello there, good people!
         ```
-
+  * A global hash table (string keys and string values only). This is in the spirit of `redis`, in a way:
+        ```
+        "some value" "mykey" h!
+        "mykey" h@ print cr
+        some value
+        ```
   * Timing:
     * a clock function ('clock') so we can time execution in nanoseconds
     for benchmarking.
@@ -239,14 +244,14 @@ Implemented thus far:
 
 TODO:
 
-  * Hashing/hash tables (dictionaries). Some work on this has started in `/lib`,
-    But there is more to do...
   * More time functions (e.g. date, calendar stuff, etc.)
   * More string functions, as needed (basic saving and typing is all we have
     at the moment, so I mean things like splitting, searching, etc.)
   * Turtle graphics for the kids!?
   * The `dsp.dc` lib has a good start! But it is growing still...this is an active
     area for my interests!
+  * A socket layer for networking would be nice.
+  * More OS-level integration (file system interaction, directories, permissions, etc.)
 
 There are three branches of this repo:
   * Standard ('master' branch)
