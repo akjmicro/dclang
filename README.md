@@ -53,7 +53,7 @@ operations work in this world (everything being immediate and w/o parenthesis).
 And also, one has to get used to manipulating the stack such that defined words
 make sensible, efficient use of the stack. It takes some getting used to. I direct
 the user to the internet or books to search for things relating to the fine art
-of programming FORTH, etc. Everything sadi there applies here.
+of programming FORTH, etc. Everything said there applies here.
 
 Anyway, due to RPN, things will look like this, when you do math:
 
@@ -243,13 +243,13 @@ Implemented thus far:
 TODO:
 
   * More time functions (e.g. date, calendar stuff, etc.)
-  * More string functions, as needed (basic saving and typing is all we have
-    at the moment, so I mean things like splitting, searching, etc.)
-  * Turtle graphics for the kids!?
+  * More string functions, as needed. We have most of the basic `string.h` C-level functions. What could be implemented
+  would be things like search/replace and `regex`.
   * The `dsp.dc` lib has a good start! But it is growing still...this is an active
     area for my interests!
   * A socket layer for networking would be nice.
   * More OS-level integration (file system interaction, directories, permissions, etc.)
+  * Turtle graphics for the kids!?
 
 There are three branches of this repo:
   * Standard ('master' branch)
