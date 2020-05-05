@@ -199,24 +199,21 @@ Implemented thus far:
 
     * This works in a similar fashion for something like a string variable
     (which is, in reality an address and a length):
-
-        ```
-        : greeting "Hello there, good people!" ;
-        greeting .s
-        <1> 94123539921536
-        greeting print cr
-        Hello there, good people!
-        ```
+      ```
+      : greeting "Hello there, good people!" ;
+      greeting .s
+      <1> 94123539921536
+      greeting print cr
+       Hello there, good people!
+      ```
   * A global hash table (string keys and string values only). This is in the spirit of `redis`, in a way:
-  
-        ```
-        "some value" "mykey" h!
-        "mykey" h@ print cr
-        some value
-        ```
+    ```
+    "some value" "mykey" h!
+    "mykey" h@ print cr
+    some value
+    ```
   * Timing:
-    * a clock function ('clock') so we can time execution in nanoseconds
-    for benchmarking.
+    * a clock function ('clock') so we can time execution in nanoseconds for benchmarking.
     * A hook into CPU-cycle clock, called 'rdtsc'. (not available on RPi)
     * A sleep function (C's `nanosleep` under-the-hood)
 
