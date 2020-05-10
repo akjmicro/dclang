@@ -196,6 +196,37 @@ static void tohexfunc()
     fflush(ofp);
 }
 
+static void tonumfunc()
+{
+    if (data_stack_ptr < 1) {
+        printf("tonum -- needs a <str-pointer> on stack! ");
+        return;
+    }
+    char *mystr = (char *)(MYUINT) pop();
+    MYFLT num = strtod(mystr, NULL);
+    push(num);
+}
+
+static void tostrfunc()
+{
+    if (data_stack_ptr < 1) {
+        printf("tostr -- needs a number on stack! ");
+        return;
+    }
+    MYFLT var = pop();
+    int bufsize = snprintf( NULL, 0, "%g", var);
+    char *str = malloc(bufsize + 1);
+    snprintf(str, bufsize + 1, "%g", var);
+    MYUINT string_dest_uint = (MYUINT) str;
+    if (string_dest_uint < MIN_STR || MIN_STR == 0) {
+        MIN_STR = string_dest_uint;
+    }
+    if (string_dest_uint + bufsize + 1 > MAX_STR || MAX_STR == 0) {
+        MAX_STR = string_dest_uint + bufsize + 1;
+    }
+    push((MYUINT) string_dest_uint);
+}
+
 static void strlenfunc()
 {
     if (data_stack_ptr < 1) {
