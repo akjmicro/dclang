@@ -101,6 +101,11 @@ static void hashsetfunc()
     }
     /* grab the key */
     char *key = (char *)(MYUINT)pop();
+    MYUINT key_addr = (MYUINT) key;
+    if (key_addr < MIN_STR || key_addr > MAX_STR) {
+        perror("h! -- String address for hash key out-of-range.");
+        return;
+    }
     /* grab the value */
     char *data = (char *)(MYUINT) pop();
     ENTRY item = {key, data};
@@ -123,6 +128,11 @@ static void hashgetfunc()
     }
     /* grab the key */
     char *key = (char *)(MYUINT)pop();
+    MYUINT key_addr = (MYUINT) key;
+    if (key_addr < MIN_STR || key_addr > MAX_STR) {
+        perror("h@ -- String address for hash key out-of-range.");
+        return;
+    }
     /* grab the value */
     char *data = "\0";
     ENTRY item = {key, data};
