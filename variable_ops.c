@@ -1,6 +1,3 @@
-/* some simple variable functions, a bare-bones way of storing temp values...
-Yes, bare-bones, but it works! */
-
 MYFLT myvars[1048576];
 MYUINT varsidx;
 
@@ -89,6 +86,11 @@ static void commafunc()
     }
     MYFLT val = pop();
     myvars[varsidx++] = val;
+}
+
+static void herefunc()
+{
+    push((MYUINT) varsidx);
 }
 
 /* global hash space, a la 'redis', but in local memory */
