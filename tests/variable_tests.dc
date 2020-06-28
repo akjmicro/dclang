@@ -43,8 +43,22 @@ beta @ 1111 = assert
 "Testing distance between variable addresses" print cr
 beta alpha - 4 = assert
 
+
+"Testing the sortnums word" print cr
+create arr_to_sort
+510 , 83 , 20053 , -19 , 1.618 ,
+arr_to_sort @ 510 = assert
+arr_to_sort 3 + @ -19 = assert
+arr_to_sort 5 sortnums
+# prove sorting worked:
+arr_to_sort @ -19 = assert
+arr_to_sort 4 + @ 20053 = assert
+
+
+cr "Here are all the variables in memory:" print cr
 : showvars 16 times i @ . again ;
 
 showvars cr
 
+cr "Here are all the defined words used for the tests:" print cr
 words

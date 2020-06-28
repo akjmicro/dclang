@@ -1,0 +1,22 @@
+var iters 24 iters !
+var myarr iters @ allot
+
+: create_rand_arr
+  iters @ times
+    rand 256 * round myarr i + !
+  again
+;
+
+: showarr
+  iters @ times
+    myarr i + @ .
+  again
+  cr
+;
+
+"Array before sorting:" print cr
+create_rand_arr
+showarr
+"Array after sorting:" print cr
+myarr iters @ sortnums
+showarr
