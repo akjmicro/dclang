@@ -161,6 +161,10 @@ int compare_doubles (const void *a, const void *b)
 
 static void sortnumsfunc()
 {
+    if (data_stack_ptr < 2) {
+        printf("sortnums -- need <arrstart_index> <size> on the stack.\n");
+        return;
+    }
     int size = (MYUINT) pop();
     int arrstart = (MYUINT) pop();
     qsort (myvars+arrstart, size, sizeof(MYFLT), compare_doubles);
