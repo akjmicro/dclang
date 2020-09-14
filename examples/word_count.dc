@@ -1,0 +1,83 @@
+var :text_to_count
+
+
+"Startsidan på DN.se kommer att göras i tre versioner: en riksversion, en
+Stockholmsversion och en Göteborgsversion. DN har av många setts som en Stockholmstidning,
+och det med all rätt. Men digitalt växer vi nu som mest i orter utanför Stockholmsregionen,
+säger Anna Åberg, chef för DN.se. Och de nya läsarna ställer andra krav både på innehållet och på presentationen.
+Många läsare utanför Stockholm blir irriterade på vad de upplever som för stort Stockholmsfokus på DN.se.
+Samtidigt tycker våra läsare i Stockholm att vi har för lite Stockholmsnyheter på startsidan.
+Med satsningen på Göteborg blev detta en av våra viktigaste utmaningar att lösa, säger Anna Åberg.
+
+Dagens Nyheter har, till skillnad från många andra nyhetssajter, valt att inte låta en algoritm styra i vilken
+ordning nyheter visas på förstasidan. Vi är måna om att nyhetsvärderingen och sorteringen på startsidan även
+fortsatt ska vara gjord av redaktörer. Men det går inte att helt bortse från geografiskt avstånd i nyhetsvärderingen.
+Om det är trafikkaos i Göteborg är det relevant för de som befinner sig i Göteborg, men inte nödvändigtvis för en
+person i Malmö, säger Anna Åberg."
+:text_to_count !
+
+var :delims " \n\t.,!?;:-" :delims !
+var token_holder_size
+var keys_size
+create token_holder
+
+: copy_token
+  24 mkbuf swap strcpy ,
+;
+
+: splitter_main
+  0 :delims @ strtok
+  dup 0 <>
+  if
+    copy_token
+    splitter_main
+  endif
+;
+
+: splitter
+  :text_to_count @ :delims @ strtok
+  dup 0 <>
+  if
+    copy_token
+    splitter_main
+  endif
+  drop
+  here token_holder -
+  token_holder_size !
+;
+
+
+splitter
+
+create keys
+# sanity check the memory
+keys token_holder token_holder_size + > assert
+
+: token_count_incr
+  token_holder_size @
+  times
+    token_holder i + @   # ( token )
+    dup h@               # ( token hash-val )
+    dup 0 =              # ( token hash-val hash-val-is-0 )
+    if
+      over ,             # ( token hash-val )
+      1 + swap h!        # ( )
+    else
+      1 + swap h!
+    endif
+  again
+  here keys -
+  keys_size !
+;
+
+token_count_incr
+
+: show_token_counts
+  keys_size @
+  times
+    keys i + @ print ": " print
+    keys i + @ h@ . cr
+  again
+;
+
+show_token_counts

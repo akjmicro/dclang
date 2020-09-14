@@ -116,7 +116,7 @@ static void hashsetfunc()
     if (entry == NULL) {
         hsearch(item, ENTER);
     } else {
-        free(entry->data);
+        //free(entry->data);
         entry->data = data;
     }
 }
