@@ -127,6 +127,10 @@ static void repl() {
 
 static void import(char *infilestr) {
     char *prefix = getenv("DCLANG_LIBS");
+    if (prefix == NULL) {
+        printf("DCLANG_LIBS env variable is unset!\n");
+        return;
+    }
     // check existence of file:
     if (access(infilestr, F_OK) == 0) {
         FILE *infile;
@@ -135,16 +139,15 @@ static void import(char *infilestr) {
         repl();
         return;
     }
-    char *buf = malloc(strlen(prefix) + 1 + strlen(infilestr) + 1);
+    char *imp_buf = malloc(strlen(prefix) + 1 + strlen(infilestr));
     char *slash = "/";
     char *ending = "\0";
-    strcat(buf, prefix);
-    strcat(buf, slash);
-    strcat(buf, infilestr);
-    char *final = strcat(buf, ending);
+    strcat(imp_buf, prefix);
+    strcat(imp_buf, slash);
+    strcat(imp_buf, infilestr);
+    char *final = strcat(imp_buf, ending);
     if (access(final, F_OK) == 0) {
         FILE *infile = fopen(final, "r");
-        free(buf);
         setinput(infile);
         repl();
         return;

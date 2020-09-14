@@ -102,7 +102,7 @@ static void stringfunc()
             chbuf[0] = ch;
             chbuf[1] = 0;
         }
-        bufsize += (strlen(chbuf) + 1);
+        bufsize += strlen(chbuf);
         buf = (char *) realloc(buf, bufsize);
         strcat(buf, chbuf);
         if ((ch = fgetc(ifp)) == EOF) exit(0);
@@ -129,16 +129,16 @@ static void printfunc()
         printf("print -- stack underflow! ");
         return;
     }
-    MYUINT string_dest = (MYUINT) pop();
-    if (string_dest == 0) {
+    MYUINT string_uint_addr = (MYUINT) pop();
+    if (string_uint_addr == 0) {
         printf("print -- Nothing to print.");
         return;
     }
-    if (string_dest < MIN_STR || string_dest > MAX_STR) {
+    if (string_uint_addr < MIN_STR || string_uint_addr > MAX_STR) {
         perror("print -- String address out-of-range.");
         return;
     }
-    fprintf(ofp, "%s", (char *)string_dest);
+    fprintf(ofp, "%s", (char *)string_uint_addr);
     fflush(ofp);
 }
 
@@ -202,7 +202,12 @@ static void tonumfunc()
         printf("tonum -- needs a <str-pointer> on stack! ");
         return;
     }
-    char *mystr = (char *)(MYUINT) pop();
+    MYUINT string_uint_addr = (MYUINT) pop();
+    if (string_uint_addr < MIN_STR || string_uint_addr > MAX_STR) {
+        perror("tonum -- String address out-of-range.");
+        return;
+    }
+    char *mystr = (char *) string_uint_addr;
     MYFLT num = strtod(mystr, NULL);
     push(num);
 }
@@ -217,14 +222,14 @@ static void tostrfunc()
     int bufsize = snprintf( NULL, 0, "%g", var);
     char *str = malloc(bufsize + 1);
     snprintf(str, bufsize + 1, "%g", var);
-    MYUINT string_dest_uint = (MYUINT) str;
-    if (string_dest_uint < MIN_STR || MIN_STR == 0) {
-        MIN_STR = string_dest_uint;
+    MYUINT string_uint_addr = (MYUINT) str;
+    if (string_uint_addr < MIN_STR || MIN_STR == 0) {
+        MIN_STR = string_uint_addr;
     }
-    if (string_dest_uint + bufsize + 1 > MAX_STR || MAX_STR == 0) {
-        MAX_STR = string_dest_uint + bufsize + 1;
+    if (string_uint_addr + bufsize + 1 > MAX_STR || MAX_STR == 0) {
+        MAX_STR = string_uint_addr + bufsize + 1;
     }
-    push((MYUINT) string_dest_uint);
+    push((MYUINT) string_uint_addr);
 }
 
 static void strlenfunc()
@@ -233,8 +238,13 @@ static void strlenfunc()
         printf("strlen -- stack underflow! ");
         return;
     }
-    MYUINT val = (MYUINT) pop();
-    push((MYUINT) strlen((char *)val));
+    MYUINT string_uint_addr = (MYUINT) pop();
+    if (string_uint_addr < MIN_STR || string_uint_addr > MAX_STR) {
+        perror("strlen -- String address out-of-range.");
+        return;
+    }
+    char *mystr = (char *) string_uint_addr;
+    push((MYUINT) strlen(mystr));
 }
 
 static void streqfunc()
@@ -243,9 +253,19 @@ static void streqfunc()
         printf("str= -- stack underflow! ");
         return;
     }
-    MYUINT str2 = (MYUINT) pop();
-    MYUINT str1 = (MYUINT) pop();
-    push((MYINT) strcmp((char *)str1, (char *)str2) == 0);
+    MYUINT string_uint_addr2 = (MYUINT) pop();
+    MYUINT string_uint_addr1 = (MYUINT) pop();
+    if (string_uint_addr1 < MIN_STR || string_uint_addr1 > MAX_STR) {
+        perror("strlen -- First given string address out-of-range.");
+        return;
+    }
+    if (string_uint_addr2 < MIN_STR || string_uint_addr2 > MAX_STR) {
+        perror("strlen -- Second given string address out-of-range.");
+        return;
+    }
+    char *str1 = (char *) string_uint_addr1;
+    char *str2 = (char *) string_uint_addr2;
+    push((MYINT) strcmp(str1, str2) == 0);
 }
 
 static void strltfunc()
@@ -254,9 +274,19 @@ static void strltfunc()
         printf("str< -- stack underflow! ");
         return;
     }
-    MYUINT str2 = (MYUINT) pop();
-    MYUINT str1 = (MYUINT) pop();
-    push((MYINT) strcmp((char *)str1, (char *)str2) < 0);
+    MYUINT string_uint_addr2 = (MYUINT) pop();
+    MYUINT string_uint_addr1 = (MYUINT) pop();
+    if (string_uint_addr1 < MIN_STR || string_uint_addr1 > MAX_STR) {
+        perror("str< -- First given string address out-of-range.");
+        return;
+    }
+    if (string_uint_addr2 < MIN_STR || string_uint_addr2 > MAX_STR) {
+        perror("str< -- Second given string address out-of-range.");
+        return;
+    }
+    char *str1 = (char *) string_uint_addr1;
+    char *str2 = (char *) string_uint_addr2;
+    push((MYINT) strcmp(str1, str2) < 0);
 }
 
 static void strgtfunc()
@@ -265,9 +295,19 @@ static void strgtfunc()
         printf("str> -- stack underflow! ");
         return;
     }
-    MYUINT str2 = (MYUINT) pop();
-    MYUINT str1 = (MYUINT) pop();
-    push((MYINT) strcmp((char *)str1, (char *)str2) > 0);
+    MYUINT string_uint_addr2 = (MYUINT) pop();
+    MYUINT string_uint_addr1 = (MYUINT) pop();
+    if (string_uint_addr1 < MIN_STR || string_uint_addr1 > MAX_STR) {
+        perror("str> -- First given string address out-of-range.");
+        return;
+    }
+    if (string_uint_addr2 < MIN_STR || string_uint_addr2 > MAX_STR) {
+        perror("str> -- Second given string address out-of-range.");
+        return;
+    }
+    char *str1 = (char *) string_uint_addr1;
+    char *str2 = (char *) string_uint_addr2;
+    push((MYINT) strcmp(str1, str2) > 0);
 }
 
 static void strfindfunc()
@@ -276,9 +316,19 @@ static void strfindfunc()
         printf("strfind -- needs <haystack> <needle> string pointers on stack! ");
         return;
     }
-    MYUINT str2 = (MYUINT) pop();
-    MYUINT str1 = (MYUINT) pop();
-    push((MYINT) strstr((char *)str1, (char *)str2));
+    MYUINT string_uint_addr2 = (MYUINT) pop();
+    MYUINT string_uint_addr1 = (MYUINT) pop();
+    if (string_uint_addr1 < MIN_STR || string_uint_addr1 > MAX_STR) {
+        perror("strfind -- 'haystack' (first) string address out-of-range.");
+        return;
+    }
+    if (string_uint_addr2 < MIN_STR || string_uint_addr2 > MAX_STR) {
+        perror("strfind -- 'needle' (second) string address out-of-range.");
+        return;
+    }
+    char *str1 = (char *) string_uint_addr1;
+    char *str2 = (char *) string_uint_addr2;
+    push((MYINT) strstr(str1, str2));
 }
 
 // destructive/creative string functions:
@@ -288,9 +338,19 @@ static void strcatfunc()
         printf("strcat -- needs <dest> <source> string pointers on stack! ");
         return;
     }
-    MYUINT str2 = (MYUINT) pop();
-    MYUINT str1 = (MYUINT) pop();
-    push((MYINT) strcat((char *)str1, (char *)str2));
+    MYUINT string_uint_addr2 = (MYUINT) pop();
+    MYUINT string_uint_addr1 = (MYUINT) pop();
+    if (string_uint_addr1 < MIN_STR || string_uint_addr1 > MAX_STR) {
+        perror("strcat --  <dest> (first) string address out-of-range.");
+        return;
+    }
+    if (string_uint_addr2 < MIN_STR || string_uint_addr2 > MAX_STR) {
+        perror("strcat -- <source> (second) string address out-of-range.");
+        return;
+    }
+    char *str1 = (char *) string_uint_addr1;
+    char *str2 = (char *) string_uint_addr2;
+    push((MYINT) strcat(str1, str2));
 }
 
 static void strcpyfunc()
@@ -299,9 +359,19 @@ static void strcpyfunc()
         printf("strcpy -- needs <dest> <source> string pointers on stack! ");
         return;
     }
-    MYUINT str2 = (MYUINT) pop();
-    MYUINT str1 = (MYUINT) pop();
-    push((MYINT) strcpy((char *)str1, (char *)str2));
+    MYUINT string_uint_addr2 = (MYUINT) pop();
+    MYUINT string_uint_addr1 = (MYUINT) pop();
+    if (string_uint_addr1 < MIN_STR || string_uint_addr1 > MAX_STR) {
+        perror("strcpy --  <dest> (first) string address out-of-range.");
+        return;
+    }
+    if (string_uint_addr2 < MIN_STR || string_uint_addr2 > MAX_STR) {
+        perror("strcpy -- <source> (second) string address out-of-range.");
+        return;
+    }
+    char *str1 = (char *) string_uint_addr1;
+    char *str2 = (char *) string_uint_addr2;
+    push((MYINT) strcpy(str1, str2));
 }
 
 static void strtokfunc()
@@ -310,9 +380,19 @@ static void strtokfunc()
         printf("strtok -- needs <str> <delim> string pointers on stack! ");
         return;
     }
-    MYUINT str2 = (MYUINT) pop();
-    MYUINT str1 = (MYUINT) pop();
-    push((MYINT) strtok((char *)str1, (char *)str2));
+    MYUINT string_uint_addr2 = (MYUINT) pop();
+    MYUINT string_uint_addr1 = (MYUINT) pop();
+    if ((string_uint_addr1 != 0) && (string_uint_addr1 < MIN_STR || string_uint_addr1 > MAX_STR)) {
+        perror("strtok --  <str> (first) string address out-of-range.");
+        return;
+    }
+    if (string_uint_addr2 < MIN_STR || string_uint_addr2 > MAX_STR) {
+        perror("strtok -- <delim> (second) string address out-of-range.");
+        return;
+    }
+    char *str1 = (char *) string_uint_addr1;
+    char *str2 = (char *) string_uint_addr2;
+    push((MYINT) strtok(str1, str2));
 }
 
 static void memsetfunc()

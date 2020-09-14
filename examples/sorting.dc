@@ -17,6 +17,75 @@ var myarr iters @ allot
 "Array before sorting:" print cr
 create_rand_arr
 showarr
+
 "Array after sorting:" print cr
 myarr iters @ sortnums
 showarr
+
+#############################
+# Example of word splitting #
+#############################
+
+var :tempest_quote
+var :delimiters
+var word_index 0 word_index !
+create tempest_words
+
+
+"We are such stuff
+as dreams are made on;
+and our little life is rounded with a sleep.
+" :tempest_quote !
+
+" \n;." :delimiters !
+
+
+cr "The following example takes a Shakespeare quote and splits it by whitespace, and sorts the words."
+print cr
+
+cr "The quote in question is: " print cr cr :tempest_quote @ print cr
+
+: copy_token
+  16 mkbuf swap strcpy ,
+;
+
+: splitter_main
+  0 :delimiters @ strtok dup
+  0 <> if
+    copy_token
+    splitter_main
+  endif
+;
+
+: splitter
+  :tempest_quote @ :delimiters @ strtok dup  # ( token token )
+  0 <> if
+    copy_token
+    splitter_main
+  endif
+  drop
+;
+
+: showstrs
+  here tempest_words -
+  times
+    tempest_words i + @
+    print cr
+  again
+;
+
+"Splitting the text..." print cr
+# iterate through the text:
+splitter
+
+cr "Displaying..." print cr
+# display output:
+showstrs
+
+cr "Sorting..." print cr
+# sort the text:
+tempest_words 18 sortstrs
+
+cr "Displaying after sort..." print cr
+# display output:
+showstrs

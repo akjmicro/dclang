@@ -153,8 +153,14 @@ int compare_doubles (const void *a, const void *b)
 {
     const double *da = (const double *) a;
     const double *db = (const double *) b;
-
     return (*da > *db) - (*da < *db);
+}
+
+int compare_strings (const void *a, const void *b)
+{
+    const char *sa = (const char *) (MYUINT) * (MYFLT *) a;
+    const char *sb = (const char *) (MYUINT) * (MYFLT *) b;
+    return strcmp(sa, sb);
 }
 
 // end helper functions
@@ -168,4 +174,15 @@ static void sortnumsfunc()
     int size = (MYUINT) pop();
     int arrstart = (MYUINT) pop();
     qsort (myvars+arrstart, size, sizeof(MYFLT), compare_doubles);
+}
+
+
+static void sortstrsfunc()
+{
+    if (data_stack_ptr < 2) {
+        printf("sortstrs -- need <arrstart_index> <size> on the stack.\n");
+    }
+    int size = (MYUINT) pop();
+    int arrstart = (MYUINT) pop();
+    qsort (myvars+arrstart, size, sizeof(MYFLT), compare_strings);
 }

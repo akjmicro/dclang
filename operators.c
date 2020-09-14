@@ -4,7 +4,7 @@ struct primitive {
   void (*function) (void);
 };
 
-static struct primitive primitives[126] = {
+static struct primitive primitives[127] = {
   // constants
   {"null", nullfunc},
   {"false", falsefunc},
@@ -85,6 +85,7 @@ static struct primitive primitives[126] = {
   {"here", herefunc},
   // sorting
   {"sortnums", sortnumsfunc},
+  {"sortstrs", sortstrsfunc},
   // hash set & get
   {"h!", hashsetfunc},
   {"h@", hashgetfunc},
