@@ -78,10 +78,10 @@ Anyway, due to RPN, things will look like this, when you do math:
     testif
     true
 
-    # times/again -- basic, fastest loop type, starts at zero, ascends to cutoff parameter.
+    # times/again -- basic, fastest loop type, starts at zero, ascends to cutoff parameter (minus one).
     : looptest 7 times i . again ;
     looptest
-    0 1 2 3 4 5 6 7
+    0 1 2 3 4 5 6
 
     # for/next loop, a little slower than basic 'times/again', but gives step options.
     # Parameters are to/from/step.
@@ -97,15 +97,16 @@ Anyway, due to RPN, things will look like this, when you do math:
     "This is a string!" print
     This is a string!
 
-    # store a value at slot zero:
-    1.15123 0 !
+    # create a variable and store a value at it:
+    var mynum
+    4.321 3 / mynum !
+    mynum @ .
+    1.3773333333333333
+
+    # low-level approach to do the same -- store a value at slot 11:
+    1.15123 11 !
     0 @ .
     1.15123
-
-    # store a value at slot 23:
-    4.132 3 / 23 !
-    23 @ .
-    1.3773333333333333
 
 ```
 
