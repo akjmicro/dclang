@@ -1,6 +1,10 @@
 MYFLT myvars[1048576];
 MYUINT varsidx;
 
+char **hashwords;
+MYUINT hashwords_size = 32;
+MYUINT hashwords_cnt = 0;
+
 static void pokefunc()
 {
     if (data_stack_ptr < 2) {
@@ -95,6 +99,16 @@ static void herefunc()
 
 /* global hash space, a la 'redis', but in local memory */
 
+static void _add_key(char *key){
+    if (hashwords_cnt > hashwords_size) {
+        hashwords_size *= 2;
+        hashwords = realloc(hashwords, hashwords_size * sizeof(*hashwords));
+    }
+    //hashwords[hashwords_cnt] = (char*)malloc(1+strlen(key));
+    hashwords[hashwords_cnt] = key;
+    ++hashwords_cnt;
+}
+
 static void hashsetfunc()
 {
     if (data_stack_ptr < 2) {
@@ -115,12 +129,12 @@ static void hashsetfunc()
     ENTRY *entry = hsearch(item, FIND);
     if (entry == NULL) {
         hsearch(item, ENTER);
+        _add_key(key);
     } else {
         //free(entry->data);
         entry->data = data;
     }
 }
-
 
 static void hashgetfunc()
 {
@@ -145,6 +159,17 @@ static void hashgetfunc()
     } else {
         push((MYUINT)(char *)entry->data);
     }
+}
+
+static void hashkeysfunc()
+{
+    if (data_stack_ptr < 1) {
+        printf("hkeys -- need an integer index on stack. Stack underflow! ");
+        return;
+    }
+    /* grab the key index */
+    MYUINT keyidx = (MYUINT)pop();
+    push((MYUINT)hashwords[keyidx]);
 }
 
 // helper functions for sorting

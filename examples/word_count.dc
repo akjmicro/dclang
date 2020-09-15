@@ -1,6 +1,5 @@
 var :text_to_count
 
-
 "Startsidan på DN.se kommer att göras i tre versioner: en riksversion, en
 Stockholmsversion och en Göteborgsversion. DN har av många setts som en Stockholmstidning,
 och det med all rätt. Men digitalt växer vi nu som mest i orter utanför Stockholmsregionen,
@@ -16,20 +15,18 @@ Om det är trafikkaos i Göteborg är det relevant för de som befinner sig i G�
 person i Malmö, säger Anna Åberg."
 :text_to_count !
 
-var :delims " \n\t.,!?;:-" :delims !
-var token_holder_size
-var keys_size
-create token_holder
+var :delims " \n\t.,!?;:-*" :delims !
 
-: copy_token
-  24 mkbuf swap strcpy ,
+
+: _hash_entry
+  dup h@ 1 + swap h!
 ;
 
 : splitter_main
   0 :delims @ strtok
   dup 0 <>
   if
-    copy_token
+    _hash_entry
     splitter_main
   endif
 ;
@@ -38,46 +35,25 @@ create token_holder
   :text_to_count @ :delims @ strtok
   dup 0 <>
   if
-    copy_token
+    _hash_entry
     splitter_main
   endif
   drop
-  here token_holder -
-  token_holder_size !
 ;
 
+: iterkeys
+  1 + dup    # ( idx idx )
+  hkeys dup  # ( idx str str )
+  0 <>       # ( idx str isnotzero )
+  if
+    dup      # ( idx str str )
+    print ": " print h@ . cr
+    iterkeys
+  else
+    drop drop
+  endif
+;
 
+# The program!
 splitter
-
-create keys
-# sanity check the memory
-keys token_holder token_holder_size + > assert
-
-: token_count_incr
-  token_holder_size @
-  times
-    token_holder i + @   # ( token )
-    dup h@               # ( token hash-val )
-    dup 0 =              # ( token hash-val hash-val-is-0 )
-    if
-      over ,             # ( token hash-val )
-      1 + swap h!        # ( )
-    else
-      1 + swap h!
-    endif
-  again
-  here keys -
-  keys_size !
-;
-
-token_count_incr
-
-: show_token_counts
-  keys_size @
-  times
-    keys i + @ print ": " print
-    keys i + @ h@ . cr
-  again
-;
-
-show_token_counts
+0 iterkeys

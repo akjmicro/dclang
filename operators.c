@@ -4,7 +4,7 @@ struct primitive {
   void (*function) (void);
 };
 
-static struct primitive primitives[127] = {
+static struct primitive primitives[129] = {
   // constants
   {"null", nullfunc},
   {"false", falsefunc},
@@ -89,6 +89,7 @@ static struct primitive primitives[127] = {
   // hash set & get
   {"h!", hashsetfunc},
   {"h@", hashgetfunc},
+  {"hkeys", hashkeysfunc},
   // branching
   {"times", timesfunc},
   {"again", againfunc},
@@ -130,6 +131,7 @@ static struct primitive primitives[127] = {
   // file
   {"fopen", fileopenfunc},
   {"fread", filereadfunc},
+  {"freadline", filereadlinefunc},
   {"fseek", fileseekfunc},
   {"ftell", filetellfunc},
   {"fwrite", filewritefunc},

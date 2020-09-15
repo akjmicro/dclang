@@ -1,3 +1,8 @@
+// used by 'freadline' function, which calls 'getline':
+char *linebuf = NULL;
+size_t linelen = 0;
+
+
 void fileopenfunc() {
     if (data_stack_ptr < 2) {
         printf("Stack underflow!\n");
@@ -48,6 +53,26 @@ void filereadfunc() {
     }
     // push the address of our new string and length
     push((MYUINT)buf);
+}
+
+void filereadlinefunc() {
+    if (data_stack_ptr < 1) {
+        printf("Stack underflow!\n");
+        printf("'freadline' needs <fpointer> on the stack\n");
+        return;
+    }
+    FILE *file_to_read = (FILE *)(MYUINT) pop();
+    ssize_t nread;
+    MYUINT num_bytes_read = getline(&linebuf, &linelen, file_to_read);
+    // update print safety:
+    if ((MYUINT) linebuf < MIN_STR || MIN_STR == 0) {
+        MIN_STR = (MYUINT) linebuf;
+    }
+    if ((MYUINT) linebuf + num_bytes_read + 1 > MAX_STR || MAX_STR == 0) {
+        MAX_STR = (MYUINT) linebuf + num_bytes_read + 1;
+    }
+    // push the address of our new string and length
+    push((MYUINT) linebuf);
 }
 
 void fileseekfunc() {

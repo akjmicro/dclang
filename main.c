@@ -97,16 +97,16 @@ MYINT def_mode;
 
 // needed so we can add 'import' to primitives
 void load_extra_primitives() {
-    primitives[123].name = "primitives";
-    primitives[123].function = show_primitivesfunc;
-    primitives[124].name = "import";
-    primitives[124].function = importfunc;
-    primitives[125].name = "input";
-    primitives[125].function = inputfunc;
+    primitives[125].name = "primitives";
+    primitives[125].function = show_primitivesfunc;
+    primitives[126].name = "import";
+    primitives[126].function = importfunc;
+    primitives[127].name = "input";
+    primitives[127].function = inputfunc;
     /* final endpoint must be zeros,
        and they won't count in the 'count': */
-    primitives[126].name = 0;
-    primitives[126].function = 0;
+    primitives[128].name = 0;
+    primitives[128].function = 0;
 }
 
 
@@ -119,6 +119,7 @@ int main(int argc, char **argv)
     srand(time(NULL));
     // create the global hash table
     hcreate(1048576);
+    hashwords = (char**)malloc(hashwords_size * sizeof(*hashwords));
     //setlocale(LC_ALL, "");
     if (argc > 1) {
         for(int opt = 1; opt < argc; opt++) {
