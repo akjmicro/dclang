@@ -252,19 +252,9 @@ TODO:
   * More OS-level integration (file system interaction, directories, permissions, etc.)
   * Turtle graphics for the kids!?
 
-There are three branches of this repo:
-  * Standard ('master' branch)
-  * (not active for a while) rpi-float ('rpi-flt' branch, optimized a bit for Rpi)
-  * (almost dead?) rpi-int ('rpi-int' branch, a bit more minimal, an experiment with fixed-point integers, really)
 
-(Quasi-deprecated note about branches):
-In the standard branch, everything is on the floating-point stack only at
-this point.  In the `rpi-int` branch, everything is a `long int` C-type.
-There may be separate stacks for integers in the future.  Not sure if it's
-necessary yet (but I am exploring the issue).
-
-### contact
+### Contact
 
 Aaron Krister Johnson
 
-Please report bugs and successes to akjmicro@gmail.com
+Please report bugs and successes to <akjmicro@gmail.com>
