@@ -211,3 +211,54 @@ static void sortstrsfunc()
     int arrstart = (MYUINT) pop();
     qsort (myvars+arrstart, size, sizeof(MYFLT), compare_strings);
 }
+
+
+// environment variables:
+
+static void envgetfunc()
+{
+    if (data_stack_ptr < 1) {
+        printf("envget -- need <env_key> string on the stack.\n");
+    }
+    /* grab the key */
+    char *env_key = (char *)(MYUINT)pop();
+    MYUINT env_key_addr = (MYUINT) env_key;
+    if (env_key_addr < MIN_STR || env_key_addr > MAX_STR) {
+        perror("envget -- String address for hash key out-of-range.");
+        return;
+    }
+    char *val = getenv(env_key);
+    MYUINT val_addr = (MYUINT) val;
+    if (val_addr > MAX_STR || MAX_STR == 0) {
+        MAX_STR = val_addr;
+    }
+    if (val_addr < MIN_STR || MIN_STR == 0) {
+        MIN_STR = val_addr;
+    }
+    push(val_addr);
+}
+
+
+static void envsetfunc()
+{
+    if (data_stack_ptr < 2) {
+        printf("envset -- need <env_val> <env_key> strings on the stack.\n");
+    }
+    // grab the key from the stack
+    char *env_key = (char *)(MYUINT)pop();
+    MYUINT env_key_addr = (MYUINT) env_key;
+    if (env_key_addr < MIN_STR || env_key_addr > MAX_STR) {
+        perror("envset -- String address for environment key out-of-range.");
+        return;
+    }
+    // grab the value from the stack
+    char *env_val = (char *)(MYUINT)pop();
+    MYUINT env_val_addr = (MYUINT) env_val;
+    if (env_val_addr < MIN_STR || env_val_addr > MAX_STR) {
+        perror("envset -- String address for environment value out-of-range.");
+        return;
+    }
+    // set the key's value
+    setenv(env_key, env_val, 1);
+    // no value put on stack -- only side effect
+}

@@ -4,7 +4,7 @@ struct primitive {
   void (*function) (void);
 };
 
-static struct primitive primitives[129] = {
+static struct primitive primitives[133] = {
   // constants
   {"null", nullfunc},
   {"false", falsefunc},
@@ -83,6 +83,8 @@ static struct primitive primitives[129] = {
   {"create", createfunc},
   {",", commafunc},
   {"here", herefunc},
+  {"envget", envgetfunc},
+  {"envset", envsetfunc},
   // sorting
   {"sortnums", sortnumsfunc},
   {"sortstrs", sortstrsfunc},
@@ -144,6 +146,8 @@ static struct primitive primitives[129] = {
   {"open", openfunc},
   {"mkbuf", mkbuffunc},
   {"read", readfunc},
+  {"write", writefunc},
+  {"close", closefunc},
   // time
   {"clock", clockfunc},
   {"sleep", sleepfunc},

@@ -173,3 +173,29 @@ void readfunc()
     int res = read(fd, buf, numbytes);
     push((int)res);
 }
+
+void writefunc()
+{
+    if (data_stack_ptr < 1) {
+        printf("Stack_underflow!\n");
+        printf("'write' needs <fpointer> <buffer-pointer> <numbytes> on the stack\n");
+        return;
+    }
+    MYUINT numbytes = (MYUINT) pop();
+    void *buf = (void *)(MYUINT)pop();
+    MYUINT fd = (MYUINT) pop();
+    int res = write(fd, buf, numbytes);
+    push((int)res);
+}
+
+void closefunc()
+{
+    if (data_stack_ptr < 1) {
+        printf("Stack_underflow!\n");
+        printf("'close' needs <fpointer> on the stack\n");
+        return;
+    }
+    MYUINT fp = (MYUINT) pop();
+    int res = close(fp);
+    push(res);
+}
