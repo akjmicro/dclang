@@ -3,7 +3,7 @@ char *linebuf = NULL;
 size_t linelen = 0;
 
 
-void fileopenfunc() {
+static void fileopenfunc() {
     if (data_stack_ptr < 2) {
         printf("Stack underflow!\n");
         printf("'fopen' needs <filename> <open-mode> on the stack\n");
@@ -24,7 +24,8 @@ void fileopenfunc() {
     push((MYUINT)openfptr);
 }
 
-void fileclosefunc() {
+
+static void fileclosefunc() {
     if (data_stack_ptr < 1) {
         printf("Stack underflow!\n");
         printf("'fclose' needs <fpointer> on the stack\n");
@@ -34,7 +35,8 @@ void fileclosefunc() {
     fclose(file_to_close);
 }
 
-void filereadfunc() {
+
+static void filereadfunc() {
     if (data_stack_ptr < 2) {
         printf("Stack underflow!\n");
         printf("'fread' needs <number-of-bytes> <fpointer> on the stack\n");
@@ -55,7 +57,8 @@ void filereadfunc() {
     push((MYUINT)buf);
 }
 
-void filereadlinefunc() {
+
+static void filereadlinefunc() {
     if (data_stack_ptr < 1) {
         printf("Stack underflow!\n");
         printf("'freadline' needs <fpointer> on the stack\n");
@@ -75,7 +78,8 @@ void filereadlinefunc() {
     push((MYUINT) linebuf);
 }
 
-void fileseekfunc() {
+
+static void fileseekfunc() {
     if (data_stack_ptr < 3) {
         printf("Stack underflow!\n");
         printf("'fseek' needs <offset> <whence> <fpointer> on the stack\n");
@@ -92,7 +96,8 @@ void fileseekfunc() {
     fseek(file_to_seek, offset, whence);
 }
 
-void filetellfunc() {
+
+static void filetellfunc() {
     if (data_stack_ptr < 1) {
         printf("Stack underflow!\n");
         printf("'ftell' needs a <fpointer> on the stack\n");
@@ -103,10 +108,10 @@ void filetellfunc() {
     push((MYUINT) mylen);
 }
 
-void filewritefunc() {
+
+static void filewritefunc() {
     if (data_stack_ptr < 2) {
-        printf("Stack underflow!\n");
-        printf("'fwrite' needs <string-address> <fpointer> on the stack\n");
+        printf("'fwrite' -- needs <string-address> <fpointer> on the stack\n");
         return;
     }
     FILE *file_to_write = (FILE *)(MYUINT) pop();
@@ -115,20 +120,22 @@ void filewritefunc() {
     fflush(file_to_write);
 }
 
-void fileflushfunc()
+
+static void fileflushfunc()
 {
-    if (data_stack_ptr < 2) {
-        printf("Stack underflow!\n");
-        printf("'fwrite' needs <string-address> <fpointer> on the stack\n");
+    if (data_stack_ptr < 1) {
+        printf("'fflush' -- needs <fpointer> on the stack\n");
         return;
     }
     FILE *file_to_flush = (FILE *)(MYUINT) pop();
     fflush(file_to_flush);
 }
 
+
 // lower-level OS calls:
 
-void openfunc()
+
+static void openfunc()
 {
     if (data_stack_ptr < 2) {
         printf("Stack_underflow!\n");
@@ -141,14 +148,15 @@ void openfunc()
     push((MYUINT) fd);
 }
 
-void mkbuffunc()
+
+static void mkbuffunc()
 {
     if (data_stack_ptr < 1) {
         printf("Stack_underflow!\n");
         printf("'mkbuf' needs <size-as-integer> on the stack\n");
     }
     MYUINT size = (MYUINT) pop();
-    void *buf = malloc(size);
+    char *buf = (char *)malloc(size);
     // update print safety:
     if ((MYUINT)buf < MIN_STR || MIN_STR == 0) {
         MIN_STR = (MYUINT)buf;
@@ -160,7 +168,8 @@ void mkbuffunc()
     push((MYUINT)buf);
 }
 
-void readfunc()
+
+static void readfunc()
 {
     if (data_stack_ptr < 1) {
         printf("Stack_underflow!\n");
@@ -169,33 +178,35 @@ void readfunc()
     }
     MYUINT numbytes = (MYUINT) pop();
     void *buf = (void *)(MYUINT)pop();
-    MYUINT fd = (MYUINT) pop();
+    int fd = (int) pop();
     int res = read(fd, buf, numbytes);
     push((int)res);
 }
 
-void writefunc()
+
+static void writefunc()
 {
-    if (data_stack_ptr < 1) {
+    if (data_stack_ptr < 3) {
         printf("Stack_underflow!\n");
         printf("'write' needs <fpointer> <buffer-pointer> <numbytes> on the stack\n");
         return;
     }
     MYUINT numbytes = (MYUINT) pop();
     void *buf = (void *)(MYUINT)pop();
-    MYUINT fd = (MYUINT) pop();
+    int fd = (int) pop();
     int res = write(fd, buf, numbytes);
     push((int)res);
 }
 
-void closefunc()
+
+static void closefunc()
 {
     if (data_stack_ptr < 1) {
         printf("Stack_underflow!\n");
         printf("'close' needs <fpointer> on the stack\n");
         return;
     }
-    MYUINT fp = (MYUINT) pop();
+    int fp = (int) pop();
     int res = close(fp);
     push(res);
 }

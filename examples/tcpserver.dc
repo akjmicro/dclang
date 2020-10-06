@@ -1,0 +1,33 @@
+var mybuf 256 mkbuf mybuf !
+
+: zerobuf
+  mybuf @ 0 256 memset
+;
+
+var myresp "This is the server. I got your request!" myresp !
+var myresp_len myresp @ strlen myresp_len !
+
+# create a listening server
+var myserv 5509 tcplisten myserv !
+var mytcpconn
+var myrequest
+
+# wait for a request
+"waiting for a request..." print cr
+myserv @ tcpaccept mytcpconn !
+
+zerobuf
+mytcpconn @ mybuf @ 255 read drop
+
+"Here is the incoming message: " print
+mybuf @ print cr
+
+# send a response
+zerobuf
+mybuf @ myresp @ strcpy
+mytcpconn @ mybuf @ myresp_len @ write drop
+
+# close down connection
+myserv @ close drop
+mytcpconn @ close drop
+

@@ -4,7 +4,7 @@ struct primitive {
   void (*function) (void);
 };
 
-static struct primitive primitives[133] = {
+static struct primitive primitives[136] = {
   // constants
   {"null", nullfunc},
   {"false", falsefunc},
@@ -148,6 +148,10 @@ static struct primitive primitives[133] = {
   {"read", readfunc},
   {"write", writefunc},
   {"close", closefunc},
+  // tcp networking using sockets
+  {"tcplisten", tcplistenfunc},
+  {"tcpaccept", tcpacceptfunc},
+  {"tcpconnect", tcpconnectfunc},
   // time
   {"clock", clockfunc},
   {"sleep", sleepfunc},

@@ -89,6 +89,7 @@ MYINT def_mode;
 #include "string_ops.c"
 #include "token.c"
 #include "file_ops.c"
+#include "socket_ops.c"
 #include "user_words.c"
 #include "variable_ops.c"
 #include "operators.c"
@@ -97,16 +98,16 @@ MYINT def_mode;
 
 // needed so we can add 'import' to primitives
 void load_extra_primitives() {
-    primitives[129].name = "primitives";
-    primitives[129].function = show_primitivesfunc;
-    primitives[130].name = "import";
-    primitives[130].function = importfunc;
-    primitives[131].name = "input";
-    primitives[131].function = inputfunc;
+    primitives[132].name = "primitives";
+    primitives[132].function = show_primitivesfunc;
+    primitives[133].name = "import";
+    primitives[133].function = importfunc;
+    primitives[134].name = "input";
+    primitives[134].function = inputfunc;
     /* final endpoint must be zeros,
        and they won't count in the 'count': */
-    primitives[132].name = 0;
-    primitives[132].function = 0;
+    primitives[135].name = 0;
+    primitives[135].function = 0;
 }
 
 

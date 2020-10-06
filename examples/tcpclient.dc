@@ -1,0 +1,12 @@
+var msg "Hello, world, from the client!" msg !
+var msglen msg @ strlen msglen !
+var mybuf 256 mkbuf mybuf !
+mybuf @ 0 256 memset
+mybuf @ msg @ strcpy
+
+var serv "localhost" 5509 tcpconnect serv !
+
+serv @ mybuf @ msglen @ write drop
+mybuf @ 0 256 memset
+serv @ mybuf @ 255 read
+mybuf @ print cr
