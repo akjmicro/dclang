@@ -58,6 +58,9 @@ int loop_counter_ptr;
 // file stack for imports
 FILE *file_stack[32];
 MYINT fsp;
+// variables space
+MYFLT myvars[1048576];
+MYUINT varsidx;
 
 // compiled tokens get saved and put into an array of type 'inst_struct'
 typedef union {
@@ -98,16 +101,16 @@ MYINT def_mode;
 
 // needed so we can add 'import' to primitives
 void load_extra_primitives() {
-    primitives[132].name = "primitives";
-    primitives[132].function = show_primitivesfunc;
-    primitives[133].name = "import";
-    primitives[133].function = importfunc;
-    primitives[134].name = "input";
-    primitives[134].function = inputfunc;
+    primitives[133].name = "primitives";
+    primitives[133].function = show_primitivesfunc;
+    primitives[134].name = "import";
+    primitives[134].function = importfunc;
+    primitives[135].name = "input";
+    primitives[135].function = inputfunc;
     /* final endpoint must be zeros,
        and they won't count in the 'count': */
-    primitives[135].name = 0;
-    primitives[135].function = 0;
+    primitives[136].name = 0;
+    primitives[136].function = 0;
 }
 
 

@@ -374,12 +374,38 @@ static void strcpyfunc()
     push((MYINT) strcpy(str1, str2));
 }
 
-static void strtokfunc()
+static void strdupfunc()
 {
-    if (data_stack_ptr < 2) {
-        printf("strtok -- needs <str> <delim> string pointers on stack! ");
+    if (data_stack_ptr < 1) {
+        printf("strdup -- needs <string> string pointer on stack! ");
         return;
     }
+    MYUINT string_uint_addr = (MYUINT) pop();
+    if (string_uint_addr < MIN_STR || string_uint_addr > MAX_STR) {
+        perror("strdup -- string address out-of-range.");
+        return;
+    }
+    char *str1 = strdup((char *) string_uint_addr);
+    MYUINT str1addr = (MYUINT) str1;
+    if (str1addr < MIN_STR || MIN_STR == 0) {
+        MIN_STR = str1addr;
+    }
+    if (str1addr > MAX_STR || MAX_STR == 0) {
+        MAX_STR = str1addr;
+    }
+    push((MYUINT) str1);
+}
+
+static void strtokfunc()
+{
+    if (data_stack_ptr < 3) {
+        printf("strtok -- needs <str> <delim> <saveptr> string pointers on stack!\n");
+        printf("<saveptr> should be a variable slot declared with `var`, without being dereferenced with `@`.\n");
+        printf("e.g. var mysavepoint strok_r \"split.this.string\" \".\" mysavepoint strtok_r\n");
+        return;
+    }
+    MYUINT savepoint = (MYUINT) pop();
+    char **savepoint_ptr = (char **) &myvars[savepoint];
     MYUINT string_uint_addr2 = (MYUINT) pop();
     MYUINT string_uint_addr1 = (MYUINT) pop();
     if ((string_uint_addr1 != 0) && (string_uint_addr1 < MIN_STR || string_uint_addr1 > MAX_STR)) {
@@ -392,7 +418,7 @@ static void strtokfunc()
     }
     char *str1 = (char *) string_uint_addr1;
     char *str2 = (char *) string_uint_addr2;
-    push((MYINT) strtok(str1, str2));
+    push((MYINT) strtok_r(str1, str2, savepoint_ptr));
 }
 
 static void memsetfunc()

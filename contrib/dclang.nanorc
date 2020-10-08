@@ -29,8 +29,9 @@ color brightred "(^|[[:space:]])((\!|\@|const|var|allot|create|\,|h\@|h\!|sortnu
 # control words
 color brightgreen "(^|[[:space:]])((times|again|exittimes|for|next|exitfor|i|j|k|if|else|endif|return)($|[[:space:]]))*"
 # other words
-color cyan "(^|[[:space:]])((\.|h\.|\.\.|\.s|\.rj|cr|print|emit|uemit|ord|tohex|bytes32|free|strlen|str=|str<|str>|strfind|strcat|strcpy|strtok|memset|clock|sleep)($|[[:space:]]))*"
-color cyan "(^|[[:space:]])((fopen|fread|fseek|ftell|fwrite|fflush|fclose|redirect|resetout|flush|open|mkbuf|read)($|[[:space:]]))*"
+color cyan "(^|[[:space:]])((\.|h\.|\.\.|\.s|\.rj|cr|print|emit|uemit|ord|tohex|bytes32|free|strlen|str=|str<|str>|strfind|strcat|strcpy|strdup|strtok|memset|clock|sleep)($|[[:space:]]))*"
+color cyan "(^|[[:space:]])((fopen|fread|fseek|ftell|fwrite|fflush|fclose|redirect|resetout|flush|open|mkbuf|read|write|close)($|[[:space:]]))*"
+color cyan "(^|[[:space:]])((tcplisten|tcpaccept|tcpconnect))*"
 color yellow "(^|[[:space:]])((words|primitives|import|input)($|[[:space:]]))*"
 # definition delimiters
 color brightred "(^|[[:space:]])((\:|;)($|[[:space:]]))*"

@@ -4,7 +4,7 @@ struct primitive {
   void (*function) (void);
 };
 
-static struct primitive primitives[136] = {
+static struct primitive primitives[137] = {
   // constants
   {"null", nullfunc},
   {"false", falsefunc},
@@ -128,6 +128,7 @@ static struct primitive primitives[136] = {
   {"strfind", strfindfunc},
   {"strcat", strcatfunc},
   {"strcpy", strcpyfunc},
+  {"strdup", strdupfunc},
   {"strtok", strtokfunc},
   {"memset", memsetfunc},
   // file

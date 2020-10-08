@@ -1,10 +1,17 @@
-var mybuf 256 mkbuf mybuf !
+var mybuf 1024 mkbuf mybuf !
 
 : zerobuf
-  mybuf @ 0 256 memset
+  mybuf @ 0 1024 memset
 ;
 
-var myresp "This is the server. I got your request!" myresp !
+var myresp
+"HTTP/1.1 200 OK
+Cache-Control: private, max-age=0
+Content-Type: text/plain; charset=ISO-8859-1
+
+Hello, world! 2020 sucks big time!
+"
+myresp !
 var myresp_len myresp @ strlen myresp_len !
 
 # create a listening server
@@ -17,7 +24,7 @@ var myrequest
 myserv @ tcpaccept mytcpconn !
 
 zerobuf
-mytcpconn @ mybuf @ 255 read drop
+mytcpconn @ mybuf @ 1023 read drop
 
 "Here is the incoming message: " print
 mybuf @ print cr
@@ -30,4 +37,3 @@ mytcpconn @ mybuf @ myresp_len @ write drop
 # close down connection
 myserv @ close drop
 mytcpconn @ close drop
-

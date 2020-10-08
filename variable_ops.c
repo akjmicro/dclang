@@ -1,6 +1,3 @@
-MYFLT myvars[1048576];
-MYUINT varsidx;
-
 char **hashwords;
 MYUINT hashwords_size = 32;
 MYUINT hashwords_cnt = 0;
@@ -73,7 +70,7 @@ static void allotfunc()
         printf("allot -- stack underflow! ");
         return;
     }
-    varsidx += (MYUINT) pop() - 1;
+    varsidx += (MYUINT) pop();
 }
 
 static void createfunc()
@@ -201,7 +198,6 @@ static void sortnumsfunc()
     qsort (myvars+arrstart, size, sizeof(MYFLT), compare_doubles);
 }
 
-
 static void sortstrsfunc()
 {
     if (data_stack_ptr < 2) {
@@ -211,7 +207,6 @@ static void sortstrsfunc()
     int arrstart = (MYUINT) pop();
     qsort (myvars+arrstart, size, sizeof(MYFLT), compare_strings);
 }
-
 
 // environment variables:
 
@@ -237,7 +232,6 @@ static void envgetfunc()
     }
     push(val_addr);
 }
-
 
 static void envsetfunc()
 {

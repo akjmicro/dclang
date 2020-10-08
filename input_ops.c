@@ -139,7 +139,7 @@ static void import(char *infilestr) {
         repl();
         return;
     }
-    char *imp_buf = malloc(strlen(prefix) + 1 + strlen(infilestr));
+    char *imp_buf = malloc(strlen(prefix) + strlen(infilestr) + 2);
     char *slash = "/";
     char *ending = "\0";
     strcat(imp_buf, prefix);
