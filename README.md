@@ -260,6 +260,9 @@ Implemented thus far:
     myfile @ fclose                       # close the file
     ```
 
+  * `tcplisten`, `tcpaccept` for server primitives, `tcpconnect` for clients. See the examples directory.
+
+
 TODO:
 
   * More time functions (e.g. date, calendar stuff, etc.)
@@ -267,8 +270,7 @@ TODO:
   would be things like search/replace and `regex`.
   * The `dsp.dc` lib has a good start! But it is growing still...this is an active
     area for my interests!
-  * A socket layer for networking would be nice.
-  * More OS-level integration (file system interaction, directories, permissions, etc.)
+  * More OS-level integration (directories, permissions, etc.)
   * Turtle graphics for the kids!?
 
 
