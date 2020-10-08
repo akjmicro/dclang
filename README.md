@@ -26,10 +26,29 @@ ____________
 
 ### ABOUT:
 
-"dclang" is an RPN, stack-based language with near-zero syntax. It is in the
-spirit and tradition of FORTH and the grand ol' RPN calculator "dc", which is
+`dclang` is an RPN, stack-based language with near-zero syntax. It is in the
+spirit and tradition of `forth` and the grand ol' RPN calculator `dc`, which is
 oft-found on a UNIX/LINUX system near you! You can think of it as a dialect of
-FORTH, much in the same way Scheme is a leaner dialect of Lisp.
+`forth`, much in the same way `scheme` is a leaner dialect of `lisp`. Why `dclang`
+and not `gforth`? For the same reasons one would choose `scheme` instead of `lisp`!
+Smaller, easier to learn, in some ways, better in terms of usability and syntactical
+and naming improvements. I wanted to take what I like about `forth`, shave off what I
+didn't like, and make a more user-friendly idealized version of `forth` -- one that `forth`
+folks would recognize, but also would perhaps be friendlier to new users.
+
+There are two constant goals of `dclang`: 
+
+  1) to present hackers with a USABLE tool that they will enjoy!
+  2) to create a lean, performant tool that utterly smokes most
+     interpreted languages.
+
+I do not want to get stuck in exploring CS theory (although that
+is respectable and interesting) so much that I have a "Turing Tarpit Tool" that
+does nothing. `dclang` is slowly gathering features that means you can use it like
+you'd use `python`, `bash`, `gforth`, etc...and i have an eye to be guided by some
+of the key "daily use" functionality that is for instance offered by `glibc` in C.
+In fact, you might say that I'll know `dclang` is really done when every (or almost every)
+aspect/feature of `glibc` is somehow reflected in the in-built capabilities of `dclang`.
 
 RPN means "Reverse Polish Notation".  That means everything uses a
 'point-free-form', and there are no parenthesis, since there is a completely
