@@ -45,7 +45,7 @@ There are two constant goals of `dclang`:
 I do not want to get stuck in exploring CS theory (although that
 is respectable and interesting) so much that I have a "Turing Tarpit Tool" that
 does nothing. `dclang` is slowly gathering features that means you can use it like
-you'd use `python`, `bash`, `gforth`, etc...and i have an eye to be guided by some
+you'd use `python`, `bash`, `gforth`, etc...and I have an eye to be guided by some
 of the key "daily use" functionality that is for instance offered by `glibc` in C.
 In fact, you might say that I'll know `dclang` is really done when every (or almost every)
 aspect/feature of `glibc` is somehow reflected in the in-built capabilities of `dclang`.
