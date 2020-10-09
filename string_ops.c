@@ -421,16 +421,60 @@ static void strtokfunc()
     push((MYINT) strtok_r(str1, str2, savepoint_ptr));
 }
 
+static void memcpyfunc()
+{
+    if (data_stack_ptr < 3) {
+        printf("memcpy -- needs <dest> <source> <size> on stack! ");
+        return;
+    }
+    MYUINT size = (MYUINT) pop();
+    MYUINT source = (MYUINT) pop();
+    MYUINT dest = (MYUINT) pop();
+    if ((dest != 0) && (dest < MIN_STR || dest > MAX_STR)) {
+        perror("memcpy --  <dest> string address out-of-range.");
+        return;
+    }
+    if (source < MIN_STR || source > MAX_STR) {
+        perror("memcpy -- <source> string address out-of-range.");
+        return;
+    }
+    push((MYUINT) memcpy((char *)dest, (char *)source, (MYUINT) size));
+}
+
+static void mempcpyfunc()
+{
+    if (data_stack_ptr < 3) {
+        printf("mempcpy -- needs <dest> <source> <size> on stack! ");
+        return;
+    }
+    MYUINT size = (MYUINT) pop();
+    MYUINT source = (MYUINT) pop();
+    MYUINT dest = (MYUINT) pop();
+    if ((dest != 0) && (dest < MIN_STR || dest > MAX_STR)) {
+        perror("mempcpy --  <dest> string address out-of-range.");
+        return;
+    }
+    if (source < MIN_STR || source > MAX_STR) {
+        perror("mempcpy -- <source> string address out-of-range.");
+        return;
+    }
+    push((MYUINT) mempcpy((char *)dest, (char *)source, (MYUINT) size));
+}
+
 static void memsetfunc()
 {
     if (data_stack_ptr < 3) {
-        printf("memset -- needs <str-pointer> <char-int> <times-int> on stack! ");
+        printf("memset -- needs <dest_str> <char-int> <times-int> on stack! ");
         return;
     }
     MYUINT times = (MYUINT) pop();
     MYUINT chr = (MYUINT) pop();
-    MYUINT strng = (MYUINT) pop();
-    push((MYINT) memset((char *)strng, (int)chr, (int)times));
+    MYUINT dest = (MYUINT) pop();
+    if ((dest != 0) && (dest < MIN_STR || dest > MAX_STR)) {
+        perror("memset --  <dest> string address out-of-range.");
+        return;
+    }
+    push((MYINT) memset((char *)dest, (int)chr, (int)times));
 }
 
 static void bytes32func()

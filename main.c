@@ -4,6 +4,8 @@
 
 Born on 2018-05-05 */
 
+#define _GNU_SOURCE
+
 #include <ctype.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -101,16 +103,16 @@ MYINT def_mode;
 
 // needed so we can add 'import' to primitives
 void load_extra_primitives() {
-    primitives[133].name = "primitives";
-    primitives[133].function = show_primitivesfunc;
-    primitives[134].name = "import";
-    primitives[134].function = importfunc;
-    primitives[135].name = "input";
-    primitives[135].function = inputfunc;
+    primitives[135].name = "primitives";
+    primitives[135].function = show_primitivesfunc;
+    primitives[136].name = "import";
+    primitives[136].function = importfunc;
+    primitives[137].name = "input";
+    primitives[137].function = inputfunc;
     /* final endpoint must be zeros,
        and they won't count in the 'count': */
-    primitives[136].name = 0;
-    primitives[136].function = 0;
+    primitives[138].name = 0;
+    primitives[138].function = 0;
 }
 
 
