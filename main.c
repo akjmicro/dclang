@@ -97,22 +97,18 @@ MYINT def_mode;
 #include "socket_ops.c"
 #include "user_words.c"
 #include "variable_ops.c"
-#include "operators.c"
+#include "primitives.c"
 #include "input_ops.c"
 
 
 // needed so we can add 'import' to primitives
 void load_extra_primitives() {
-    primitives[135].name = "primitives";
-    primitives[135].function = show_primitivesfunc;
-    primitives[136].name = "import";
-    primitives[136].function = importfunc;
-    primitives[137].name = "input";
-    primitives[137].function = inputfunc;
+    add_primitive("primitives", show_primitivesfunc);
+    add_primitive("import", importfunc);
+    add_primitive("input", inputfunc);
     /* final endpoint must be zeros,
        and they won't count in the 'count': */
-    primitives[138].name = 0;
-    primitives[138].function = 0;
+    add_primitive(0, 0);
 }
 
 
@@ -121,6 +117,7 @@ int main(int argc, char **argv)
 {
     setinput(stdin);
     resetoutfunc();
+    add_all_primitives();
     load_extra_primitives();
     srand(time(NULL));
     // create the global hash table

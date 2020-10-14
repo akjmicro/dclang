@@ -52,7 +52,7 @@ aspect/feature of `glibc` is somehow reflected in the in-built capabilities of `
 
 RPN means "Reverse Polish Notation".  That means everything uses a
 'point-free-form', and there are no parenthesis, since there is a completely
-level order of operation.  Operators operate on stack operands immediately,
+level order of operation.  Words operate on stack operands immediately,
 and leave the result on the stack immediately.  This makes the
 interpreter/parser not only simple but faster than one that has to do
 computational gymnastics around parsing things like braces or parenthesis,

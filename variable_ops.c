@@ -4,7 +4,8 @@ MYUINT hashwords_cnt = 0;
 
 static void pokefunc()
 {
-    if (data_stack_ptr < 2) {
+    if (data_stack_ptr < 2)
+    {
         printf("! -- stack underflow! ");
         return;
     }
@@ -15,7 +16,8 @@ static void pokefunc()
 
 static void peekfunc()
 {
-    if (data_stack_ptr < 1) {
+    if (data_stack_ptr < 1)
+    {
         printf("@ -- stack underflow! ");
         return;
     }
@@ -42,7 +44,8 @@ static void _variable_common()
 
 static void variablefunc()
 {
-    if (iptr < max_iptr) {
+    if (iptr < max_iptr)
+    {
         // mark current position
         MYUINT ret_iptr = iptr;
         // jump to end (when this is called in the future)
@@ -66,7 +69,8 @@ static void variablefunc()
 
 static void allotfunc()
 {
-    if (data_stack_ptr < 1) {
+    if (data_stack_ptr < 1)
+    {
         printf("allot -- stack underflow! ");
         return;
     }
@@ -81,7 +85,8 @@ static void createfunc()
 
 static void commafunc()
 {
-    if (data_stack_ptr < 1) {
+    if (data_stack_ptr < 1)
+    {
         printf(", -- stack underflow! ");
         return;
     }
@@ -97,7 +102,8 @@ static void herefunc()
 /* global hash space, a la 'redis', but in local memory */
 
 static void _add_key(char *key){
-    if (hashwords_cnt > hashwords_size) {
+    if (hashwords_cnt > hashwords_size)
+    {
         hashwords_size *= 2;
         hashwords = realloc(hashwords, hashwords_size * sizeof(*hashwords));
     }
@@ -108,14 +114,16 @@ static void _add_key(char *key){
 
 static void hashsetfunc()
 {
-    if (data_stack_ptr < 2) {
+    if (data_stack_ptr < 2)
+    {
         printf("h! -- stack underflow! ");
         return;
     }
     /* grab the key */
     char *key = (char *)(MYUINT)pop();
     MYUINT key_addr = (MYUINT) key;
-    if (key_addr < MIN_STR || key_addr > MAX_STR) {
+    if (key_addr < MIN_STR || key_addr > MAX_STR)
+    {
         perror("h! -- String address for hash key out-of-range.");
         return;
     }
@@ -124,7 +132,8 @@ static void hashsetfunc()
     ENTRY item = {key, data};
     /* see if we have an entry for the given key first */
     ENTRY *entry = hsearch(item, FIND);
-    if (entry == NULL) {
+    if (entry == NULL)
+    {
         hsearch(item, ENTER);
         _add_key(key);
     } else {
@@ -135,14 +144,16 @@ static void hashsetfunc()
 
 static void hashgetfunc()
 {
-    if (data_stack_ptr < 1) {
+    if (data_stack_ptr < 1)
+    {
         printf("h@ -- stack underflow! ");
         return;
     }
     /* grab the key */
     char *key = (char *)(MYUINT)pop();
     MYUINT key_addr = (MYUINT) key;
-    if (key_addr < MIN_STR || key_addr > MAX_STR) {
+    if (key_addr < MIN_STR || key_addr > MAX_STR)
+    {
         perror("h@ -- String address for hash key out-of-range.");
         return;
     }
@@ -151,7 +162,8 @@ static void hashgetfunc()
     ENTRY item = {key, data};
     /* see if we have an entry for the given key first */
     ENTRY *entry = hsearch(item, FIND);
-    if (entry == NULL) {
+    if (entry == NULL)
+    {
         push(0);
     } else {
         push((MYUINT)(char *)entry->data);
@@ -160,7 +172,8 @@ static void hashgetfunc()
 
 static void hashkeysfunc()
 {
-    if (data_stack_ptr < 1) {
+    if (data_stack_ptr < 1)
+    {
         printf("hkeys -- need an integer index on stack. Stack underflow! ");
         return;
     }
@@ -189,7 +202,8 @@ int compare_strings (const void *a, const void *b)
 
 static void sortnumsfunc()
 {
-    if (data_stack_ptr < 2) {
+    if (data_stack_ptr < 2)
+    {
         printf("sortnums -- need <arrstart_index> <size> on the stack.\n");
         return;
     }
@@ -200,7 +214,8 @@ static void sortnumsfunc()
 
 static void sortstrsfunc()
 {
-    if (data_stack_ptr < 2) {
+    if (data_stack_ptr < 2)
+    {
         printf("sortstrs -- need <arrstart_index> <size> on the stack.\n");
     }
     int size = (MYUINT) pop();
@@ -212,22 +227,26 @@ static void sortstrsfunc()
 
 static void envgetfunc()
 {
-    if (data_stack_ptr < 1) {
+    if (data_stack_ptr < 1)
+    {
         printf("envget -- need <env_key> string on the stack.\n");
     }
     /* grab the key */
     char *env_key = (char *)(MYUINT)pop();
     MYUINT env_key_addr = (MYUINT) env_key;
-    if (env_key_addr < MIN_STR || env_key_addr > MAX_STR) {
+    if (env_key_addr < MIN_STR || env_key_addr > MAX_STR)
+    {
         perror("envget -- String address for hash key out-of-range.");
         return;
     }
     char *val = getenv(env_key);
     MYUINT val_addr = (MYUINT) val;
-    if (val_addr > MAX_STR || MAX_STR == 0) {
+    if (val_addr > MAX_STR || MAX_STR == 0)
+    {
         MAX_STR = val_addr;
     }
-    if (val_addr < MIN_STR || MIN_STR == 0) {
+    if (val_addr < MIN_STR || MIN_STR == 0)
+    {
         MIN_STR = val_addr;
     }
     push(val_addr);
@@ -235,20 +254,23 @@ static void envgetfunc()
 
 static void envsetfunc()
 {
-    if (data_stack_ptr < 2) {
+    if (data_stack_ptr < 2)
+    {
         printf("envset -- need <env_val> <env_key> strings on the stack.\n");
     }
     // grab the key from the stack
     char *env_key = (char *)(MYUINT)pop();
     MYUINT env_key_addr = (MYUINT) env_key;
-    if (env_key_addr < MIN_STR || env_key_addr > MAX_STR) {
+    if (env_key_addr < MIN_STR || env_key_addr > MAX_STR)
+    {
         perror("envset -- String address for environment key out-of-range.");
         return;
     }
     // grab the value from the stack
     char *env_val = (char *)(MYUINT)pop();
     MYUINT env_val_addr = (MYUINT) env_val;
-    if (env_val_addr < MIN_STR || env_val_addr > MAX_STR) {
+    if (env_val_addr < MIN_STR || env_val_addr > MAX_STR)
+    {
         perror("envset -- String address for environment value out-of-range.");
         return;
     }

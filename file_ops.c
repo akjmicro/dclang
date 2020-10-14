@@ -3,8 +3,10 @@ char *linebuf = NULL;
 size_t linelen = 0;
 
 
-static void fileopenfunc() {
-    if (data_stack_ptr < 2) {
+static void fileopenfunc()
+{
+    if (data_stack_ptr < 2)
+    {
         printf("Stack underflow!\n");
         printf("'fopen' needs <filename> <open-mode> on the stack\n");
         return;
@@ -15,7 +17,8 @@ static void fileopenfunc() {
     char *path = (char *)(MYUINT) pop();
     // if mode is read or append, file must exist:
     if ( (access(path, F_OK) == -1)
-         && ( !strcmp("r", mode) || !strcmp("r+", mode) ) ) {
+         && ( !strcmp("r", mode) || !strcmp("r+", mode) ) )
+    {
         printf("The file named %s doesn't appear to exist, " \
                "or cannot be accessed.\n", path);
         return;
@@ -25,8 +28,10 @@ static void fileopenfunc() {
 }
 
 
-static void fileclosefunc() {
-    if (data_stack_ptr < 1) {
+static void fileclosefunc()
+{
+    if (data_stack_ptr < 1)
+    {
         printf("Stack underflow!\n");
         printf("'fclose' needs <fpointer> on the stack\n");
         return;
@@ -36,8 +41,10 @@ static void fileclosefunc() {
 }
 
 
-static void filereadfunc() {
-    if (data_stack_ptr < 2) {
+static void filereadfunc()
+{
+    if (data_stack_ptr < 2)
+    {
         printf("Stack underflow!\n");
         printf("'fread' needs <number-of-bytes> <fpointer> on the stack\n");
         return;
@@ -47,10 +54,12 @@ static void filereadfunc() {
     char *buf = malloc(num_bytes);
     MYUINT num_bytes_read = fread(buf, num_bytes, 1, file_to_read);
     // update print safety:
-    if ((MYUINT)buf < MIN_STR || MIN_STR == 0) {
+    if ((MYUINT)buf < MIN_STR || MIN_STR == 0)
+    {
         MIN_STR = (MYUINT)buf;
     }
-    if ((MYUINT)buf + num_bytes_read + 1 > MAX_STR || MAX_STR == 0) {
+    if ((MYUINT)buf + num_bytes_read + 1 > MAX_STR || MAX_STR == 0)
+    {
         MAX_STR = (MYUINT)buf + num_bytes_read + 1;
     }
     // push the address of our new string and length
@@ -58,8 +67,10 @@ static void filereadfunc() {
 }
 
 
-static void filereadlinefunc() {
-    if (data_stack_ptr < 1) {
+static void filereadlinefunc()
+{
+    if (data_stack_ptr < 1)
+    {
         printf("Stack underflow!\n");
         printf("'freadline' needs <fpointer> on the stack\n");
         return;
@@ -68,10 +79,12 @@ static void filereadlinefunc() {
     ssize_t nread;
     MYUINT num_bytes_read = getline(&linebuf, &linelen, file_to_read);
     // update print safety:
-    if ((MYUINT) linebuf < MIN_STR || MIN_STR == 0) {
+    if ((MYUINT) linebuf < MIN_STR || MIN_STR == 0)
+    {
         MIN_STR = (MYUINT) linebuf;
     }
-    if ((MYUINT) linebuf + num_bytes_read + 1 > MAX_STR || MAX_STR == 0) {
+    if ((MYUINT) linebuf + num_bytes_read + 1 > MAX_STR || MAX_STR == 0)
+    {
         MAX_STR = (MYUINT) linebuf + num_bytes_read + 1;
     }
     // push the address of our new string and length
@@ -79,8 +92,10 @@ static void filereadlinefunc() {
 }
 
 
-static void fileseekfunc() {
-    if (data_stack_ptr < 3) {
+static void fileseekfunc()
+{
+    if (data_stack_ptr < 3)
+    {
         printf("Stack underflow!\n");
         printf("'fseek' needs <offset> <whence> <fpointer> on the stack\n");
         printf("'Whence' must be 0 (SEEK_SET), 1 (SEEK_CUR), or 2 (SEEK_END).\n");
@@ -88,7 +103,8 @@ static void fileseekfunc() {
     }
     FILE *file_to_seek = (FILE *)(MYUINT) pop();
     MYUINT whence = (MYUINT) pop();
-    if (!(whence >= 0 && whence <= 2)) {
+    if (!(whence >= 0 && whence <= 2))
+    {
         printf("Whence parameter must be between 0 and 2 inclusive!\n");
         return;
     }
@@ -97,8 +113,10 @@ static void fileseekfunc() {
 }
 
 
-static void filetellfunc() {
-    if (data_stack_ptr < 1) {
+static void filetellfunc()
+{
+    if (data_stack_ptr < 1)
+    {
         printf("Stack underflow!\n");
         printf("'ftell' needs a <fpointer> on the stack\n");
         return;
@@ -109,8 +127,10 @@ static void filetellfunc() {
 }
 
 
-static void filewritefunc() {
-    if (data_stack_ptr < 2) {
+static void filewritefunc()
+{
+    if (data_stack_ptr < 2)
+    {
         printf("'fwrite' -- needs <string-address> <fpointer> on the stack\n");
         return;
     }
@@ -123,7 +143,8 @@ static void filewritefunc() {
 
 static void fileflushfunc()
 {
-    if (data_stack_ptr < 1) {
+    if (data_stack_ptr < 1)
+    {
         printf("'fflush' -- needs <fpointer> on the stack\n");
         return;
     }
@@ -137,7 +158,8 @@ static void fileflushfunc()
 
 static void openfunc()
 {
-    if (data_stack_ptr < 2) {
+    if (data_stack_ptr < 2)
+    {
         printf("Stack_underflow!\n");
         printf("'open' needs <filestr> <flagint> on the stack\n");
         return;
@@ -151,17 +173,20 @@ static void openfunc()
 
 static void mkbuffunc()
 {
-    if (data_stack_ptr < 1) {
+    if (data_stack_ptr < 1)
+    {
         printf("Stack_underflow!\n");
         printf("'mkbuf' needs <size-as-integer> on the stack\n");
     }
     MYUINT size = (MYUINT) pop();
     char *buf = (char *)malloc(size);
     // update print safety:
-    if ((MYUINT)buf < MIN_STR || MIN_STR == 0) {
+    if ((MYUINT)buf < MIN_STR || MIN_STR == 0)
+    {
         MIN_STR = (MYUINT)buf;
     }
-    if ((MYUINT)buf + size + 1 > MAX_STR || MAX_STR == 0) {
+    if ((MYUINT)buf + size + 1 > MAX_STR || MAX_STR == 0)
+    {
         MAX_STR = (MYUINT)buf + size + 1;
     }
     // done updating
@@ -171,7 +196,8 @@ static void mkbuffunc()
 
 static void readfunc()
 {
-    if (data_stack_ptr < 1) {
+    if (data_stack_ptr < 1)
+    {
         printf("Stack_underflow!\n");
         printf("'read' needs <fpointer> <buffer-pointer> <numbytes> on the stack\n");
         return;
@@ -186,7 +212,8 @@ static void readfunc()
 
 static void writefunc()
 {
-    if (data_stack_ptr < 3) {
+    if (data_stack_ptr < 3)
+    {
         printf("Stack_underflow!\n");
         printf("'write' needs <fpointer> <buffer-pointer> <numbytes> on the stack\n");
         return;
@@ -201,7 +228,8 @@ static void writefunc()
 
 static void closefunc()
 {
-    if (data_stack_ptr < 1) {
+    if (data_stack_ptr < 1)
+    {
         printf("Stack_underflow!\n");
         printf("'close' needs <fpointer> on the stack\n");
         return;

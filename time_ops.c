@@ -10,6 +10,10 @@ static void clockfunc()
 }
 
 static void sleepfunc() {
+    if (data_stack_ptr < 1) {
+        printf("sleep -- need a time amount in seconds on the stack!\n");
+        return;
+    }
     MYFLT sleeptime = pop();
     struct timespec t1, t2;
     t1.tv_sec = floor(sleeptime);

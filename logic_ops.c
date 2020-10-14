@@ -1,71 +1,126 @@
 /* logical words */
 static void andfunc()
 {
-  push((MYINT) pop() & (MYINT) pop());
+    if (data_stack_ptr < 2)
+    {
+        printf("'and' needs two elements on the stack!\n");
+        return;
+    }
+    push((MYINT) pop() & (MYINT) pop());
 }
 
 static void orfunc()
 {
-  push((MYINT) pop() | (MYINT) pop());
+    if (data_stack_ptr < 2)
+    {
+        printf("'or' needs two elements on the stack!\n");
+        return;
+    }
+    push((MYINT) pop() | (MYINT) pop());
 }
 
 static void xorfunc()
 {
-  push((MYINT) pop() ^ (MYINT) pop());
+    if (data_stack_ptr < 2)
+    {
+        printf("'xor' needs two elements on the stack!\n");
+        return;
+    }
+    push((MYINT) pop() ^ (MYINT) pop());
 }
 
 static void notfunc()
 {
-  push(~(MYINT) pop());
+    if (data_stack_ptr < 1)
+    {
+        printf("'not' needs an element on the stack!\n");
+        return;
+    }
+    push(~(MYINT) pop());
 }
 
 /* comparison booleans */
 static void eqfunc()
 {
-  push((MYFLT) pop() == (MYFLT) pop());
+    if (data_stack_ptr < 2)
+    {
+        printf("'=' needs two elements on the stack!\n");
+        return;
+    }
+    push((MYFLT) pop() == (MYFLT) pop());
 }
 
 static void noteqfunc()
 {
-  push((MYFLT) pop() != (MYFLT) pop());
+    if (data_stack_ptr < 2)
+    {
+        printf("'!=' needs two elements on the stack!\n");
+        return;
+    }
+    push((MYFLT) pop() != (MYFLT) pop());
 }
 
 static void gtfunc()
 {
-  push((MYFLT) pop() < (MYFLT) pop());
+    if (data_stack_ptr < 2)
+    {
+        printf("'>' needs two elements on the stack!\n");
+        return;
+    }
+    push((MYFLT) pop() < (MYFLT) pop());
 }
 
 static void ltfunc()
 {
-  push((MYFLT) pop() > (MYFLT) pop());
+    if (data_stack_ptr < 2)
+    {
+        printf("'<' needs two elements on the stack!\n");
+        return;
+    }
+    push((MYFLT) pop() > (MYFLT) pop());
 }
 
 static void gtefunc()
 {
-  push((MYFLT) pop() <= (MYFLT) pop());
+    if (data_stack_ptr < 2)
+    {
+        printf("'>=' needs two elements on the stack!\n");
+        return;
+    }
+    push((MYFLT) pop() <= (MYFLT) pop());
 }
 
 static void ltefunc()
 {
-  push((MYFLT) pop() >= (MYFLT) pop());
+    if (data_stack_ptr < 2)
+    {
+        printf("'<=' needs two elements on the stack!\n");
+        return;
+    }
+    push((MYFLT) pop() >= (MYFLT) pop());
 }
 
 // assertions
 static void assertfunc()
 {
-  MYINT truth = pop();
-  if (truth == 0) {
-      printf("ASSERT FAIL!\n");
-  }
+    if (data_stack_ptr < 1)
+    {
+        printf("'assert' needs an element on the stack!\n");
+        return;
+    }
+    MYINT truth = pop();
+    if (truth == 0) {
+        printf("ASSERT FAIL!\n");
+    }
 }
 
 // true/false syntactic sugar
 static void truefunc()
 {
-  push(-1);
+    push(-1);
 }
 
 static void falsefunc()
 {
-  push(0);
+    push(0);
 }
