@@ -86,10 +86,16 @@ static void stringfunc()
                 chbuf[0] = 9;
                 chbuf[1] = 0;
             }
-            /* newline */
+            /* newline (line-feed and carriage return together on unix) */
             if (strchr("n", ch))
             {
                 chbuf[0] = 10;
+                chbuf[1] = 0;
+            }
+            /* carriage return */
+            if (strchr("r", ch))
+            {
+                chbuf[0] = 13;
                 chbuf[1] = 0;
             }
             /* 2-byte unicode */

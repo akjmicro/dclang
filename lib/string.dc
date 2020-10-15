@@ -1,0 +1,29 @@
+: _substr_count_helper
+  over strfind dup
+  if
+    savepop 1 + savepush
+    over strlen +
+    _substr_count_helper
+  else
+    2drop savepop
+  endif
+;
+
+: substr_count  # ( substr str counter )
+  savepush
+  _substr_count_helper
+;
+
+var teststr
+"thisBLAHisBLAHa littleBLAH testBLAHstring"
+teststr !
+
+"BLAH" const :BLAH
+
+# run `substr_count` as a test!
+:BLAH teststr @ 0
+substr_count
+
+# make an assertion that our test string has 4 instances
+# of "BLAH"
+4 = assert
