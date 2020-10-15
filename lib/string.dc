@@ -9,8 +9,8 @@
   endif
 ;
 
-: substr_count  # ( substr str counter )
-  savepush
+: substr_count  # ( str substr )
+  0 savepush swap
   _substr_count_helper
 ;
 
@@ -21,7 +21,7 @@ teststr !
 "BLAH" const :BLAH
 
 # run `substr_count` as a test!
-:BLAH teststr @ 0
+teststr @ :BLAH
 substr_count
 
 # make an assertion that our test string has 4 instances
