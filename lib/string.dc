@@ -14,16 +14,61 @@
   _substr_count_helper
 ;
 
-var teststr
-"thisBLAHisBLAHa littleBLAH testBLAHstring"
-teststr !
+: _setup_replace_buffer
+  # ( str findstr replacestr times )
+  rot rot
+  strlen swap strlen - *
+  swap strlen +
+  mkbuf
+;
 
-"BLAH" const :BLAH
+: _strreplace_setup
+  # ( str find repl )
+  2 pick 2 pick substr_count
+  # ( str find repl count )
+  2over 2over _setup_replace_buffer
+  # ( str find repl count buffer )
+  nip
+  # ( str find repl buffer )
+  swap
+  # ( str find buffer repl )
+  savepush
+  # ( str find buffer ) ( repl )
+  -rot
+  # ( buffer str find ) ( repl )
+  savepop
+  # ( buffer str find repl )
+;
 
-# run `substr_count` as a test!
-teststr @ :BLAH
-substr_count
+: _strreplace_helper
+  2over 2over drop strfind dup
+  # ( buffer str find repl buffer found found ) ( buffer )
+  if
+  # ( buffer str find repl buffer found ) ( buffer )
+    dup savepush
+    # ( buffer str find repl buffer found ) ( found buffer )
+    4 pick tuck -
+    # ( buffer str find repl buffer str sz ) ( found buffer )
+    mempcpy over dup strlen mempcpy
+    # ( buffer str find repl newbufrepl ) ( found buffer )
+    savepop 3 pick strlen +
+    # ( buffer str find repl newbufrepl found+findlen ) ( buffer )
+    2rot 2drop 2swap
+    # ( newbufrepl found+findlen find repl ) ( buffer )
+    _strreplace_helper
+  else
+  # ( buffer str find repl buffer found ) ( buffer )
+    2drop 2drop dup strlen
+  # ( buffer str sz )
+    mempcpy drop savepop
+  # ( buffer )
+  endif
+;
 
-# make an assertion that our test string has 4 instances
-# of "BLAH"
-4 = assert
+: strreplace
+  _strreplace_setup
+  # ( buffer str find repl )
+  3 pick savepush
+  # ( buffer str find repl ) ( buffer )
+  _strreplace_helper
+;

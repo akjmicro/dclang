@@ -257,7 +257,7 @@ static void clearfunc()
 /////////////////////
 // save data stack //
 /////////////////////
-static void savepush()
+static void savepushfunc()
 {
     if (save_data_stack_ptr >= DATA_STACK_SIZE) {
         printf("savepush -- stack overflow!\n");
@@ -267,7 +267,7 @@ static void savepush()
     save_data_stack[save_data_stack_ptr++] = val;
 }
 
-static void savepop()
+static void savepopfunc()
 {
     MYFLT val = save_data_stack[--save_data_stack_ptr];
     push_no_check(val);

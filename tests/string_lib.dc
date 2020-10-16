@@ -1,0 +1,24 @@
+"string.dc" import
+
+var teststr
+"thisBLAHisBLAHa littleBLAH testBLAHstring"
+teststr !
+
+"BLAH" const :BLAH
+
+# run `substr_count` as a test!
+teststr @ :BLAH
+substr_count
+
+# make an assertion that our test string has 4 instances
+# of "BLAH"
+4 = assert
+
+teststr @ :BLAH "BLAHFOO" strreplace
+"thisBLAHFOOisBLAHFOOa littleBLAHFOO testBLAHFOOstring"
+str= assert
+
+teststr @ "NOTFOUND" " " strreplace
+teststr @
+str= assert
+

@@ -28,10 +28,22 @@ static void showstackfunc()
     char *joiner;
     x = data_stack_ptr > 16 ? data_stack_ptr - 16 : 0;
     joiner = x == 0 ? " " : " ... ";
-    fprintf(ofp, "<%i>%s", data_stack_ptr, joiner);
+    fprintf(ofp, "data_stack: <%i>%s", data_stack_ptr, joiner);
     fflush(ofp);
     for (x=0; x < data_stack_ptr; x++) {
         fprintf(ofp, "%0.19g ", data_stack[x]);
+        fflush(ofp);
+    }
+    fprintf(ofp, "\n");
+    // do the save data stack as well:
+    MYINT y;
+    char *sv_joiner;
+    y = save_data_stack_ptr > 16 ? save_data_stack_ptr - 16 : 0;
+    sv_joiner = y == 0 ? " " : " ... ";
+    fprintf(ofp, "save_stack: <%i>%s", save_data_stack_ptr, sv_joiner);
+    fflush(ofp);
+    for (y=0; y < save_data_stack_ptr; y++) {
+        fprintf(ofp, "%0.19g ", save_data_stack[y]);
         fflush(ofp);
     }
     fprintf(ofp, "\n");

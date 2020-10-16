@@ -1,0 +1,26 @@
+: timestack
+  clock
+  1
+  10000000 times
+    dup drop
+  again
+  drop
+  clock swap - . cr
+;
+
+var myvar
+1 myvar !
+
+: timevar
+  clock
+  10000000 times
+    myvar @ drop
+  again
+  clock swap - . cr
+;
+
+"Timing the stack: " print cr
+timestack
+
+"Timing variables: " print cr
+timevar

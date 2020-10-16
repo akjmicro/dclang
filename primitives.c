@@ -91,8 +91,8 @@ void add_all_primitives()
     add_primitive("2nip", nip2func);
     add_primitive("2tuck", tuck2func);
     // extra stack
-    add_primitive("savepush", savepush);
-    add_primitive("savepop", savepop);
+    add_primitive("savepush", savepushfunc);
+    add_primitive("savepop", savepopfunc);
     // constants & variables
     add_primitive("!", pokefunc);
     add_primitive("@", peekfunc);
