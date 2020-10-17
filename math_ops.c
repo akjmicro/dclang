@@ -124,9 +124,9 @@ static void roundfunc()
 
 static void floorfunc()
 {
-    if (data_stack_ptr < 2)
+    if (data_stack_ptr < 1)
     {
-        printf("'floor' needs two numbers on the stack!\n");
+        printf("'floor' needs a number on the stack!\n");
         return;
     }
     push((MYINT) floor(pop()));
@@ -134,9 +134,9 @@ static void floorfunc()
 
 static void ceilfunc()
 {
-    if (data_stack_ptr < 2)
+    if (data_stack_ptr < 1)
     {
-        printf("'ceil' needs two numbers on the stack!\n");
+        printf("'ceil' needs a number on the stack!\n");
         return;
     }
     push((MYINT) ceil(pop()));
