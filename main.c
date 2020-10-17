@@ -87,7 +87,6 @@ MYINT def_mode;
 #include "stack_ops.c"
 #include "null_ops.c"
 #include "logic_ops.c"
-#include "time_ops.c"
 #include "math_ops.c"
 #include "branch_ops.c"
 #include "output_ops.c"
@@ -97,6 +96,7 @@ MYINT def_mode;
 #include "socket_ops.c"
 #include "user_words.c"
 #include "variable_ops.c"
+#include "time_ops.c"
 #include "primitives.c"
 #include "input_ops.c"
 

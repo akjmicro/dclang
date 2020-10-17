@@ -114,9 +114,9 @@ static void maxfunc()
 
 static void roundfunc()
 {
-    if (data_stack_ptr < 2)
+    if (data_stack_ptr < 1)
     {
-        printf("'round' needs two numbers on the stack!\n");
+        printf("'round' needs a number on the stack!\n");
         return;
     }
     push((MYINT) round(pop()));

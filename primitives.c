@@ -177,6 +177,7 @@ void add_all_primitives()
     // time
     add_primitive("clock", clockfunc);
     add_primitive("sleep", sleepfunc);
+    add_primitive("datetime", datetimefunc);
     // show defined words!
     add_primitive("words", showdefined);
 };
