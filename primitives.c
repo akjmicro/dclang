@@ -178,6 +178,7 @@ void add_all_primitives()
     add_primitive("clock", clockfunc);
     add_primitive("sleep", sleepfunc);
     add_primitive("datetime", datetimefunc);
+    add_primitive("dt->epoch", dt_to_epochfunc);
     // show defined words!
     add_primitive("words", showdefined);
 };

@@ -64,7 +64,9 @@ static void stringfunc()
     char ch;
     char chbuf[5];
     char *buf;
-    long unsigned bufsize = 2;
+    MYUINT bufsize_step = 64;
+    MYUINT cur_bufsize = 0;
+    MYUINT bufsize = bufsize_step;
     buf = (char *)malloc(bufsize);
     // get the next character, and start the process for real:
     if ((ch = fgetc(ifp)) == EOF) exit(0);
@@ -121,8 +123,12 @@ static void stringfunc()
             chbuf[0] = ch;
             chbuf[1] = 0;
         }
-        bufsize += strlen(chbuf);
-        buf = (char *) realloc(buf, bufsize);
+        cur_bufsize += strlen(chbuf);
+        if (cur_bufsize > bufsize)
+        {
+            bufsize += bufsize_step;
+            buf = (char *) realloc(buf, bufsize);
+        }
         strcat(buf, chbuf);
         if ((ch = fgetc(ifp)) == EOF) exit(0);
     }
