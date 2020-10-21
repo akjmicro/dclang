@@ -120,6 +120,8 @@ int main(int argc, char **argv)
     add_all_primitives();
     load_extra_primitives();
     srand(time(NULL));
+    // memset the dt_conv_tm
+    memset(&dt_epoch_tm, 0, sizeof(dt_epoch_tm));
     // create the global hash table
     hcreate(1048576);
     hashwords = (char**)malloc(hashwords_size * sizeof(*hashwords));

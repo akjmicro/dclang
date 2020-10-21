@@ -1,4 +1,5 @@
 #include <sys/time.h>
+#include <time.h>
 
 struct timeval tval;
 struct tm dt_epoch_tm;
@@ -8,6 +9,13 @@ static void clockfunc()
 {
     gettimeofday(&tval, NULL);
     MYFLT now = (tval.tv_sec * 1000000) + tval.tv_usec;
+    push(now);
+}
+
+static void epochfunc()
+{
+    gettimeofday(&tval, NULL);
+    MYFLT now = (tval.tv_sec);
     push(now);
 }
 
@@ -25,14 +33,37 @@ static void sleepfunc() {
 
 // date functions
 
-static void datetimefunc()
+static void dt_to_epochfunc()
+{
+    if (data_stack_ptr < 2)
+    {
+        printf("dt->epoch: need a <iso_fmt_date> like \"2020-01-01 12:14:13\" and a <input_format> on the stack.\n");
+        return;
+    }
+    // input string setup
+    char *fmt = (char *)(MYUINT) pop();
+    char *to_conv = (char *)(MYUINT) pop();
+    // convert to broken time
+    if (strptime(to_conv, fmt, &dt_epoch_tm) == NULL)
+    {
+        printf("Conversion to broken time failed in 'dt->epoch'\n");
+        return;
+    }
+    // do the conversion to seconds since epoch
+    time_t res_time = mktime(&dt_epoch_tm);
+    push((MYINT) res_time);
+}
+
+static void epoch_to_dtfunc()
 {
     if (data_stack_ptr < 1)
     {
-        printf("datetime -- need a format str on the stack\n");
+        printf("epoch->dt: need a <epoch_int> and an <output_format> on the stack.\n");
         return;
     }
-    char *fmt = (char *) (MYUINT) pop();
+    // input string setup
+    char *fmt = (char *)(MYUINT) pop();
+    time_t in_epoch = (time_t)(MYUINT) pop();
     char *tmbuf = malloc(64 * sizeof(char));
     MYUINT bufaddr = (MYUINT) tmbuf;
     if (bufaddr > MAX_STR || MAX_STR == 0)
@@ -43,39 +74,11 @@ static void datetimefunc()
     {
         MIN_STR = bufaddr;
     }
-    time_t curtime = time(NULL);
-    struct tm *loctime = localtime(&curtime);
+    struct tm *loctime = localtime(&in_epoch);
     if (strftime(tmbuf, 64, fmt, loctime) == 0)
     {
-        printf("'strftime', a low-level call of 'datetime', returned an error.\n");
+        printf("'strftime', a low-level call of 'epoch->dt', returned an error.\n");
         return;
     }
     push(bufaddr);
-    free((char *)fmt);
-}
-
-
-static void dt_to_epochfunc()
-{
-    if (data_stack_ptr < 1)
-    {
-        printf("dt->epoch: need a <iso_fmt_date> like \"2020-01-01 12:14:13\" on the stack.\n");
-        return;
-    }
-    // input string setup -- leave it uncast as an unsigned int
-    MYUINT to_conv = (MYUINT) pop();
-    // set time structure
-    struct tm *dp_epoch_tm = malloc(sizeof(struct tm));
-    memset((void *)&dt_epoch_tm, 0, sizeof(dt_epoch_tm));
-    // convert to broken time
-    if (strptime((char *) to_conv, "%Y-%m-%d %H:%M:%S", &dt_epoch_tm) == NULL)
-    {
-        printf("Conversion to broken time failed in 'dt->epoch'\n");
-        return;
-    }
-    // do the conversion to seconds since epoch
-    time_t res_time = mktime(&dt_epoch_tm);
-    push((MYUINT) res_time);
-    free((char *) to_conv);
-    free(dp_epoch_tm);
 }

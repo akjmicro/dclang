@@ -140,6 +140,7 @@ void add_all_primitives()
     add_primitive("tostr", tostrfunc);
     add_primitive("bytes32", bytes32func);
     add_primitive("free", freefunc);
+    add_primitive("strclear", strclearfunc);
     add_primitive("strlen", strlenfunc);
     add_primitive("str=", streqfunc);
     add_primitive("str<", strltfunc);
@@ -177,8 +178,9 @@ void add_all_primitives()
     // time
     add_primitive("clock", clockfunc);
     add_primitive("sleep", sleepfunc);
-    add_primitive("datetime", datetimefunc);
+    add_primitive("epoch", epochfunc);
     add_primitive("dt->epoch", dt_to_epochfunc);
+    add_primitive("epoch->dt", epoch_to_dtfunc);
     // show defined words!
     add_primitive("words", showdefined);
 };
