@@ -37,14 +37,24 @@ static void dt_to_epochfunc()
 {
     if (data_stack_ptr < 2)
     {
-        printf("dt->epoch: need a <iso_fmt_date> like \"2020-01-01 12:14:13\" and a <input_format> on the stack.\n");
+        printf("dt->epoch: need a <date> like \"2020-01-01 12:14:13\" and a <input_format> on the stack.\n");
         return;
     }
     // input string setup
-    char *fmt = (char *)(MYUINT) pop();
-    char *to_conv = (char *)(MYUINT) pop();
+    MYUINT fmt = (MYUINT) pop();
+    MYUINT to_conv = (MYUINT) pop();
+    if (fmt < MIN_STR || fmt > MAX_STR)
+    {
+        printf("dt->epoch -- <input_format> string address out-of-range.\n");
+        return;
+    }
+    if (to_conv < MIN_STR || to_conv > MAX_STR)
+    {
+        printf("dt->epoch -- <date> string address out-of-range.\n");
+        return;
+    }
     // convert to broken time
-    if (strptime(to_conv, fmt, &dt_epoch_tm) == NULL)
+    if (strptime((char *) to_conv, (char *)fmt, &dt_epoch_tm) == NULL)
     {
         printf("Conversion to broken time failed in 'dt->epoch'\n");
         return;
@@ -62,7 +72,12 @@ static void epoch_to_dtfunc()
         return;
     }
     // input string setup
-    char *fmt = (char *)(MYUINT) pop();
+    MYUINT fmt = (MYUINT) pop();
+    if (fmt < MIN_STR || fmt > MAX_STR)
+    {
+        printf("epoch->dt -- <output_format> string address out-of-range.\n");
+        return;
+    }
     time_t in_epoch = (time_t)(MYUINT) pop();
     char *tmbuf = malloc(64 * sizeof(char));
     MYUINT bufaddr = (MYUINT) tmbuf;
@@ -75,7 +90,7 @@ static void epoch_to_dtfunc()
         MIN_STR = bufaddr;
     }
     struct tm *loctime = localtime(&in_epoch);
-    if (strftime(tmbuf, 64, fmt, loctime) == 0)
+    if (strftime(tmbuf, 64, (char *)fmt, loctime) == 0)
     {
         printf("'strftime', a low-level call of 'epoch->dt', returned an error.\n");
         return;
