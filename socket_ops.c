@@ -56,7 +56,7 @@ static void tcpconnectfunc()
     // A tcp client word. This can reach out to a pre-established tcp server
     // already set up with the above words.
     if (data_stack_ptr < 2) {
-        printf("tcpconnect -- need <host> <port> <requestbuf> <responsebuf> on the stack");
+        printf("tcpconnect -- need <host> <port> on the stack");
         return;
     }
     int sockfd = socket(AF_INET, SOCK_STREAM, 0);
