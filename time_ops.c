@@ -2,7 +2,6 @@
 #include <time.h>
 
 struct timeval tval;
-struct tm dt_epoch_tm;
 
 
 static void clockfunc()
@@ -53,15 +52,18 @@ static void dt_to_epochfunc()
         printf("dt->epoch -- <date> string address out-of-range.\n");
         return;
     }
+    // memset the dt_conv_tm
+    struct tm dt_epoch_tm;
+    memset(&dt_epoch_tm, 0, sizeof(dt_epoch_tm));
     // convert to broken time
-    if (strptime((char *) to_conv, (char *)fmt, &dt_epoch_tm) == NULL)
+    if (strptime((char *)to_conv, (char *) fmt, &dt_epoch_tm) == NULL)
     {
         printf("Conversion to broken time failed in 'dt->epoch'\n");
         return;
     }
     // do the conversion to seconds since epoch
     time_t res_time = mktime(&dt_epoch_tm);
-    push((MYINT) res_time);
+    push((MYUINT) res_time);
 }
 
 static void epoch_to_dtfunc()
@@ -78,8 +80,16 @@ static void epoch_to_dtfunc()
         printf("epoch->dt -- <output_format> string address out-of-range.\n");
         return;
     }
-    time_t in_epoch = (time_t)(MYUINT) pop();
-    char *tmbuf = malloc(64 * sizeof(char));
+    MYUINT in_epoch_uint = (MYUINT) pop();
+    time_t in_epoch = (time_t) in_epoch_uint;
+    char tmbuf[256];
+    memset(&tmbuf[0], 0, 256);
+    struct tm *loctime = localtime(&in_epoch);
+    if (strftime(tmbuf, 256, (char *) fmt, loctime) == 0)
+    {
+        printf("'strftime', a low-level call of 'epoch->dt', returned an error.\n");
+        return;
+    }
     MYUINT bufaddr = (MYUINT) tmbuf;
     if (bufaddr > MAX_STR || MAX_STR == 0)
     {
@@ -88,12 +98,6 @@ static void epoch_to_dtfunc()
     if (bufaddr < MIN_STR || MIN_STR == 0)
     {
         MIN_STR = bufaddr;
-    }
-    struct tm *loctime = localtime(&in_epoch);
-    if (strftime(tmbuf, 64, (char *)fmt, loctime) == 0)
-    {
-        printf("'strftime', a low-level call of 'epoch->dt', returned an error.\n");
-        return;
     }
     push(bufaddr);
 }

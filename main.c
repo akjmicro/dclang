@@ -63,6 +63,9 @@ MYINT fsp;
 // variables space
 MYFLT myvars[1048576];
 MYUINT varsidx;
+// min and max string buffer addresses
+MYUINT MIN_STR = 0;
+MYUINT MAX_STR = 0;
 
 // compiled tokens get saved and put into an array of type 'inst_struct'
 typedef union {
@@ -90,13 +93,13 @@ MYINT def_mode;
 #include "math_ops.c"
 #include "branch_ops.c"
 #include "output_ops.c"
-#include "string_ops.c"
-#include "token.c"
+#include "time_ops.c"
 #include "file_ops.c"
 #include "socket_ops.c"
+#include "string_ops.c"
+#include "token.c"
 #include "user_words.c"
 #include "variable_ops.c"
-#include "time_ops.c"
 #include "primitives.c"
 #include "input_ops.c"
 
@@ -120,8 +123,6 @@ int main(int argc, char **argv)
     add_all_primitives();
     load_extra_primitives();
     srand(time(NULL));
-    // memset the dt_conv_tm
-    memset(&dt_epoch_tm, 0, sizeof(dt_epoch_tm));
     // create the global hash table
     hcreate(1048576);
     hashwords = (char**)malloc(hashwords_size * sizeof(*hashwords));

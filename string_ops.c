@@ -1,9 +1,3 @@
-MYUINT MIN_STR = 0;
-MYUINT MAX_STR = 0;
-
-char *scratch;
-char *scratch_end;
-
 /* utf-8 char buffer */
 char utf8_buf[5];
 
@@ -66,15 +60,13 @@ static void stringfunc()
 {
     char ch;
     char chbuf[5];
-    MYUINT cur_bufsize = 0;
-    MYUINT bufsize = 4096;
-    MYUINT bufsize_step = 4096;
-    if (scratch == NULL)
-    {
-        scratch = (char *) malloc(bufsize);
-        scratch_end = scratch;
-    }
-    char *str_top = scratch_end;
+    MYUINT chr_cnt = 0;
+    char *scratch = (char *) malloc(sizeof(char));
+    // workaround if some garbage appears:
+    int advance = strlen(scratch);
+    chr_cnt += advance;
+    // end workaround;
+    MYUINT bufsize = sizeof(scratch);
     // get the next character, and start the process for real:
     if ((ch = fgetc(ifp)) == EOF) exit(0);
     while (! strchr("\"", ch))
@@ -130,19 +122,22 @@ static void stringfunc()
             chbuf[0] = ch;
             chbuf[1] = 0;
         }
-        cur_bufsize += strlen(chbuf);
-        if (cur_bufsize > bufsize)
+        chr_cnt += strlen(chbuf);
+        if (chr_cnt > bufsize)
         {
-            bufsize += bufsize_step;
+            bufsize += 32;
             scratch = realloc(scratch, bufsize);
         }
-        scratch_end = mempcpy(scratch_end, chbuf, strlen(chbuf));
+        strcat(scratch, chbuf);
         if ((ch = fgetc(ifp)) == EOF) exit(0);
     }
-    scratch_end = mempcpy(scratch_end, "\0", 1);
-    // number for stack needs to be a double:
-    MYUINT string_dest_uint = (MYUINT) str_top;
-    MYUINT buflen = (MYUINT) strlen(str_top);
+    scratch = realloc(scratch, chr_cnt + 1);
+    // Number for stack needs to be a double.
+    // Notice the use of "advance" to go beyond any buffer
+    // overflow garbage that might appear when the initial
+    // buffer is allocated.
+    MYUINT string_dest_uint = (MYUINT) scratch + advance;
+    MYUINT buflen = (MYUINT) strlen(scratch);
     if (string_dest_uint < MIN_STR || MIN_STR == 0)
     {
         MIN_STR = string_dest_uint;
@@ -190,17 +185,7 @@ static void freefunc()
         return;
     }
     MYUINT loc_uint = (MYUINT) pop();
-    if ((loc_uint > (MYUINT) scratch) && (loc_uint <= (MYUINT) scratch_end))
-    {
-        printf("free -- cannot free the string scratch buffer area. Use 'strclear' instead");
-        return;
-    }
     free((char *) loc_uint);
-}
-
-static void strclearfunc()
-{
-    free((char *) scratch);
 }
 
 static void emitfunc()

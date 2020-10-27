@@ -140,7 +140,6 @@ void add_all_primitives()
     add_primitive("tostr", tostrfunc);
     add_primitive("bytes32", bytes32func);
     add_primitive("free", freefunc);
-    add_primitive("strclear", strclearfunc);
     add_primitive("strlen", strlenfunc);
     add_primitive("str=", streqfunc);
     add_primitive("str<", strltfunc);
