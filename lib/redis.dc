@@ -1,0 +1,136 @@
+###################################################################
+# Still in early stages, but the idea is to implement a Redis API #
+###################################################################
+
+"string.dc" import
+
+# constants
+"localhost" const REDIS_HOST
+6379 const REDIS_PORT
+1024 const REDIS_BUFSIZE
+REDIS_BUFSIZE mkbuf const REDIS_BUFFER
+"*3\r\n$3\r\nSET\r\n${keylen}\r\n{key}\r\n${vallen}\r\n{val}\r\n" const REDIS_SET_TEMPLATE
+"*2\r\n$3\r\nGET\r\n${keylen}\r\n{key}\r\n" const REDIS_GET_TEMPLATE
+"{key}" const REDIS_KEY_WD
+"{val}" const REDIS_VAL_WD
+"{keylen}" const REDIS_KEYLEN_WD
+"{vallen}" const REDIS_VALLEN_WD
+
+# setup a dummy socket first
+var redis_socket -1 redis_socket !
+
+: sanity_check
+  REDIS_SET_TEMPLATE print cr
+  REDIS_GET_TEMPLATE print cr
+  REDIS_KEY_WD print cr
+  REDIS_VAL_WD print cr
+  REDIS_KEYLEN_WD print cr
+  REDIS_VALLEN_WD print cr
+;
+
+: showstr
+  dup print cr
+;
+
+: 2savepush
+  savepush savepush
+;
+
+: 2savepop
+  savepop savepop
+;
+
+: 2savecopy
+  2dup 2savepush
+;
+
+: _prep_socket
+  # ( msg ) ( ) -> ( msg ) ( )
+  redis_socket @ dup -1 <>
+  if
+    close drop
+  else
+    drop
+  endif
+  REDIS_HOST REDIS_PORT tcpconnect
+  redis_socket !
+;
+
+: _prep_redis_buffer
+  # ( msg ) ( ) -> ( BFmem ) ( )
+  REDIS_BUFFER 0 REDIS_BUFSIZE memset
+  over strcpy free
+;
+
+: _write_redis_buffer
+  # ( BFmem ) ( ) -> ( ) ( )
+  redis_socket @ swap
+  REDIS_BUFSIZE
+  write drop
+;
+
+: _reprep_redis_buffer
+  # ( ) ( ) -> ( sckt BFSZ BFmem ) ( BF )
+  redis_socket @ REDIS_BUFFER REDIS_BUFSIZE
+  2dup 0 swap memset
+  rot savepush
+  swap read drop
+  savepop
+;
+
+: _redis_write_read
+  _prep_socket
+  _prep_redis_buffer
+  _write_redis_buffer
+  _reprep_redis_buffer
+;
+
+: _replace_keylen
+  # ( K Tmpl ) -> ( K repl1  )
+  over strlen REDIS_KEYLEN_WD swap tostr
+  strreplace
+;
+
+: _replace_key
+  # ( K repl1 ) (  ) -> ( repl2 ) ( )
+  REDIS_KEY_WD rot
+  strreplace
+;
+
+: _replace_vallen
+  # ( V repl2 ) ( ) -> ( V repl3 ) ( )
+  over strlen REDIS_VALLEN_WD swap tostr
+  strreplace
+;
+
+: _replace_val
+  # ( V repl3 ) ( ) -> ( repl3 VWD V ) ( )
+  swap REDIS_VAL_WD swap
+  strreplace
+;
+
+: redis_set
+  REDIS_SET_TEMPLATE strdup
+  _replace_keylen
+  _replace_key
+  _replace_vallen
+  _replace_val
+  _redis_write_read
+;
+
+: redis_get
+  # ( Key ) -> ( strrep2 ) ( strrep2 )
+  REDIS_GET_TEMPLATE strdup
+  _replace_keylen
+  _replace_key
+  _redis_write_read
+;
+
+# test it!
+"Yes" "Prog_band:0" redis_set print cr
+"Prog_band:0" redis_get print cr
+# sanity_check
+"Bach" "Best_composer" redis_set print cr
+#sanity_check
+"Best_composer" redis_get print cr
+# sanity_check

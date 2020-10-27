@@ -3,7 +3,7 @@
 #include <netdb.h>
 
 
-struct sockaddr_in serv_addr, cli_addr, host_addr;
+struct sockaddr_in serv_addr, cli_addr;
 
 
 static void tcplistenfunc()
@@ -62,10 +62,11 @@ static void tcpconnectfunc()
     int sockfd = socket(AF_INET, SOCK_STREAM, 0);
     if (sockfd < 0) perror("tcpconnect -- ERROR opening socket");
     int portno = (int) pop();
+    struct sockaddr_in host_addr;
     char *servername = (char *) (MYUINT) pop();
     struct hostent *server = gethostbyname(servername);
     if (server == NULL) {
-        fprintf(stderr,"tcpconnect -- ERROR, no such host\n");
+        fprintf(stderr, "tcpconnect -- ERROR, no such host\n");
         exit(0);
     }
     bzero((char *) &host_addr, sizeof(host_addr));

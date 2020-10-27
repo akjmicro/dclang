@@ -1,7 +1,12 @@
+: _incr_saved_counter
+  savepop 1 + savepush
+;
+
 : _substr_count_helper
+  # ( substr str ) ( 0 ) -> ( cnt ) ( )
   over strfind dup
   if
-    savepop 1 + savepush
+    _incr_saved_counter
     over strlen +
     _substr_count_helper
   else
@@ -9,7 +14,8 @@
   endif
 ;
 
-: substr_count  # ( str substr )
+: substr_count
+  # ( str substr ) -> # ( substr str ) ( 0 )
   0 savepush swap
   _substr_count_helper
 ;

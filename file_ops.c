@@ -179,18 +179,22 @@ static void mkbuffunc()
         printf("'mkbuf' needs <size-as-integer> on the stack\n");
     }
     MYUINT size = (MYUINT) pop();
-    char *buf = (char *)malloc(size);
+    char *buf = (char *) malloc(size);
+    memset(buf, 0, size);
+    int advance = strlen(buf);
+    MYUINT bufaddr = (MYUINT) buf;
+    bufaddr += advance;
     // update print safety:
-    if ((MYUINT)buf < MIN_STR || MIN_STR == 0)
+    if (bufaddr < MIN_STR || MIN_STR == 0)
     {
-        MIN_STR = (MYUINT)buf;
+        MIN_STR = bufaddr;
     }
-    if ((MYUINT)buf + size + 1 > MAX_STR || MAX_STR == 0)
+    if (bufaddr + size + 1 > MAX_STR || MAX_STR == 0)
     {
-        MAX_STR = (MYUINT)buf + size + 1;
+        MAX_STR = bufaddr + size + 1;
     }
     // done updating
-    push((MYUINT)buf);
+    push(bufaddr);
 }
 
 

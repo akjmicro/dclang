@@ -22,6 +22,7 @@ Born on 2018-05-05 */
 #define DELIM " "
 #define MAXWORD 65536
 #define IBUFSIZE 128
+#define NUMVARS 1048576
 
 /*
    These should be changed based on architecture. For instance, on my x86_64
@@ -61,7 +62,7 @@ int loop_counter_ptr;
 FILE *file_stack[32];
 MYINT fsp;
 // variables space
-MYFLT myvars[1048576];
+MYFLT myvars[NUMVARS];
 MYUINT varsidx;
 // min and max string buffer addresses
 MYUINT MIN_STR = 0;

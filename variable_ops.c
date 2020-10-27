@@ -9,7 +9,12 @@ static void pokefunc()
         printf("! -- stack underflow! ");
         return;
     }
-    MYINT idx = (MYINT) pop();
+    MYUINT idx = (MYUINT) pop();
+    if (idx < 0 || idx > NUMVARS)
+    {
+        printf("! -- variable slot number out-of-range!\n");
+        return;
+    }
     MYFLT val = pop();
     myvars[idx] = val;
 }
@@ -22,6 +27,11 @@ static void peekfunc()
         return;
     }
     MYINT idx = (MYINT) pop();
+    if (idx < 0 || idx > NUMVARS)
+    {
+        printf("@ -- variable slot number out-of-range!\n");
+        return;
+    }
     push(myvars[idx]);
 }
 
