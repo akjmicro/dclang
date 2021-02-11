@@ -7,7 +7,7 @@ typedef struct {
 forloop_info fl_stack[3];
 MYINT fl_ptr;
 
-// array for 'do' loop max amounts:
+// array for 'times' loop max amounts:
 MYINT times_info[3];
 MYINT times_ptr;
 
