@@ -40,16 +40,13 @@ Born on 2018-05-05 */
 #define MYFLT double
 // end of data type macros
 
-// input buffer and input file (stdin or file input) stuff
-FILE *ifp;
-char buf[IBUFSIZE];
-MYINT bufused;
-MYINT live_repl = 0;
-// output file, usually stdout, but can be redirected with 'redirect'
-FILE *ofp;
 // data stack
-MYFLT data_stack[DATA_STACK_SIZE];
+MYFLT data_stack[DATA_STACK_SIZE * 2];
 int data_stack_ptr;
+// variables space
+MYFLT myvars[NUMVARS];
+MYUINT varsidx;
+// save data stack
 MYFLT save_data_stack[DATA_STACK_SIZE];
 int save_data_stack_ptr;
 // return stack
@@ -58,12 +55,6 @@ int return_stack_ptr;
 // loop 'stack'
 MYINT loop_counter[3];
 int loop_counter_ptr;
-// file stack for imports
-FILE *file_stack[32];
-MYINT fsp;
-// variables space
-MYFLT myvars[NUMVARS];
-MYUINT varsidx;
 // min and max string buffer addresses
 MYUINT MIN_STR = 0;
 MYUINT MAX_STR = 0;
@@ -86,6 +77,17 @@ MYUINT max_iptr;
 
 // flag for if we are defining a new word (function)
 MYINT def_mode;
+
+// input buffer and input file (stdin or file input) stuff
+FILE *ifp;
+char buf[IBUFSIZE];
+MYINT bufused;
+MYINT live_repl = 0;
+// output file, usually stdout, but can be redirected with 'redirect'
+FILE *ofp;
+// file stack for imports
+FILE *file_stack[32];
+MYINT fsp;
 
 // inline dclang code
 #include "stack_ops.c"

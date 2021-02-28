@@ -1,65 +1,64 @@
-: present_results
+: present-results
   "The sum is: " print . cr
   swap -
   "The time difference is: " print . "seconds" print cr
 ;
 
 : sl-helper
-   # ( sum max cur )
-   rot       # ( max cur sum )
-   over      # ( max cur sum cur )
-   +         # ( max cur sum1 )
-   rot rot   # ( cur sum1 max -- sum1 max cur )
+  # ( sum max cur )
+  rot       # ( max cur sum )
+  over      # ( max cur sum cur )
+  +         # ( max cur sum1 )
+  rot rot   # ( cur sum1 max -- sum1 max cur )
 ;
 
 : recur-loop
-    1 +        # sum cur'
-    swap       # cur' sum
-    over       # cur' sum cur'
-    +          # cur' sum'
-    swap       # sum' cur'
-    dup        # sum' cur' cur'
-    20000000 <>
-    if
-      recur-loop
-    endif
+  1 +        # sum cur'
+  tuck       # cur' sum cur'
+  +          # cur' sum'
+  swap       # sum' cur'
+  dup        # sum' cur' cur'
+  20000000 <>
+  if
+    recur-loop
+  endif
 ;
 
-: test_recur
-    clock
-    0 0 recur-loop   # clock sum cur func
-    clock            # clock sum cur clock'
-    swap             # clock sum clock' cur
-    drop swap        # clock clock' sum
+: test-recur
+  clock
+  0 0 recur-loop   # clock sum cur func
+  clock            # clock sum cur clock'
+  swap             # clock sum clock' cur
+  drop swap        # clock clock' sum
 ;
 
 : testfor
-    clock 0
-    20000001 0 1 for
-      i +
-    next
-    clock
-    swap
+  clock 0
+  20000001 0 1 for
+    i +
+  next
+  clock
+  swap
 ;
 
 : testtimes
-    clock 0
-    20000001 times
-      i +
-    again
-    clock
-    swap
+  clock 0
+  20000001 times
+    i +
+  again
+  clock
+  swap
 ;
 
 : testtimes-var
-    clock
-    0 0 !
-    20000001 times
-      0 @ i + 0 !
-    again
-    0 @
-    clock
-    swap
+  clock
+  0 0 !
+  20000001 times
+    0 @ i + 0 !
+  again
+  0 @
+  clock
+  swap
 ;
 
 "\nThis will show how various ways of composing loops are more efficient.
@@ -72,17 +71,17 @@ lives in the memory heap instead of right on the stack, as a 4th example
 " print
 
 "\nTesting loop using recursion\n" print
-test_recur
-present_results
+test-recur-fast
+present-results
 
 "\nTesting loop using 'for'\n" print
 testfor
-present_results
+present-results
 
 "\nTesting loop using 'times'\n" print
 testtimes
-present_results
+present-results
 
 "\nTesting loop using 'times' and poking/peeking a variable\n" print
 testtimes-var
-present_results
+present-results
