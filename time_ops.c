@@ -7,7 +7,7 @@ struct timeval tval;
 static void clockfunc()
 {
     gettimeofday(&tval, NULL);
-    MYFLT now = (tval.tv_sec * 1000000) + tval.tv_usec;
+    MYFLT now = ((MYFLT) tval.tv_sec) + (((MYFLT) tval.tv_usec) / 1000000);
     push(now);
 }
 

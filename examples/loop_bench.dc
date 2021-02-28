@@ -1,7 +1,7 @@
 : present_results
-    "The sum is: " print . cr
-    swap -
-    "The time difference is: " print .. "μs" print cr
+  "The sum is: " print . cr
+  swap -
+  "The time difference is: " print . "seconds" print cr
 ;
 
 : sl-helper
@@ -36,7 +36,7 @@
 : testfor
     clock 0
     20000001 0 1 for
-      i
+      i +
     next
     clock
     swap
@@ -45,7 +45,7 @@
 : testtimes
     clock 0
     20000001 times
-      i
+      i +
     again
     clock
     swap
@@ -66,7 +66,9 @@
 In general, go with the simplest case, and avoid logical and stack
 operations inside of loops, when you can.  Hence, the the first 'manual'
 loop here, using indexing via recursion, is the worst performer, and the
-simple 'times' loop at the end is the fastest.
+simple 'times' loop at the end is the fastest. For extra interest, we
+have added a 'times' loop benchmark where the variable being incremented
+lives in the memory heap instead of right on the stack, as a 4th example
 " print
 
 "\nTesting loop using recursion\n" print

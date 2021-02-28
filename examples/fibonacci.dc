@@ -1,16 +1,31 @@
 : fibo-setup
-  0 1     # ( n 0 1 )
-  rot     # ( 0 1 n )
-  0 1     # ( 0 1 n 0 1 )
+  # this allows us to set up a loop withouth the user worrying about it
+  1 0     # ( n 0 1 )
+  rot     # ( 1 0 n )
+  0 1     # ( 1 0 n 0 1 )
 ;
 
 : fibonacci
-  fibo-setup   # ( 0 1 to from step ) ; 'to' is put in front of 'fibo-setup'
-  for
-    tuck
-    swap dup . swap    # output
-  next
+  dup 0 =
+  if
+    0 . cr drop
+    return
+  else
+    fibo-setup
+    for
+      tuck +
+    next
+    . cr drop
+  endif
 ;
 
-20 fibonacci
-cr
+: fibonacci-benchmark
+  clock .s
+  24 fibonacci .s
+  clock .s
+  swap .s - .s
+  "24 fibonacci finished in: " . "microseconds" print cr
+;
+
+
+fibonacci-benchmark
