@@ -71,7 +71,7 @@ lives in the memory heap instead of right on the stack, as a 4th example
 " print
 
 "\nTesting loop using recursion\n" print
-test-recur-fast
+test-recur
 present-results
 
 "\nTesting loop using 'for'\n" print

@@ -19,21 +19,25 @@ static void timesfunc()
     loop_counter[loop_counter_ptr++] = 0;
 }
 
+static void _conttimes()
+{
+    loop_counter[loop_counter_ptr - 1] += 1;
+    iptr = return_stack[return_stack_ptr - 1];
+}
+
 static void exittimesfunc()
 {
     loop_counter[--loop_counter_ptr] = 0;
     --return_stack_ptr;
+    --times_ptr;
 }
 
 static void againfunc()
 {
     if (loop_counter[loop_counter_ptr - 1] < times_info[times_ptr - 1] - 1) {
-        loop_counter[loop_counter_ptr - 1] += 1;
-        iptr = return_stack[return_stack_ptr - 1];
+        _conttimes();
     } else {
-        loop_counter[--loop_counter_ptr] = 0;
-        --return_stack_ptr;
-        --times_ptr;
+        exittimesfunc();
     }
 }
 
@@ -44,6 +48,12 @@ static void forfunc()
     fl_stack[fl_ptr].step = (MYINT) pop();
     loop_counter[loop_counter_ptr++] = (MYINT) pop();
     fl_stack[fl_ptr++].limit = (MYINT) pop();
+}
+
+static void _contfor()
+{
+    loop_counter[loop_counter_ptr - 1] += fl_stack[fl_ptr - 1].step;
+    iptr = return_stack[return_stack_ptr - 1];
 }
 
 static void exitforfunc()
@@ -59,17 +69,15 @@ static void nextfunc()
         if (loop_counter[loop_counter_ptr - 1] < \
                 (fl_stack[fl_ptr - 1].limit \
                  - fl_stack[fl_ptr - 1].step)) {
-            loop_counter[loop_counter_ptr - 1] += fl_stack[fl_ptr - 1].step;
-            iptr = return_stack[return_stack_ptr - 1];
+            _contfor();
         } else {
             exitforfunc();
         }
     } else {
         if (loop_counter[loop_counter_ptr - 1] > \
-                ((fl_stack[fl_ptr - 1].limit) \
-                  - fl_stack[fl_ptr - 1].step)) {
-            loop_counter[loop_counter_ptr - 1] += fl_stack[fl_ptr - 1].step;
-            iptr = return_stack[return_stack_ptr - 1];
+                (fl_stack[fl_ptr - 1].limit \
+                 - fl_stack[fl_ptr - 1].step)) {
+            _contfor();
         } else {
             exitforfunc();
         }
