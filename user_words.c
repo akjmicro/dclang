@@ -39,7 +39,7 @@ static void callfunc(MYFLT where)
     if (return_stack[return_stack_ptr - 1] != iptr) {
         return_stack[return_stack_ptr++] = iptr;
     }
-    iptr = (MYINT) where;
+    iptr = (MYUINT) where;
     (*(prog[iptr].function.with_param)) (prog[iptr].param);
 }
 
