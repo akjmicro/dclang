@@ -43,7 +43,7 @@ static void tcpacceptfunc()
         printf("tcpaccept -- need <socket> on the stack");
         return;
     }
-    int clilen = sizeof(cli_addr);
+    unsigned int clilen = sizeof(cli_addr);
     int sockfd = (int) pop();
     int newsockfd = accept(sockfd, (struct sockaddr *) &cli_addr, &clilen);
     if (newsockfd < 0) perror("tcpaccept -- ERROR on accept step!");
