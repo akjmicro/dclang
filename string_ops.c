@@ -471,7 +471,7 @@ static void strtokfunc()
     {
         printf("strtok -- needs <str> <delim> <saveptr> string pointers on stack!\n");
         printf("<saveptr> should be a variable slot declared with `var`, without being dereferenced with `@`.\n");
-        printf("e.g. var mysavepoint strok_r \"split.this.string\" \".\" mysavepoint strtok_r\n");
+        printf("e.g. var mysavepoint strtok \"split.this.string\" \".\" mysavepoint strtok_r\n");
         return;
     }
     MYUINT savepoint = (MYUINT) pop();
