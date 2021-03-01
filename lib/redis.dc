@@ -131,6 +131,6 @@ var redis_socket -1 redis_socket !
 "Prog_band:0" redis_get print cr
 # sanity_check
 "Bach" "Best_composer" redis_set print cr
-#sanity_check
+# sanity_check
 "Best_composer" redis_get print cr
 # sanity_check

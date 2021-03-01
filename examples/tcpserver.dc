@@ -1,39 +1,40 @@
-var mybuf 1024 mkbuf mybuf !
+var connbuf 1024 mkbuf connbuf !
 
 : zerobuf
-  mybuf @ 0 1024 memset
+  connbuf @ 0 1024 memset
 ;
 
-var myresp
-"HTTP/1.1 200 OK
-Cache-Control: private, max-age=0
-Content-Type: text/plain; charset=ISO-8859-1
-
-Hello, world! 2020 sucks big time!
-"
-myresp !
-var myresp_len myresp @ strlen myresp_len !
+var received 1024 mkbuf received !
+var response_prefix "OK, message received: " response_prefix !
+var response_prefix_len
+response_prefix @ strlen response_prefix_len !
 
 # create a listening server
-var myserv 5509 tcplisten myserv !
-var mytcpconn
-var myrequest
+var srv_queue 5509 tcplisten srv_queue !
+var accepted_conn
 
-# wait for a request
-"waiting for a request..." print cr
-myserv @ tcpaccept mytcpconn !
+: acceptloop
+  # wait for a request
+  "waiting for a request..." print cr
+  srv_queue @ tcpaccept accepted_conn !
+  zerobuf
+  accepted_conn @ connbuf @ 1023 read
+  drop
+  # echo the incoming on the server side
+  "Here is the incoming message: " print
+  connbuf @ print cr
+  # send a response
+  received @ connbuf @ strcpy
+  # first append incoming to response_prefix
+  zerobuf
+  connbuf @ response_prefix @ response_prefix_len @ mempcpy
+  received @ dup strlen mempcpy
+  accepted_conn @ connbuf @ dup strlen write drop
+  accepted_conn @ close drop
+  acceptloop
+;
 
-zerobuf
-mytcpconn @ mybuf @ 1023 read drop
-
-"Here is the incoming message: " print
-mybuf @ print cr
-
-# send a response
-zerobuf
-mybuf @ myresp @ strcpy
-mytcpconn @ mybuf @ myresp_len @ write drop
+acceptloop
 
 # close down connection
-myserv @ close drop
-mytcpconn @ close drop
+srv_queue @ close drop

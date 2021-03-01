@@ -176,6 +176,7 @@ char string_pad[512];
 int string_here;
 
 static void grabinput() {
+    setinput(stdin);
     char ch;
     // get a starting marker for length
     unsigned long string_start = string_here;
@@ -216,10 +217,13 @@ static void grabinput() {
         MAX_STR = string_dest_uint + string_size + 1;
     }
     push(string_dest_uint);
+    revertinput();
 }
 
 static void inputfunc() {
     if (!def_mode) {
         grabinput();
+    } else {
+        prog[iptr++].function.without_param = grabinput;
     }
 }
