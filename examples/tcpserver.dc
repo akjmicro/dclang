@@ -1,9 +1,4 @@
 var connbuf 1024 mkbuf connbuf !
-
-: zerobuf
-  connbuf @ 0 1024 memset
-;
-
 var received 1024 mkbuf received !
 var response_prefix "OK, message received: " response_prefix !
 var response_prefix_len
@@ -13,24 +8,41 @@ response_prefix @ strlen response_prefix_len !
 var srv_queue 5509 tcplisten srv_queue !
 var accepted_conn
 
+: get_accepted_conn accepted_conn @ ;
+: get_connbuf connbuf @ ;
+: get_received received @ ;
+: get_response_prefix response_prefix @ ;
+: get_response_prefix_len response_prefix_len @ ;
+: zerobuf get_connbuf 0 1024 memset ;
+: msgcpy get_received get_connbuf strcpy ;
+
+: read_incoming
+  zerobuf
+  get_accepted_conn get_connbuf 1023 read drop
+;
+
+: concat_response
+  msgcpy
+  zerobuf
+  get_connbuf get_response_prefix get_response_prefix_len mempcpy
+  get_received dup strlen mempcpy
+;
+
+: write_response
+  get_accepted_conn get_connbuf dup strlen write drop
+  get_accepted_conn close drop
+;
+
 : acceptloop
   # wait for a request
   "waiting for a request..." print cr
   srv_queue @ tcpaccept accepted_conn !
-  zerobuf
-  accepted_conn @ connbuf @ 1023 read
-  drop
+  # read the incoming msg
+  read_incoming
   # echo the incoming on the server side
-  "Here is the incoming message: " print
-  connbuf @ print cr
-  # send a response
-  received @ connbuf @ strcpy
-  # first append incoming to response_prefix
-  zerobuf
-  connbuf @ response_prefix @ response_prefix_len @ mempcpy
-  received @ dup strlen mempcpy
-  accepted_conn @ connbuf @ dup strlen write drop
-  accepted_conn @ close drop
+  "Here is the incoming message: " print get_connbuf print cr
+  concat_response
+  write_response
   acceptloop
 ;
 

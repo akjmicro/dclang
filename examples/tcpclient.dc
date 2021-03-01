@@ -4,26 +4,49 @@ var msglen
 var connbuf 256 mkbuf connbuf !
 var prompt "Please enter your message: " prompt !
 
+: get_serv serv @ ;
+: get_connbuf connbuf @ ;
+: get_msg msg @ ;
+: get_msglen msglen @ ;
+: get_prompt prompt @ ;
+: set_msg msg ! ;
+: set_msglen msglen ! ;
+
+: get_user_msg
+  get_prompt print
+  input
+  set_msg
+  get_msg strlen set_msglen
+  "You entered: " print get_msg print cr
+;
+
+: zerobuf get_connbuf 0 256 memset ;
+
+: msg_to_buf
+  zerobuf
+  get_connbuf get_msg strcpy
+;
+
+: client_connect "localhost" 5509 tcpconnect serv ! ;
+
+: write_to_server
+  get_serv get_connbuf get_msglen write
+  drop
+;
+
+: read_response
+  zerobuf
+  get_serv get_connbuf 255 read
+  get_connbuf print cr
+;
+
 
 : sendloop
-  prompt @ print
-  input
-  msg !
-  msg @ strlen msglen !
-  "You entered: " print msg @ print cr
-  # set up the buffer
-  connbuf @ 0 256 memset
-  connbuf @ msg @ strcpy
-  # make a connection ot the server
-  "localhost" 5509 tcpconnect serv !
-  # write to the server via the buffer
-  serv @ connbuf @ msglen @ write drop
-  # zero the connection buffer in preparation for reading
-  connbuf @ 0 256 memset
-  # read the response
-  serv @ connbuf @ 255 read
-  connbuf @ print cr
-  # repeat
+  get_user_msg
+  msg_to_buf
+  client_connect
+  write_to_server
+  read_response
   sendloop
 ;
 
