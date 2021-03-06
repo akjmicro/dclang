@@ -15,6 +15,11 @@ REDIS_BUFSIZE mkbuf const REDIS_BUFFER
 "{val}" const REDIS_VAL_WD
 "{keylen}" const REDIS_KEYLEN_WD
 "{vallen}" const REDIS_VALLEN_WD
+var msg
+
+: _get_msg msg @ ;
+: _get_msglen msg @ strlen ;
+: _set_msg msg ! ;
 
 # setup a dummy socket first
 var redis_socket -1 redis_socket !
@@ -28,61 +33,35 @@ var redis_socket -1 redis_socket !
   REDIS_VALLEN_WD print cr
 ;
 
-: showstr
-  dup print cr
-;
-
-: 2savepush
-  savepush savepush
-;
-
-: 2savepop
-  savepop savepop
-;
-
-: 2savecopy
-  2dup 2savepush
-;
-
-: _prep_socket
-  # ( msg ) ( ) -> ( msg ) ( )
-  redis_socket @ dup -1 <>
-  if
-    close drop
-  else
-    drop
-  endif
-  REDIS_HOST REDIS_PORT tcpconnect
-  redis_socket !
-;
-
-: _prep_redis_buffer
-  # ( msg ) ( ) -> ( BFmem ) ( )
+: _zero_redis_buffer
   REDIS_BUFFER 0 REDIS_BUFSIZE memset
-  over strcpy free
+;
+
+: _msg_to_buf
+  _set_msg
+  _zero_redis_buffer
+  REDIS_BUFFER _get_msg strcpy
+;
+
+: _redis_connect
+  REDIS_HOST REDIS_PORT tcpconnect redis_socket !
 ;
 
 : _write_redis_buffer
-  # ( BFmem ) ( ) -> ( ) ( )
-  redis_socket @ swap
-  REDIS_BUFSIZE
-  write drop
+  redis_socket @ REDIS_BUFFER _get_msglen write drop
 ;
 
-: _reprep_redis_buffer
-  # ( ) ( ) -> ( sckt BFSZ BFmem ) ( BF )
-  redis_socket @ REDIS_BUFFER REDIS_BUFSIZE
-  2dup 0 swap memset
-  rot savepush
-  swap read drop
-  savepop
+: _read_redis_buffer
+  _zero_redis_buffer
+  redis_socket @ REDIS_BUFFER REDIS_BUFSIZE read drop
+  REDIS_BUFFER
 ;
 
 : _redis_write_read
-  _prep_socket
-  _prep_redis_buffer
+  _msg_to_buf
+  _redis_connect
   _write_redis_buffer
-  _reprep_redis_buffer
+  _read_redis_buffer
 ;
 
 : _replace_keylen
@@ -127,6 +106,7 @@ var redis_socket -1 redis_socket !
 ;
 
 # test it!
+#_redis_connect
 "Yes" "Prog_band:0" redis_set print cr
 "Prog_band:0" redis_get print cr
 # sanity_check

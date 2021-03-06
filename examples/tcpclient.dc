@@ -30,13 +30,12 @@ var prompt "Please enter your message: " prompt !
 : client_connect "localhost" 5509 tcpconnect serv ! ;
 
 : write_to_server
-  get_serv get_connbuf get_msglen write
-  drop
+  get_serv get_connbuf get_msglen write drop
 ;
 
 : read_response
   zerobuf
-  get_serv get_connbuf 255 read
+  get_serv get_connbuf 256 read drop
   get_connbuf print cr
 ;
 
