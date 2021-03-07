@@ -59,14 +59,14 @@ int get_unicode_by_hex(char *c, int usize)
 static void stringfunc()
 {
     char ch;
+    char escape_ch;
     char chbuf[5];
+    int stat;
     MYUINT chr_cnt = 0;
-    char *scratch = (char *) malloc(sizeof(char));
-    // workaround if some garbage appears:
-    int advance = strlen(scratch);
-    chr_cnt += advance;
-    // end workaround;
-    MYUINT bufsize = sizeof(scratch);
+    MYUINT bufsize = 32;
+    char *scratch = (char *) malloc(sizeof(char) * bufsize);
+    // ZERO OUT buffer:
+    memset(scratch, 0, bufsize);
     // get the next character, and start the process for real:
     if ((ch = fgetc(ifp)) == EOF) exit(0);
     while (! strchr("\"", ch))
@@ -74,49 +74,51 @@ static void stringfunc()
         if (strchr("\\", ch))
         {
             /* consume an extra char due to backslash */
-            if ((ch = fgetc(ifp)) == EOF) exit(0);
-            /* backspace */
-            if (strchr("b", ch))
+            if ((escape_ch = fgetc(ifp)) == EOF) exit(0);
+            switch(escape_ch)
             {
-                chbuf[0] = 8;
-                chbuf[1] = 0;
-            }
-            /* tab */
-            if (strchr("t", ch))
-            {
-                chbuf[0] = 9;
-                chbuf[1] = 0;
-            }
-            /* newline (line-feed and carriage return together on unix) */
-            if (strchr("n", ch))
-            {
-                chbuf[0] = 10;
-                chbuf[1] = 0;
-            }
-            /* carriage return */
-            if (strchr("r", ch))
-            {
-                chbuf[0] = 13;
-                chbuf[1] = 0;
-            }
-            /* 2-byte unicode */
-            if (strchr("u", ch))
-            {
-                int stat = get_unicode_by_hex(chbuf, 5);
-                if (stat == 0)
-                {
-                    printf("Illegal 2-byte unicode entry in string.\n");
-                    return;
-                }
-            }
-            /* 4-byte unicode */
-            if (strchr("U", ch))
-            {
-                int stat = get_unicode_by_hex(chbuf, 9);
-                if (stat == 0)
-                {
-                    printf("Illegal 4-byte unicode entry in string.\n");
-                }
+                /* backspace */
+                case 'b' :
+                  chbuf[0] = 8;
+                  chbuf[1] = 0;
+                  break;
+                /* tab */
+                case 't' :
+                    chbuf[0] = 9;
+                    chbuf[1] = 0;
+                    break;
+                /* newline
+                (line-feed and carriage return together on unix)
+                */
+                case 'n' :
+                    chbuf[0] = 10;
+                    chbuf[1] = 0;
+                    break;
+                /* carriage return */
+                case 'r' :
+                    chbuf[0] = 13;
+                    chbuf[1] = 0;
+                    break;
+                /* 2-byte unicode */
+                case 'u' :
+                    stat = get_unicode_by_hex(chbuf, 3);
+                    if (stat == 0)
+                    {
+                        printf("Illegal 2-byte unicode entry in string.\n");
+                        return;
+                    }
+                    break;
+                /* 4-byte unicode */
+                case 'U' :
+                    stat = get_unicode_by_hex(chbuf, 5);
+                    if (stat == 0)
+                    {
+                        printf("Illegal 4-byte unicode entry in string.\n");
+                    }
+                    break;
+                default :
+                    chbuf[0] = escape_ch;
+                    chbuf[1] = 0;
             }
         } else {
             chbuf[0] = ch;
@@ -136,7 +138,7 @@ static void stringfunc()
     // Notice the use of "advance" to go beyond any buffer
     // overflow garbage that might appear when the initial
     // buffer is allocated.
-    MYUINT string_dest_uint = (MYUINT) scratch + advance;
+    MYUINT string_dest_uint = (MYUINT) scratch;
     MYUINT buflen = (MYUINT) strlen(scratch);
     if (string_dest_uint < MIN_STR || MIN_STR == 0)
     {

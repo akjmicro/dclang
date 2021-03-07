@@ -104,13 +104,3 @@ var redis_socket -1 redis_socket !
   _replace_key
   _redis_write_read
 ;
-
-# test it!
-#_redis_connect
-"Yes" "Prog_band:0" redis_set print cr
-"Prog_band:0" redis_get print cr
-# sanity_check
-"Bach" "Best_composer" redis_set print cr
-# sanity_check
-"Best_composer" redis_get print cr
-# sanity_check

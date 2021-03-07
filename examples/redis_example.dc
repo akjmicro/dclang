@@ -1,0 +1,54 @@
+"redis.dc" import
+
+"
+Illustration of redis interface, which for now is limited to the simplest
+setting and getting of top-level keys.
+"
+print cr
+
+# Illustrate simple key setting and getting
+
+# STRING
+"To set the key \"Foo\" to the value \"Bar\", one calls the following:
+
+\"Bar\" \"Foo\" redis_set print cr
+
+Notice that the value precedes the key, consistent with the idea that
+a key to be fetched would immediately precede the operator doing the fetching,
+and thus, the value to be set would preced _that_. So, <val> <key> <operator>
+would be the natural order in a stack-based language like `dclang`.
+"
+print cr
+# END STRING
+
+# CODE
+"Bar" "Foo" redis_set print cr
+# END CODE
+
+# STRING
+"Now, to fetch the value we have set, we simply do:
+
+\"Foo\" redis_get print cr
+"
+print cr
+# END STRING
+
+# CODE
+"Foo" redis_get print cr
+cr
+# END CODE
+
+# STRING
+"Next, we'll do a simlar set/get, but with the grea J.S. Bach as the subject
+of interest. The following is the output of two commands in succession:
+
+\"Bach\" \"Best_composer\" redis_set print cr
+\"Best_composer\" redis_get print cr
+"
+print cr
+# END STRING
+
+# CODE
+"Bach" "Best_composer" redis_set print cr
+"Best_composer" redis_get print cr
+# END CODE
