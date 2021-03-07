@@ -9,60 +9,26 @@
 6379 const REDIS_PORT
 1024 const REDIS_BUFSIZE
 REDIS_BUFSIZE mkbuf const REDIS_BUFFER
+
+# msg variable, socket pointer variable
+var msg
+var redis_socket -1 redis_socket !
+
+# various redis function API string templates
 "*3\r\n$3\r\nSET\r\n${keylen}\r\n{key}\r\n${vallen}\r\n{val}\r\n" const REDIS_SET_TEMPLATE
 "*2\r\n$3\r\nGET\r\n${keylen}\r\n{key}\r\n" const REDIS_GET_TEMPLATE
 "{key}" const REDIS_KEY_WD
 "{val}" const REDIS_VAL_WD
 "{keylen}" const REDIS_KEYLEN_WD
 "{vallen}" const REDIS_VALLEN_WD
-var msg
+"*2\r\n$4\r\nKEYS\r\n${searchlen}\r\n{search}\r\n" const REDIS_KEYSEARCH_TEMPLATE
+"{search}" const REDIS_SEARCH_WD
+"{searchlen}" const REDIS_SEARCHLEN_WD
 
+# setters and getters
 : _get_msg msg @ ;
 : _get_msglen msg @ strlen ;
 : _set_msg msg ! ;
-
-# setup a dummy socket first
-var redis_socket -1 redis_socket !
-
-: sanity_check
-  REDIS_SET_TEMPLATE print cr
-  REDIS_GET_TEMPLATE print cr
-  REDIS_KEY_WD print cr
-  REDIS_VAL_WD print cr
-  REDIS_KEYLEN_WD print cr
-  REDIS_VALLEN_WD print cr
-;
-
-: _zero_redis_buffer
-  REDIS_BUFFER 0 REDIS_BUFSIZE memset
-;
-
-: _msg_to_buf
-  _set_msg
-  _zero_redis_buffer
-  REDIS_BUFFER _get_msg strcpy
-;
-
-: _redis_connect
-  REDIS_HOST REDIS_PORT tcpconnect redis_socket !
-;
-
-: _write_redis_buffer
-  redis_socket @ REDIS_BUFFER _get_msglen write drop
-;
-
-: _read_redis_buffer
-  _zero_redis_buffer
-  redis_socket @ REDIS_BUFFER REDIS_BUFSIZE read drop
-  REDIS_BUFFER
-;
-
-: _redis_write_read
-  _msg_to_buf
-  _redis_connect
-  _write_redis_buffer
-  _read_redis_buffer
-;
 
 : _replace_keylen
   # ( K Tmpl ) -> ( K repl1  )
@@ -88,6 +54,55 @@ var redis_socket -1 redis_socket !
   strreplace
 ;
 
+: _replace_searchlen
+  over strlen REDIS_SEARCHLEN_WD swap tostr
+  strreplace
+;
+
+: _replace_search
+  swap REDIS_SEARCH_WD swap
+  strreplace
+;
+
+######################################
+# buffer and tcp communication words #
+######################################
+
+: _zero_redis_buffer
+  REDIS_BUFFER 0 REDIS_BUFSIZE memset drop
+;
+
+: _msg_to_buf
+  _set_msg
+  _zero_redis_buffer
+  REDIS_BUFFER _get_msg strcpy drop
+;
+
+: _redis_connect
+  REDIS_HOST REDIS_PORT tcpconnect redis_socket !
+;
+
+: _write_redis_buffer
+  redis_socket @ REDIS_BUFFER _get_msglen write drop
+;
+
+: _read_redis_buffer
+  _zero_redis_buffer
+  redis_socket @ REDIS_BUFFER REDIS_BUFSIZE read drop
+  REDIS_BUFFER
+;
+
+: _redis_write_read
+  _msg_to_buf
+  _redis_connect
+  _write_redis_buffer
+  _read_redis_buffer
+;
+
+#########################
+# MAIN PUBLIC API WORDS #
+#########################
+
 : redis_set
   REDIS_SET_TEMPLATE strdup
   _replace_keylen
@@ -98,9 +113,15 @@ var redis_socket -1 redis_socket !
 ;
 
 : redis_get
-  # ( Key ) -> ( strrep2 ) ( strrep2 )
   REDIS_GET_TEMPLATE strdup
   _replace_keylen
   _replace_key
+  _redis_write_read
+;
+
+: redis_keys
+  REDIS_KEYSEARCH_TEMPLATE strdup
+  _replace_searchlen
+  _replace_search
   _redis_write_read
 ;

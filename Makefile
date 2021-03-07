@@ -1,4 +1,4 @@
-CC = gcc
+CC = clang
 CFLAGS = -c -march=native -O3
 LDFLAGS = -lm
 SOURCES = main.c
