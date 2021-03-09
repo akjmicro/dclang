@@ -12,9 +12,9 @@ static void fileopenfunc()
         return;
     }
     // file mode string
-    char *mode = (char *)(MYUINT) pop();
+    char *mode = (char *)(DCLANG_UINT) pop();
     // file path
-    char *path = (char *)(MYUINT) pop();
+    char *path = (char *)(DCLANG_UINT) pop();
     // if mode is read or append, file must exist:
     if ( (access(path, F_OK) == -1)
          && ( !strcmp("r", mode) || !strcmp("r+", mode) ) )
@@ -24,7 +24,7 @@ static void fileopenfunc()
         return;
     }
     FILE *openfptr = fopen(path, mode);
-    push((MYUINT)openfptr);
+    push((DCLANG_UINT)openfptr);
 }
 
 
@@ -36,7 +36,7 @@ static void fileclosefunc()
         printf("'fclose' needs <fpointer> on the stack\n");
         return;
     }
-    FILE *file_to_close = (FILE *)(MYUINT) pop();
+    FILE *file_to_close = (FILE *)(DCLANG_UINT) pop();
     fclose(file_to_close);
 }
 
@@ -49,21 +49,21 @@ static void filereadfunc()
         printf("'fread' needs <number-of-bytes> <fpointer> on the stack\n");
         return;
     }
-    FILE *file_to_read = (FILE *)(MYUINT) pop();
-    MYINT num_bytes = (MYUINT) pop();
+    FILE *file_to_read = (FILE *)(DCLANG_UINT) pop();
+    DCLANG_INT num_bytes = (DCLANG_UINT) pop();
     char *buf = malloc(num_bytes);
-    MYUINT num_bytes_read = fread(buf, num_bytes, 1, file_to_read);
+    DCLANG_UINT num_bytes_read = fread(buf, num_bytes, 1, file_to_read);
     // update print safety:
-    if ((MYUINT)buf < MIN_STR || MIN_STR == 0)
+    if ((DCLANG_UINT)buf < MIN_STR || MIN_STR == 0)
     {
-        MIN_STR = (MYUINT)buf;
+        MIN_STR = (DCLANG_UINT)buf;
     }
-    if ((MYUINT)buf + num_bytes_read + 1 > MAX_STR || MAX_STR == 0)
+    if ((DCLANG_UINT)buf + num_bytes_read + 1 > MAX_STR || MAX_STR == 0)
     {
-        MAX_STR = (MYUINT)buf + num_bytes_read + 1;
+        MAX_STR = (DCLANG_UINT)buf + num_bytes_read + 1;
     }
     // push the address of our new string and length
-    push((MYUINT)buf);
+    push((DCLANG_UINT)buf);
 }
 
 
@@ -75,20 +75,20 @@ static void filereadlinefunc()
         printf("'freadline' needs <fpointer> on the stack\n");
         return;
     }
-    FILE *file_to_read = (FILE *)(MYUINT) pop();
+    FILE *file_to_read = (FILE *)(DCLANG_UINT) pop();
     ssize_t nread;
-    MYUINT num_bytes_read = getline(&linebuf, &linelen, file_to_read);
+    DCLANG_UINT num_bytes_read = getline(&linebuf, &linelen, file_to_read);
     // update print safety:
-    if ((MYUINT) linebuf < MIN_STR || MIN_STR == 0)
+    if ((DCLANG_UINT) linebuf < MIN_STR || MIN_STR == 0)
     {
-        MIN_STR = (MYUINT) linebuf;
+        MIN_STR = (DCLANG_UINT) linebuf;
     }
-    if ((MYUINT) linebuf + num_bytes_read + 1 > MAX_STR || MAX_STR == 0)
+    if ((DCLANG_UINT) linebuf + num_bytes_read + 1 > MAX_STR || MAX_STR == 0)
     {
-        MAX_STR = (MYUINT) linebuf + num_bytes_read + 1;
+        MAX_STR = (DCLANG_UINT) linebuf + num_bytes_read + 1;
     }
     // push the address of our new string and length
-    push((MYUINT) linebuf);
+    push((DCLANG_UINT) linebuf);
 }
 
 
@@ -101,14 +101,14 @@ static void fileseekfunc()
         printf("'Whence' must be 0 (SEEK_SET), 1 (SEEK_CUR), or 2 (SEEK_END).\n");
         return;
     }
-    FILE *file_to_seek = (FILE *)(MYUINT) pop();
-    MYUINT whence = (MYUINT) pop();
+    FILE *file_to_seek = (FILE *)(DCLANG_UINT) pop();
+    DCLANG_UINT whence = (DCLANG_UINT) pop();
     if (!(whence >= 0 && whence <= 2))
     {
         printf("Whence parameter must be between 0 and 2 inclusive!\n");
         return;
     }
-    MYINT offset = (MYINT) pop();
+    DCLANG_INT offset = (DCLANG_INT) pop();
     fseek(file_to_seek, offset, whence);
 }
 
@@ -121,9 +121,9 @@ static void filetellfunc()
         printf("'ftell' needs a <fpointer> on the stack\n");
         return;
     }
-    FILE *file_to_tell = (FILE *)(MYUINT) pop();
-    MYUINT mylen = ftell(file_to_tell);
-    push((MYUINT) mylen);
+    FILE *file_to_tell = (FILE *)(DCLANG_UINT) pop();
+    DCLANG_UINT mylen = ftell(file_to_tell);
+    push((DCLANG_UINT) mylen);
 }
 
 
@@ -134,8 +134,8 @@ static void filewritefunc()
         printf("'fwrite' -- needs <string-address> <fpointer> on the stack\n");
         return;
     }
-    FILE *file_to_write = (FILE *)(MYUINT) pop();
-    char *str = (char *)(MYUINT) pop();
+    FILE *file_to_write = (FILE *)(DCLANG_UINT) pop();
+    char *str = (char *)(DCLANG_UINT) pop();
     fwrite(str, 1, strlen(str), file_to_write);
     fflush(file_to_write);
 }
@@ -148,7 +148,7 @@ static void fileflushfunc()
         printf("'fflush' -- needs <fpointer> on the stack\n");
         return;
     }
-    FILE *file_to_flush = (FILE *)(MYUINT) pop();
+    FILE *file_to_flush = (FILE *)(DCLANG_UINT) pop();
     fflush(file_to_flush);
 }
 
@@ -164,10 +164,10 @@ static void openfunc()
         printf("'open' needs <filestr> <flagint> on the stack\n");
         return;
     }
-    MYUINT flagint = (MYUINT) pop();
-    char *path = (char *)(MYUINT)pop();
+    DCLANG_UINT flagint = (DCLANG_UINT) pop();
+    char *path = (char *)(DCLANG_UINT)pop();
     int fd = open(path, flagint);
-    push((MYUINT) fd);
+    push((DCLANG_UINT) fd);
 }
 
 
@@ -178,11 +178,11 @@ static void mkbuffunc()
         printf("Stack_underflow!\n");
         printf("'mkbuf' needs <size-as-integer> on the stack\n");
     }
-    MYUINT size = (MYUINT) pop();
+    DCLANG_UINT size = (DCLANG_UINT) pop();
     char *buf = (char *) malloc(size);
     memset(buf, 0, size);
     int advance = strlen(buf);
-    MYUINT bufaddr = (MYUINT) buf;
+    DCLANG_UINT bufaddr = (DCLANG_UINT) buf;
     bufaddr += advance;
     // update print safety:
     if (bufaddr < MIN_STR || MIN_STR == 0)
@@ -206,8 +206,8 @@ static void readfunc()
         printf("'read' needs <fpointer> <buffer-pointer> <numbytes> on the stack\n");
         return;
     }
-    MYUINT numbytes = (MYUINT) pop();
-    void *buf = (void *)(MYUINT)pop();
+    DCLANG_UINT numbytes = (DCLANG_UINT) pop();
+    void *buf = (void *)(DCLANG_UINT)pop();
     int fd = (int) pop();
     int res = read(fd, buf, numbytes);
     push((int)res);
@@ -222,8 +222,8 @@ static void writefunc()
         printf("'write' needs <fpointer> <buffer-pointer> <numbytes> on the stack\n");
         return;
     }
-    MYUINT numbytes = (MYUINT) pop();
-    void *buf = (void *)(MYUINT)pop();
+    DCLANG_UINT numbytes = (DCLANG_UINT) pop();
+    void *buf = (void *)(DCLANG_UINT)pop();
     int fd = (int) pop();
     int res = write(fd, buf, numbytes);
     push((int)res);

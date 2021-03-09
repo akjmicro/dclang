@@ -7,14 +7,14 @@ struct timeval tval;
 static void clockfunc()
 {
     gettimeofday(&tval, NULL);
-    MYFLT now = ((MYFLT) tval.tv_sec) + (((MYFLT) tval.tv_usec) / 1000000);
+    DCLANG_FLT now = ((DCLANG_FLT) tval.tv_sec) + (((DCLANG_FLT) tval.tv_usec) / 1000000);
     push(now);
 }
 
 static void epochfunc()
 {
     gettimeofday(&tval, NULL);
-    MYFLT now = (tval.tv_sec);
+    DCLANG_FLT now = (tval.tv_sec);
     push(now);
 }
 
@@ -23,7 +23,7 @@ static void sleepfunc() {
         printf("sleep -- need a time amount in seconds on the stack!\n");
         return;
     }
-    MYFLT sleeptime = pop();
+    DCLANG_FLT sleeptime = pop();
     struct timespec t1, t2;
     t1.tv_sec = floor(sleeptime);
     t1.tv_nsec = round(fmod(sleeptime, 1) * 1000000000);
@@ -40,8 +40,8 @@ static void dt_to_epochfunc()
         return;
     }
     // input string setup
-    MYUINT fmt = (MYUINT) pop();
-    MYUINT to_conv = (MYUINT) pop();
+    DCLANG_UINT fmt = (DCLANG_UINT) pop();
+    DCLANG_UINT to_conv = (DCLANG_UINT) pop();
     if (fmt < MIN_STR || fmt > MAX_STR)
     {
         printf("dt->epoch -- <input_format> string address out-of-range.\n");
@@ -63,7 +63,7 @@ static void dt_to_epochfunc()
     }
     // do the conversion to seconds since epoch
     time_t res_time = mktime(&dt_epoch_tm);
-    push((MYUINT) res_time);
+    push((DCLANG_UINT) res_time);
 }
 
 static void epoch_to_dtfunc()
@@ -74,13 +74,13 @@ static void epoch_to_dtfunc()
         return;
     }
     // input string setup
-    MYUINT fmt = (MYUINT) pop();
+    DCLANG_UINT fmt = (DCLANG_UINT) pop();
     if (fmt < MIN_STR || fmt > MAX_STR)
     {
         printf("epoch->dt -- <output_format> string address out-of-range.\n");
         return;
     }
-    MYUINT in_epoch_uint = (MYUINT) pop();
+    DCLANG_UINT in_epoch_uint = (DCLANG_UINT) pop();
     time_t in_epoch = (time_t) in_epoch_uint;
     char tmbuf[256];
     memset(&tmbuf[0], 0, 256);
@@ -90,7 +90,7 @@ static void epoch_to_dtfunc()
         printf("'strftime', a low-level call of 'epoch->dt', returned an error.\n");
         return;
     }
-    MYUINT bufaddr = (MYUINT) tmbuf;
+    DCLANG_UINT bufaddr = (DCLANG_UINT) tmbuf;
     if (bufaddr > MAX_STR || MAX_STR == 0)
     {
         MAX_STR = bufaddr;

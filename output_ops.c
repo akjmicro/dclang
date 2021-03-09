@@ -24,7 +24,7 @@ static void crfunc()
 
 static void showstackfunc()
 {
-    MYINT x;
+    DCLANG_INT x;
     char *joiner;
     x = data_stack_ptr > 16 ? data_stack_ptr - 16 : 0;
     joiner = x == 0 ? " " : " ... ";
@@ -36,7 +36,7 @@ static void showstackfunc()
     }
     fprintf(ofp, "\n");
     // do the save data stack as well:
-    MYINT y;
+    DCLANG_INT y;
     char *sv_joiner;
     y = save_data_stack_ptr > 16 ? save_data_stack_ptr - 16 : 0;
     sv_joiner = y == 0 ? " " : " ... ";
@@ -56,8 +56,8 @@ static void showrjfunc()
         return;
     }
     // right-justified for pretty printing!
-    int precision = (MYINT) pop();
-    int width = (MYINT) pop();
+    int precision = (DCLANG_INT) pop();
+    int width = (DCLANG_INT) pop();
     fprintf(ofp, "%*.*g ", width, precision, pop());
 }
 
@@ -67,7 +67,7 @@ static void redirectfunc()
         printf("Stack underflow! 'redirect' needs an output file pointer before being called\n");
         return;
     }
-    ofp = (FILE *)(MYUINT) pop();
+    ofp = (FILE *)(DCLANG_UINT) pop();
 }
 
 static void resetoutfunc()

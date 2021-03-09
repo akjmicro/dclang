@@ -1,5 +1,5 @@
 /* stack operations */
-static void push(MYFLT a)
+static void push(DCLANG_FLT a)
 {
     if (data_stack_ptr >= DATA_STACK_SIZE) {
         printf("push -- stack overflow!\n");
@@ -8,12 +8,12 @@ static void push(MYFLT a)
     data_stack[data_stack_ptr++] = a;
 }
 
-static void push_no_check(MYFLT a)
+static void push_no_check(DCLANG_FLT a)
 {
     data_stack[data_stack_ptr++] = a;
 }
 
-static MYFLT pop()
+static DCLANG_FLT pop()
 {
     return data_stack[--data_stack_ptr];
 }
@@ -42,8 +42,8 @@ static void swapfunc()
         printf("swap -- stack underflow!\n");
         return;
     }
-    MYFLT val1 = pop();
-    MYFLT val2 = pop();
+    DCLANG_FLT val1 = pop();
+    DCLANG_FLT val2 = pop();
     push_no_check(val1);
     push_no_check(val2);
 }
@@ -64,9 +64,9 @@ static void rotfunc()
         return;
     }
     /* a b c -- b c a */
-    MYFLT c = pop();
-    MYFLT b = pop();
-    MYFLT a = pop();
+    DCLANG_FLT c = pop();
+    DCLANG_FLT b = pop();
+    DCLANG_FLT a = pop();
     push_no_check(b);
     push_no_check(c);
     push_no_check(a);
@@ -79,9 +79,9 @@ static void rotnegfunc()
         return;
     }
     /* a b c -- c a b */
-    MYFLT c = pop();
-    MYFLT b = pop();
-    MYFLT a = pop();
+    DCLANG_FLT c = pop();
+    DCLANG_FLT b = pop();
+    DCLANG_FLT a = pop();
     push_no_check(c);
     push_no_check(a);
     push_no_check(b);
@@ -93,7 +93,7 @@ static void nipfunc()
         printf("nip -- stack underflow!\n");
         return;
     }
-    MYFLT b = pop();
+    DCLANG_FLT b = pop();
     pop();
     push_no_check(b);
 }
@@ -104,8 +104,8 @@ static void tuckfunc()
         printf("tuck -- stack underflow!\n");
         return;
     }
-    MYFLT val1 = pop();
-    MYFLT val2 = pop();
+    DCLANG_FLT val1 = pop();
+    DCLANG_FLT val2 = pop();
     push_no_check(val1);
     push_no_check(val2);
     push(data_stack[data_stack_ptr - 2]);
@@ -127,7 +127,7 @@ static void dup2func()
         printf("2dup -- stack underflow!\n");
         return;
     }
-    MYFLT val2 = data_stack[data_stack_ptr - 1];
+    DCLANG_FLT val2 = data_stack[data_stack_ptr - 1];
     push(data_stack[data_stack_ptr - 2]);
     push(data_stack[data_stack_ptr - 2]);
 }
@@ -138,10 +138,10 @@ static void swap2func()
         printf("2swap -- stack underflow!\n");
         return;
     }
-    MYFLT val1 = pop();
-    MYFLT val2 = pop();
-    MYFLT val3 = pop();
-    MYFLT val4 = pop();
+    DCLANG_FLT val1 = pop();
+    DCLANG_FLT val2 = pop();
+    DCLANG_FLT val3 = pop();
+    DCLANG_FLT val4 = pop();
     push_no_check(val2);
     push_no_check(val1);
     push_no_check(val4);
@@ -165,12 +165,12 @@ static void rot2func()
         printf("2rot -- stack underflow!\n");
         return;
     }
-    MYFLT val1 = pop();
-    MYFLT val2 = pop();
-    MYFLT val3 = pop();
-    MYFLT val4 = pop();
-    MYFLT val5 = pop();
-    MYFLT val6 = pop();
+    DCLANG_FLT val1 = pop();
+    DCLANG_FLT val2 = pop();
+    DCLANG_FLT val3 = pop();
+    DCLANG_FLT val4 = pop();
+    DCLANG_FLT val5 = pop();
+    DCLANG_FLT val6 = pop();
     push_no_check(val4);
     push_no_check(val3);
     push_no_check(val2);
@@ -186,12 +186,12 @@ static void rotneg2func()
         printf("-2rot -- Stack underflow!\n");
         return;
     }
-    MYFLT val1 = pop();
-    MYFLT val2 = pop();
-    MYFLT val3 = pop();
-    MYFLT val4 = pop();
-    MYFLT val5 = pop();
-    MYFLT val6 = pop();
+    DCLANG_FLT val1 = pop();
+    DCLANG_FLT val2 = pop();
+    DCLANG_FLT val3 = pop();
+    DCLANG_FLT val4 = pop();
+    DCLANG_FLT val5 = pop();
+    DCLANG_FLT val6 = pop();
     push_no_check(val2);
     push_no_check(val1);
     push_no_check(val6);
@@ -207,8 +207,8 @@ static void nip2func()
         printf("2nip -- Stack underflow!\n");
         return;
     }
-    MYFLT val1 = pop();
-    MYFLT val2 = pop();
+    DCLANG_FLT val1 = pop();
+    DCLANG_FLT val2 = pop();
     pop();
     pop();
     push_no_check(val2);
@@ -222,10 +222,10 @@ static void tuck2func()
         printf("2tuck -- stack underflow!\n");
         return;
     }
-    MYFLT val1 = pop();
-    MYFLT val2 = pop();
-    MYFLT val3 = pop();
-    MYFLT val4 = pop();
+    DCLANG_FLT val1 = pop();
+    DCLANG_FLT val2 = pop();
+    DCLANG_FLT val3 = pop();
+    DCLANG_FLT val4 = pop();
     push_no_check(val2);
     push_no_check(val1);
     push_no_check(val4);
@@ -240,7 +240,7 @@ static void pickfunc()
          printf("pick -- stack underflow!\n");
          return;
     }
-    MYUINT pick_idx = (MYUINT) pop();
+    DCLANG_UINT pick_idx = (DCLANG_UINT) pop();
     if (data_stack_ptr < (pick_idx + 1)) {
         printf("pick -- stack not deep enough!\n");
         return;
@@ -263,12 +263,12 @@ static void savepushfunc()
         printf("savepush -- stack overflow!\n");
         save_data_stack_ptr = 0;
     }
-    MYFLT val = pop();
+    DCLANG_FLT val = pop();
     save_data_stack[save_data_stack_ptr++] = val;
 }
 
 static void savepopfunc()
 {
-    MYFLT val = save_data_stack[--save_data_stack_ptr];
+    DCLANG_FLT val = save_data_stack[--save_data_stack_ptr];
     push_no_check(val);
 }

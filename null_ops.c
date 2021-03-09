@@ -1,7 +1,7 @@
 static void nullfunc()
 {
     void *ptr = NULL;
-    push((MYINT)ptr);
+    push((DCLANG_INT)ptr);
 }
 
 static void isnullfunc()
@@ -11,6 +11,6 @@ static void isnullfunc()
         printf("'isnull' needs an element on the stack!\n");
         return;
     }
-    void *ptr = (void *)(MYINT)pop();
+    void *ptr = (void *)(DCLANG_INT)pop();
     push(ptr == NULL);
 }

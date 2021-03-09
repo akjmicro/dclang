@@ -24,7 +24,7 @@ void revertinput() {
 }
 
 char *get_token() {
-    MYINT ch;
+    DCLANG_INT ch;
     bufused = 0;
     // skip leading spaces and comments
     while (1) {

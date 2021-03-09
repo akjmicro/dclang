@@ -17,11 +17,11 @@
 
 typedef struct {
     const char *name;
-    MYUINT word_start;
+    DCLANG_UINT word_start;
 } user_word;
 
 user_word user_words[1024];
-MYUINT num_user_words;
+DCLANG_UINT num_user_words;
 
 /* for debugging */
 static void showdefined()
@@ -32,14 +32,14 @@ static void showdefined()
     }
 }
 
-static void callfunc(MYFLT where)
+static void callfunc(DCLANG_FLT where)
 {
     /* Don't consume more of the return stack if we are going nowhere.
        This will allow better recursion */
     if (return_stack[return_stack_ptr - 1] != iptr) {
         return_stack[return_stack_ptr++] = iptr;
     }
-    iptr = (MYUINT) where;
+    iptr = (DCLANG_UINT) where;
     (*(prog[iptr].function.with_param)) (prog[iptr].param);
 }
 

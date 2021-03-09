@@ -17,13 +17,6 @@ Born on 2018-05-05 */
 #include <fcntl.h>
 #include <search.h>
 
-#define DATA_STACK_SIZE 128
-#define RETURN_STACK_SIZE 128
-#define DELIM " "
-#define MAXWORD 65536
-#define IBUFSIZE 128
-#define NUMVARS 1048576
-
 /*
    These should be changed based on architecture. For instance, on my x86_64
    system, best performance was squeezed by making the integer type and the
@@ -33,61 +26,68 @@ Born on 2018-05-05 */
    I've found it crawls to a halt on the benchmarks if you use 'float'!
 */
 
-#define MYINT32 int
-#define MYUINT32 unsigned int
-#define MYINT long
-#define MYUINT unsigned long
-#define MYFLT double
+// data type macros
+#define DCLANG_INT32 int
+#define DCLANG_UINT32 unsigned int
+#define DCLANG_INT long
+#define DCLANG_UINT unsigned long
+#define DCLANG_FLT double
 // end of data type macros
 
+#define DATA_STACK_SIZE 128
+#define RETURN_STACK_SIZE 128
+#define MAXWORD 1048576
+#define IBUFSIZE 128
+#define NUMVARS 1048576
+
 // data stack
-MYFLT data_stack[DATA_STACK_SIZE * 2];
+DCLANG_FLT data_stack[DATA_STACK_SIZE * 2];
 int data_stack_ptr;
-// variables space
-MYFLT myvars[NUMVARS];
-MYUINT varsidx;
 // save data stack
-MYFLT save_data_stack[DATA_STACK_SIZE];
+DCLANG_FLT save_data_stack[DATA_STACK_SIZE];
 int save_data_stack_ptr;
+// variables space
+DCLANG_FLT vars[NUMVARS];
+DCLANG_UINT varsidx;
 // return stack
-MYINT return_stack[RETURN_STACK_SIZE];
+DCLANG_INT return_stack[RETURN_STACK_SIZE];
 int return_stack_ptr;
 // loop 'stack'
-MYINT loop_counter[3];
+DCLANG_INT loop_counter[3];
 int loop_counter_ptr;
 // min and max string buffer addresses
-MYUINT MIN_STR = 0;
-MYUINT MAX_STR = 0;
+DCLANG_UINT MIN_STR = 0;
+DCLANG_UINT MAX_STR = 0;
 
 // compiled tokens get saved and put into an array of type 'inst_struct'
 typedef union {
-    void (*with_param) (MYFLT);
+    void (*with_param) (DCLANG_FLT);
     void (*without_param) (void);
 } func_union;
 typedef struct {
     func_union function;
-    MYFLT param;
+    DCLANG_FLT param;
 } inst_struct;
 
 /* an array of inst_struct instructions. This is where the user's commands,
  i.e. the 'program' will live: */
 inst_struct prog[MAXWORD];
-MYINT iptr;
-MYUINT max_iptr;
+DCLANG_INT iptr;
+DCLANG_UINT max_iptr;
 
 // flag for if we are defining a new word (function)
-MYINT def_mode;
+DCLANG_INT def_mode;
 
 // input buffer and input file (stdin or file input) stuff
 FILE *ifp;
 char buf[IBUFSIZE];
-MYINT bufused;
-MYINT live_repl = 0;
+DCLANG_INT bufused;
+DCLANG_INT live_repl = 0;
 // output file, usually stdout, but can be redirected with 'redirect'
 FILE *ofp;
 // file stack for imports
 FILE *file_stack[32];
-MYINT fsp;
+DCLANG_INT fsp;
 
 // inline dclang code
 #include "stack_ops.c"

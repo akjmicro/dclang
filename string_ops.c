@@ -47,12 +47,12 @@ static long utf8_encode(char *out, uint64_t utf)
     }
 }
 
-int get_unicode_by_hex(char *c, int usize)
+int get_unicode_by_hex(char *chbuf, int usize)
 {
     char numstr[usize];
-    long int status = (long int)fgets(numstr, usize, ifp);
+    long int status = (long int) fgets(numstr, usize, ifp);
     int ucode = strtol(numstr, NULL, 16);
-    int num_bytes_ret = utf8_encode(c, ucode);
+    int num_bytes_ret = utf8_encode(chbuf, ucode);
     return status;
 }
 
@@ -62,8 +62,8 @@ static void stringfunc()
     char escape_ch;
     char chbuf[5];
     int stat;
-    MYUINT chr_cnt = 0;
-    MYUINT bufsize = 32;
+    DCLANG_UINT chr_cnt = 0;
+    DCLANG_UINT bufsize = 32;
     char *scratch = (char *) malloc(sizeof(char) * bufsize);
     // ZERO OUT buffer:
     memset(scratch, 0, bufsize);
@@ -101,7 +101,7 @@ static void stringfunc()
                     break;
                 /* 2-byte unicode */
                 case 'u' :
-                    stat = get_unicode_by_hex(chbuf, 3);
+                    stat = get_unicode_by_hex(chbuf, 5);
                     if (stat == 0)
                     {
                         printf("Illegal 2-byte unicode entry in string.\n");
@@ -110,7 +110,7 @@ static void stringfunc()
                     break;
                 /* 4-byte unicode */
                 case 'U' :
-                    stat = get_unicode_by_hex(chbuf, 5);
+                    stat = get_unicode_by_hex(chbuf, 9);
                     if (stat == 0)
                     {
                         printf("Illegal 4-byte unicode entry in string.\n");
@@ -138,8 +138,8 @@ static void stringfunc()
     // Notice the use of "advance" to go beyond any buffer
     // overflow garbage that might appear when the initial
     // buffer is allocated.
-    MYUINT string_dest_uint = (MYUINT) scratch;
-    MYUINT buflen = (MYUINT) strlen(scratch);
+    DCLANG_UINT string_dest_uint = (DCLANG_UINT) scratch;
+    DCLANG_UINT buflen = (DCLANG_UINT) strlen(scratch);
     if (string_dest_uint < MIN_STR || MIN_STR == 0)
     {
         MIN_STR = string_dest_uint;
@@ -164,7 +164,7 @@ static void printfunc()
         printf("print -- stack underflow! ");
         return;
     }
-    MYUINT string_uint_addr = (MYUINT) pop();
+    DCLANG_UINT string_uint_addr = (DCLANG_UINT) pop();
     if (string_uint_addr == 0)
     {
         printf("print -- Nothing to print.");
@@ -186,7 +186,7 @@ static void freefunc()
         printf("free -- stack underflow! ");
         return;
     }
-    MYUINT loc_uint = (MYUINT) pop();
+    DCLANG_UINT loc_uint = (DCLANG_UINT) pop();
     free((char *) loc_uint);
 }
 
@@ -222,7 +222,7 @@ static void ordfunc()
         printf("ord -- stack underflow! ");
         return;
     }
-    char *string_loc = (char *)(MYUINT) pop();
+    char *string_loc = (char *)(DCLANG_UINT) pop();
     push((int) *string_loc);
 }
 
@@ -233,7 +233,7 @@ static void tohexfunc()
         printf("tohex -- stack underflow! ");
         return;
     }
-    MYINT val = (MYINT) pop();
+    DCLANG_INT val = (DCLANG_INT) pop();
     fprintf(ofp, "0x%.2lx", val);
     fflush(ofp);
 }
@@ -245,14 +245,14 @@ static void tonumfunc()
         printf("tonum -- needs a <str-pointer> on stack! ");
         return;
     }
-    MYUINT string_uint_addr = (MYUINT) pop();
+    DCLANG_UINT string_uint_addr = (DCLANG_UINT) pop();
     if (string_uint_addr < MIN_STR || string_uint_addr > MAX_STR)
     {
         perror("tonum -- String address out-of-range.");
         return;
     }
     char *mystr = (char *) string_uint_addr;
-    MYFLT num = strtod(mystr, NULL);
+    DCLANG_FLT num = strtod(mystr, NULL);
     push(num);
 }
 
@@ -263,11 +263,11 @@ static void tostrfunc()
         printf("tostr -- needs a number on stack! ");
         return;
     }
-    MYFLT var = pop();
+    DCLANG_FLT var = pop();
     int bufsize = snprintf( NULL, 0, "%g", var);
     char *str = malloc(bufsize + 1);
     snprintf(str, bufsize + 1, "%g", var);
-    MYUINT string_uint_addr = (MYUINT) str;
+    DCLANG_UINT string_uint_addr = (DCLANG_UINT) str;
     if (string_uint_addr < MIN_STR || MIN_STR == 0)
     {
         MIN_STR = string_uint_addr;
@@ -276,7 +276,7 @@ static void tostrfunc()
     {
         MAX_STR = string_uint_addr + bufsize + 1;
     }
-    push((MYUINT) string_uint_addr);
+    push((DCLANG_UINT) string_uint_addr);
 }
 
 static void strlenfunc()
@@ -286,14 +286,14 @@ static void strlenfunc()
         printf("strlen -- stack underflow! ");
         return;
     }
-    MYUINT string_uint_addr = (MYUINT) pop();
+    DCLANG_UINT string_uint_addr = (DCLANG_UINT) pop();
     if (string_uint_addr < MIN_STR || string_uint_addr > MAX_STR)
     {
         perror("strlen -- String address out-of-range.");
         return;
     }
     char *mystr = (char *) string_uint_addr;
-    push((MYUINT) strlen(mystr));
+    push((DCLANG_UINT) strlen(mystr));
 }
 
 static void streqfunc()
@@ -303,8 +303,8 @@ static void streqfunc()
         printf("str= -- stack underflow! ");
         return;
     }
-    MYUINT string_uint_addr2 = (MYUINT) pop();
-    MYUINT string_uint_addr1 = (MYUINT) pop();
+    DCLANG_UINT string_uint_addr2 = (DCLANG_UINT) pop();
+    DCLANG_UINT string_uint_addr1 = (DCLANG_UINT) pop();
     if (string_uint_addr1 < MIN_STR || string_uint_addr1 > MAX_STR)
     {
         perror("strlen -- First given string address out-of-range.");
@@ -317,7 +317,7 @@ static void streqfunc()
     }
     char *str1 = (char *) string_uint_addr1;
     char *str2 = (char *) string_uint_addr2;
-    push((MYINT) strcmp(str1, str2) == 0);
+    push((DCLANG_INT) strcmp(str1, str2) == 0);
 }
 
 static void strltfunc()
@@ -327,8 +327,8 @@ static void strltfunc()
         printf("str< -- stack underflow! ");
         return;
     }
-    MYUINT string_uint_addr2 = (MYUINT) pop();
-    MYUINT string_uint_addr1 = (MYUINT) pop();
+    DCLANG_UINT string_uint_addr2 = (DCLANG_UINT) pop();
+    DCLANG_UINT string_uint_addr1 = (DCLANG_UINT) pop();
     if (string_uint_addr1 < MIN_STR || string_uint_addr1 > MAX_STR)
     {
         perror("str< -- First given string address out-of-range.");
@@ -341,7 +341,7 @@ static void strltfunc()
     }
     char *str1 = (char *) string_uint_addr1;
     char *str2 = (char *) string_uint_addr2;
-    push((MYINT) strcmp(str1, str2) < 0);
+    push((DCLANG_INT) strcmp(str1, str2) < 0);
 }
 
 static void strgtfunc()
@@ -351,8 +351,8 @@ static void strgtfunc()
         printf("str> -- stack underflow! ");
         return;
     }
-    MYUINT string_uint_addr2 = (MYUINT) pop();
-    MYUINT string_uint_addr1 = (MYUINT) pop();
+    DCLANG_UINT string_uint_addr2 = (DCLANG_UINT) pop();
+    DCLANG_UINT string_uint_addr1 = (DCLANG_UINT) pop();
     if (string_uint_addr1 < MIN_STR || string_uint_addr1 > MAX_STR)
     {
         perror("str> -- First given string address out-of-range.");
@@ -365,7 +365,7 @@ static void strgtfunc()
     }
     char *str1 = (char *) string_uint_addr1;
     char *str2 = (char *) string_uint_addr2;
-    push((MYINT) strcmp(str1, str2) > 0);
+    push((DCLANG_INT) strcmp(str1, str2) > 0);
 }
 
 static void strfindfunc()
@@ -375,8 +375,8 @@ static void strfindfunc()
         printf("strfind -- needs <haystack> <needle> string pointers on stack! ");
         return;
     }
-    MYUINT string_uint_addr2 = (MYUINT) pop();
-    MYUINT string_uint_addr1 = (MYUINT) pop();
+    DCLANG_UINT string_uint_addr2 = (DCLANG_UINT) pop();
+    DCLANG_UINT string_uint_addr1 = (DCLANG_UINT) pop();
     if (string_uint_addr1 < MIN_STR || string_uint_addr1 > MAX_STR)
     {
         perror("strfind -- 'haystack' (first) string address out-of-range.");
@@ -389,7 +389,7 @@ static void strfindfunc()
     }
     char *str1 = (char *) string_uint_addr1;
     char *str2 = (char *) string_uint_addr2;
-    push((MYINT) strstr(str1, str2));
+    push((DCLANG_INT) strstr(str1, str2));
 }
 
 // destructive/creative string functions:
@@ -400,8 +400,8 @@ static void strcatfunc()
         printf("strcat -- needs <dest> <source> string pointers on stack! ");
         return;
     }
-    MYUINT string_uint_addr2 = (MYUINT) pop();
-    MYUINT string_uint_addr1 = (MYUINT) pop();
+    DCLANG_UINT string_uint_addr2 = (DCLANG_UINT) pop();
+    DCLANG_UINT string_uint_addr1 = (DCLANG_UINT) pop();
     if (string_uint_addr1 < MIN_STR || string_uint_addr1 > MAX_STR)
     {
         perror("strcat --  <dest> (first) string address out-of-range.");
@@ -414,7 +414,7 @@ static void strcatfunc()
     }
     char *str1 = (char *) string_uint_addr1;
     char *str2 = (char *) string_uint_addr2;
-    push((MYINT) strcat(str1, str2));
+    push((DCLANG_INT) strcat(str1, str2));
 }
 
 static void strcpyfunc()
@@ -424,8 +424,8 @@ static void strcpyfunc()
         printf("strcpy -- needs <dest> <source> string pointers on stack! ");
         return;
     }
-    MYUINT string_uint_addr2 = (MYUINT) pop();
-    MYUINT string_uint_addr1 = (MYUINT) pop();
+    DCLANG_UINT string_uint_addr2 = (DCLANG_UINT) pop();
+    DCLANG_UINT string_uint_addr1 = (DCLANG_UINT) pop();
     if (string_uint_addr1 < MIN_STR || string_uint_addr1 > MAX_STR)
     {
         perror("strcpy --  <dest> (first) string address out-of-range.");
@@ -438,7 +438,7 @@ static void strcpyfunc()
     }
     char *str1 = (char *) string_uint_addr1;
     char *str2 = (char *) string_uint_addr2;
-    push((MYINT) strcpy(str1, str2));
+    push((DCLANG_INT) strcpy(str1, str2));
 }
 
 static void strdupfunc()
@@ -448,14 +448,14 @@ static void strdupfunc()
         printf("strdup -- needs <string> string pointer on stack! ");
         return;
     }
-    MYUINT string_uint_addr = (MYUINT) pop();
+    DCLANG_UINT string_uint_addr = (DCLANG_UINT) pop();
     if (string_uint_addr < MIN_STR || string_uint_addr > MAX_STR)
     {
         perror("strdup -- string address out-of-range.");
         return;
     }
     char *str1 = strdup((char *) string_uint_addr);
-    MYUINT str1addr = (MYUINT) str1;
+    DCLANG_UINT str1addr = (DCLANG_UINT) str1;
     if (str1addr < MIN_STR || MIN_STR == 0)
     {
         MIN_STR = str1addr;
@@ -464,7 +464,7 @@ static void strdupfunc()
     {
         MAX_STR = str1addr;
     }
-    push((MYUINT) str1);
+    push((DCLANG_UINT) str1);
 }
 
 static void strtokfunc()
@@ -473,13 +473,16 @@ static void strtokfunc()
     {
         printf("strtok -- needs <str> <delim> <saveptr> string pointers on stack!\n");
         printf("<saveptr> should be a variable slot declared with `var`, without being dereferenced with `@`.\n");
-        printf("e.g. var mysavepoint strtok \"split.this.string\" \".\" mysavepoint strtok_r\n");
+        printf("e.g.:\n\nvar mysave\n\"split.this.string!\" \".\" mysave strtok print cr\n");
+        printf("split\nnull \".\" mysave strtok print cr\n");
+        printf("this\nnull \".\" mysave strtok print cr\n");
+        printf("string!\n\n");
         return;
     }
-    MYUINT savepoint = (MYUINT) pop();
-    char **savepoint_ptr = (char **) &myvars[savepoint];
-    MYUINT string_uint_addr2 = (MYUINT) pop();
-    MYUINT string_uint_addr1 = (MYUINT) pop();
+    DCLANG_UINT savepoint = (DCLANG_UINT) pop();
+    char **savepoint_ptr = (char **) &vars[savepoint];
+    DCLANG_UINT string_uint_addr2 = (DCLANG_UINT) pop();
+    DCLANG_UINT string_uint_addr1 = (DCLANG_UINT) pop();
     if ((string_uint_addr1 != 0) && (string_uint_addr1 < MIN_STR || string_uint_addr1 > MAX_STR))
     {
         perror("strtok --  <str> (first) string address out-of-range.");
@@ -492,7 +495,7 @@ static void strtokfunc()
     }
     char *str1 = (char *) string_uint_addr1;
     char *str2 = (char *) string_uint_addr2;
-    push((MYINT) strtok_r(str1, str2, savepoint_ptr));
+    push((DCLANG_INT) strtok_r(str1, str2, savepoint_ptr));
 }
 
 static void memcpyfunc()
@@ -502,9 +505,9 @@ static void memcpyfunc()
         printf("memcpy -- needs <dest> <source> <size> on stack! ");
         return;
     }
-    MYUINT size = (MYUINT) pop();
-    MYUINT source = (MYUINT) pop();
-    MYUINT dest = (MYUINT) pop();
+    DCLANG_UINT size = (DCLANG_UINT) pop();
+    DCLANG_UINT source = (DCLANG_UINT) pop();
+    DCLANG_UINT dest = (DCLANG_UINT) pop();
     if ((dest != 0) && (dest < MIN_STR || dest > MAX_STR))
     {
         perror("memcpy --  <dest> string address out-of-range.");
@@ -515,7 +518,7 @@ static void memcpyfunc()
         perror("memcpy -- <source> string address out-of-range.");
         return;
     }
-    push((MYUINT) memcpy((char *)dest, (char *)source, (MYUINT) size));
+    push((DCLANG_UINT) memcpy((char *)dest, (char *)source, (DCLANG_UINT) size));
 }
 
 static void mempcpyfunc()
@@ -525,9 +528,9 @@ static void mempcpyfunc()
         printf("mempcpy -- needs <dest> <source> <size> on stack! ");
         return;
     }
-    MYUINT size = (MYUINT) pop();
-    MYUINT source = (MYUINT) pop();
-    MYUINT dest = (MYUINT) pop();
+    DCLANG_UINT size = (DCLANG_UINT) pop();
+    DCLANG_UINT source = (DCLANG_UINT) pop();
+    DCLANG_UINT dest = (DCLANG_UINT) pop();
     if ((dest != 0) && (dest < MIN_STR || dest > MAX_STR))
     {
         perror("mempcpy --  <dest> string address out-of-range.");
@@ -538,7 +541,7 @@ static void mempcpyfunc()
         perror("mempcpy -- <source> string address out-of-range.");
         return;
     }
-    push((MYUINT) mempcpy((char *)dest, (char *)source, (MYUINT) size));
+    push((DCLANG_UINT) mempcpy((char *)dest, (char *)source, (DCLANG_UINT) size));
 }
 
 static void memsetfunc()
@@ -548,20 +551,20 @@ static void memsetfunc()
         printf("memset -- needs <dest_str> <char-int> <times-int> on stack! ");
         return;
     }
-    MYUINT times = (MYUINT) pop();
-    MYUINT chr = (MYUINT) pop();
-    MYUINT dest = (MYUINT) pop();
+    DCLANG_UINT times = (DCLANG_UINT) pop();
+    DCLANG_UINT chr = (DCLANG_UINT) pop();
+    DCLANG_UINT dest = (DCLANG_UINT) pop();
     if ((dest != 0) && (dest < MIN_STR || dest > MAX_STR))
     {
         perror("memset --  <dest> string address out-of-range.");
         return;
     }
-    push((MYINT) memset((char *)dest, (int)chr, (int)times));
+    push((DCLANG_INT) memset((char *)dest, (int)chr, (int)times));
 }
 
 static void bytes32func()
 {
-    MYINT32 val = (MYINT32) pop();
+    DCLANG_INT32 val = (DCLANG_INT32) pop();
     char low = (char) val & 0xff;
     val >>= 8;
     char lowmid = (char) val & 0xff;

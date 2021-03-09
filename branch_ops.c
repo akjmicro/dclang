@@ -1,21 +1,21 @@
 // struct for 'for' loops:
 typedef struct {
-    MYINT limit;
-    MYINT step;
+    DCLANG_INT limit;
+    DCLANG_INT step;
 } forloop_info;
 
 forloop_info fl_stack[3];
-MYINT fl_ptr;
+DCLANG_INT fl_ptr;
 
 // array for 'times' loop max amounts:
-MYINT times_info[3];
-MYINT times_ptr;
+DCLANG_INT times_info[3];
+DCLANG_INT times_ptr;
 
 // looping
 static void timesfunc()
 {
     return_stack[return_stack_ptr++] = iptr;
-    times_info[times_ptr++] = (MYINT) pop();
+    times_info[times_ptr++] = (DCLANG_INT) pop();
     loop_counter[loop_counter_ptr++] = 0;
 }
 
@@ -45,9 +45,9 @@ static void againfunc()
 static void forfunc()
 {
     return_stack[return_stack_ptr++] = iptr;
-    fl_stack[fl_ptr].step = (MYINT) pop();
-    loop_counter[loop_counter_ptr++] = (MYINT) pop();
-    fl_stack[fl_ptr++].limit = (MYINT) pop();
+    fl_stack[fl_ptr].step = (DCLANG_INT) pop();
+    loop_counter[loop_counter_ptr++] = (DCLANG_INT) pop();
+    fl_stack[fl_ptr++].limit = (DCLANG_INT) pop();
 }
 
 static void _contfor()
@@ -103,8 +103,8 @@ static void kfunc()
 // jump if zero (false)
 static void jumpzfunc()
 {
-    MYINT where = (MYINT) pop();
-    MYINT truth = (MYINT) pop();
+    DCLANG_INT where = (DCLANG_INT) pop();
+    DCLANG_INT truth = (DCLANG_INT) pop();
     if (!truth) {
         iptr = where;
     }
@@ -113,7 +113,7 @@ static void jumpzfunc()
 // unconditional jump
 static void jumpufunc()
 {
-    MYINT where = (MYINT) pop();
+    DCLANG_INT where = (DCLANG_INT) pop();
     iptr = where;
 }
 
@@ -130,7 +130,7 @@ static void iffunc()
 static void elsefunc()
 {
     // get the last 'if' value
-    MYINT if_val = return_stack[--return_stack_ptr];
+    DCLANG_INT if_val = return_stack[--return_stack_ptr];
     // replace the return stack location value with 'here'
     // so, we are re-marking our location
     return_stack[return_stack_ptr++] = iptr;
@@ -145,6 +145,6 @@ static void elsefunc()
 
 static void endiffunc()
 {
-    MYINT last_val = return_stack[--return_stack_ptr];
+    DCLANG_INT last_val = return_stack[--return_stack_ptr];
     prog[last_val].param = iptr - 1;
 }

@@ -1,6 +1,6 @@
 char **hashwords;
-MYUINT hashwords_size = 32;
-MYUINT hashwords_cnt = 0;
+DCLANG_UINT hashwords_size = 32;
+DCLANG_UINT hashwords_cnt = 0;
 
 static void pokefunc()
 {
@@ -9,14 +9,14 @@ static void pokefunc()
         printf("! -- stack underflow! ");
         return;
     }
-    MYUINT idx = (MYUINT) pop();
+    DCLANG_UINT idx = (DCLANG_UINT) pop();
     if (idx < 0 || idx > NUMVARS)
     {
         printf("! -- variable slot number out-of-range!\n");
         return;
     }
-    MYFLT val = pop();
-    myvars[idx] = val;
+    DCLANG_FLT val = pop();
+    vars[idx] = val;
 }
 
 static void peekfunc()
@@ -26,13 +26,13 @@ static void peekfunc()
         printf("@ -- stack underflow! ");
         return;
     }
-    MYINT idx = (MYINT) pop();
+    DCLANG_INT idx = (DCLANG_INT) pop();
     if (idx < 0 || idx > NUMVARS)
     {
         printf("@ -- variable slot number out-of-range!\n");
         return;
     }
-    push(myvars[idx]);
+    push(vars[idx]);
 }
 
 /* implement constants */
@@ -57,7 +57,7 @@ static void variablefunc()
     if (iptr < max_iptr)
     {
         // mark current position
-        MYUINT ret_iptr = iptr;
+        DCLANG_UINT ret_iptr = iptr;
         // jump to end (when this is called in the future)
         iptr = return_stack[--return_stack_ptr];
         return_stack[return_stack_ptr++] = ret_iptr;
@@ -84,7 +84,7 @@ static void allotfunc()
         printf("allot -- stack underflow! ");
         return;
     }
-    varsidx += (MYUINT) pop();
+    varsidx += (DCLANG_UINT) pop();
 }
 
 static void createfunc()
@@ -100,13 +100,13 @@ static void commafunc()
         printf(", -- stack underflow! ");
         return;
     }
-    MYFLT val = pop();
-    myvars[varsidx++] = val;
+    DCLANG_FLT val = pop();
+    vars[varsidx++] = val;
 }
 
 static void herefunc()
 {
-    push((MYUINT) varsidx);
+    push((DCLANG_UINT) varsidx);
 }
 
 /* global hash space, a la 'redis', but in local memory */
@@ -130,15 +130,15 @@ static void hashsetfunc()
         return;
     }
     /* grab the key */
-    char *key = (char *)(MYUINT)pop();
-    MYUINT key_addr = (MYUINT) key;
+    char *key = (char *)(DCLANG_UINT)pop();
+    DCLANG_UINT key_addr = (DCLANG_UINT) key;
     if (key_addr < MIN_STR || key_addr > MAX_STR)
     {
         perror("h! -- String address for hash key out-of-range.");
         return;
     }
     /* grab the value */
-    char *data = (char *)(MYUINT) pop();
+    char *data = (char *)(DCLANG_UINT) pop();
     ENTRY item = {key, data};
     /* see if we have an entry for the given key first */
     ENTRY *entry = hsearch(item, FIND);
@@ -160,8 +160,8 @@ static void hashgetfunc()
         return;
     }
     /* grab the key */
-    char *key = (char *)(MYUINT)pop();
-    MYUINT key_addr = (MYUINT) key;
+    char *key = (char *)(DCLANG_UINT)pop();
+    DCLANG_UINT key_addr = (DCLANG_UINT) key;
     if (key_addr < MIN_STR || key_addr > MAX_STR)
     {
         perror("h@ -- String address for hash key out-of-range.");
@@ -176,7 +176,7 @@ static void hashgetfunc()
     {
         push(0);
     } else {
-        push((MYUINT)(char *)entry->data);
+        push((DCLANG_UINT)(char *)entry->data);
     }
 }
 
@@ -188,8 +188,8 @@ static void hashkeysfunc()
         return;
     }
     /* grab the key index */
-    MYUINT keyidx = (MYUINT)pop();
-    push((MYUINT)hashwords[keyidx]);
+    DCLANG_UINT keyidx = (DCLANG_UINT)pop();
+    push((DCLANG_UINT)hashwords[keyidx]);
 }
 
 // helper functions for sorting
@@ -203,8 +203,8 @@ int compare_doubles (const void *a, const void *b)
 
 int compare_strings (const void *a, const void *b)
 {
-    const char *sa = (const char *) (MYUINT) * (MYFLT *) a;
-    const char *sb = (const char *) (MYUINT) * (MYFLT *) b;
+    const char *sa = (const char *) (DCLANG_UINT) * (DCLANG_FLT *) a;
+    const char *sb = (const char *) (DCLANG_UINT) * (DCLANG_FLT *) b;
     return strcmp(sa, sb);
 }
 
@@ -217,9 +217,9 @@ static void sortnumsfunc()
         printf("sortnums -- need <arrstart_index> <size> on the stack.\n");
         return;
     }
-    int size = (MYUINT) pop();
-    int arrstart = (MYUINT) pop();
-    qsort (myvars+arrstart, size, sizeof(MYFLT), compare_doubles);
+    int size = (DCLANG_UINT) pop();
+    int arrstart = (DCLANG_UINT) pop();
+    qsort (vars+arrstart, size, sizeof(DCLANG_FLT), compare_doubles);
 }
 
 static void sortstrsfunc()
@@ -228,9 +228,9 @@ static void sortstrsfunc()
     {
         printf("sortstrs -- need <arrstart_index> <size> on the stack.\n");
     }
-    int size = (MYUINT) pop();
-    int arrstart = (MYUINT) pop();
-    qsort (myvars+arrstart, size, sizeof(MYFLT), compare_strings);
+    int size = (DCLANG_UINT) pop();
+    int arrstart = (DCLANG_UINT) pop();
+    qsort (vars+arrstart, size, sizeof(DCLANG_FLT), compare_strings);
 }
 
 // environment variables:
@@ -242,15 +242,15 @@ static void envgetfunc()
         printf("envget -- need <env_key> string on the stack.\n");
     }
     /* grab the key */
-    char *env_key = (char *)(MYUINT)pop();
-    MYUINT env_key_addr = (MYUINT) env_key;
+    char *env_key = (char *)(DCLANG_UINT)pop();
+    DCLANG_UINT env_key_addr = (DCLANG_UINT) env_key;
     if (env_key_addr < MIN_STR || env_key_addr > MAX_STR)
     {
         perror("envget -- String address for hash key out-of-range.");
         return;
     }
     char *val = getenv(env_key);
-    MYUINT val_addr = (MYUINT) val;
+    DCLANG_UINT val_addr = (DCLANG_UINT) val;
     if (val_addr > MAX_STR || MAX_STR == 0)
     {
         MAX_STR = val_addr;
@@ -269,16 +269,16 @@ static void envsetfunc()
         printf("envset -- need <env_val> <env_key> strings on the stack.\n");
     }
     // grab the key from the stack
-    char *env_key = (char *)(MYUINT)pop();
-    MYUINT env_key_addr = (MYUINT) env_key;
+    char *env_key = (char *)(DCLANG_UINT)pop();
+    DCLANG_UINT env_key_addr = (DCLANG_UINT) env_key;
     if (env_key_addr < MIN_STR || env_key_addr > MAX_STR)
     {
         perror("envset -- String address for environment key out-of-range.");
         return;
     }
     // grab the value from the stack
-    char *env_val = (char *)(MYUINT)pop();
-    MYUINT env_val_addr = (MYUINT) env_val;
+    char *env_val = (char *)(DCLANG_UINT)pop();
+    DCLANG_UINT env_val_addr = (DCLANG_UINT) env_val;
     if (env_val_addr < MIN_STR || env_val_addr > MAX_STR)
     {
         perror("envset -- String address for environment value out-of-range.");

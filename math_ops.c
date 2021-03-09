@@ -16,7 +16,7 @@ static void subfunc()
         printf("'-' needs two numbers on the stack!\n");
         return;
     }
-    MYFLT subtrahend = pop();
+    DCLANG_FLT subtrahend = pop();
     push(pop() - subtrahend);
 }
 
@@ -37,7 +37,7 @@ static void divfunc()
         printf("'/' needs two numbers on the stack!\n");
         return;
     }
-    MYFLT divisor = pop();
+    DCLANG_FLT divisor = pop();
     push(pop() / divisor);
 }
 
@@ -48,7 +48,7 @@ static void modfunc()
         printf("'%%' needs two numbers on the stack!\n");
         return;
     }
-    MYFLT modulus = pop();
+    DCLANG_FLT modulus = pop();
     push(fmod(pop(), modulus));
 }
 
@@ -59,9 +59,9 @@ static void lshiftfunc()
         printf("'<<' needs two numbers on the stack!\n");
         return;
     }
-    MYUINT shift_amt = (MYUINT) pop();
-    MYUINT base = (MYUINT) pop();
-    push((MYUINT) base << shift_amt);
+    DCLANG_UINT shift_amt = (DCLANG_UINT) pop();
+    DCLANG_UINT base = (DCLANG_UINT) pop();
+    push((DCLANG_UINT) base << shift_amt);
 }
 
 static void rshiftfunc()
@@ -71,9 +71,9 @@ static void rshiftfunc()
         printf("'>>' needs two numbers on the stack!\n");
         return;
     }
-    MYUINT shift_amt = (MYUINT) pop();
-    MYUINT base = (MYUINT) pop();
-    push((MYUINT) base >> shift_amt);
+    DCLANG_UINT shift_amt = (DCLANG_UINT) pop();
+    DCLANG_UINT base = (DCLANG_UINT) pop();
+    push((DCLANG_UINT) base >> shift_amt);
 }
 
 static void absfunc()
@@ -93,9 +93,9 @@ static void minfunc()
         printf("'min' needs two numbers on the stack!\n");
         return;
     }
-    MYFLT a = pop();
-    MYFLT b = pop();
-    MYFLT c = (a < b) ? a : b;
+    DCLANG_FLT a = pop();
+    DCLANG_FLT b = pop();
+    DCLANG_FLT c = (a < b) ? a : b;
     push(c);
 }
 
@@ -106,9 +106,9 @@ static void maxfunc()
         printf("'max' needs two numbers on the stack!\n");
         return;
     }
-    MYFLT a = pop();
-    MYFLT b = pop();
-    MYFLT c = (a > b) ? a : b;
+    DCLANG_FLT a = pop();
+    DCLANG_FLT b = pop();
+    DCLANG_FLT c = (a > b) ? a : b;
     push(c);
 }
 
@@ -119,7 +119,7 @@ static void roundfunc()
         printf("'round' needs a number on the stack!\n");
         return;
     }
-    push((MYINT) round(pop()));
+    push((DCLANG_INT) round(pop()));
 }
 
 static void floorfunc()
@@ -129,7 +129,7 @@ static void floorfunc()
         printf("'floor' needs a number on the stack!\n");
         return;
     }
-    push((MYINT) floor(pop()));
+    push((DCLANG_INT) floor(pop()));
 }
 
 static void ceilfunc()
@@ -139,7 +139,7 @@ static void ceilfunc()
         printf("'ceil' needs a number on the stack!\n");
         return;
     }
-    push((MYINT) ceil(pop()));
+    push((DCLANG_INT) ceil(pop()));
 }
 
 /* scientific math words */
@@ -151,7 +151,7 @@ static void powerfunc()
         printf("'pow' needs two numbers on the stack!\n");
         return;
     }
-    MYFLT raise = pop();
+    DCLANG_FLT raise = pop();
     push(pow(pop(), raise));
 }
 
