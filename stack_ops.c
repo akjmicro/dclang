@@ -248,6 +248,12 @@ static void pickfunc()
     push(data_stack[data_stack_ptr - (pick_idx + 1)]);
 }
 
+static void depthfunc()
+{
+    DCLANG_UINT size = data_stack_ptr;
+    push((DCLANG_FLT)size);
+}
+
 static void clearfunc()
 {
     // clears the stack!

@@ -72,7 +72,6 @@ void add_all_primitives()
     // randomness
     add_primitive("rand", randfunc);
     // stack manipulation
-    add_primitive("clear", clearfunc);
     add_primitive("drop", dropfunc);
     add_primitive("dup", dupfunc);
     add_primitive("over", overfunc);
@@ -90,6 +89,8 @@ void add_all_primitives()
     add_primitive("-2rot", rotneg2func);
     add_primitive("2nip", nip2func);
     add_primitive("2tuck", tuck2func);
+    add_primitive("clear", clearfunc);
+    add_primitive("depth", depthfunc);
     // extra stack
     add_primitive("savepush", savepushfunc);
     add_primitive("savepop", savepopfunc);

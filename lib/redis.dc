@@ -104,6 +104,11 @@ var redis_socket -1 redis_socket !
 #########################
 
 : redis_set
+  depth 2 <
+  if
+    "redis_set needs <val_str> <key_str> on the stack!" print cr
+    return
+  endif
   REDIS_SET_TEMPLATE strdup
   _replace_keylen
   _replace_key
@@ -113,6 +118,11 @@ var redis_socket -1 redis_socket !
 ;
 
 : redis_get
+  depth 1 <
+  if
+    "redis_get needs <key_str> on the stack!" print cr
+    return
+  endif
   REDIS_GET_TEMPLATE strdup
   _replace_keylen
   _replace_key
@@ -120,6 +130,13 @@ var redis_socket -1 redis_socket !
 ;
 
 : redis_keys
+  depth 1 <
+  if
+    "redis_keys needs <search_str> on the stack!" print cr
+    "You can try using something like:" print cr cr
+    "\"*\" redis_keys print cr" print cr
+    return
+  endif
   REDIS_KEYSEARCH_TEMPLATE strdup
   _replace_searchlen
   _replace_search
