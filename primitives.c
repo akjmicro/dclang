@@ -140,6 +140,7 @@ void add_all_primitives()
     add_primitive("tonum", tonumfunc);
     add_primitive("tostr", tostrfunc);
     add_primitive("bytes32", bytes32func);
+    add_primitive("mkbuf", mkbuffunc);
     add_primitive("free", freefunc);
     add_primitive("strlen", strlenfunc);
     add_primitive("str=", streqfunc);
@@ -167,7 +168,6 @@ void add_all_primitives()
     add_primitive("flush", flushoutfunc);
     // low-level (OS) file ops:
     add_primitive("open", openfunc);
-    add_primitive("mkbuf", mkbuffunc);
     add_primitive("read", readfunc);
     add_primitive("write", writefunc);
     add_primitive("close", closefunc);

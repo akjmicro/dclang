@@ -2,7 +2,6 @@
 char *linebuf = NULL;
 size_t linelen = 0;
 
-
 static void fileopenfunc()
 {
     if (data_stack_ptr < 2)
@@ -27,7 +26,6 @@ static void fileopenfunc()
     push((DCLANG_UINT)openfptr);
 }
 
-
 static void fileclosefunc()
 {
     if (data_stack_ptr < 1)
@@ -39,7 +37,6 @@ static void fileclosefunc()
     FILE *file_to_close = (FILE *)(DCLANG_UINT) pop();
     fclose(file_to_close);
 }
-
 
 static void filereadfunc()
 {
@@ -66,7 +63,6 @@ static void filereadfunc()
     push((DCLANG_UINT)buf);
 }
 
-
 static void filereadlinefunc()
 {
     if (data_stack_ptr < 1)
@@ -91,7 +87,6 @@ static void filereadlinefunc()
     push((DCLANG_UINT) linebuf);
 }
 
-
 static void fileseekfunc()
 {
     if (data_stack_ptr < 3)
@@ -112,7 +107,6 @@ static void fileseekfunc()
     fseek(file_to_seek, offset, whence);
 }
 
-
 static void filetellfunc()
 {
     if (data_stack_ptr < 1)
@@ -125,7 +119,6 @@ static void filetellfunc()
     DCLANG_UINT mylen = ftell(file_to_tell);
     push((DCLANG_UINT) mylen);
 }
-
 
 static void filewritefunc()
 {
@@ -140,7 +133,6 @@ static void filewritefunc()
     fflush(file_to_write);
 }
 
-
 static void fileflushfunc()
 {
     if (data_stack_ptr < 1)
@@ -152,9 +144,7 @@ static void fileflushfunc()
     fflush(file_to_flush);
 }
 
-
 // lower-level OS calls:
-
 
 static void openfunc()
 {
@@ -169,34 +159,6 @@ static void openfunc()
     int fd = open(path, flagint);
     push((DCLANG_UINT) fd);
 }
-
-
-static void mkbuffunc()
-{
-    if (data_stack_ptr < 1)
-    {
-        printf("Stack_underflow!\n");
-        printf("'mkbuf' needs <size-as-integer> on the stack\n");
-    }
-    DCLANG_UINT size = (DCLANG_UINT) pop();
-    char *buf = (char *) malloc(size);
-    memset(buf, 0, size);
-    int advance = strlen(buf);
-    DCLANG_UINT bufaddr = (DCLANG_UINT) buf;
-    bufaddr += advance;
-    // update print safety:
-    if (bufaddr < MIN_STR || MIN_STR == 0)
-    {
-        MIN_STR = bufaddr;
-    }
-    if (bufaddr + size + 1 > MAX_STR || MAX_STR == 0)
-    {
-        MAX_STR = bufaddr + size + 1;
-    }
-    // done updating
-    push(bufaddr);
-}
-
 
 static void readfunc()
 {
@@ -213,7 +175,6 @@ static void readfunc()
     push((int)res);
 }
 
-
 static void writefunc()
 {
     if (data_stack_ptr < 3)
@@ -228,7 +189,6 @@ static void writefunc()
     int res = write(fd, buf, numbytes);
     push((int)res);
 }
-
 
 static void closefunc()
 {

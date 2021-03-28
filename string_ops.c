@@ -179,6 +179,32 @@ static void printfunc()
     fflush(ofp);
 }
 
+static void mkbuffunc()
+{
+    if (data_stack_ptr < 1)
+    {
+        printf("Stack_underflow!\n");
+        printf("'mkbuf' needs <size-as-integer> on the stack\n");
+    }
+    DCLANG_UINT size = (DCLANG_UINT) pop();
+    char *buf = (char *) malloc(size);
+    memset(buf, 0, size);
+    int advance = strlen(buf);
+    DCLANG_UINT bufaddr = (DCLANG_UINT) buf;
+    bufaddr += advance;
+    // update print safety:
+    if (bufaddr < MIN_STR || MIN_STR == 0)
+    {
+        MIN_STR = bufaddr;
+    }
+    if (bufaddr + size + 1 > MAX_STR || MAX_STR == 0)
+    {
+        MAX_STR = bufaddr + size + 1;
+    }
+    // done updating
+    push(bufaddr);
+}
+
 static void freefunc()
 {
     if (data_stack_ptr < 1)
