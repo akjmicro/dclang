@@ -16,6 +16,7 @@ Born on 2018-05-05 */
 #include <time.h>
 #include <fcntl.h>
 #include <search.h>
+#include <signal.h>
 
 /*
    These should be changed based on architecture. For instance, on my x86_64
@@ -103,6 +104,7 @@ DCLANG_INT fsp;
 #include "token.c"
 #include "user_words.c"
 #include "variable_ops.c"
+#include "signal_ops.c"
 #include "primitives.c"
 #include "input_ops.c"
 

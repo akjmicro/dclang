@@ -1,0 +1,55 @@
+# An implementation of Heap's algorithm
+
+create counters 0 , 0 , 0 , 0 , 0 ,
+create pmvalues 1 , 2 , 3 , 4 , 5 ,
+var i
+var n
+
+: idx @ + ;
+: add1 dup @ 1 + swap ! ;
+: get_c_by_i c i idx @ ;
+: get_i i @ ;
+: get_n n @ ;
+
+: pmswap
+  2dup @ savepush
+  @ swap !
+  savepop swap !
+;
+
+: is_even? 2 % 0 = ;
+
+: _permute_helper
+  get_i get_n <
+  if
+    get_c_by_i get_i <
+    if
+      get_i is_even?
+      if
+        pmvalues
+        pmvalues i idx
+        pmswap
+      else
+        pmvalues c i idx idx
+        pmvalues i idx
+        pmswap
+      endif
+      show_vals
+      c i idx add_1
+      1 i !
+    else
+      0 c i idx !
+      i add_1
+    end if
+  if
+    _permute_helper
+  endif
+;
+
+: permute
+  # ( n arr )
+  dup savepush # ( n arr ) ( arr )
+  show_vals
+  1 i !
+  _permute_helper
+;

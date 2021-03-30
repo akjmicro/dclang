@@ -1,16 +1,30 @@
-# The flag '2050' is equivalent to 2048 (O_NONBLOCK) + 2 (O_RDNLY)
-# Thus, the file is being opened in non-blocking, readonly mode.
 var mididev
-"/dev/snd/midiC1D0" 2050 open mididev !
-var mybuf
-1 mkbuf mybuf !
-
+var inbuf
+var direction
 var midi_ctl_slots 128 allot
 
-: _get_midi_byte mididev @ mybuf @ 1 read
+: setup_port
+  "DCLANG_MIDI_PORT_DIRECTION" envget
+  "write" str=
+  if
+    "DCLANG_MIDI_PORT" envget "wb" fopen mididev !
+  else
+    # The flag '2050' is equivalent to 2048 (O_NONBLOCK) + 2 (O_RDNLY)
+    # Thus, the file is being opened in non-blocking, readonly mode.
+    "DCLANG_MIDI_PORT" envget 2050 open mididev !
+    1 mkbuf inbuf !
+  endif
+;
+
+setup_port
+
+: get_mididev mididev @ ;
+: get_inbuf inbuf @ ;
+
+: _get_midi_byte get_mididev get_inbuf 1 read
   0 >
   if
-    mybuf @ ord 0xff and
+    inbuf @ ord 0xff and
   else
     0xff
   endif
@@ -30,3 +44,22 @@ var midi_ctl_slots 128 allot
 # This is the main API for grabbing a controller variable
 # ( ctrlnum -- sig )
 : midictl midi_ctl_slots + @ ;
+
+
+# output words
+: note_on
+  get_mididev redirect
+  savepush savepush
+  emit savepop emit savepop emit
+  flush
+  resetout
+;
+
+: panic
+  get_mididev redirect
+  128 0 1 for
+    0x80 emit i emit 0 emit flush
+    0.01 sleep
+  next
+  resetout
+;

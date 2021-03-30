@@ -181,10 +181,12 @@ void add_all_primitives()
     add_primitive("epoch", epochfunc);
     add_primitive("dt->epoch", dt_to_epochfunc);
     add_primitive("epoch->dt", epoch_to_dtfunc);
+    // block a SIGINT
+    add_primitive("block_sigint", blocksigintfunc);
+    add_primitive("unblock_sigint", unblocksigintfunc);
     // show defined words!
     add_primitive("words", showdefined);
 };
-
 
 void show_primitivesfunc()
 {
