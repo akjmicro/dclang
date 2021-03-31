@@ -3,66 +3,106 @@
 
 create counters 0 , 0 , 0 , 0 , 0 ,
 create pmvalues 1 , 2 , 3 , 4 , 5 ,
-var i
-var n
+var idx
+5 const PSIZE
 
-: idx @ + ;
+: $idx idx @ ;
+: idx->1 1 idx ! ;
+
+: idx++
+    idx
+      dup
+      @
+        1
+      +
+      swap
+  !
+;
+
+: pmvalues[idx] pmvalues idx @ + ;
+: $pmvalues[idx] pmvalues[idx] @ ;
+: counters[idx] counters idx @ + ;
+: $counters[idx] counters[idx] @ ;
+
+: counters[idx]++
+      counters idx @
+    +
+      dup @
+        1
+      +
+      swap
+  !
+;
+
+: counters[idx]->0
+    0
+        counters idx @
+      +
+  !
+;
+
+: pmvalues[counters[idx]]
+  pmvalues $counters[idx] +
+;
+
 : add1 dup @ 1 + swap ! ;
-: get_c_by_i c i idx @ ;
-: get_i i @ ;
-: get_n n @ ;
 
 : show_vals
-
+    PSIZE
+  times
+        pmvalues i
+      +
+      @
+    .
+  again
+  cr
 ;
 
 : pmswap
-					2dup @		# ( a b a b@ ) ( )
-				savepush 		# ( a b a ) ( b@ )
-				@						# ( a b a@ ) ( b@ )
-				swap				# ( a a@ b ) ( b@ )
-		!								# ( a ) ( b@ )
-			savepop				# ( a b@ )
-			swap					# ( b@ a )
-	!									# ( )
+          2dup @    # ( a b a b@ ) ( )
+        savepush    # ( a b a ) ( b@ )
+        @           # ( a b a@ ) ( b@ )
+        swap        # ( a a@ b ) ( b@ )
+    !               # ( a ) ( b@ )
+      savepop       # ( a b@ )
+      swap          # ( b@ a )
+  !                 # ( )
 ;
 
 : is_even? 2 % 0 = ;
 
 : _permute_helper
-			get_i get_n
-		<
-	if
-				get_c_by_i get_i
-			<
-		if
-				get_i
-				is_even?
-			if
-					pmvalues
-						pmvalues i idx
-				pmswap
-			else
-						pmvalues c i idx idx
-						pmvalues i idx
-				pmswap
-			endif
-			show_vals
-			c	i idx add_1
-			1 i !
-		else
-			0 c i idx !
-			i add_1
-		endif
-	if
-		_permute_helper
-	endif
+      $idx PSIZE
+    <
+  if
+        $counters[idx] $idx
+      <
+    if
+        $idx
+        is_even?
+      if
+          pmvalues
+            pmvalues[idx]
+        pmswap
+      else
+            pmvalues[counters[idx]]
+            pmvalues[idx]
+        pmswap
+      endif
+      show_vals
+      counters[idx]++
+      idx->1
+    else
+      counters[idx]->0
+      idx++
+    endif
+  if
+    _permute_helper
+  endif
 ;
 
 : permute
-	# ( n arr )
-	dup savepush # ( n arr ) ( arr )
-	show_vals
-	1 i !
-	_permute_helper
+  show_vals
+  1 idx !
+  _permute_helper
 ;
