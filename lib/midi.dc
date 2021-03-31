@@ -1,19 +1,33 @@
+# In this file, I'm experimenting with what I call "stack indentation" w/tabbing
+# 2021-03-30
+
 var mididev
 var inbuf
 var direction
 var midi_ctl_slots 128 allot
 
 : setup_port
-  "DCLANG_MIDI_PORT_DIRECTION" envget
-  "write" str=
-  if
-    "DCLANG_MIDI_PORT" envget "wb" fopen mididev !
-  else
-    # The flag '2050' is equivalent to 2048 (O_NONBLOCK) + 2 (O_RDNLY)
-    # Thus, the file is being opened in non-blocking, readonly mode.
-    "DCLANG_MIDI_PORT" envget 2050 open mididev !
-    1 mkbuf inbuf !
-  endif
+		"DCLANG_MIDI_PORT_DIRECTION"
+		envget
+			"write"
+		str=
+	if
+			"DCLANG_MIDI_PORT"
+			envget
+				"wb"
+			fopen
+		    mididev
+    !
+	else
+			"DCLANG_MIDI_PORT"
+			envget
+				2048		# 2048 = non-blocking read-only
+			open
+		mididev !
+			1
+			mkbuf
+		inbuf !
+	endif
 ;
 
 setup_port
@@ -21,45 +35,70 @@ setup_port
 : get_mididev mididev @ ;
 : get_inbuf inbuf @ ;
 
-: _get_midi_byte get_mididev get_inbuf 1 read
-  0 >
-  if
-    inbuf @ ord 0xff and
-  else
-    0xff
-  endif
+: _get_midi_byte
+				get_mididev get_inbuf 1
+		read
+			0
+		>
+	if
+			inbuf @
+			ord
+				0xff
+		and
+	else
+		0xff
+	endif
 ;
 
 # Use this every 16, 32, 64, etc. samples or so
 # This will update the `midi_ctl_slots` variable
 : refresh_midictl
-  _get_midi_byte 0xf0 and 0xb0 =
-  if
-    _get_midi_byte _get_midi_byte swap
-    # ( val ctrlnum )
-    midi_ctl_slots + !
-  endif
+			_get_midi_byte 0xf0
+		and
+			0xb0
+		=
+	if
+				_get_midi_byte _get_midi_byte
+				swap	# ( val ctrlnum )
+					midi_ctl_slots
+				+
+		!
+	endif
 ;
 
 # This is the main API for grabbing a controller variable
 # ( ctrlnum -- sig )
 : midictl midi_ctl_slots + @ ;
 
-
 # output words
 : note_on
-  get_mididev redirect
-  savepush savepush
-  emit savepop emit savepop emit
-  flush
-  resetout
+	# ( status nnum vel )
+				get_mididev redirect
+			savepush
+		savepush
+	emit
+		savepop
+	emit
+		savepop
+	emit
+	flush
+	resetout
 ;
 
 : panic
-  get_mididev redirect
-  128 0 1 for
-    0x80 emit i emit 0 emit flush
-    0.01 sleep
-  next
-  resetout
+		get_mididev
+	redirect
+				128 0 1
+	for
+			0x80
+		emit
+			i
+		emit
+			0
+		emit
+		flush
+			0.01
+		sleep
+	next
+	resetout
 ;
