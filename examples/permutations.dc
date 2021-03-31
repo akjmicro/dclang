@@ -12,45 +12,57 @@ var n
 : get_i i @ ;
 : get_n n @ ;
 
+: show_vals
+
+;
+
 : pmswap
-  2dup @ savepush
-  @ swap !
-  savepop swap !
+					2dup @		# ( a b a b@ ) ( )
+				savepush 		# ( a b a ) ( b@ )
+				@						# ( a b a@ ) ( b@ )
+				swap				# ( a a@ b ) ( b@ )
+		!								# ( a ) ( b@ )
+			savepop				# ( a b@ )
+			swap					# ( b@ a )
+	!									# ( )
 ;
 
 : is_even? 2 % 0 = ;
 
 : _permute_helper
-  get_i get_n <
-  if
-    get_c_by_i get_i <
-    if
-      get_i is_even?
-      if
-        pmvalues
-        pmvalues i idx
-        pmswap
-      else
-        pmvalues c i idx idx
-        pmvalues i idx
-        pmswap
-      endif
-      show_vals
-      c i idx add_1
-      1 i !
-    else
-      0 c i idx !
-      i add_1
-    end if
-  if
-    _permute_helper
-  endif
+			get_i get_n
+		<
+	if
+				get_c_by_i get_i
+			<
+		if
+				get_i
+				is_even?
+			if
+					pmvalues
+						pmvalues i idx
+				pmswap
+			else
+						pmvalues c i idx idx
+						pmvalues i idx
+				pmswap
+			endif
+			show_vals
+			c	i idx add_1
+			1 i !
+		else
+			0 c i idx !
+			i add_1
+		endif
+	if
+		_permute_helper
+	endif
 ;
 
 : permute
-  # ( n arr )
-  dup savepush # ( n arr ) ( arr )
-  show_vals
-  1 i !
-  _permute_helper
+	# ( n arr )
+	dup savepush # ( n arr ) ( arr )
+	show_vals
+	1 i !
+	_permute_helper
 ;
