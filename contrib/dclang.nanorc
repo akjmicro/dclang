@@ -23,13 +23,13 @@ color brightyellow "(^|[[:space:]])((\+|-|\*|\/|\%|abs|min|max|<<|>>)($|[[:space
 color brightyellow "(^|[[:space:]])((=|<>|<|>|<=|>=|assert|isnull|and|or|not|xor)($|[[:space:]]))*"
 color brightyellow "(^|[[:space:]])((round|ceil|floor|pow|sqrt|log|log2|log10|sin|cos|tan|rand)($|[[:space:]]))*"
 # stack manipulation
-color brightblue "(^|[[:space:]])((clear|drop|dup|over|pick|swap|rot|-rot|nip|tuck|2drop|2dup|2over|2swap|2rot|-2rot|2nip|2tuck|savepush|savepop)($|[[:space:]]))*"
+color brightblue "(^|[[:space:]])((drop|dup|over|pick|swap|2drop|2dup|2over|depth|clear|\.|\.\.|\.rj|\.s|svpush|svpop|svdrop|svpick|svdepth|svclear)($|[[:space:]]))*"
 # memory words
 color brightred "(^|[[:space:]])((\!|\@|const|var|allot|create|\,|h\@|h\!|hkeys|sortnums|sortstrs)($|[[:space:]]))*"
 # control words
 color brightgreen "(^|[[:space:]])((times|again|exittimes|for|next|exitfor|i|j|k|if|else|endif|return)($|[[:space:]]))*"
 # other words
-color cyan "(^|[[:space:]])((\.|h\.|\.\.|\.s|\.rj|cr|print|emit|uemit|ord|tohex|bytes32)($|[[:space:]]))*"
+color cyan "(^|[[:space:]])((cr|print|emit|uemit|ord|tohex|bytes32)($|[[:space:]]))*"
 color cyan "(^|[[:space:]])((free|strlen|str=|str<|str>|strfind|strcat|strcpy|strdup|strtok|memcpy|mempcpy|memset|clock|sleep)($|[[:space:]]))*"
 color cyan "(^|[[:space:]])((fopen|fread|fseek|ftell|fwrite|fflush|fclose|redirect|resetout|flush|open|mkbuf|read|write|close)($|[[:space:]]))*"
 color cyan "(^|[[:space:]])((tcplisten|tcpaccept|tcpconnect|block_sigint|unblock_sigint)($|[[:space:]]))*"

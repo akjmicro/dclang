@@ -77,23 +77,22 @@ void add_all_primitives()
     add_primitive("over", overfunc);
     add_primitive("pick", pickfunc);
     add_primitive("swap", swapfunc);
-    add_primitive("rot", rotfunc);
-    add_primitive("-rot", rotnegfunc);
-    add_primitive("nip", nipfunc);
-    add_primitive("tuck", tuckfunc);
     add_primitive("2drop", drop2func);
     add_primitive("2dup", dup2func);
     add_primitive("2over", over2func);
-    add_primitive("2swap", swap2func);
-    add_primitive("2rot", rot2func);
-    add_primitive("-2rot", rotneg2func);
-    add_primitive("2nip", nip2func);
-    add_primitive("2tuck", tuck2func);
-    add_primitive("clear", clearfunc);
     add_primitive("depth", depthfunc);
+    add_primitive("clear", clearfunc);
+    add_primitive(".", showfunc);
+    add_primitive("..", shownospacefunc);
+    add_primitive(".rj", showrjfunc);
+    add_primitive(".s", showstackfunc);
     // extra stack
-    add_primitive("savepush", savepushfunc);
-    add_primitive("savepop", savepopfunc);
+    add_primitive("svpush", svpushfunc);
+    add_primitive("svpop", svpopfunc);
+    add_primitive("svdrop", svdropfunc);
+    add_primitive("svpick", svpickfunc);
+    add_primitive("svdepth", svdepthfunc);
+    add_primitive("svclear", svclearfunc);
     // constants & variables
     add_primitive("!", pokefunc);
     add_primitive("@", peekfunc);
@@ -127,10 +126,6 @@ void add_all_primitives()
     add_primitive("endif", endiffunc);
     add_primitive("return", returnfunc);
     // output and string ops
-    add_primitive(".", showfunc);
-    add_primitive("..", shownospacefunc);
-    add_primitive(".rj", showrjfunc);
-    add_primitive(".s", showstackfunc);
     add_primitive("cr", crfunc);
     add_primitive("print", printfunc);
     add_primitive("emit", emitfunc);

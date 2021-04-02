@@ -60,7 +60,9 @@ static void filereadfunc()
         MAX_STR = (DCLANG_UINT)buf + num_bytes_read + 1;
     }
     // push the address of our new string and length
-    push((DCLANG_UINT)buf);
+    push((DCLANG_UINT) buf);
+    // push the number of bytes read
+    push(num_bytes_read);
 }
 
 static void filereadlinefunc()
@@ -72,7 +74,6 @@ static void filereadlinefunc()
         return;
     }
     FILE *file_to_read = (FILE *)(DCLANG_UINT) pop();
-    ssize_t nread;
     DCLANG_UINT num_bytes_read = getline(&linebuf, &linelen, file_to_read);
     // update print safety:
     if ((DCLANG_UINT) linebuf < MIN_STR || MIN_STR == 0)
@@ -85,6 +86,8 @@ static void filereadlinefunc()
     }
     // push the address of our new string and length
     push((DCLANG_UINT) linebuf);
+    // push the number of bytes read
+    push(num_bytes_read);
 }
 
 static void fileseekfunc()

@@ -2,6 +2,8 @@
 # DCLANG DSP! #
 ###############
 
+"deprecated_stack.dc" import
+
 # definition of 2pi
 pi 2 * const 2PI
 
@@ -357,7 +359,7 @@ DELAY_HEADER_SIZE STORAGE_SIZE + const DELAY_STRUCT_SIZE
 
 : biquad_compute
   # ( sig struct -- sig-out )
-  over savepush
+  over svpush
   # ( sig struct )  ( sig )
   # the actual transformative equation:
   2dup dup mu @ swap xt1 @ * 2 pick dup sigma @ swap xt2 @ * + +
@@ -373,7 +375,7 @@ DELAY_HEADER_SIZE STORAGE_SIZE + const DELAY_STRUCT_SIZE
   # UPDATE:
   -rot dup xt1 @ over xt2 !
   # ( sig-out sig struct )  ( sig )
-  savepop over xt1 !
+  svpop over xt1 !
   # ( sig-out sig struct )  ( )
   dup yt1 @ over yt2 !
   # ( sig-out sig struct )  ( )

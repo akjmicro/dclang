@@ -1,0 +1,50 @@
+# These traditional FORTH stack ops are inefficent and
+# confusing to use. You are highly encouraged in dclang
+# to defy the FORTH purists who mock `pick` and using the
+# stack(s) as a local array. One of the things that leads to
+# people hating FORTH and other stack languages is the confusion
+# caused by stack-dancing. Eventually, tehse will be deprecated
+# once they can be removed entirely from the library and examples
+# that already use them. In fact, in dclang, you are encouraged
+# to avoid stack-dancing and to simply push what you want on the stack
+# in the order you want it - by, in fact, using the stack and the
+# save-stack as "arrays", as needed.
+#
+# Clarity, not obfuscation, will be the underlying philosophy of `dclang`.
+
+# less bad
+: nip swap drop ;
+
+: tuck swap over ;
+
+# really bad
+: rot
+  svpush svpush svpush
+  1 svpick 2 svpick 0 svpick
+  svdrop svdrop svdrop
+;
+
+: -rot
+  svpush svpush svpush
+  2 svpick 0 svpick 1 svpick
+  svdrop svdrop svdrop
+;
+
+# abysmal
+: 2swap
+  svpush svpush svpush svpush
+  2 svpick 3 svpick 0 svpick 1 svpick
+  svdrop svdrop svdrop svdrop
+;
+
+: 2rot
+  svpush svpush svpush svpush svpush svpush
+  2 svpick 3 svpick 4 svpick 5 svpick 0 svpick 1 svpick
+  svdrop svdrop svdrop svdrop svdrop svdrop
+;
+
+: -2rot
+  svpush svpush svpush svpush svpush svpush
+  4 svpick 5 svpick 0 svpick 1 svpick 2 svpick 3 svpick
+  svdrop svdrop svdrop svdrop svdrop svdrop
+;

@@ -74,12 +74,12 @@ setup_port
 : note_on
   # ( status nnum vel )
         get_mididev redirect
-      savepush
-    savepush
+      svpush
+    svpush
   emit
-    savepop
+    svpop
   emit
-    savepop
+    svpop
   emit
   flush
   resetout

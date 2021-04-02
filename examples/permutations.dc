@@ -1,5 +1,7 @@
 # An implementation of Heap's algorithm
 
+"deprecated_stack.dc" import
+
 create counters 0 , 0 , 0 , 0 , 0 ,
 create pmvalues 1 , 2 , 3 , 4 , 5 ,
 var idx
@@ -59,11 +61,11 @@ var idx
 
 : pmswap
           2dup @    # ( a b a b@ ) ( )
-        savepush    # ( a b a ) ( b@ )
+        svpush    # ( a b a ) ( b@ )
         @           # ( a b a@ ) ( b@ )
         swap        # ( a a@ b ) ( b@ )
     !               # ( a ) ( b@ )
-      savepop       # ( a b@ )
+      svpop       # ( a b@ )
       swap          # ( b@ a )
   !                 # ( )
 ;

@@ -1,3 +1,5 @@
+"deprecated_stack.dc" import
+
 : fibo-setup
   # this allows us to set up a loop withouth the user worrying about it
   1 0     # ( n 0 1 )
@@ -20,12 +22,12 @@
 ;
 
 : fibonacci-benchmark
-  clock .s
-  24 fibonacci .s
-  clock .s
-  swap .s - .s
-  "24 fibonacci finished in: " . "microseconds" print cr
+  "Running `24 fibonacci`:" print cr
+  clock
+  24 fibonacci
+  clock
+  swap -
+  "`24 fibonacci` finished in: " print . "seconds" print cr
 ;
-
 
 fibonacci-benchmark

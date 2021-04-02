@@ -8,12 +8,12 @@ create pentatonic 48 , 50 , 52 , 55 , 57 , 60 , 60
   block_sigint
   ###
   0x90
-  pentatonic 5 randint + @ dup savepush
+  pentatonic 5 randint + @ dup svpush
   96
   note_on
   ###
   0.10 sleep
-  0x90 savepop 0 note_on
+  0x90 svpop 0 note_on
   0.02 sleep
   unblock_sigint
   _midi_random

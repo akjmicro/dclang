@@ -1,5 +1,7 @@
+"deprecated_stack.dc" import
+
 : _incr_saved_counter
-  savepop 1 + savepush
+  svpop 1 + svpush
 ;
 
 : _substr_count_helper
@@ -10,13 +12,13 @@
     over strlen +
     _substr_count_helper
   else
-    2drop savepop
+    2drop svpop
   endif
 ;
 
 : substr_count
   # ( str substr ) -> # ( substr str ) ( 0 )
-  0 savepush swap
+  0 svpush swap
   _substr_count_helper
 ;
 
@@ -38,11 +40,11 @@
   # ( str find repl buffer )
   swap
   # ( str find buffer repl )
-  savepush
+  svpush
   # ( str find buffer ) ( repl )
   -rot
   # ( buffer str find ) ( repl )
-  savepop
+  svpop
   # ( buffer str find repl )
 ;
 
@@ -51,13 +53,13 @@
   # ( buffer str find repl buffer found found ) ( buffer )
   if
   # ( buffer str find repl buffer found ) ( buffer )
-    dup savepush
+    dup svpush
     # ( buffer str find repl buffer found ) ( found buffer )
     4 pick tuck -
     # ( buffer str find repl buffer str sz ) ( found buffer )
     mempcpy over dup strlen mempcpy
     # ( buffer str find repl newbufrepl ) ( found buffer )
-    savepop 3 pick strlen +
+    svpop 3 pick strlen +
     # ( buffer str find repl newbufrepl found+findlen ) ( buffer )
     2rot 2drop 2swap
     # ( newbufrepl found+findlen find repl ) ( buffer )
@@ -66,7 +68,7 @@
   # ( buffer str find repl buffer found ) ( buffer )
     2drop 2drop dup strlen
   # ( buffer str sz )
-    mempcpy drop savepop
+    mempcpy drop svpop
   # ( buffer )
   endif
 ;
@@ -74,7 +76,7 @@
 : strreplace
   _strreplace_setup
   # ( buffer str find repl )
-  3 pick savepush
+  3 pick svpush
   # ( buffer str find repl ) ( buffer )
   _strreplace_helper
 ;
