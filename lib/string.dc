@@ -80,3 +80,56 @@
   # ( buffer str find repl ) ( buffer )
   _strreplace_helper
 ;
+
+: _get_next_num_from_line
+  # need a strtok ptr and a linestr_ptr
+  # ( ss lp ) ()
+  svpush svpush
+  # ( ) ( lp ss )
+  # return early if the line point is itself null
+  1 svpick @ null =
+  if
+    svdrop svdrop
+    0 return
+  endif
+  0 svpick @ null =
+  if
+    1 svpick @ " \n" 0 svpick strtok
+    svdrop svdrop
+  else
+    null " \n" 0 svpick strtok
+    svdrop svdrop
+  endif
+;
+
+: next_num_from_file
+  # an iterator over a file with just whitespace separated numbers
+  # start with <strtok_space> <linestr_space> <open_file_pointer>
+  # on the data stack
+  # ( ss lp fp ) ()
+  svpush svpush svpush
+  # () ( fp lp ss )
+  0 svpick 1 svpick _get_next_num_from_line
+  dup 0 =
+  if
+    drop
+    0 0 svpick !
+    2 svpick @ freadline
+    -1 =    # -1 == EOF (end-of-file)
+    if
+      drop
+      0 0 svpick !
+      0 1 svpick !
+      svdrop svdrop svdrop
+      0 return
+    else
+      1 svpick !
+      0 svpick 1 svpick _get_next_num_from_line
+      svdrop svdrop svdrop
+      return
+    endif
+  else
+    svdrop svdrop svdrop
+    return
+  endif
+;

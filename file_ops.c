@@ -62,7 +62,7 @@ static void filereadfunc()
     // push the address of our new string and length
     push((DCLANG_UINT) buf);
     // push the number of bytes read
-    push(num_bytes_read);
+    push((DCLANG_INT) num_bytes_read);
 }
 
 static void filereadlinefunc()
@@ -87,7 +87,7 @@ static void filereadlinefunc()
     // push the address of our new string and length
     push((DCLANG_UINT) linebuf);
     // push the number of bytes read
-    push(num_bytes_read);
+    push((DCLANG_INT) num_bytes_read);
 }
 
 static void fileseekfunc()
