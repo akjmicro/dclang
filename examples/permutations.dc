@@ -1,5 +1,4 @@
 # An implementation of Heap's algorithm
-# STILL BROKEN at the moment
 
 create counters 0 , 0 , 0 , 0 , 0 ,
 create pmvalues 1 , 2 , 3 , 4 , 5 ,
@@ -96,7 +95,6 @@ var idx
       counters[idx]->0
       idx++
     endif
-  if
     _permute_helper
   endif
 ;
@@ -106,3 +104,6 @@ var idx
   1 idx !
   _permute_helper
 ;
+
+permute
+

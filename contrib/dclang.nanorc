@@ -7,7 +7,7 @@ comment "#"
 # general constants
 color magenta "(^|[[:space:]])(([_:A-Z0-9]+)($|[[:space:]]))*"
 # general names
-color green "(^|[[:space:]])(([_:a-z0-9]*[-_:a-z0-9]+)($|[[:space:]]))*"
+color green "(^|[[:space:]])(([^[:space:]]+)($|[[:space:]]))*"
 # decimal numeric
 color white,black "(^|[[:space:]])((-?[0-9]+\.?[0-9]*)($|[[:space:]]))*"
 # hexidecimal numeric
@@ -32,7 +32,7 @@ color brightgreen "(^|[[:space:]])((times|again|exittimes|for|next|exitfor|i|j|k
 color cyan "(^|[[:space:]])((\.|h\.|\.\.|\.s|\.rj|cr|print|emit|uemit|ord|tohex|bytes32)($|[[:space:]]))*"
 color cyan "(^|[[:space:]])((free|strlen|str=|str<|str>|strfind|strcat|strcpy|strdup|strtok|memcpy|mempcpy|memset|clock|sleep)($|[[:space:]]))*"
 color cyan "(^|[[:space:]])((fopen|fread|fseek|ftell|fwrite|fflush|fclose|redirect|resetout|flush|open|mkbuf|read|write|close)($|[[:space:]]))*"
-color cyan "(^|[[:space:]])((tcplisten|tcpaccept|tcpconnect)($|[[:space:]]))*"
+color cyan "(^|[[:space:]])((tcplisten|tcpaccept|tcpconnect|block_sigint|unblock_sigint)($|[[:space:]]))*"
 color yellow "(^|[[:space:]])((words|primitives|import|input)($|[[:space:]]))*"
 # definition delimiters
 color brightred "(^|[[:space:]])((\:|;)($|[[:space:]]))*"
@@ -40,4 +40,3 @@ color brightred "(^|[[:space:]])((\:|;)($|[[:space:]]))*"
 color white,black "(^|[[:space:]])#.*$"
 # trailing whitespace.
 color ,red "[[:space:]]+$"
-
