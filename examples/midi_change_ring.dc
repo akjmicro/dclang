@@ -1,0 +1,64 @@
+"midi.dc" import
+"string.dc" import
+
+var strsav
+var lnpnt
+var fpnt
+"change_ring.txt" "r" fopen fpnt !
+
+create pentatonic 50 , 52 , 55 , 57 , 60 ,
+create lengths     2 , 1 , 2 , 2 , 1 ,
+var length_idx
+0.16 const BASE_LEN
+6 const TRANSPOSE
+
+: length_idx++ length_idx dup @ 1 + swap ! ;
+
+: _get_length lengths length_idx @ 5 % + @ BASE_LEN * ;
+
+: _get_next
+    strsav lnpnt fpnt
+  next_num_from_file
+  dup 0 =
+  if
+    drop
+    0 strsav !
+    0 lnpnt !
+    0 0 fpnt @ fseek  # reset to beginning of file
+    _get_next
+  else
+    tonum 1 -
+    5 %
+  endif
+;
+
+: _midi_change_ring
+  block_sigint
+  ###
+    0x90
+      pentatonic
+        _get_next
+      +
+      @
+        TRANSPOSE
+      +
+      dup svpush
+    96
+  note_on
+  ###
+  _get_length sleep
+  0x90 svpop 0 note_on
+  0.02 sleep
+  unblock_sigint
+  length_idx++
+  _midi_change_ring
+;
+
+: midi_change_ring
+  "You are now entering an endless loop, hit CTRL-C to stop..." print cr
+  "Notice that you won't be able to stop until a note off event hits." print cr
+  "In this way, the notes end cleanly!" print cr
+  _midi_change_ring
+;
+
+midi_change_ring
