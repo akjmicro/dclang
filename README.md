@@ -58,21 +58,21 @@ interpreter/parser not only simple but faster than one that has to do
 computational gymnastics around parsing things like braces or parenthesis,
 etc.  It also saves memory, since you don't have runaway linked-list
 creation that you have to later garbage-collect.  All actions happen on the
-stack.  Like FORTH, this is not and never will be a garbage collected
+stack.  Like `forth`, this is not and never will be a garbage collected
 language, but there will be operations to create variables and other data
 structures like lists and hashes (dictionaries) and so on, but they will be
 manually destroyed in memory to make room for other structures with other
 keywords ('free').  No garbage collection means things are kept simple, and
 the programmer is assumed to be a thoughtful and responsible adult. :)
-FORTH is a great language, and I mean to follow that lead, even as I simplify
-certain aspects of the FORTH standard in this dialect.
+`forth` is a great language, and I mean to follow that lead, even as I simplify
+certain aspects of the `forth` standard in this dialect.
 
 The trade-off for that simplicity is that one has to get used to how order of
 operations work in this world (everything being immediate and w/o parenthesis).
 And also, one has to get used to manipulating the stack such that defined words
 make sensible, efficient use of the stack. It takes some getting used to. I direct
 the user to the internet or books to search for things relating to the fine art
-of programming FORTH, etc. Everything said there applies here.
+of programming `forth`, etc. Everything said there applies here.
 
 Anyway, due to RPN, things will look like this, when you do math:
 
@@ -130,7 +130,7 @@ Anyway, due to RPN, things will look like this, when you do math:
 ```
 
 Notice the '.' character, which pops/prints the top-of-stack (TOS). This comes
-from FORTH, as does '.s', which non-destructively shows the stack contents.
+from `forth`, as does '.s', which non-destructively shows the stack contents.
 This is different from 'dc', where 'p' pops/prints the TOS.
 
 In the looping examples, the block has access to up to 3 hidden variables,
@@ -152,8 +152,9 @@ Implemented thus far:
     * `and`, `or`, `not`, `xor`
     * `=`, `<>`, `>`, `<`, `>=`, `<=`
   * Stack operations:
-    * `drop`, `dup`, `over`, `swap`, `rot`, `-rot`, `nip`, `tuck`, `pick`
-    * `2drop`, `2dup`, `2over`, `2swap`, `2rot`, `-2rot`, `2nip`, `2tuck`
+    * `drop`, `dup`, `over`, `swap`, `pick`, `2drop`, `2dup`, `2over`
+    * `svpush`, `svpop`, `svdrop`, `svpick`
+    * `depth`, `clear`, `svdepth`, `svclear`
   * Control structures:
     * `if`-`else`-`endif`
     * `times`/`again`; `for`/`next` (looping)
