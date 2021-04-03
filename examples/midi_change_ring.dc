@@ -10,11 +10,15 @@ create pentatonic 50 , 52 , 55 , 57 , 60 ,
 create lengths     2 , 1 , 2 , 2 , 1 ,
 var length_idx
 0.16 const BASE_LEN
+BASE_LEN 0.97 * const ON_LEN
+BASE_LEN ON_LEN - const OFF_LEN
 6 const TRANSPOSE
 
 : length_idx++ length_idx dup @ 1 + swap ! ;
 
-: _get_length lengths length_idx @ 5 % + @ BASE_LEN * ;
+: _get_on_length lengths length_idx @ 5 % + @ ON_LEN * ;
+
+: _get_off_length lengths length_idx @ 5 % + @ OFF_LEN * ;
 
 : _get_next
     strsav lnpnt fpnt
@@ -44,11 +48,11 @@ var length_idx
       +
       dup svpush
     96
-  note_on
+  send_midi
   ###
-  _get_length sleep
-  0x90 svpop 0 note_on
-  0.02 sleep
+  _get_on_length sleep
+  0x90 svpop 0 send_midi
+  _get_off_length sleep
   unblock_sigint
   length_idx++
   _midi_change_ring

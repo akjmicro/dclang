@@ -71,8 +71,8 @@ setup_port
 : midictl midi_ctl_slots + @ ;
 
 # output words
-: note_on
-  # ( status nnum vel )
+: send_midi
+  # ( status_byte v1 v2 )
         get_mididev redirect
       svpush
     svpush
@@ -90,13 +90,8 @@ setup_port
   redirect
         128 0 1
   for
-      0x80
-    emit
-      i
-    emit
-      0
-    emit
-    flush
+      0x80 i 0
+    send_midi
       0.01
     sleep
   next
