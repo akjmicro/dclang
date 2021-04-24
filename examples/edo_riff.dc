@@ -1,0 +1,98 @@
+"midi.dc" import
+
+17 midi_edo !
+
+: generate_interval
+  / log2 midi_edo @ * round
+;
+
+9 8 generate_interval const STEP
+6 5 generate_interval const MIN3
+6 5 generate_interval const THIRD
+3 2 generate_interval const FIFTH
+9 5 generate_interval const SEV
+
+create choices 0 , STEP , THIRD , FIFTH , SEV ,
+create lengths 0.25 , 0.25 ,
+create attacks 96 , 32 , 32 , 32 , 32 ,
+create modulations FIFTH , MIN3 , FIFTH , MIN3 ,
+var stopgap
+lengths choices - const CHOICES_SIZE
+CHOICES_SIZE 2 * const MEASURE
+stopgap modulations - const MODUSIZE
+var step
+0 step !
+var modulations_pointer
+0 modulations_pointer !
+
+: _advance_step
+  step @ 1 + step !
+;
+
+: _get_modulations_pointer
+  modulations_pointer @ dup
+  MODUSIZE =
+  if
+    drop
+    0
+  endif
+  dup 1 + modulations_pointer !
+;
+
+: _add_interval
+  svpush
+  CHOICES_SIZE times
+    choices i + @
+    0 svpick +   # interval on stack is added here
+    midi_edo @ %
+    choices i + !
+  again
+  svdrop
+  # lower first note (root) an octave
+  choices @ midi_edo @ -
+  choices !
+  choices CHOICES_SIZE sortnums
+;
+
+: _do_transposition
+  step @ MEASURE %
+  0 =
+  if
+    modulations
+    _get_modulations_pointer
+    + @
+    _add_interval
+  endif
+;
+
+: _get_edo_note
+  step @
+  CHOICES_SIZE %
+  choices + @
+  step @
+  CHOICES_SIZE %
+  attacks + @
+;
+
+: _get_length
+  rand 2 * round 2 %
+  lengths + @
+;
+
+: edo_riff
+  block_sigint
+  _get_edo_note
+  # stack: ( note attack ) ( )
+  over 0 edo_degree_to_midi
+  _get_length sleep
+  0 swap 0 edo_degree_to_midi
+  0.01 sleep
+  unblock_sigint
+  _advance_step
+  _do_transposition
+  edo_riff
+;
+
+edo_riff
+
+8192 0 0xE0 send_midi_reverse

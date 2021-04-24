@@ -7,18 +7,22 @@ var fpnt
 "change_ring.txt" "r" fopen fpnt !
 
 create pentatonic 50 , 52 , 55 , 57 , 60 ,
-create lengths     2 , 1 , 2 , 2 , 1 ,
+create lengths     1 , 1 , 1 , 1 , 1 , 1 , 1 , 1 ,
+create vols       96 , 96 , 96 , 96 , 96 , 0 , 0 , 0 ,
+5 const CYCLE_SIZE
 var length_idx
-0.16 const BASE_LEN
-BASE_LEN 0.97 * const ON_LEN
-BASE_LEN ON_LEN - const OFF_LEN
+0.152 const BASE_LEN
+BASE_LEN 0.95 * const ON_LEN
+BASE_LEN 0.05 * const OFF_LEN
 6 const TRANSPOSE
 
 : length_idx++ length_idx dup @ 1 + swap ! ;
 
-: _get_on_length lengths length_idx @ 5 % + @ ON_LEN * ;
+: _get_on_length lengths length_idx @ CYCLE_SIZE % + @ ON_LEN * ;
 
-: _get_off_length lengths length_idx @ 5 % + @ OFF_LEN * ;
+: _get_off_length lengths length_idx @ CYCLE_SIZE % + @ OFF_LEN * ;
+
+: _get_vol vols length_idx @ CYCLE_SIZE % + @ ;
 
 : _get_next
     strsav lnpnt fpnt
@@ -47,7 +51,7 @@ BASE_LEN ON_LEN - const OFF_LEN
         TRANSPOSE
       +
       dup svpush
-    96
+    _get_vol
   send_midi
   ###
   _get_on_length sleep
