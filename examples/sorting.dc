@@ -1,3 +1,5 @@
+"string.dc" import
+
 var iters 24 iters !
 var myarr iters @ allot
 
@@ -28,6 +30,7 @@ showarr
 
 var :tempest_quote
 var :delimiters
+var token_hold
 var word_index 0 word_index !
 create tempest_words
 
@@ -45,25 +48,32 @@ print cr
 
 cr "The quote in question is: " print cr cr :tempest_quote @ print cr
 
-: copy_token
-  16 mkbuf swap strcpy ,
-;
-
 : splitter_main
-  0 :delimiters @ strtok dup
-  0 <> if
-    copy_token
-    splitter_main
-  endif
+    0
+      :delimiters @
+        token_hold
+    strtok
+      dup
+        0
+      <>
+    if
+      ,
+      splitter_main
+    endif
 ;
 
 : splitter
-  :tempest_quote @ :delimiters @ strtok dup  # ( token token )
-  0 <> if
-    copy_token
-    splitter_main
-  endif
-  drop
+    :tempest_quote @
+      :delimiters @
+        token_hold
+    strtok
+      dup  # ( token token )
+        0
+      <>
+    if
+      ,
+      splitter_main
+    endif
 ;
 
 : showstrs

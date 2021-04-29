@@ -39,7 +39,7 @@ cr
 # END CODE
 
 # STRING
-"Next, we'll do a simlar set/get, but with the grea J.S. Bach as the subject
+"Next, we'll do a simlar set/get, but with the great J.S. Bach as the subject
 of interest. The following is the output of two commands in succession:
 
 \"Bach\" \"Best_composer\" redis_set print cr

@@ -1,5 +1,14 @@
 "deprecated_stack.dc" import
 
+: strdup
+  # copies a string; leaves the new string's
+  # beginning address on the stack
+  dup strlen
+  swap over mkbuf
+  swap 2 pick mempcpy
+  swap -
+;
+
 : _incr_saved_counter
   svpop 1 + svpush
 ;

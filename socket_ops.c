@@ -14,14 +14,14 @@ static void tcplistenfunc()
         printf("tcplisten -- need <port_number> on the\n");
         return;
     }
-    int sockfd = socket(AF_INET, SOCK_STREAM, 0);
-    int true = 1;
-    setsockopt(sockfd, SOL_SOCKET, SO_REUSEADDR, &true, sizeof(int));
+    DCLANG_INT32 sockfd = socket(AF_INET, SOCK_STREAM, 0);
+    DCLANG_INT32 true = 1;
+    setsockopt(sockfd, SOL_SOCKET, SO_REUSEADDR, &true, sizeof(DCLANG_INT32));
     if (sockfd < 0) {
        perror("tcplisten -- ERROR opening socket.");
     }
     bzero((char *) &serv_addr, sizeof(serv_addr));
-    int portno = (int) pop();
+    DCLANG_INT32 portno = (DCLANG_INT32) pop();
     serv_addr.sin_family = AF_INET;
     serv_addr.sin_addr.s_addr = INADDR_ANY;
     serv_addr.sin_port = htons(portno);
@@ -29,7 +29,7 @@ static void tcplistenfunc()
           sizeof(serv_addr)) < 0)
           perror("ERROR on binding");
     listen(sockfd, 5);
-    push((int) sockfd);
+    push((DCLANG_INT32) sockfd);
 }
 
 
@@ -43,11 +43,11 @@ static void tcpacceptfunc()
         printf("tcpaccept -- need <socket> on the stack");
         return;
     }
-    unsigned int clilen = sizeof(cli_addr);
-    int sockfd = (int) pop();
-    int newsockfd = accept(sockfd, (struct sockaddr *) &cli_addr, &clilen);
+    DCLANG_UINT32 clilen = sizeof(cli_addr);
+    DCLANG_INT32 sockfd = (DCLANG_INT32) pop();
+    DCLANG_INT32 newsockfd = accept(sockfd, (struct sockaddr *) &cli_addr, &clilen);
     if (newsockfd < 0) perror("tcpaccept -- ERROR on accept step!");
-    push((int) newsockfd);
+    push((DCLANG_INT32) newsockfd);
 }
 
 
@@ -59,9 +59,9 @@ static void tcpconnectfunc()
         printf("tcpconnect -- need <host> <port> on the stack");
         return;
     }
-    int sockfd = socket(AF_INET, SOCK_STREAM, 0);
+    DCLANG_INT32 sockfd = socket(AF_INET, SOCK_STREAM, 0);
     if (sockfd < 0) perror("tcpconnect -- ERROR opening socket");
-    int portno = (int) pop();
+    DCLANG_INT32 portno = (DCLANG_INT32) pop();
     struct sockaddr_in host_addr;
     char *servername = (char *) (DCLANG_UINT) pop();
     struct hostent *server = gethostbyname(servername);
@@ -75,5 +75,5 @@ static void tcpconnectfunc()
     host_addr.sin_port = htons(portno);
     if (connect(sockfd, (struct sockaddr *)&host_addr, sizeof(host_addr)) < 0)
         perror("tcpconnect -- ERROR connecting");
-    push((int) sockfd);
+    push((DCLANG_INT32) sockfd);
 }

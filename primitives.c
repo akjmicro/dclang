@@ -135,18 +135,14 @@ void add_all_primitives()
     add_primitive("tonum", tonumfunc);
     add_primitive("tostr", tostrfunc);
     add_primitive("bytes32", bytes32func);
-    add_primitive("mkbuf", mkbuffunc);
-    add_primitive("free", freefunc);
     add_primitive("strlen", strlenfunc);
     add_primitive("str=", streqfunc);
     add_primitive("str<", strltfunc);
     add_primitive("str>", strgtfunc);
     add_primitive("strfind", strfindfunc);
-    add_primitive("strcat", strcatfunc);
-    add_primitive("strcpy", strcpyfunc);
-    add_primitive("strdup", strdupfunc);
     add_primitive("strtok", strtokfunc);
-    add_primitive("memcpy", memcpyfunc);
+    add_primitive("mkbuf", mkbuffunc);
+    add_primitive("free", freefunc);
     add_primitive("mempcpy", mempcpyfunc);
     add_primitive("memset", memsetfunc);
     // file
@@ -179,6 +175,9 @@ void add_all_primitives()
     // block a SIGINT
     add_primitive("block_sigint", blocksigintfunc);
     add_primitive("unblock_sigint", unblocksigintfunc);
+    // os fork and exit
+    add_primitive("fork", forkfunc);
+    add_primitive("exit", exitfunc);
     // show defined words!
     add_primitive("words", showdefined);
 };

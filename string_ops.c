@@ -418,80 +418,6 @@ static void strfindfunc()
     push((DCLANG_INT) strstr(str1, str2));
 }
 
-// destructive/creative string functions:
-static void strcatfunc()
-{
-    if (data_stack_ptr < 2)
-    {
-        printf("strcat -- needs <dest> <source> string pointers on stack! ");
-        return;
-    }
-    DCLANG_UINT string_uint_addr2 = (DCLANG_UINT) pop();
-    DCLANG_UINT string_uint_addr1 = (DCLANG_UINT) pop();
-    if (string_uint_addr1 < MIN_STR || string_uint_addr1 > MAX_STR)
-    {
-        perror("strcat --  <dest> (first) string address out-of-range.");
-        return;
-    }
-    if (string_uint_addr2 < MIN_STR || string_uint_addr2 > MAX_STR)
-    {
-        perror("strcat -- <source> (second) string address out-of-range.");
-        return;
-    }
-    char *str1 = (char *) string_uint_addr1;
-    char *str2 = (char *) string_uint_addr2;
-    push((DCLANG_INT) strcat(str1, str2));
-}
-
-static void strcpyfunc()
-{
-    if (data_stack_ptr < 2)
-    {
-        printf("strcpy -- needs <dest> <source> string pointers on stack! ");
-        return;
-    }
-    DCLANG_UINT string_uint_addr2 = (DCLANG_UINT) pop();
-    DCLANG_UINT string_uint_addr1 = (DCLANG_UINT) pop();
-    if (string_uint_addr1 < MIN_STR || string_uint_addr1 > MAX_STR)
-    {
-        perror("strcpy --  <dest> (first) string address out-of-range.");
-        return;
-    }
-    if (string_uint_addr2 < MIN_STR || string_uint_addr2 > MAX_STR)
-    {
-        perror("strcpy -- <source> (second) string address out-of-range.");
-        return;
-    }
-    char *str1 = (char *) string_uint_addr1;
-    char *str2 = (char *) string_uint_addr2;
-    push((DCLANG_INT) strcpy(str1, str2));
-}
-
-static void strdupfunc()
-{
-    if (data_stack_ptr < 1)
-    {
-        printf("strdup -- needs <string> string pointer on stack! ");
-        return;
-    }
-    DCLANG_UINT string_uint_addr = (DCLANG_UINT) pop();
-    if (string_uint_addr < MIN_STR || string_uint_addr > MAX_STR)
-    {
-        perror("strdup -- string address out-of-range.");
-        return;
-    }
-    char *str1 = strdup((char *) string_uint_addr);
-    DCLANG_UINT str1addr = (DCLANG_UINT) str1;
-    if (str1addr < MIN_STR || MIN_STR == 0)
-    {
-        MIN_STR = str1addr;
-    }
-    if (str1addr > MAX_STR || MAX_STR == 0)
-    {
-        MAX_STR = str1addr;
-    }
-    push((DCLANG_UINT) str1);
-}
 
 static void strtokfunc()
 {
@@ -524,28 +450,6 @@ static void strtokfunc()
     push((DCLANG_INT) strtok_r(str1, str2, savepoint_ptr));
 }
 
-static void memcpyfunc()
-{
-    if (data_stack_ptr < 3)
-    {
-        printf("memcpy -- needs <dest> <source> <size> on stack! ");
-        return;
-    }
-    DCLANG_UINT size = (DCLANG_UINT) pop();
-    DCLANG_UINT source = (DCLANG_UINT) pop();
-    DCLANG_UINT dest = (DCLANG_UINT) pop();
-    if ((dest != 0) && (dest < MIN_STR || dest > MAX_STR))
-    {
-        perror("memcpy --  <dest> string address out-of-range.");
-        return;
-    }
-    if (source < MIN_STR || source > MAX_STR)
-    {
-        perror("memcpy -- <source> string address out-of-range.");
-        return;
-    }
-    push((DCLANG_UINT) memcpy((char *)dest, (char *)source, (DCLANG_UINT) size));
-}
 
 static void mempcpyfunc()
 {

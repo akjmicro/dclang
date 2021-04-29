@@ -12,8 +12,8 @@ drop dup over pick depth swap rot -rot nip tuck
 svpush svpop svpick svdrop svclear
 ! @ const var allot create , h@ h! hkeys
 times again exittimes for next exitfor i j k if else endif return
-. h. .. .s .rj cr print emit uemit ord tohex bytes32 free
-strlen str= str< str> strfind strcat strcpy strdup strtok memcpy mempcpy memset
+. h. .. .s .rj cr print emit uemit ord tohex bytes32
+strlen str= str< str> strfind strtok mempcpy memset mkbuf free
 fopen fread fseek ftell fwrite fflush fclose redirect resetout flush
 open mkbuf read tcplisten tcpaccept tcpconnect clock sleep
 words primitives import input

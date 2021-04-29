@@ -24,7 +24,10 @@ var prompt "Please enter your message: " prompt !
 
 : msg_to_buf
   zerobuf
-  get_connbuf get_msg strcpy
+    get_connbuf
+      get_msg
+        dup strlen
+  mempcpy drop
 ;
 
 : client_connect "localhost" 5509 tcpconnect serv ! ;

@@ -162,7 +162,7 @@ Implemented thus far:
   * Strings:
     * simple string printing w/ `print`
     * fancier right-justified numeric output fields: `.rj`
-    * `strcat`, `strcpy`, `strtok`, `memcpy`
+    * `strtok`, `mempcpy`, `memset`, `mkbuf`, `free`
     * strong comparison with: `strlen`, `str=`, `str<`, `str>`
     * find a substring with `strfind`
     * '#' to end-of-line' for comments

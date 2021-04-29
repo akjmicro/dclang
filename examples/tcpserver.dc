@@ -14,7 +14,13 @@ var accepted_conn
 : get_response_prefix response_prefix @ ;
 : get_response_prefix_len response_prefix_len @ ;
 : zerobuf get_connbuf 0 1024 memset ;
-: msgcpy get_received get_connbuf strcpy ;
+: copyinput
+  get_received
+    get_connbuf
+      dup strlen
+  mempcpy
+  drop
+;
 
 : read_incoming
   zerobuf
@@ -22,7 +28,7 @@ var accepted_conn
 ;
 
 : concat_response
-  msgcpy
+  copyinput
   zerobuf
   get_connbuf get_response_prefix get_response_prefix_len mempcpy
   get_received dup strlen mempcpy
