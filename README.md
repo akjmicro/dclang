@@ -256,8 +256,10 @@ Implemented thus far:
     myfile @ fwrite                       # write a sentence
     myfile @ fclose                       # close the file
     "test-file.txt" "r" fopen myfile !    # re-open for reading
-    30 myfile @ fread print               # read 30 bytes from the file
+    var buf 1024 mkbuf buf !              # create a memory buffer
+    buf @ myfile @ 30 fread               # read 30 bytes from file, put in 'buf'
     # will print: Some text in my file! Woo-hoo!
+    buf @ print cr
     myfile @ fclose                       # close the file
     ```
 

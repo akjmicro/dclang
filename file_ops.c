@@ -40,16 +40,16 @@ static void fileclosefunc()
 
 static void filereadfunc()
 {
-    if (data_stack_ptr < 2)
+    if (data_stack_ptr < 3)
     {
         printf("Stack underflow!\n");
-        printf("'fread' needs <number-of-bytes> <fpointer> on the stack\n");
+        printf("'fread' needs <buf_pointer> <fpointer> <number-of-bytes> on the stack\n");
         return;
     }
-    FILE *file_to_read = (FILE *)(DCLANG_UINT) pop();
     DCLANG_INT num_bytes = (DCLANG_UINT) pop();
-    char *buf = malloc(num_bytes);
-    DCLANG_UINT num_bytes_read = fread(buf, num_bytes, 1, file_to_read);
+    FILE *file_to_read = (FILE *)(DCLANG_UINT) pop();
+    char *buf = (char *)(DCLANG_UINT) pop();
+    DCLANG_UINT num_bytes_read = fread(buf, 1, num_bytes + 1, file_to_read);
     // update print safety:
     if ((DCLANG_UINT)buf < MIN_STR || MIN_STR == 0)
     {
@@ -59,8 +59,8 @@ static void filereadfunc()
     {
         MAX_STR = (DCLANG_UINT)buf + num_bytes_read + 1;
     }
-    // push the address of our new string and length
-    push((DCLANG_UINT) buf);
+    // push the address of the END of our new string
+    push((DCLANG_UINT) buf + num_bytes_read);
     // push the number of bytes read
     push((DCLANG_INT) num_bytes_read);
 }
@@ -70,7 +70,7 @@ static void filereadlinefunc()
     if (data_stack_ptr < 1)
     {
         printf("Stack underflow!\n");
-        printf("'freadline' needs <fpointer> on the stack\n");
+        printf("'freadline' needs <buffer_pointer> <fpointer> on the stack\n");
         return;
     }
     FILE *file_to_read = (FILE *)(DCLANG_UINT) pop();

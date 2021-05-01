@@ -1,3 +1,13 @@
+2020-05-01
+* Ok, maybe I'll be nice and announce: the `fread` word has changed API. The old parameter
+  pattern was: <num_bytes_to_read> <file_ptr>, and an automatic buffer was created for the work.
+  I then realized it would be better to make the user/caller supply the buffer, and return
+  the end of the buffer on success, so that concats are easy like in `mempcpy`. In addition, `fread`
+  could have a similar calling patter that would allow easy "chaining" of the returns to repeatedly
+  concat the read-in string from the <file>. So now, the parameters on the stack are:
+  <buf_ptr> <file_ptr> <num_bytes_to_read>, and it will return the new ENDING point of the
+  buffer, which is essentially the input <buf_ptr> + <num_bytes_read_in_successfully>
+
 2020-03-06
 * refuse to update this file anymore when there is version control!
 

@@ -142,3 +142,26 @@
     return
   endif
 ;
+
+: _freadall_helper
+  dup svpush
+  1024 fread
+  1024 <
+  if
+    svpop 2drop
+    return
+  else
+    svpop
+    _freadall_helper
+  endif
+;
+
+: freadall
+  # read an entire file into a memory buffer
+  depth 2 <
+  if
+    "freadall needs <buf_ptr> <file_ptr> on the stack!" print cr
+    return
+  endif
+  _freadall_helper
+;
