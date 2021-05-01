@@ -83,6 +83,12 @@
 ;
 
 : strreplace
+  depth 3 <
+  if
+    "strreplace needs <haystack> <needle> <replacement_needle> on the stack"
+    print cr
+    return
+  endif
   _strreplace_setup
   # ( buffer str find repl )
   3 pick svpush
