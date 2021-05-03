@@ -1,0 +1,10 @@
+"http_server.dc" import
+
+# make sure to have the environment variable DCLANG_HTTP_PORT
+# set somewhere in your shell variables for this to work
+"DCLANG_HTTP_PORT" envget tonum const HTTP_PORT
+
+acceptloop
+
+# close down connection
+srv_queue @ close drop
