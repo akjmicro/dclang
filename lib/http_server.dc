@@ -94,7 +94,6 @@ var _split_q
 : _print_hash_table_helper
   1 + dup
   hkeys dup
-  "here" print cr
   # ( idx hkeystr is_string? ) ( connbuf_end )
   if
     # ( idx hkeystr ) ( connbuf_end )
@@ -105,30 +104,31 @@ var _split_q
     strfind
     # ( idx hkeystr found? ) ( connbuf_end )
     if
-      dup svpop swap
-      # ( idx connbuf_end hkeystr ) ()
+      svpop swap
+      # ( idx connbuf_end hkeystr ) ( )
       dup svpush
       # ( idx connbuf_end hkeystr ) ( hkeystr )
       dup strlen mempcpy
       :COLON dup strlen mempcpy
       svpop h@ dup strlen mempcpy
+      "\n" dup strlen mempcpy
       # ( idx connbuf_end ) ( )
       svpush
       # ( idx ) ( connbuf_end )
     else
-      "here2" print cr
       drop
     endif
-    "here3" print cr
     _print_hash_table_helper
   else
-   "here4" print cr
     drop svpop
   endif
 ;
 
 : print_hash_table
-  svpush -1 _print_hash_table_helper
+  get_query
+  if
+    svpush -1 _print_hash_table_helper
+  endif
 ;
 
 : copy_HTTP_header_to_buffer
@@ -149,17 +149,15 @@ var _split_q
     else
       drop
     endif
-  .s
+  "\nHash Table Entries: \n" dup strlen mempcpy
   print_hash_table
-  "\n" dup strlen mempcpy
   drop
 ;
 
 : write_response
-  zerobuf                      depth 1 = assert
+  zerobuf
   copy_HTTP_header_to_buffer
   copy_response_to_buffer
-  get_connbuf print cr
   get_accepted_conn get_connbuf HTTP_BUFSIZE write drop
   get_accepted_conn close drop
 ;
