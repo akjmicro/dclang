@@ -3,10 +3,14 @@
 : strdup
   # copies a string; leaves the new string's
   # beginning address on the stack
-  dup strlen
+  dup strlen 1 +
   swap over mkbuf
   swap 2 pick mempcpy
   swap -
+;
+
+: str+
+  dup strlen mempcpy
 ;
 
 : _incr_saved_counter

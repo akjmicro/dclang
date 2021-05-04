@@ -56,12 +56,13 @@ var _split_q
   "=" _split_hash strtok
   0 "=" _split_hash strtok
   swap h!
+  0 _split_hash !
 ;
 
 : _split_query_string_helper
   0 "&" _split_q strtok dup
   if
-    hash_assign
+    strdup hash_assign
     _split_query_string_helper
   else
     drop
@@ -69,10 +70,10 @@ var _split_q
 ;
 
 : split_query_string
-  get_query
+  get_query strdup
   strdup "&" _split_q strtok dup
   if
-    hash_assign
+    strdup hash_assign
     _split_query_string_helper
   else
     drop
@@ -94,27 +95,13 @@ var _split_q
 : _print_hash_table_helper
   1 + dup
   hkeys dup
-  # ( idx hkeystr is_string? ) ( connbuf_end )
   if
-    # ( idx hkeystr ) ( connbuf_end )
     dup
-    # ( idx hkeystr hkeystr ) ( connbuf_end )
-    get_query swap
-    # ( idx hkeystr query_str hkeystr ) ( connbuf_end )
-    strfind
-    # ( idx hkeystr found? ) ( connbuf_end )
+    get_query swap strfind
     if
-      svpop swap
-      # ( idx connbuf_end hkeystr ) ( )
-      dup svpush
-      # ( idx connbuf_end hkeystr ) ( hkeystr )
-      dup strlen mempcpy
-      :COLON dup strlen mempcpy
-      svpop h@ dup strlen mempcpy
-      "\n" dup strlen mempcpy
-      # ( idx connbuf_end ) ( )
+      svpop swap dup svpush
+      str+ :COLON str+ svpop h@ str+ "\n" str+
       svpush
-      # ( idx ) ( connbuf_end )
     else
       drop
     endif

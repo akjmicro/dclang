@@ -22,4 +22,13 @@ teststr @ "NOTFOUND" " " strreplace
 teststr @
 str= assert
 
+var buf 128 mkbuf buf !
+buf @ "This will" str+
+" be concatted " str+
+"together!" str+
+drop
+"This will be concatted together!" buf @
+str= assert
+buf @ free
+
 "If you are only seeing this msg, all tests have passed!" print cr
