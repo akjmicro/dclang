@@ -24,7 +24,7 @@ var _split_hash
 var _split_q
 # response headers
 "HTTP/1.1 200 OK\nContent-Type: text/plain\n\n" const HTTP_TEXT_HEADER
-"HTTP/1.1 200 OK\nContent-Type: text/html\n" const HTTP_HTML_HEADER
+"HTTP/1.1 200 OK\nContent-Type: text/html\n\n" const HTTP_HTML_HEADER
 
 # getters and setters
 : get_accepted_conn accepted_conn @ ;
@@ -41,6 +41,12 @@ var _split_q
 # relevant words #
 ##################
 
+: read_incoming
+  zerobuf
+  get_accepted_conn swap HTTP_BUFSIZE read drop
+  get_connbuf strdup received !
+;
+
 : split_request_topline
   get_received " " _split1 strtok method !
   0 " " _split1 strtok path_and_query !
@@ -53,9 +59,14 @@ var _split_q
 ;
 
 : hash_assign
-  "=" _split_hash strtok
-  0 "=" _split_hash strtok
-  swap h!
+  dup "=" strfind
+  if
+    "=" _split_hash strtok
+    0 "=" _split_hash strtok
+    swap h!
+  else
+    drop
+  endif
   0 _split_hash !
 ;
 
@@ -70,20 +81,17 @@ var _split_q
 ;
 
 : split_query_string
-  get_query strdup
-  strdup "&" _split_q strtok dup
+  get_query
   if
-    strdup hash_assign
-    _split_query_string_helper
-  else
-    drop
+    get_query
+    strdup "&" _split_q strtok dup
+    if
+      strdup hash_assign
+      _split_query_string_helper
+    else
+      drop
+    endif
   endif
-;
-
-: read_incoming
-  zerobuf
-  get_accepted_conn swap HTTP_BUFSIZE read drop
-  get_connbuf strdup received !
 ;
 
 : process_request
@@ -100,7 +108,7 @@ var _split_q
     get_query swap strfind
     if
       svpop swap dup svpush
-      str+ :COLON str+ svpop h@ str+ "\n" str+
+      str+ :COLON str+ svpop h@ str+ "<br>\n" str+
       svpush
     else
       drop
@@ -118,41 +126,12 @@ var _split_q
   endif
 ;
 
-: copy_HTTP_header_to_buffer
-    # ( zeroed_buf )
-      HTTP_TEXT_HEADER
-        dup strlen
-    mempcpy
+: copy_header_to_buffer
+  # ( zeroed_buf )
+  HTTP_HTML_HEADER str+
+  "<html>\n<body>\n" str+
 ;
 
-: copy_response_to_buffer
-  "Incoming path was: " dup strlen mempcpy
-  get_path dup strlen mempcpy
-  "\nQuery string was: " dup strlen mempcpy
-  get_query
-    dup
-    if
-      dup strlen mempcpy
-    else
-      drop
-    endif
-  "\nHash Table Entries: \n" dup strlen mempcpy
-  print_hash_table
-  drop
-;
-
-: write_response
-  zerobuf
-  copy_HTTP_header_to_buffer
-  copy_response_to_buffer
-  get_accepted_conn get_connbuf HTTP_BUFSIZE write drop
-  get_accepted_conn close drop
-;
-
-: acceptloop
-  srv_queue @ tcpaccept accepted_conn !
-  read_incoming
-  process_request
-  write_response
-  acceptloop
+: copy_footer_to_buffer
+  "</body>\n</html>\n" str+
 ;

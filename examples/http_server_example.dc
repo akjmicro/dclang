@@ -4,6 +4,59 @@
 # set somewhere in your shell variables for this to work
 "DCLANG_HTTP_PORT" envget tonum const HTTP_PORT
 
+: copy_response_to_buffer
+  # This reponse code is a simple demo that enumerates the input GET request
+  # It can/should be customized to suit whatever your response needs are.
+  # You could also read a variable that might branch according to endpoint
+  # routing, so you serve different pages, etc. etc. This could perhaps
+  # be fed by something set in the calling `acceptloop` word (see below)
+  # after the initial `process_request` word runs, and before the call to
+  # `write_response`.
+  "Incoming path was: " str+
+  get_path str+ "<br>\n" str+
+  "Query string was: " str+
+  get_query
+    dup
+    if
+      str+
+    else
+      drop
+    endif
+  "<br>\nHash Table Entries: <br>\n" str+
+  print_hash_table
+;
+
+: custom_response
+  # an example typical response body is defined here...there are other possibilities
+  copy_header_to_buffer    # <-- a standard HTTP header and HTML header
+                           # (can be changed as needed, but exists as a helper in the http_server lib)
+  copy_response_to_buffer  # <-- this can be customized to suit your response needs
+  copy_footer_to_buffer    # <-- this is here to close off the standard HTML header
+                           # (whether preset or not depends on whether `copy_header_to_buffer` was used)
+                           # (exists as a helper in the http_server lib
+;
+
+: write_response
+  zerobuf                                                # should always be here
+  custom_response                                        # To customize the response,
+                                                         # one can change the body of this word,
+                                                         # (see above)
+  get_accepted_conn get_connbuf HTTP_BUFSIZE write drop  # should always be here
+  get_accepted_conn close drop                           # should always be here
+;
+
+: acceptloop
+  srv_queue @ tcpaccept accepted_conn !
+  read_incoming    # reads in the request
+  process_request  # does the basic necessities like splitting the page and query
+  # One could put an extra step or two here to do stuff on the backend
+  # with the incoming request data.
+  # ...
+  # END of extra request processing.
+  write_response   # send the response
+  acceptloop       # infinite "wait for request" loop
+;
+
 acceptloop
 
 # close down connection
