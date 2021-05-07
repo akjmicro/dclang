@@ -1,0 +1,51 @@
+"http_server.dc" import
+"redis.dc" import
+
+# make sure to have the environment variable DCLANG_HTTP_PORT
+# set somewhere in your shell variables for this to work
+"DCLANG_HTTP_PORT" envget tonum const HTTP_PORT
+
+: custom_response
+  # an example typical response body is defined here...there are other possibilities
+  HTTP_HTML_HEADER str+    # <-- a standard HTTP header for text/html
+  # ( connbuff ) ()
+  get_path strdup
+  "/send_value" str=
+  if
+    "chaos" h@ dup
+    if
+      "chaos" redis_set drop
+    else
+      drop
+    endif
+    "<html><body>OK<br>\n</body></html>\n" str+
+  else
+    "widget.html" "r" fopen
+    freadall
+  endif
+  # keep the stack from overflowing in case we get
+  # a fast waves of requests:
+  clear
+;
+
+: write_response
+  zerobuf                                                # should always be here
+  custom_response                                        # To customize the response,
+                                                         # one can change the body of this word,
+                                                         # (see above)
+  get_accepted_conn get_connbuf HTTP_BUFSIZE write drop  # should always be here
+  get_accepted_conn close drop                           # should always be here
+;
+
+: acceptloop
+  srv_queue @ tcpaccept accepted_conn !
+  read_incoming    # reads in the request
+  process_request  # does the basic necessities like splitting the page and query
+  write_response   # send the response
+  acceptloop       # infinite "wait for request" loop
+;
+
+acceptloop
+
+# close down connection
+srv_queue @ close drop
