@@ -47,7 +47,7 @@
 <p>Drag the slider to display the current value.</p>
 
 <div class="slidecontainer">
-  <input type="range" min="0.5" max="2" step="0.001" value="1.5" class="slider" id="myRange">
+  <input type="range" min="0.0" max="1.0" step="0.001" value="0.5" class="slider" id="myRange">
   <p>Value: <span id="demo"></span></p>
 </div>
 
@@ -59,7 +59,7 @@ output.innerHTML = slider.value;
 slider.oninput = function() {
   output.innerHTML = this.value;
   var xhttp = new XMLHttpRequest();
-  xhttp.open("GET", "/send_value?chaos=" + this.value, true);
+  xhttp.open("GET", "/send_value?slider=" + this.value, true);
   xhttp.send();
 }
 </script>

@@ -14,9 +14,9 @@ redis_connect
   get_path strdup
   "/send_value" str=
   if
-    "chaos" h@ dup
+    "slider" h@ dup
     if
-      "chaos" redis_set drop
+      "slider" redis_set drop
     else
       drop
     endif

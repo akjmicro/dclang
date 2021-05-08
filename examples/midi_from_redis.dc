@@ -1,14 +1,14 @@
-# To run: run the `http_widget_server_example.dc` example like so:
-# dclang http_widget_server_example.dc
+# This illustrates using decimal expansions of a fraction division in any base
+# being used to make music via MIDI
 #
-# Then, in another shell, open this script:
+# First, make sure you have a running redis server on your machine
+#
+# Then, to run, do `redis-cli` in a shell, making sure you set the following vars:
+#     tempo, base, div, mode, transp
+# (they should all be integers)
+#
+# Then, in another shell, open this script, your command should be:
 # dclang midi_from_redis.dc
-#
-# Make sure, of course, you have a redis server running on your machine.
-#
-# Direct your browser to localhost:7651
-# (or whatever port you've configured, that's the default)
-# Watch how the sliders influence
 
 "midi.dc" import
 "redis.dc" import
@@ -16,39 +16,96 @@
 # make the redis connection
 redis_connect
 
-var x 1 x !
+var remainder 1 remainder !
 var _tok1
 var _tok2
+var _tok3
+var _tok4
+var _tok5
+# some symbols
 "\n" const :NL
-"chaos" const :CHAOS
 "tempo" const :TEMPO
+"base" const :BASE
+"div" const :DIV
+"mode" const :MODE
+"transp" const :TRANSPOSE
+# our EDO var
+17 midi_edo !
 
-create pentatonic 50 , 52 , 55 , 57 , 60 , 60 ,
+create scale -6 , -3 , 1 , 4 , 8 , 11 , 14 , 18 , 21 , 25 , 28 ,
+var dummy
+var scale_size
+dummy scale -
+scale_size !
 
-
-: _get_chaos
-  :CHAOS redis_get :NL _tok1 strtok drop
-  0 :NL _tok1 strtok tonum
+: absmod
+  dup svpush
+  %
+  dup 0 <
+  if
+    svpop +
+  else
+    svdrop
+  endif
 ;
+
+: _get_remainder remainder @ dup 0 = if drop 1 endif ;
+: _set_remainder remainder ! ;
 
 : _get_tempo
-  :TEMPO redis_get :NL _tok2 strtok drop
-  0 :NL _tok2 strtok tonum 60 swap /
+  :TEMPO redis_get :NL _tok1 strtok drop
+  0 :NL _tok1 strtok tonum 60 swap /
 ;
 
-: _get_next
-  _get_chaos x @ over
-  * +
-  1 % dup x !
-  5 *
-  5 %
+: _get_div
+  :DIV redis_get :NL _tok2 strtok drop
+  0 :NL _tok2 strtok tonum round
+  dup 0 = if drop 1 endif
+;
+
+: _get_base
+  :BASE redis_get :NL _tok3 strtok drop
+  0 :NL _tok3 strtok tonum round
+;
+
+: _get_mode
+  :MODE redis_get :NL _tok4 strtok drop
+  0 :NL _tok4 strtok tonum round
+;
+
+: _get_transpose
+  :TRANSPOSE redis_get :NL _tok5 strtok drop
+  0 :NL _tok5 strtok tonum round
+;
+
+: _get_next_note
+    _get_remainder
+      _get_div
+          2dup
+        /
+        floor
+        dup svpush
+      *
+    -
+      _get_base
+    *
+  _set_remainder
+    svpop
+      _get_mode
+    +
+      scale_size @
+    absmod
+      scale
+    +
+    @
+      _get_transpose
+    +
 ;
 
 : _get_on_length
   _get_tempo 0.25 *
   0.97 *
 ;
-
 
 : _get_off_length
   _get_tempo 0.25 *
@@ -59,17 +116,17 @@ create pentatonic 50 , 52 , 55 , 57 , 60 , 60 ,
   block_sigint
   ###
     100
-      pentatonic
-        _get_next
-      +
-      @
+      _get_next_note
       dup svpush
-        0x90
-  send_midi_reverse
+        0
+  edo_degree_to_midi
   ###
-  _get_on_length sleep
-  0 svpop 0x90 send_midi_reverse
-  _get_off_length sleep
+    _get_on_length
+  sleep
+        0 svpop 0
+  edo_degree_to_midi
+    _get_off_length
+  sleep
   unblock_sigint
   _midi_from_redis
 ;
