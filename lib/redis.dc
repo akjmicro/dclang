@@ -79,17 +79,17 @@ var redis_socket -1 redis_socket !
 ######################################
 
 : _zero_redis_buffer
-  REDIS_BUFFER 0 REDIS_BUFSIZE memset drop
+  REDIS_BUFFER 0 REDIS_BUFSIZE memset
 ;
 
 : _msg_to_buf
   _set_msg
   _zero_redis_buffer
-  REDIS_BUFFER _get_msg dup strlen mempcpy
+  _get_msg str+
   drop
 ;
 
-: _redis_connect
+: redis_connect
   REDIS_HOST REDIS_PORT tcpconnect redis_socket !
 ;
 
@@ -99,13 +99,12 @@ var redis_socket -1 redis_socket !
 
 : _read_redis_buffer
   _zero_redis_buffer
-  redis_socket @ REDIS_BUFFER REDIS_BUFSIZE read drop
+  redis_socket @ swap REDIS_BUFSIZE read drop
   REDIS_BUFFER
 ;
 
 : _redis_write_read
   _msg_to_buf
-  _redis_connect
   _write_redis_buffer
   _read_redis_buffer
 ;

@@ -1,6 +1,8 @@
 "http_server.dc" import
 "redis.dc" import
 
+redis_connect
+
 # make sure to have the environment variable DCLANG_HTTP_PORT
 # set somewhere in your shell variables for this to work
 "DCLANG_HTTP_PORT" envget tonum const HTTP_PORT

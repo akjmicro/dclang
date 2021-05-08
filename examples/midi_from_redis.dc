@@ -1,0 +1,86 @@
+# To run: run the `http_widget_server_example.dc` example like so:
+# dclang http_widget_server_example.dc
+#
+# Then, in another shell, open this script:
+# dclang midi_from_redis.dc
+#
+# Make sure, of course, you have a redis server running on your machine.
+#
+# Direct your browser to localhost:7651
+# (or whatever port you've configured, that's the default)
+# Watch how the sliders influence
+
+"midi.dc" import
+"redis.dc" import
+
+# make the redis connection
+redis_connect
+
+var x 1 x !
+var _tok1
+var _tok2
+"\n" const :NL
+"chaos" const :CHAOS
+"tempo" const :TEMPO
+
+create pentatonic 50 , 52 , 55 , 57 , 60 , 60 ,
+
+
+: _get_chaos
+  :CHAOS redis_get :NL _tok1 strtok drop
+  0 :NL _tok1 strtok tonum
+;
+
+: _get_tempo
+  :TEMPO redis_get :NL _tok2 strtok drop
+  0 :NL _tok2 strtok tonum 60 swap /
+;
+
+: _get_next
+  _get_chaos x @ over
+  * +
+  1 % dup x !
+  5 *
+  5 %
+;
+
+: _get_on_length
+  _get_tempo 0.25 *
+  0.97 *
+;
+
+
+: _get_off_length
+  _get_tempo 0.25 *
+  0.03 *
+;
+
+: _midi_from_redis
+  block_sigint
+  ###
+    100
+      pentatonic
+        _get_next
+      +
+      @
+      dup svpush
+        0x90
+  send_midi_reverse
+  ###
+  _get_on_length sleep
+  0 svpop 0x90 send_midi_reverse
+  _get_off_length sleep
+  unblock_sigint
+  _midi_from_redis
+;
+
+: midi_from_redis
+  "You are now entering an endless loop, hit CTRL-C to stop..." print cr
+  "Notice that you won't be able to stop until a note off event hits." print cr
+  "In this way, the notes end cleanly!" print cr
+  _midi_from_redis
+;
+
+midi_from_redis
+
+panic

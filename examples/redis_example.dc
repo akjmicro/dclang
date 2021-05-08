@@ -1,5 +1,8 @@
 "redis.dc" import
 
+# connect to the server
+redis_connect
+
 "
 Illustration of redis interface, which for now is limited to the simplest
 setting and getting of top-level keys.
