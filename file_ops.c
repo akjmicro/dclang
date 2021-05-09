@@ -132,8 +132,8 @@ static void filewritefunc()
     }
     FILE *file_to_write = (FILE *)(DCLANG_UINT) pop();
     char *str = (char *)(DCLANG_UINT) pop();
-    fwrite(str, 1, strlen(str), file_to_write);
-    fflush(file_to_write);
+    DCLANG_INT result = fwrite(str, 1, strlen(str), file_to_write);
+    push(result);
 }
 
 static void fileflushfunc()
