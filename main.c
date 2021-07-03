@@ -108,12 +108,63 @@ DCLANG_INT fsp;
 #include "primitives.c"
 #include "input_ops.c"
 
+void execfunc() {
+    if (data_stack_ptr < 1)
+    {
+        printf("exec -- stack underflow! ");
+        return;
+    }
+    DCLANG_UINT string_uint_addr = (DCLANG_UINT) pop();
+    if (string_uint_addr < MIN_STR || string_uint_addr > MAX_STR)
+    {
+        perror("exec -- String address out-of-range.");
+        return;
+    }
+    char *argument = (char *)string_uint_addr;
+    const struct primitive *pr = primitives;
+
+    // search user-defined functions (words)
+    for (DCLANG_INT x = num_user_words - 1; x > -1 ; x--) {
+        if (strcmp(user_words[x].name, argument) == 0) {
+            if (def_mode) {
+                prog[iptr].function.with_param = callfunc;
+                prog[iptr++].param = user_words[x].word_start;
+            } else {
+                DCLANG_INT cur_iptr = iptr;
+                callfunc(user_words[x].word_start);
+                // run the function
+                while (iptr < max_iptr) {
+                    iptr += 1;
+                    (*(prog[iptr].function.with_param)) (prog[iptr].param);
+                }
+            }
+            return;
+        }
+    }
+
+    // search dictionary (list, not hash) entry
+    while (pr->name != 0) {
+        if (strcmp(pr->name, argument) == 0) {
+            if ((def_mode) && (!is_special_form(pr->name))) {
+                prog[iptr++].function.without_param = pr->function;
+            } else {
+                if (validate(argument)) {
+                    (*(pr->function)) ();
+                }
+            }
+            return;
+        }
+        pr++;
+    }
+    printf("exec -- word not found: %s\n", argument);
+}
 
 // needed so we can add 'import' to primitives
 void load_extra_primitives() {
     add_primitive("primitives", show_primitivesfunc);
     add_primitive("import", importfunc);
     add_primitive("input", inputfunc);
+    add_primitive("exec", execfunc);
     /* final endpoint must be zeros,
        and they won't count in the 'count': */
     add_primitive(0, 0);
