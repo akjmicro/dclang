@@ -89,7 +89,7 @@ setup_port
 : send_midi_reverse
   # sometimes, it's easier to have the stack be queued out such
   # the the top-of-stack goes out first. So, in this case, one would
-  # for example put the volumn, then the note, then the status_byte
+  # for example put the volume, then the note, then the status_byte
   # on the stack in that order. Then it's a simple matter of emitting
   # three times with zero stack-dancing or svpush or swapping involved.
   get_mididev redirect
