@@ -5,6 +5,7 @@
 Born on 2018-05-05 */
 
 #define _GNU_SOURCE
+#define __USE_GNU 1
 
 #include <ctype.h>
 #include <stdio.h>
@@ -104,6 +105,7 @@ DCLANG_INT fsp;
 #include "token.c"
 #include "user_words.c"
 #include "variable_ops.c"
+#include "tree.c"
 #include "signal_ops.c"
 #include "primitives.c"
 #include "input_ops.c"

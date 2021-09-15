@@ -111,6 +111,10 @@ void add_all_primitives()
     add_primitive("h!", hashsetfunc);
     add_primitive("h@", hashgetfunc);
     add_primitive("hkeys", hashkeysfunc);
+    // tree storage
+    add_primitive("treemake", treemakefunc);
+    add_primitive("tree!", treesetfunc);
+    add_primitive("tree@", treegetfunc);
     // branching
     add_primitive("times", timesfunc);
     add_primitive("again", againfunc);
