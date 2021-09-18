@@ -41,6 +41,7 @@ Born on 2018-05-05 */
 #define MAXWORD 1048576
 #define IBUFSIZE 128
 #define NUMVARS 1048576
+#define NUM_TREE_ROOTS 32
 
 // data stack
 DCLANG_FLT data_stack[DATA_STACK_SIZE * 2];

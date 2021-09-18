@@ -1,0 +1,23 @@
+treemake const :mytree
+"A cat" "Garfield" :mytree tree! drop  # tree! will automatically put the value of the key to TOS
+"A dog" "Droopy" :mytree tree! drop    # many times, we want to ignore it, so we `drop` it here.
+
+# assert on fetching from first tree
+"Garfield" :mytree tree@
+"A cat" str= assert
+"Droopy" :mytree tree@
+"A dog" str= assert
+
+# create a second tree
+treemake const :mytree2
+"Elizabethan author" "Shakespeare" :mytree2 tree! drop
+
+# assert on fetching, and that we are isolated from the first tree
+"Shakespeare" :mytree2 tree@
+"Elizabethan author" str= assert
+"Garfield" :mytree2 tree@   # should be a null entry
+0 = assert
+
+# check the first tree again:
+"Garfield" :mytree tree@
+"A cat" str= assert

@@ -25,31 +25,25 @@ make_tree_entry(char *key, DCLANG_FLT value)
     return new_tree;
 }
 
-void *tree_root = NULL;
+void *tree_roots[NUM_TREE_ROOTS] = {NULL};
+int tree_roots_idx = -1;
 
 void treemakefunc()
 {
-    //void *tree_root = malloc(sizeof(void *));
-    //tree_root = NULL;
-    push((DCLANG_UINT) &tree_root);
-}
-
-void tree_free_func(void *tree_data)
-{
-    struct tree_entry *td = tree_data;
-    if(!td) {
+    tree_roots_idx += 1;
+    if (tree_roots_idx > (NUM_TREE_ROOTS - 1))
+    {
+        printf("treemake -- tree root limit reached!\n");
+        printf("You can change the limit when compiling via the NUM_TREE_ROOTS variable\n");
         return;
     }
-    free(tree_data);
-    return;
+    push((DCLANG_UINT) tree_roots_idx);
 }
 
 int tree_compare_func(const void *l, const void *r)
 {
     struct tree_entry *tree_l = (struct tree_entry *)l;
     struct tree_entry *tree_r = (struct tree_entry *)r;
-    //printf("tree_l->key is %s\n", tree_l->key);
-    //printf("tree_r->key is %s\n", tree_r->key);
     return strcmp(tree_l->key, tree_r->key);
 }
 
@@ -62,13 +56,10 @@ void treegetfunc()
         printf("so it can be referred to later.\n");
         return;
     }
-    void **tree_root = (void **)(DCLANG_UINT)pop();
-    //void *root = *tree_root;
+    DCLANG_UINT tree_idx = (DCLANG_UINT) pop();
     char *search_key = (char *)(DCLANG_UINT) pop();
-    //printf("about to make tree entry\n");
     struct tree_entry *te = make_tree_entry(strdup(search_key), 0);
-    //printf("about to do tfind\n");
-    struct tree_entry *retval = tfind(te, tree_root, tree_compare_func);
+    struct tree_entry *retval = tfind(te, &tree_roots[tree_idx], tree_compare_func);
     if (retval == NULL)
     {
         push((DCLANG_UINT) 0);
@@ -86,27 +77,12 @@ void treesetfunc()
         printf("so it can be referred to later.\n");
         return;
     }
-    void **tree_root = (void **)(DCLANG_UINT) pop();
-    //void *root = *tree_root;
+    DCLANG_UINT tree_idx = (DCLANG_UINT) pop();
     char *search_key = (char *)(DCLANG_UINT) pop();
     DCLANG_FLT value = pop();
-    //printf("about to make tree entry\n");
     struct tree_entry *te = make_tree_entry(strdup(search_key), value);
-    //printf("about to do tsearch\n");
-    struct tree_entry *retval = tsearch(te, tree_root, tree_compare_func);
+    struct tree_entry *retval = tsearch(te, &tree_roots[tree_idx], tree_compare_func);
     push((DCLANG_FLT)((*(struct tree_entry **)retval)->value));
 }
 
-void walk_entry(const void *tree_data, VISIT x, int level)
-{
-    struct tree_entry *node = *(struct tree_entry **)tree_data;
-    printf("<%d>Walk on node %s %u %s  \n",
-        level,
-        x == preorder?"preorder":
-        x == postorder?"postorder":
-        x == endorder?"endorder":
-        x == leaf?"leaf":
-        "unknown",
-        node->key, node->value);
-    return;
-}
+// TODO: twalk, tdestroy, tdelete
