@@ -63,12 +63,12 @@ void treegetfunc()
         return;
     }
     void **tree_root = (void **)(DCLANG_UINT)pop();
-    void *root = *tree_root;
+    //void *root = *tree_root;
     char *search_key = (char *)(DCLANG_UINT) pop();
     //printf("about to make tree entry\n");
     struct tree_entry *te = make_tree_entry(strdup(search_key), 0);
     //printf("about to do tfind\n");
-    struct tree_entry *retval = tfind(te, &root, tree_compare_func);
+    struct tree_entry *retval = tfind(te, tree_root, tree_compare_func);
     if (retval == NULL)
     {
         push((DCLANG_UINT) 0);
@@ -87,13 +87,13 @@ void treesetfunc()
         return;
     }
     void **tree_root = (void **)(DCLANG_UINT) pop();
-    void *root = *tree_root;
+    //void *root = *tree_root;
     char *search_key = (char *)(DCLANG_UINT) pop();
     DCLANG_FLT value = pop();
     //printf("about to make tree entry\n");
     struct tree_entry *te = make_tree_entry(strdup(search_key), value);
     //printf("about to do tsearch\n");
-    struct tree_entry *retval = tsearch(te, &root, tree_compare_func);
+    struct tree_entry *retval = tsearch(te, tree_root, tree_compare_func);
     push((DCLANG_FLT)((*(struct tree_entry **)retval)->value));
 }
 
