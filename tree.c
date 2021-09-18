@@ -25,15 +25,14 @@ make_tree_entry(char *key, DCLANG_FLT value)
     return new_tree;
 }
 
+void *tree_root = NULL;
 
 void treemakefunc()
 {
-    void *tree_root = malloc(sizeof(void *));
+    //void *tree_root = malloc(sizeof(void *));
     //tree_root = NULL;
     push((DCLANG_UINT) &tree_root);
 }
-
-void *tree_root = NULL;
 
 void tree_free_func(void *tree_data)
 {
@@ -49,8 +48,8 @@ int tree_compare_func(const void *l, const void *r)
 {
     struct tree_entry *tree_l = (struct tree_entry *)l;
     struct tree_entry *tree_r = (struct tree_entry *)r;
-    printf("tree_l->key is %s\n", tree_l->key);
-    printf("tree_r->key is %s\n", tree_r->key);
+    //printf("tree_l->key is %s\n", tree_l->key);
+    //printf("tree_r->key is %s\n", tree_r->key);
     return strcmp(tree_l->key, tree_r->key);
 }
 
@@ -63,12 +62,13 @@ void treegetfunc()
         printf("so it can be referred to later.\n");
         return;
     }
-    DCLANG_UINT which_tree = (DCLANG_UINT) pop();
+    void **tree_root = (void **)(DCLANG_UINT)pop();
+    void *root = *tree_root;
     char *search_key = (char *)(DCLANG_UINT) pop();
-    printf("about to make tree entry\n");
+    //printf("about to make tree entry\n");
     struct tree_entry *te = make_tree_entry(strdup(search_key), 0);
-    printf("about to do tfind\n");
-    struct tree_entry *retval = tfind(te, &tree_root, tree_compare_func);
+    //printf("about to do tfind\n");
+    struct tree_entry *retval = tfind(te, &root, tree_compare_func);
     if (retval == NULL)
     {
         push((DCLANG_UINT) 0);
@@ -86,13 +86,14 @@ void treesetfunc()
         printf("so it can be referred to later.\n");
         return;
     }
-    DCLANG_UINT which_tree = (DCLANG_UINT) pop();
+    void **tree_root = (void **)(DCLANG_UINT) pop();
+    void *root = *tree_root;
     char *search_key = (char *)(DCLANG_UINT) pop();
     DCLANG_FLT value = pop();
-    printf("about to make tree entry\n");
+    //printf("about to make tree entry\n");
     struct tree_entry *te = make_tree_entry(strdup(search_key), value);
-    printf("about to do tsearch\n");
-    struct tree_entry *retval = tsearch(te, &tree_root, tree_compare_func);
+    //printf("about to do tsearch\n");
+    struct tree_entry *retval = tsearch(te, &root, tree_compare_func);
     push((DCLANG_FLT)((*(struct tree_entry **)retval)->value));
 }
 
