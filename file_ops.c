@@ -70,7 +70,7 @@ static void filereadlinefunc()
     if (data_stack_ptr < 1)
     {
         printf("Stack underflow!\n");
-        printf("'freadline' needs <buffer_pointer> <fpointer> on the stack\n");
+        printf("'freadline' needs <fpointer> on the stack\n");
         return;
     }
     FILE *file_to_read = (FILE *)(DCLANG_UINT) pop();

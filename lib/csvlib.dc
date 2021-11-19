@@ -1,0 +1,98 @@
+# This is a first sketch of a "naive .psv" processing library
+# It's set here to split by sqlite3-like records, which are pipe-delimited
+# by default with the "|" character. The functionality so far is "naive"
+# because it's assumed that the data won't have newlines (\n) in anyplace
+# but the true end-of-line of the record (so, it doesn't have the capacity
+# yet to do embedded, escaped "\n" via '"'. And, it also assumes your .csv
+# file (really a 'psv' by default) also won't have the pipe character "|"
+# in your data columns. If you can live with those current restrictions,
+# you can do some basic iteration through lines of a CSV file to get at
+# integer 0-indexed columns.
+
+var csv_input_file
+var csv_output_file
+var csv_line_idx -1 csv_line_idx !
+var csv_sep "|" csv_sep !  # pipe-delimited by default, can be over-ridden
+var csv_col_idx 0 csv_col_idx !
+var csv_col_desired
+var csv_col_buf
+
+
+: csv_open_input_file
+  # ( file_string )  # file-string must be on stack
+  -1 csv_line_idx !
+  "r" fopen
+  csv_input_file !
+;
+
+: _csv_init_col_buf
+  # ( num_bytes )
+  csv_col_buf @                 # ( num_bytes buf )
+  dup 0 =                       # ( num_bytes buf buf_is_0 )
+  if
+    drop                        # ( num_bytes )
+  else
+    free
+  endif
+  mkbuf
+  csv_col_buf !
+;
+
+: csv_next_input_line
+  csv_input_file @ freadline           # ( result_str  num_bytes )
+  dup -1 =
+  if
+    swap drop return                   # will return -1. Caller can catch.
+  else
+	  dup _csv_init_col_buf
+	  over +                             # ( result_str  end_of_str )
+	  1 -                                # ( result_str  end_of_str-1 )
+	  0 1 memset                         # replace newline with \0
+	  drop                               # ( result_str )
+	  csv_line_idx @ 1 + csv_line_idx !
+  endif
+;
+
+: csv_column_loop
+  dup csv_sep @ strfind
+  dup 0 =
+  if
+    drop
+    return
+  else
+		2dup swap
+		-                          # ( start end diff )
+    csv_col_idx @ csv_col_desired @ =
+    if
+      csv_col_buf @            # ( start end diff buf )
+      3 pick 2 pick mempcpy    # ( start end diff buf+diff )
+      0 1 memset
+      swap
+      -                        # ( start end buf )
+      swap drop swap drop      # ( buf )
+      return
+    else
+      drop                     # ( start end )
+      swap drop                # ( end )
+      1 +                      # ( end+1 ) -- advance the string pointer
+      csv_col_idx @ 1 + csv_col_idx !
+      csv_column_loop
+    endif
+  endif
+;
+
+: csv_find_col_x
+  0 csv_col_idx !
+  csv_col_desired !
+  csv_column_loop
+;
+
+: csv_cleanup
+  csv_col_buf @
+  dup 0 = if drop else free endif
+  csv_input_file @
+  dup 0 = if drop else fclose endif
+  csv_output_file @
+  dup 0 = if drop else fclose endif
+  clear
+;

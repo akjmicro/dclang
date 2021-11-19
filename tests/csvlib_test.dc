@@ -1,0 +1,46 @@
+"csvlib.dc" import
+
+var example_line
+"one|two|three|||five" example_line !
+
+: test_csv_init_col_buf_resets_full_buffer
+    32 mkbuf csv_col_buf !
+    csv_col_buf @
+      "This sentence has 32 characters!"
+        dup strlen
+    mempcpy
+  drop
+  depth 0 = assert
+  32 _csv_init_col_buf
+  csv_col_buf @ "" str= assert
+;
+
+: test_csv_next_input_line
+  "example.csv" csv_open_input_file
+  csv_next_input_line "one|two|three" str= assert
+  csv_next_input_line "four|five|six" str= assert
+  csv_next_input_line "seven|eight|nine" str= assert
+  csv_input_file @ fclose
+;
+
+: test_csv_find_col_x
+  example_line @ 2 csv_find_col_x "three" str= assert
+  example_line @ 1 csv_find_col_x "two" str= assert
+  example_line @ 4 csv_find_col_x "" str= assert
+  example_line @ 5 csv_find_col_x "five" str= assert
+;
+
+: test_csv_iteration
+  "example.csv" csv_open_input_file
+  csv_next_input_line 0 csv_find_col_x "one" str= assert
+  csv_next_input_line 1 csv_find_col_x "five" str= assert
+  csv_next_input_line 2 csv_find_col_x "nine" str= assert
+  # We expect to hit the EOF here:
+  csv_next_input_line -1 = assert
+;
+
+test_csv_init_col_buf_resets_full_buffer
+test_csv_next_input_line
+test_csv_find_col_x
+test_csv_iteration
+csv_cleanup
