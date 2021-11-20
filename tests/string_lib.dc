@@ -31,4 +31,16 @@ drop
 str= assert
 buf @ free
 
+# testing the str_between word:
+"blueberry" "apple" "cranberry" str_between
+true = assert
+"apple" "apple" "cranberry" str_between
+true = assert
+"cranberry" "apple" "cranberry" str_between
+true = assert
+"acai" "apple" "cranberry" str_between
+false = assert
+"lingonberry" "apple" "cranberry" str_between
+false = assert
+
 "If you are only seeing this msg, all tests have passed!" print cr

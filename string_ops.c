@@ -341,7 +341,7 @@ static void streqfunc()
     }
     char *str1 = (char *) string_uint_addr1;
     char *str2 = (char *) string_uint_addr2;
-    push((DCLANG_INT) strcmp(str1, str2) == 0);
+    push(((DCLANG_INT) strcmp(str1, str2) == 0) * -1);
 }
 
 static void strltfunc()
@@ -365,7 +365,7 @@ static void strltfunc()
     }
     char *str1 = (char *) string_uint_addr1;
     char *str2 = (char *) string_uint_addr2;
-    push((DCLANG_INT) strcmp(str1, str2) < 0);
+    push(((DCLANG_INT) strcmp(str1, str2) < 0) * -1);
 }
 
 static void strgtfunc()
@@ -389,7 +389,7 @@ static void strgtfunc()
     }
     char *str1 = (char *) string_uint_addr1;
     char *str2 = (char *) string_uint_addr2;
-    push((DCLANG_INT) strcmp(str1, str2) > 0);
+    push(((DCLANG_INT) strcmp(str1, str2) > 0) * -1);
 }
 
 static void strfindfunc()

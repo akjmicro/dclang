@@ -13,6 +13,14 @@
   dup strlen mempcpy
 ;
 
+: str_between
+  # ( str_pnt bottom top ) .s
+  2 pick           # ( str_pnt bottom top str_pnt )
+  str< not svpush  # ( str_pnt bottom ) ( not_outside )
+  str< not         # ( not_outside ) ( not_outside )
+  svpop and
+;
+
 : _incr_saved_counter
   svpop 1 + svpush
 ;
