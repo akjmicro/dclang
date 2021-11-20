@@ -80,9 +80,32 @@ void treesetfunc()
     DCLANG_UINT tree_idx = (DCLANG_UINT) pop();
     char *search_key = (char *)(DCLANG_UINT) pop();
     DCLANG_FLT value = pop();
+    struct tree_entry *te_del = make_tree_entry(strdup(search_key), value);
+    tdelete(te_del, &tree_roots[tree_idx], tree_compare_func);
     struct tree_entry *te = make_tree_entry(strdup(search_key), value);
     struct tree_entry *retval = tsearch(te, &tree_roots[tree_idx], tree_compare_func);
     push((DCLANG_FLT)((*(struct tree_entry **)retval)->value));
 }
 
 // TODO: twalk, tdestroy, tdelete
+
+void print_node(const void *node, const VISIT order, const int depth)
+{
+    if (order == preorder || order == leaf ) {
+		    printf(
+		        "key=%s, value=%s\n",
+		        (*(struct tree_entry **)node)->key,
+		        (char *)(DCLANG_UINT)((*(struct tree_entry **)node)->value)
+		    );
+    }
+}
+
+void treewalkfunc()
+{
+    if (data_stack_ptr < 1) {
+        printf("treewalk -- stack underflow! Need <tree_index> on the stack.\n");
+        return;
+    }
+    DCLANG_UINT tree_idx = (DCLANG_UINT) pop();
+    twalk(tree_roots[tree_idx], print_node);
+}
