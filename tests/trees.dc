@@ -21,3 +21,15 @@ treemake const :mytree2
 # check the first tree again:
 "Garfield" :mytree tree@
 "A cat" str= assert
+
+# test deleting an element
+"Shakespeare" :mytree2 treedel
+"Shakespeare" :mytree2 tree@
+0 = assert
+
+# test destroying a tree:
+:mytree treedestroy
+"Garfield" :mytree tree@
+0 = assert
+#"Droopy" :mytree tree@
+#0 = assert

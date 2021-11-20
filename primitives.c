@@ -116,6 +116,8 @@ void add_all_primitives()
     add_primitive("tree!", treesetfunc);
     add_primitive("tree@", treegetfunc);
     add_primitive("treewalk", treewalkfunc);
+    add_primitive("treedel", treedelfunc);
+    add_primitive("treedestroy", treedestroyfunc);
     // branching
     add_primitive("times", timesfunc);
     add_primitive("again", againfunc);
