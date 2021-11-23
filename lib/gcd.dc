@@ -3,6 +3,11 @@
   if else dup endif
 ;
 
-: gcd ?dup if tuck % gcd else endif ;
+: gcd
+  ?dup
+  if
+    swap over % gcd
+  endif
+;
 
 784 48 gcd 16 = assert
