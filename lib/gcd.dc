@@ -6,7 +6,8 @@
 : gcd
   ?dup
   if
-    swap over % gcd
+    swap over %
+    gcd
   endif
 ;
 
