@@ -1,3 +1,13 @@
+2021-11-27
+* Been a while since I've updated this. Big things I can remember having added since the last update
+  (more available by looking at github diffs):
+  * adding a bunch of words to use binary trees structures as avariable storage option. These work like
+    hashes, but unlike `h@` and `h!`, you can create more than one (the `h` words only use a giant global
+    common hash-space). They are only slightly slower than a hash; they have O(log n) performance.
+  * tcp networking words: `tcpconnect`, `tcplisten`, `tcpaccept`
+  * some library tweaks, including many MIDI examples and their dependent library code.
+  * The addition (today) of `freadall`, to slurp an entire file into memory.
+
 2020-05-01
 * Ok, maybe I'll be nice and announce: the `fread` word has changed API. The old parameter
   pattern was: <num_bytes_to_read> <file_ptr>, and an automatic buffer was created for the work.
