@@ -156,6 +156,7 @@ void add_all_primitives()
     add_primitive("fopen", fileopenfunc);
     add_primitive("fread", filereadfunc);
     add_primitive("freadline", filereadlinefunc);
+    add_primitive("freadall", filereadallfunc);
     add_primitive("fseek", fileseekfunc);
     add_primitive("ftell", filetellfunc);
     add_primitive("fwrite", filewritefunc);

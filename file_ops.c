@@ -90,6 +90,46 @@ static void filereadlinefunc()
     push((DCLANG_INT) num_bytes_read);
 }
 
+static void filereadallfunc()
+{
+    if (data_stack_ptr < 1)
+    {
+        printf("Stack underflow!\n");
+        printf("'freadall' needs <fpointer> on the stack\n");
+        return;
+    }
+    DCLANG_UINT chr_cnt = 0;
+    DCLANG_UINT bufsize = 64;
+    DCLANG_INT ch;
+    char *allbuf = (char *) malloc(sizeof(char) * bufsize);
+    memset(allbuf, 0, bufsize);
+    FILE *file_to_read = (FILE *)(DCLANG_UINT) pop();
+    while ((ch = fgetc(file_to_read)) != EOF)
+    {
+        chr_cnt += 1;
+        if (chr_cnt > bufsize)
+        {
+            bufsize += 64;
+            allbuf = realloc(allbuf, bufsize);
+        }
+        memset(allbuf + chr_cnt - 1, ch, 1);
+    }
+    memset(allbuf + chr_cnt, 0, 1);
+    // update print safety:
+    if ((DCLANG_UINT) allbuf < MIN_STR || MIN_STR == 0)
+    {
+        MIN_STR = (DCLANG_UINT) allbuf;
+    }
+    if ((DCLANG_UINT) allbuf + chr_cnt + 1 > MAX_STR || MAX_STR == 0)
+    {
+        MAX_STR = (DCLANG_UINT) allbuf + chr_cnt + 1;
+    }
+    // push the address of our new string and length
+    push((DCLANG_UINT) allbuf);
+    // push the number of bytes read
+    push((DCLANG_INT) chr_cnt);
+}
+
 static void fileseekfunc()
 {
     if (data_stack_ptr < 3)
