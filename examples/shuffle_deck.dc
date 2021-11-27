@@ -1,4 +1,5 @@
 # N.B. this is a newer, more efficient algorithm, simply using swaps
+# change on 2021-11-27: use the more correct Fisher-Yates algorithm
 
 : TEMP-SLOT 0 ;
 : DECK-START 1 ;
@@ -19,11 +20,14 @@
 
 : shuffle-deck
   0 TEMP-SLOT !
-  NUM-CARDS 1 + times
+    1
+      NUM-CARDS
+        -1
+    for
       i
-      rand NUM-CARDS * floor
+      rand i * floor
       cell-swap
-  again
+  next
 ;
 
 : printout-deck
