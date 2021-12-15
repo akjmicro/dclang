@@ -11,26 +11,10 @@
 # dclang midi_from_redis.dc
 
 "midi.dc" import
-"redis.dc" import
-
-# make the redis connection
-redis_connect
+"redis_midi.dc" import
 
 var remainder 1 remainder !
-var _tok1
-var _tok2
-var _tok3
-var _tok4
-var _tok5
-var _tok6
-# some symbols
-"\n" const :NL
-"tempo" const :TEMPO
-"gate" const :GATE
-"base" const :BASE
-"div" const :DIV
-"mode" const :MODE
-"transp" const :TRANSPOSE
+
 # our EDO var
 41 midi_edo !
 
@@ -81,37 +65,6 @@ scale_size !
 
 : _get_remainder remainder @ dup 0 = if drop 1 endif ;
 : _set_remainder remainder ! ;
-
-: _get_tempo
-  :TEMPO redis_get :NL _tok1 strtok drop
-  0 :NL _tok1 strtok tonum 60 swap /
-;
-
-: _get_gate
-  :GATE redis_get :NL _tok6 strtok drop
-  0 :NL _tok6 strtok tonum 100 /
-;
-
-: _get_div
-  :DIV redis_get :NL _tok2 strtok drop
-  0 :NL _tok2 strtok tonum round
-  dup 0 = if drop 1 endif
-;
-
-: _get_base
-  :BASE redis_get :NL _tok3 strtok drop
-  0 :NL _tok3 strtok tonum round
-;
-
-: _get_mode
-  :MODE redis_get :NL _tok4 strtok drop
-  0 :NL _tok4 strtok tonum round
-;
-
-: _get_transpose
-  :TRANSPOSE redis_get :NL _tok5 strtok drop
-  0 :NL _tok5 strtok tonum round
-;
 
 : _get_next_note
     _get_remainder

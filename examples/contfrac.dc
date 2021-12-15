@@ -41,21 +41,21 @@ drop
 ;
 
 : show-frac
-    # do numerator
-    expansion-get
-    numerator-get *
-    numerator-lag +
-    dup ..
-    numerator-lead-put
+  # do numerator
+  expansion-get
+  numerator-get *
+  numerator-lag +
+  dup ..
+  numerator-lead-put
 
-    "/" print
+  "/" print
 
-    # do denominator
-    expansion-get
-    denominator-get *
-    denominator-lag +
-    dup .
-    denominator-lead-put
+  # do denominator
+  expansion-get
+  denominator-get *
+  denominator-lag +
+  dup .
+  denominator-lead-put
 ;
 
 : continued-fraction
@@ -86,3 +86,4 @@ pi 7 continued-fraction
 "The continued fraction expansion of Phi is: " print cr
 : phi 1 5 sqrt + 2 / ;
 phi 16 continued-fraction
+

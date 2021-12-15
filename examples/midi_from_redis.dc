@@ -4,31 +4,17 @@
 # First, make sure you have a running redis server on your machine
 #
 # Then, to run, do `redis-cli` in a shell, making sure you set the following vars:
-#     tempo, base, div, mode, transp
+#     tempo, gate, base, div, mode, transp
 # (they should all be integers)
 #
 # Then, in another shell, open this script, your command should be:
 # dclang midi_from_redis.dc
 
 "midi.dc" import
-"redis.dc" import
-
-# make the redis connection
-redis_connect
+"redis_midi.dc" import
 
 var remainder 1 remainder !
-var _tok1
-var _tok2
-var _tok3
-var _tok4
-var _tok5
-# some symbols
-"\n" const :NL
-"tempo" const :TEMPO
-"base" const :BASE
-"div" const :DIV
-"mode" const :MODE
-"transp" const :TRANSPOSE
+
 # our EDO var
 17 midi_edo !
 
@@ -51,32 +37,6 @@ scale_size !
 
 : _get_remainder remainder @ dup 0 = if drop 1 endif ;
 : _set_remainder remainder ! ;
-
-: _get_tempo
-  :TEMPO redis_get :NL _tok1 strtok drop
-  0 :NL _tok1 strtok tonum 60 swap /
-;
-
-: _get_div
-  :DIV redis_get :NL _tok2 strtok drop
-  0 :NL _tok2 strtok tonum round
-  dup 0 = if drop 1 endif
-;
-
-: _get_base
-  :BASE redis_get :NL _tok3 strtok drop
-  0 :NL _tok3 strtok tonum round
-;
-
-: _get_mode
-  :MODE redis_get :NL _tok4 strtok drop
-  0 :NL _tok4 strtok tonum round
-;
-
-: _get_transpose
-  :TRANSPOSE redis_get :NL _tok5 strtok drop
-  0 :NL _tok5 strtok tonum round
-;
 
 : _get_next_note
     _get_remainder
@@ -103,13 +63,15 @@ scale_size !
 ;
 
 : _get_on_length
-  _get_tempo 0.25 *
-  0.97 *
+  _get_tempo
+  _get_gate *
+  0.25 *
 ;
 
 : _get_off_length
-  _get_tempo 0.25 *
-  0.03 *
+  _get_tempo
+  1 _get_gate - *
+  0.25 *
 ;
 
 : _midi_from_redis
