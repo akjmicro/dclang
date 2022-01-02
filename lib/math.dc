@@ -1,0 +1,22 @@
+: _digit_sum_helper
+  over 0 >
+  if
+    dup svpush
+    2dup %
+    svpush
+    / floor
+    swap svpop
+    +
+    swap svpop
+    _digit_sum_helper
+  else
+    2drop
+  endif
+;
+
+: digit_sum
+  svpush svpush
+  0
+  svpop svpop
+  _digit_sum_helper
+;
