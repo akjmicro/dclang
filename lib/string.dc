@@ -5,10 +5,12 @@
 1024 const SLICEBUFSIZE
 var _slicebuf
 SLICEBUFSIZE mkbuf _slicebuf !
-# some error messages we re-use
-"error: strslice: cannot slice a string with the start_idx > end_idx!"
+# Some error messages we re-use
+"strslice: stack underflow -- must have <straddr> <start_idx> <end_idx> on the stack!"
+const :STRSLICE_UNDERFLOW_ERROR
+"strslice: error -- cannot slice a string with the start_idx > end_idx!"
 const :STRSLICE_NOT_LTE_ERROR
-"error: strslice: cannot slice a string with negative indices!"
+"strslice: error -- cannot slice a string with negative indices!"
 const :STRSLICE_NEG_ERROR
 
 : strdup
@@ -25,13 +27,24 @@ const :STRSLICE_NEG_ERROR
 ;
 
 : strslice
+  # Need the following on the stack to use (TOS is rightmost):
   # (string_addr start_idx end_idx)
-  # validation steps:
+  ####################
+  # Validation steps #
+  ####################
+  # First check the stack depth. We need at least 3 parms:
+  depth 3 <
+  if
+    :STRSLICE_UNDERFLOW_ERROR print cr
+    clear return
+  endif
+  # Now, check that start index isn't bigger than end index:
   2dup <= not
   if
     :STRSLICE_NOT_LTE_ERROR print cr
     clear return
   endif
+  # Finally, check that both #s aren't negative:
   2dup
   0 <
   if
@@ -43,9 +56,12 @@ const :STRSLICE_NEG_ERROR
     :STRSLICE_NEG_ERROR print cr
     clear return
   endif
-  # first clear the _strslice buffer:
+  ########################
+  # END VALIDATION STEPS #
+  ########################
+  # Clear the `_strslice` buffer:
   _slicebuf @ 0 SLICEBUFSIZE memset drop
-  # now, actually deal with the user input:
+  # Now, actually deal with the user input:
   over -
   svpush +
   svpush
