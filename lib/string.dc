@@ -1,5 +1,16 @@
 "deprecated_stack.dc" import
 
+# Set up a small _private_ buffer for doing string slices.
+# Used by `strslice` below
+1024 const SLICEBUFSIZE
+var _slicebuf
+SLICEBUFSIZE mkbuf _slicebuf !
+# some error messages we re-use
+"error: strslice: cannot slice a string with the start_idx > end_idx!"
+const :STRSLICE_NOT_LTE_ERROR
+"error: strslice: cannot slice a string with negative indices!"
+const :STRSLICE_NEG_ERROR
+
 : strdup
   # copies a string; leaves the new string's
   # beginning address on the stack
@@ -11,6 +22,36 @@
 
 : str+
   dup strlen mempcpy
+;
+
+: strslice
+  # (string_addr start_idx end_idx)
+  # validation steps:
+  2dup <= not
+  if
+    :STRSLICE_NOT_LTE_ERROR print cr
+    clear return
+  endif
+  2dup
+  0 <
+  if
+    :STRSLICE_NEG_ERROR print cr
+    clear return
+  endif
+  0 <
+  if
+    :STRSLICE_NEG_ERROR print cr
+    clear return
+  endif
+  # first clear the _strslice buffer:
+  _slicebuf @ 0 SLICEBUFSIZE memset drop
+  # now, actually deal with the user input:
+  over -
+  svpush +
+  svpush
+  _slicebuf @ svpop svpop mempcpy
+  drop
+  _slicebuf @
 ;
 
 : str_between

@@ -1,0 +1,62 @@
+"csvlib.dc" import
+
+# Here is the input file to read catalog numbers from.
+# One might also try '100_double_stars.txt'
+var objects_file
+"colorful_double_stars.txt" "r" fopen
+objects_file !
+
+var sky_safari_file
+"skysafi.skylist" "w" fopen
+sky_safari_file !
+
+var this_obj 0 this_obj !
+
+: _writeblock
+  sky_safari_file @ fwrite drop
+;
+
+: _writeheader
+  "SkySafariObservingListVersion=3.0\n" _writeblock
+;
+
+: _read_object
+  objects_file @ freadline
+  -1 =
+  if
+    -1 swap drop
+    return
+  endif
+;
+
+: _do_record
+    "SkyObject=BeginObject\n  ObjectID=2,-1,-1\n"
+  _writeblock
+    "  CatalogNumber="
+  _writeblock
+    this_obj @
+  _writeblock
+    "EndObject=SkyObject\n"
+  _writeblock
+;
+
+: _iterate_and_write
+  _read_object dup
+  -1 =
+  if
+    drop
+  else
+    this_obj !
+    _do_record
+    _iterate_and_write
+  endif
+;
+
+: everything
+  _writeheader
+  _iterate_and_write
+  sky_safari_file @ fclose
+  objects_file @ fclose
+;
+
+everything
