@@ -225,6 +225,7 @@ static void emitfunc()
     }
     char char_code = (char) pop();
     fprintf(ofp, "%c", char_code);
+    fflush(ofp);
 }
 
 static void uemitfunc()
@@ -237,6 +238,7 @@ static void uemitfunc()
     long unsigned long char_code = (long unsigned long) pop();
     long ulen = utf8_encode(utf8_buf, char_code);
     fprintf(ofp, "%s", utf8_buf);
+    fflush(ofp);
 }
 
 static void ordfunc()

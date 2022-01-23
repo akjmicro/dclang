@@ -6,6 +6,7 @@ static void showfunc()
         return;
     }
     fprintf(ofp, "%0.19g ", pop());
+    fflush(ofp);
 }
 
 static void shownospacefunc()
@@ -15,6 +16,7 @@ static void shownospacefunc()
         return;
     }
     fprintf(ofp, "%0.19g", pop());
+    fflush(ofp);
 }
 
 static void crfunc()
@@ -59,6 +61,7 @@ static void showrjfunc()
     int precision = (DCLANG_INT) pop();
     int width = (DCLANG_INT) pop();
     fprintf(ofp, "%*.*g ", width, precision, pop());
+    fflush(ofp);
 }
 
 static void redirectfunc()
