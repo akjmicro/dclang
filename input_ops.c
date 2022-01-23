@@ -139,24 +139,23 @@ static void import(char *infilestr) {
         repl();
         return;
     }
-    char *imp_buf = malloc(strlen(prefix) + strlen(infilestr) + 2);
+    char *full_path = malloc(512);
+    memset(full_path, 0, 512);
     char *slash = "/";
-    char *ending = "\0";
-    strcat(imp_buf, prefix);
-    strcat(imp_buf, slash);
-    strcat(imp_buf, infilestr);
-    char *final = strcat(imp_buf, ending);
-    if (access(final, F_OK) == 0) {
-        FILE *infile = fopen(final, "r");
+    strcat(full_path, prefix);
+    strcat(full_path, slash);
+    strcat(full_path, infilestr);
+    if (access(full_path, F_OK) == 0) {
+        FILE *infile = fopen(full_path, "r");
         setinput(infile);
         repl();
         return;
     }
     printf(
         "The file named %s doesn't appear to exist in the current " \
-        "directory, or under %s, or cannot be accessed.\n"
+        "directory, or under %s as %s, or cannot be accessed.\n"
         "You may want to check its existence and permissions!\n",
-        infilestr, prefix
+        infilestr, prefix, full_path
     );
     return;
 }
