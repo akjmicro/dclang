@@ -3,7 +3,7 @@
 # to defy the FORTH purists who mock `pick` and using the
 # stack(s) as a local array. One of the things that leads to
 # people hating FORTH and other stack languages is the confusion
-# caused by stack-dancing. Eventually, tehse will be deprecated
+# caused by stack-dancing. Eventually, these will be deprecated
 # once they can be removed entirely from the library and examples
 # that already use them. In fact, in dclang, you are encouraged
 # to avoid stack-dancing and to simply push what you want on the stack
