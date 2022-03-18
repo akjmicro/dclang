@@ -21,7 +21,7 @@ foo @ 20 = assert
 bar @ 30 = assert
 
 
-: testfuncvar 1 drop var 3 allot ;
+: testfuncvar 1 drop var 4 allot ;
 
 testfuncvar alpha
 2632.12 alpha !

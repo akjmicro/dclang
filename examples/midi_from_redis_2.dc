@@ -10,6 +10,7 @@
 # Then, in another shell, open this script, your command should be:
 # dclang midi_from_redis.dc
 
+"math.dc" import
 "midi.dc" import
 "redis_midi.dc" import
 
@@ -51,17 +52,6 @@ var dummy
 var scale_size
 dummy scale -
 scale_size !
-
-: absmod
-  dup svpush
-  %
-  dup 0 <
-  if
-    svpop +
-  else
-    svdrop
-  endif
-;
 
 : _get_remainder remainder @ dup 0 = if drop 1 endif ;
 : _set_remainder remainder ! ;

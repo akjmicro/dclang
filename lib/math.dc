@@ -1,3 +1,14 @@
+: absmod
+  dup svpush
+  %
+  dup 0 <
+  if
+    svpop +
+  else
+    svdrop
+  endif
+;
+
 : _digit_sum_helper
   over 0 >
   if

@@ -37,7 +37,7 @@ var RCHAN
 # We need to create a common, general space for phasor accumulators.
 # that happens here:
 var _PHASOR_COUNT
-var _PHASOR_ARRAY 64 allot
+var _PHASOR_ARRAY 65 allot
 
 : _reset_phasor_count  0 _PHASOR_COUNT ! ;
 

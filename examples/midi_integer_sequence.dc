@@ -14,7 +14,6 @@
 "midi.dc" import
 "redis_midi.dc" import
 
-
 # our EDO var
 41 midi_edo !
 
@@ -43,17 +42,6 @@ var x
 : x++
   x @ 1 +
   x !
-;
-
-: absmod
-  dup svpush
-  %
-  dup 0 <
-  if
-    svpop +
-  else
-    svdrop
-  endif
 ;
 
 : _get_next_note

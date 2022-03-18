@@ -84,7 +84,7 @@ static void allotfunc()
         printf("allot -- stack underflow! ");
         return;
     }
-    varsidx += (DCLANG_UINT) pop();
+    varsidx += (DCLANG_UINT) pop() - 1;
 }
 
 static void createfunc()
