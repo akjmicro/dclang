@@ -1,23 +1,34 @@
 "dsp.dc" import
 
-0.09 0.75 make-port myport
+0.09 1.00 make-port myport
 
 : mymetronome
-  300 sine
-  2.01 metro 0.7 *
-  myport port *
-  0.4 panmix
-
-  350.11 sine
-  2.51 metro 0.7 *
-  myport port *
-  0.3 sine * 0.4 0.4 +
+    400 sine
+      2.01 metro
+      1.2 *
+        myport
+      port
+    *
+      0.4
   panmix
-
-  450.231 sine
-  3.01 metro 0.7 *
-  myport port *
-  0.6 panmix
+    467 sine
+      2.51 metro
+      1.2 *
+        myport
+      port
+    *
+      0.3 sine
+      0.25 *
+      0.5 +
+  panmix
+    600 sine
+      3.01 metro
+      1.2 *
+        myport
+      port
+    *
+      0.6
+  panmix
   stereo-out
   t+
   mymetronome

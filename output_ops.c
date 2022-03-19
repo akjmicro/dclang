@@ -60,7 +60,7 @@ static void showrjfunc()
     // right-justified for pretty printing!
     int precision = (DCLANG_INT) pop();
     int width = (DCLANG_INT) pop();
-    fprintf(ofp, "%*.*g ", width, precision, pop());
+    fprintf(ofp, "%*.*f ", width, precision, pop());
     fflush(ofp);
 }
 

@@ -3,17 +3,20 @@
 make-biquad myflt
 
 : biquad-example
-  # some noise
-  noise 0.8 *
-  myflt
-  false
-  0.2 sine 500 * 1500 +
-  105.01
-  biquad-bp
+  # some noise, scaled to 0.8 max amplitude
+    noise 0.8 *
+      myflt
+        false
+          0.2 sine
+          500 *
+          1500 +
+            105.01
+    biquad-bp
   # scale down, it's louder
-  0.001 *
+    0.001 *
   # mix into center
-  0.5 panmix
+      0.5
+  panmix
   # put to output
   stereo-out
   # advance counter

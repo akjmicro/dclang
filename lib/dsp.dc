@@ -14,7 +14,7 @@ pi 2 / const PI_DIV_2
 1 2 pi * / const INV_2PI
 
 # sample rate and bit depth here
-# can be 8000e, 44100e, etc. etc
+# can be 8000, 44100, 48000, etc.
 44100 const SAMPLE_RATE
 
 # more efficient, for multiplication
@@ -358,29 +358,45 @@ DELAY_HEADER_SIZE STORAGE_SIZE + const DELAY_STRUCT_SIZE
 ;
 
 : biquad_compute
-  # ( sig struct -- sig-out )
-  over svpush
-  # ( sig struct )  ( sig )
+  # ( sig struct -- sig_out )
   # the actual transformative equation:
-  2dup dup mu @ swap xt1 @ * 2 pick dup sigma @ swap xt2 @ * + +
-  # ( sig struct sig+mu*xt1+sigma*xt2 )
-  # ( sig struct sig+mu*xt1+sigma*xt2 )  ( sig )
-  over alpha @ *
-  # ( sig struct alpha*(sig+mu*xt1+sigma*xt2) )  ( sig )
-  over gamma @ 2 pick yt1 @ *
-  # ( sig struct alpha*(sig+mu*xt1+sigma*xt2) gamma*yt1 )  ( sig )
-  2 pick beta @ 3 pick yt2 @ * - +
-  # ( sig struct alpha*(sig+mu*xt1+sigma*xt2)+gamma*yt1-beta*yt2 )  ( sig )
-  # ( sig struct sig-out )  ( sig )
-  # UPDATE:
-  -rot dup xt1 @ over xt2 !
-  # ( sig-out sig struct )  ( sig )
-  svpop over xt1 !
-  # ( sig-out sig struct )  ( )
-  dup yt1 @ over yt2 !
-  # ( sig-out sig struct )  ( )
-  nip over swap yt1 !
-  # ( sig-out )  ( )
+          2dup                 # ( sig struct sig struct )
+            dup mu @           # ( sig struct sig struct mu )
+            swap xt1 @         # ( sig struct sig mu xt1 )
+          *                    # ( sig struct sig mu*xt1 )
+            2 pick             # ( sig struct sig mu*xt1 struct )
+              dup sigma @      # ( sig struct sig mu*xt1 struct sigma )
+              swap xt2 @       # ( sig struct sig mu*xt1 sigma xt2 )
+            *                  # ( sig struct sig mu*xt1 xt2*sigma)
+          +                    # ( sig struct sig mu*xt1+xt2*sigma)
+        +                      # ( sig struct sig+mu*xt1+sigma*xt2 )
+        over alpha @ *         # ( sig struct alpha*(sig+mu*xt1+sigma*xt2) )
+          over gamma @         # ( sig struct alpha*(sig+mu*xt1+sigma*xt2) gamma )
+          2 pick yt1 @ *       # ( sig struct alpha*(sig+mu*xt1+sigma*xt2) gamma*yt1 )
+            2 pick beta @      # ( sig struct alpha*(sig+mu*xt1+sigma*xt2) gamma*yt1 beta )
+              3 pick yt2 @     # ( sig struct alpha*(sig+mu*xt1+sigma*xt2) gamma*yt1 beta yt2 )
+            *
+          -
+        +                      # ( sig struct alpha*(sig+mu*xt1+sigma*xt2)+gamma*yt1-beta*yt2 )
+                               # simplification:
+                               # ( sig struct sig_out )
+      svpush                   # ( sig struct )                        ( sig_out )
+  ##################################
+  # UPDATE xt2, yt2, xt1, and yt1: #
+  ##################################
+        dup xt1 @              # ( sig struct xt1 )                    ( sig_out )
+          over xt2             # ( sig struct xt1 xt2_addr )           ( sig_out )
+      !                        # ( sig struct )                        ( sig_out )
+        dup yt1 @              # ( sig struct yt1 )                    ( sig_out )
+          over yt2             # ( sig struct yt1 yt2_addr )           ( sig_out )
+      !                        # ( sig struct )                        ( sig_out )
+          2dup xt1             # ( sig struct sig xt1_addr )           ( sig_out )
+      !                        # ( sig struct )                        ( sig_out )
+    swap drop                  # ( struct )                            ( sig_out )
+          svpop 2dup           # ( struct sig_out struct sig_out )     ( )
+          swap yt1             # ( struct sig_out sig_out yt1_addr )   ( )
+      !                        # ( struct sig_out )                    ( )
+    nip                        # ( sig_out )                           ( )
 ;
 
 : make-biquad
@@ -389,7 +405,7 @@ DELAY_HEADER_SIZE STORAGE_SIZE + const DELAY_STRUCT_SIZE
 ;
 
 : biquad-lp
-  # ( sig struct reinit cutoff res -- sig-out )
+  # ( sig struct reinit cutoff res -- sig_out )
   3 pick cutoff @ 2 pick <>
   # ( sig struct reinit cutoff res bool_cfdiff  )
   4 pick res @ 2 pick <>
@@ -404,7 +420,7 @@ DELAY_HEADER_SIZE STORAGE_SIZE + const DELAY_STRUCT_SIZE
 ;
 
 : biquad-hp
-  # ( sig struct reinit cutoff res -- sig-out )
+  # ( sig struct reinit cutoff res -- sig_out )
   3 pick cutoff @ 2 pick <>
   # ( sig struct reinit cutoff res bool_cfdiff  )
   4 pick res @ 2 pick <>
@@ -419,7 +435,7 @@ DELAY_HEADER_SIZE STORAGE_SIZE + const DELAY_STRUCT_SIZE
 ;
 
 : biquad-bp
-  # ( sig struct reinit cutoff res -- sig-out )
+  # ( sig struct reinit cutoff res -- sig_out )
   3 pick cutoff @ 2 pick <>
   # ( sig struct reinit cutoff res bool_cfdiff  )
   4 pick res @ 2 pick <>

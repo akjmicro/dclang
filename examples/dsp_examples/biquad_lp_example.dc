@@ -6,43 +6,48 @@ make-biquad myflt3
 make-biquad myflt4
 
 : biquad-example
-  # fat source (left)
-  noise 0.3 *
-  dup
-  myflt1
-  false
-  120
-  67.2
-  biquad-lp
-  # scale down, it's louder
-  0.5 *
-  myflt2
-  false
-  120
-  1.2
-  biquad-bp
-  # scale down, it's louder
-  0.002 *
-  # mix into center
-  0.05 panmix
   #####################
-  # right side
-  myflt3
-  false
-  120.431
-  67.2
-  biquad-lp
+  # fat source (left) #
+  #####################
+    noise 0.3 *
+      dup
+        myflt1
+          false
+            120
+              67.2
+      biquad-lp
   # scale down, it's louder
-  0.5 *
-  myflt4
-  false
-  120.431
-  1.2
-  biquad-bp
+      0.5 *
+        myflt2
+          false
+            120
+              1.2
+      biquad-bp
   # scale down, it's louder
-  0.002 *
+      0.002 *
   # mix into center
-  0.95 panmix
+        0.05
+    panmix
+  #####################################
+  # right side (duplicated from above #
+  #####################################
+      myflt3
+        false
+          120.431
+            67.2
+    biquad-lp
+  # scale down, it's louder
+    0.5 *
+      myflt4
+        false
+          120.431
+            1.2
+    biquad-bp
+  # scale down, it's louder
+    0.002 *
+  # mix into center
+      0.95
+  panmix
   # put to output
   stereo-out
   # advance counter
