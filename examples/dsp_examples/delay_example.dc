@@ -15,8 +15,7 @@ var mysl
 make-hc-filter mylp
 
 # delay setup:
-make-delay-line mydelay
-mydelay init-delay-line
+1 make-delay-line mydelay
 
 # random pitch setup:
 # A Wilson CPS hexany (2, 3, 5, 9)

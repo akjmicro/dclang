@@ -1,14 +1,12 @@
 "dsp.dc" import
 
 # create a delay line
-make-delay-line mydelay
-mydelay init-delay-line
+1 make-delay-line mydelay
 
 0.03 0.6 make-port myport
 
 # example function
 : simple-delay-example
-
   440 sine
   0.4333 metro 0.8 *
   myport port *

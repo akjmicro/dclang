@@ -45,7 +45,7 @@ static void callfunc(DCLANG_FLT where)
 
 /* This word will restore 'iptr' to what it was before going on its
 fancy journey into a word.  It won't "Make America Great Again", but it's
-a start.  */
+a start. */
 static void returnfunc()
 {
     iptr = return_stack[--return_stack_ptr];

@@ -40,7 +40,7 @@ Born on 2018-05-05 */
 #define RETURN_STACK_SIZE 128
 #define MAXWORD 1048576
 #define IBUFSIZE 128
-#define NUMVARS 1048576
+#define NUMVARS 16777216
 #define NUM_TREE_ROOTS 32
 
 // data stack

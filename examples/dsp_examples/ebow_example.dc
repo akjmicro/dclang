@@ -1,24 +1,35 @@
 "dsp.dc" import
 
 make-hc-filter mylp
-make-delay-line mydelay
-mydelay init-delay-line
+1 make-delay-line mydelay
 
 : ebow-example
   # trigger, will be nozzled off:
-  noise 0.5 *
-  mylp 768 0.3 hc-lowpass 0.9 *
-  0.333 0.1 gate 0.5 * *
-  0.3 phasor *
+    noise 0.5 *
+      mylp
+        768
+          0.3
+    hc-lowpass
+    0.9 *
+      0.333
+        0.1
+      gate
+      0.5 *
+    *
+      0.3 phasor
+    *
   # filtered noise fed into a delay line resonator
-  mydelay 1 256 / delay-read 0.99999 *
-  2dup
-  +
-  0.5 panmix
+      mydelay
+        1 256 /
+      delay-read
+      0.99999 *           # ( dry wet )
+    +                     # ( dry+wet )
+      dup                 # ( dry+wet dry+wet )
+      0.5 panmix          # ( dry+wet )
   # mix for delay-write
-  + 0.95 *
-  mydelay delay-write
-
+    0.95 *                # ((dry+wet)*0.95)
+      mydelay
+  delay-write             # ( )
   # final output
   stereo-out
   t+

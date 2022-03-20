@@ -27,58 +27,55 @@ pi 2 / const PI_DIV_2
 0x7fffffff const BIT_DEPTH
 
 # setup timestamp; unit will be samples.
-var SAMPLE_CLOCK
-0 SAMPLE_CLOCK !
+var sample_clock
+0 sample_clock !
 
 # setup channels
-var LCHAN
-var RCHAN
+var lchan
+var rchan
 
-# We need to create a common, general space for phasor accumulators.
-# that happens here:
-var _PHASOR_COUNT
-var _PHASOR_ARRAY 64 allot
-
-: _reset_phasor_count  0 _PHASOR_COUNT ! ;
-
-: _advance_phasor_count _PHASOR_COUNT @ 1 + _PHASOR_COUNT ! ;
-
-: seconds2samples SAMPLE_RATE * round ;
+: seconds2samples
+  # (seconds -- samples )
+    SAMPLE_RATE * round
+;
 
 # sample clock (timestamp) and channel routines here
-: t SAMPLE_CLOCK @ ;
-: lcget LCHAN @ ;
-: lcset LCHAN ! ;
-: rcget RCHAN @ ;
-: rcset RCHAN ! ;
+: t sample_clock @ ;
+: lcget lchan @ ;
+: lcset lchan ! ;
+: rcget rchan @ ;
+: rcset rchan ! ;
 : _clear_channels  0.0 lcset 0.0 rcset ;
-
-: t+
-  # advance the clock
-  1 SAMPLE_CLOCK @ + SAMPLE_CLOCK !
-  _clear_channels
-  _reset_phasor_count
-;
 
 : freq2sample_phase INV_SAMPLE_RATE * ;
 
-: phasor-pointer
-  _PHASOR_ARRAY _PHASOR_COUNT @ +
-;
+#######################
+# PHASORS/OSCILLATORS #
+#######################
 
-###############
-# OSCILLATORS #
-###############
+# To start with, we need to create a common, general space for phasor accumulators.
+# That happens here. This is so that any new phasor automatically registers
+# its value and allows the next phasor to do the same.
+var _phasor_count
+var _phasor_array 64 allot
+
+: _reset_phasor_count  0 _phasor_count ! ;
+
+: _advance_phasor_count _phasor_count @ 1 + _phasor_count ! ;
+
+: phasor_pointer
+  _phasor_array _phasor_count @ +
+;
 
 : phasor
   # get current phase; wrap around 0-1:
   freq2sample_phase
   # grab the accumulator value:
-  phasor-pointer @ tuck
+  phasor_pointer @ tuck
   # add, wrap-around from 0.0-1.0
   + 1.0 %
   # write back current value:
-  phasor-pointer !
+  phasor_pointer !
   # update count reference (this will be reset by the clock advance) :
   _advance_phasor_count
 ;
@@ -155,20 +152,21 @@ var cmp
 # DELAY #
 #########
 
-262144 const STORAGE_SIZE
 2 const DELAY_HEADER_SIZE
-DELAY_HEADER_SIZE STORAGE_SIZE + const DELAY_STRUCT_SIZE
 
-: make-delay-line var DELAY_STRUCT_SIZE allot ;
-
-: init-delay-line
-  # ( delay-struct -- )
-  STORAGE_SIZE over !
-  0 over 1 + !
-  STORAGE_SIZE times
-    0.0 over i + DELAY_HEADER_SIZE + !
-  again
-  drop
+: make-delay-line
+  # Create a delay line. 'seconds' represents the maximum
+  # time the delay can reach, not the actual read delay time,
+  # which is controlled by `delay-read`
+  # ( seconds <make-delay-line> name )
+    var                   # ( seconds )
+    seconds2samples       # ( samples )
+      dup                 # ( samples samples )
+        here              # ( samples samples var_addr+1 )
+        1 -               # ( samples samples var_addr )
+    !                     # ( samples )    # put the delay sample size in first slot
+    DELAY_HEADER_SIZE +   # ( samples+hdrsz )
+  allot                   # (  )        # reserve the memory
 ;
 
 : %abs 2dup % over + swap % swap drop ;
@@ -177,14 +175,8 @@ DELAY_HEADER_SIZE STORAGE_SIZE + const DELAY_STRUCT_SIZE
 : _set-delay-position      1 + ! ;
 : _set-delay-value         dup _get-delay-position DELAY_HEADER_SIZE + + ! ;
 : _read-delay-pos-wrapped  over @ %abs DELAY_HEADER_SIZE + + @ ;
-
-: _get-floor-val
-  2dup floor _read-delay-pos-wrapped
-;
-
-: _get-ceil-val
-  2 pick 2 pick ceil _read-delay-pos-wrapped
-;
+: _get-floor-val           2dup floor _read-delay-pos-wrapped ;
+: _get-ceil-val            2 pick 2 pick ceil _read-delay-pos-wrapped ;
 
 : _interpolate
   # ( real-val floor-val ceil-val -- interpolated_val )
@@ -194,11 +186,15 @@ DELAY_HEADER_SIZE STORAGE_SIZE + const DELAY_STRUCT_SIZE
 : delay-read
   # ( delay-struct time -- delsig )
   # convert time offset to samples:
-  SAMPLE_RATE *
+      SAMPLE_RATE *                  # ( dstr tsmp )
   # add distance from write offset:
-  over _get-delay-position swap -
-  _get-floor-val _get-ceil-val _interpolate
-  swap drop
+        over _get-delay-position     # ( dstr tsmp dpos )
+        swap                         # ( dstr dspo tsmp )
+      -                              # ( dstr dpos-tsmp )
+        _get-floor-val               # ( dstr val fl_val )
+          _get-ceil-val              # ( dstr val fl_val ceil_val )
+      _interpolate                   # ( dstr interp_val )
+  swap drop                          # ( interp_val )
 ;
 
 : delay-write
@@ -227,9 +223,9 @@ DELAY_HEADER_SIZE STORAGE_SIZE + const DELAY_STRUCT_SIZE
 # Neat bonus: this 'port' ugen can be used to make envelopes!
 # See the example file 'bell_of_doom.fs' for an example.
 
-: _port-factor 1 swap 0.5 * SAMPLE_RATE * / ;
-: _get-rising-factor 1 + @ ;
-: _get-falling-factor 2 + @ ;
+: _port-factor         1 swap 0.5 * SAMPLE_RATE * / ;
+: _get-rising-factor   1 + @ ;
+: _get-falling-factor  2 + @ ;
 
 : make-port
   # ( rise-sec fall-sec -- struct )
@@ -247,6 +243,38 @@ DELAY_HEADER_SIZE STORAGE_SIZE + const DELAY_STRUCT_SIZE
     2dup swap _get-falling-factor *
   endif
   swap drop over @ + tuck swap !
+;
+
+##################
+# Allpass filter #
+##################
+# Based on the equation:
+# y = coef*x + x_delayed - coef*y_delayed
+# so, it's a feed-forward and feedback using
+# a delay line of a given length, and a matched
+# coefficient `coef`.
+
+: allpass
+  # y = coef*x + x_del - coef*y_del
+  # ( sig coef dx dy dlt -- sig_out )
+  # same as:
+  # ( x c dx dy dlt -- y )
+                2dup             # ( x c dx dy dlt dy dlt )         (   )
+            delay-read           # ( x c dx dy dlt y_del )          (   )
+              4 pick *           # ( x c dx dy dlt c*y_del )        (   )
+            svpush               # ( x c dx dy dlt )                ( c*y_del )
+              2 pick swap        # ( x c dx dy dx dlt )             ( c*y_del )
+          delay-read svpush      # ( x c dx dy )                    ( x_del c*y_del )
+            3 pick 3 pick *      # ( x c dx dy c*x )                ( x_del c*y_del )
+            svpop +              # ( x c dx dy c*x+x_del )          ( c*y_del )
+            svpop -              # ( x c dx dy c*x+x_del-c*y_del )  (   )
+                                 # ( x c dx dy y )                  (   )
+            dup svpush           # ( x c dx dy y )                  ( y )
+            swap                 # ( x c dx y dy )                  ( y )
+        delay-write              # ( x c dx )                       ( y )
+      nip                        # ( x dx )                         ( y )
+  delay-write                    # (   )                            ( y )
+    svpop                        # ( y )                            (   )
 ;
 
 ##################
@@ -500,7 +528,6 @@ DELAY_HEADER_SIZE STORAGE_SIZE + const DELAY_STRUCT_SIZE
   _hc_common drop nip hc_del1 @
 ;
 
-
 ##########
 # OUTPUT #
 ##########
@@ -520,7 +547,15 @@ DELAY_HEADER_SIZE STORAGE_SIZE + const DELAY_STRUCT_SIZE
   BIT_DEPTH * round bytes32
 ;
 
+# stereo version of output
 : stereo-out
   lcget sendout
   rcget sendout
+;
+
+# word to advance the clock
+: t+
+  1 sample_clock @ + sample_clock !
+  _clear_channels
+  _reset_phasor_count
 ;
