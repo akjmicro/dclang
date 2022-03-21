@@ -248,33 +248,60 @@ var cmp
 ##################
 # Allpass filter #
 ##################
-# Based on the equation:
-# y = coef*x + x_delayed - coef*y_delayed
-# so, it's a feed-forward and feedback using
-# a delay line of a given length, and a matched
-# coefficient `coef`.
+# Two delay comb-filters (feed-forward and feedback using)
+# The delay lines having the same length, and a matched
+# coefficient `coef` that works in opposing signs on the
+# feedback and feedfoward signals
+
+: make_allpass
+  # ( dlt_max <make_allpass> name )
+    var
+    seconds2samples
+      here 1 -
+        over
+        2 + 2 *
+      allot
+          2dup
+      !
+      over + 2 +
+  !
+;
 
 : allpass
+  # Based on the equation:
   # y = coef*x + x_del - coef*y_del
-  # ( sig coef dx dy dlt -- sig_out )
+  # ( sig del dlt coef -- sig_out )
   # same as:
-  # ( x c dx dy dlt -- y )
-                2dup             # ( x c dx dy dlt dy dlt )         (   )
-            delay-read           # ( x c dx dy dlt y_del )          (   )
-              4 pick *           # ( x c dx dy dlt c*y_del )        (   )
-            svpush               # ( x c dx dy dlt )                ( c*y_del )
-              2 pick swap        # ( x c dx dy dx dlt )             ( c*y_del )
-          delay-read svpush      # ( x c dx dy )                    ( x_del c*y_del )
-            3 pick 3 pick *      # ( x c dx dy c*x )                ( x_del c*y_del )
-            svpop +              # ( x c dx dy c*x+x_del )          ( c*y_del )
-            svpop -              # ( x c dx dy c*x+x_del-c*y_del )  (   )
-                                 # ( x c dx dy y )                  (   )
-            dup svpush           # ( x c dx dy y )                  ( y )
-            swap                 # ( x c dx y dy )                  ( y )
-        delay-write              # ( x c dx )                       ( y )
-      nip                        # ( x dx )                         ( y )
-  delay-write                    # (   )                            ( y )
-    svpop                        # ( y )                            (   )
+  # ( x del dlt c -- y )
+	          2 pick
+	            dup
+	            @ 2 +
+	          +
+	            2 pick
+            delay-read
+	          over *
+	        svpush
+	          2 pick 2 pick
+	        delay-read
+	      svpush
+	# save stack is ( c*y_del x_del ) now
+	        3 pick
+	      *
+	        svpop
+	      +
+	        svpop
+	      -
+	    svpush
+	# save_stack is ( y ) now
+	      0 svpick
+	        2 pick
+	        dup @
+	        2 +
+	      +
+	    delay-write
+	  drop
+	delay-write
+	  svpop
 ;
 
 ##################

@@ -64,10 +64,10 @@
 ;
 
 : test-primes
-  2048 2 1 for
+  8192 2 1 for
     i is-prime
     if
-      i 4 4 .rj
+      i 4 0 .rj
     else
     endif
   next

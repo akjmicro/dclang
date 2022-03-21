@@ -1,0 +1,99 @@
+"dsp.dc" import
+
+make-hc-filter myhcfilter
+make-hc-filter myhcfilter2
+0.001 0.1 make-port myport
+0.15 make_allpass myallpass1
+0.15 make_allpass myallpass2
+0.15 make_allpass myallpass3
+0.15 make_allpass myallpass4
+0.15 make-delay-line mydelay1
+0.15 make-delay-line mydelay2
+0.15 make-delay-line mydelay3
+0.15 make-delay-line mydelay4
+create allpass_lengths
+  1889 INV_SAMPLE_RATE * ,
+  1597 INV_SAMPLE_RATE * ,
+  1237 INV_SAMPLE_RATE * ,
+   971 INV_SAMPLE_RATE * ,
+create delay_lengths
+  4172 INV_SAMPLE_RATE * ,
+  3863 INV_SAMPLE_RATE * ,
+  3557 INV_SAMPLE_RATE * ,
+  3217 INV_SAMPLE_RATE * ,
+var coef
+0.5 coef !
+var factor
+0.25 factor !
+var feedback
+0.87 feedback !
+
+######################################################################################
+# This example creates a very large hall or factory-space sounding reverb effect.    #
+# The source is a white noise impulse, which can be colored by filtering.            #
+# The signal for the reverb is 4 allpass filters in series, the signal of which gets #
+# split and sent to 4 parallel feedback delay lines.                                 #
+######################################################################################
+
+: allpass_reverb_example
+    noise 0.85 *
+    myhcfilter 5000 0.75 hc-lowpass
+      0.01 0.2 gate
+        myport
+      port
+    *
+    0.5 *
+      dup
+      myallpass1 allpass_lengths 0 + @ coef @ allpass
+      myallpass2 allpass_lengths 1 + @ coef @ allpass
+      myallpass3 allpass_lengths 2 + @ coef @ allpass
+      myallpass4 allpass_lengths 3 + @ coef @ allpass
+        dup
+          mydelay1 delay_lengths 0 + @ delay-read
+        +
+          dup
+          feedback @ *
+        mydelay1 delay-write
+      svpush
+        dup
+          mydelay2 delay_lengths 1 + @ delay-read
+        +
+          dup
+          feedback @ *
+        mydelay2 delay-write
+      svpush
+        dup
+          mydelay3 delay_lengths 2 + @ delay-read
+        +
+          dup
+          feedback @ *
+        mydelay3 delay-write
+      svpush
+        dup
+          mydelay4 delay_lengths 3 + @ delay-read
+        +
+          dup
+          feedback @ *
+        mydelay4 delay-write
+      svpush
+    drop
+      svpop
+        svpop
+          svpop
+            svpop
+          +
+        +
+      +
+      factor @ *
+        myhcfilter2
+          3500
+            0.0
+      hc-lowpass
+    +
+  0.5 panmix
+  stereo-out
+  t+
+  allpass_reverb_example
+;
+
+allpass_reverb_example
