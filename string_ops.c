@@ -437,7 +437,7 @@ static void strtokfunc()
     DCLANG_UINT string_uint_addr1 = (DCLANG_UINT) pop();
     if ((string_uint_addr1 != 0) && (string_uint_addr1 < MIN_STR || string_uint_addr1 > MAX_STR))
     {
-        perror("strtok --  <str> (first) string address out-of-range.");
+        perror("strtok -- <str> (first) string address out-of-range.");
         return;
     }
     if (string_uint_addr2 < MIN_STR || string_uint_addr2 > MAX_STR)
@@ -463,7 +463,7 @@ static void mempcpyfunc()
     DCLANG_UINT dest = (DCLANG_UINT) pop();
     if ((dest != 0) && (dest < MIN_STR || dest > MAX_STR))
     {
-        perror("mempcpy --  <dest> string address out-of-range.");
+        perror("mempcpy -- <dest> string address out-of-range.");
         return;
     }
     if (source < MIN_STR || source > MAX_STR)
@@ -486,7 +486,7 @@ static void memsetfunc()
     DCLANG_UINT dest = (DCLANG_UINT) pop();
     if ((dest != 0) && (dest < MIN_STR || dest > MAX_STR))
     {
-        perror("memset --  <dest> string address out-of-range.");
+        perror("memset -- <dest> string address out-of-range.");
         return;
     }
     push((DCLANG_INT) memset((char *)dest, (int)chr, (int)times));
