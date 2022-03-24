@@ -1,26 +1,108 @@
-: timestack
+: time_stack
+  "Timing the stack:                  " print
   clock
   1
-  10000000 times
+  25000000 times
     dup drop
   again
   drop
-  clock swap - . cr
+  clock swap - 2 6 .rj cr
 ;
+
+time_stack
+
+: time_svstack
+  "Timing the save stack:             " print
+  clock
+  1 svpush
+  25000000 times
+    0 svpick drop
+  again
+  clock swap - 2 6 .rj cr
+;
+
+time_svstack
+
+1 4 !
+
+: time_var_raw_int
+  "Timing variables using integers:   " print
+  clock
+  25000000 times
+    4 @ drop
+  again
+  clock swap - 2 6 .rj cr
+;
+
+time_var_raw_int
 
 var myvar
 1 myvar !
 
-: timevar
+: time_var
+  "Timing normal named variables:     " print
   clock
-  10000000 times
+  25000000 times
     myvar @ drop
   again
-  clock swap - . cr
+  clock swap - 2 6 .rj cr
 ;
 
-"Timing the stack: " print cr
-timestack
+time_var
 
-"Timing variables: " print cr
-timevar
+: time_hash
+  "Timing hash lookup:                " print
+  clock
+  1 "mykey" h!
+  25000000 times
+    "mykey" h@ drop
+  again
+  clock swap - 2 6 .rj cr
+;
+
+time_hash
+
+: do_math_swap
+  "Timing math with swap:             " print
+  clock
+    25000000 times
+        1 2 +
+          3 4 +
+          swap
+        /
+      drop
+    again
+  clock swap - 2 6 .rj cr
+;
+
+do_math_swap
+
+: do_math_save
+  "Timing math with svpush and svpop: " print
+  clock
+    25000000 times
+        1 2 + svpush
+        3 4 +
+          svpop
+        /
+      drop
+    again
+  clock swap - 2 6 .rj cr
+;
+
+do_math_save
+
+: do_math_var
+  "Timing math with ! and @:          " print
+  clock
+    25000000 times
+        1 2 + 0 !
+        3 4 +
+          0 @
+        /
+      drop
+    again
+  clock swap - 2 6 .rj cr
+;
+
+do_math_var

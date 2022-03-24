@@ -1,0 +1,71 @@
+: time_add
+  "Timing addition:       " print
+  clock
+  25000000 times
+    i 42 +
+  drop
+  again
+  clock swap - 2 6 .rj cr
+;
+
+time_add
+
+: time_sub
+  "Timing subtraction:    " print
+  clock
+  25000000 times
+    i 42 -
+  drop
+  again
+  clock swap - 2 6 .rj cr
+;
+
+time_sub
+
+: time_mul
+  "Timing multiplication: " print
+  clock
+  25000000 times
+    i 42 *
+  drop
+  again
+  clock swap - 2 6 .rj cr
+;
+
+time_mul
+
+: time_div
+  "Timing division:       " print
+  clock
+  25000000 times
+    i 42 /
+  drop
+  again
+  clock swap - 2 6 .rj cr
+;
+
+time_div
+
+: time_mod
+  "Timing modulus:        " print
+  clock
+  25000000 times
+    i 42 %
+  drop
+  again
+  clock swap - 2 6 .rj cr
+;
+
+time_mod
+
+: time_sine
+  "Timing sine:           " print
+  clock
+  25000000 times
+    i sin
+  drop
+  again
+  clock swap - 2 6 .rj cr
+;
+
+time_sine
