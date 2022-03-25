@@ -220,9 +220,9 @@ static void grabinput() {
 }
 
 static void inputfunc() {
-    if (!def_mode) {
-        grabinput();
-    } else {
+    if (def_mode) {
         prog[iptr++].function.without_param = grabinput;
+    } else {
+        grabinput();
     }
 }

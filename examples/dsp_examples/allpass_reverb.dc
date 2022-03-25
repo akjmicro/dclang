@@ -2,7 +2,7 @@
 
 make-hc-filter myhcfilter
 make-hc-filter myhcfilter2
-0.001 0.1 make-port myport
+0.001 0.05 make-port myport
 0.15 make_allpass myallpass1
 0.15 make_allpass myallpass2
 0.15 make_allpass myallpass3
@@ -36,9 +36,9 @@ var feedback
 ######################################################################################
 
 : allpass_reverb_example
-    noise 0.85 *
-    myhcfilter 5000 0.75 hc-lowpass
-      0.01 0.2 gate
+    noise 0.87 *
+    myhcfilter 1500 0.1 hc-lowpass
+      0.01 0.34 rand 0.14 * 0.14 + - gate
         myport
       port
     *
@@ -86,10 +86,11 @@ var feedback
       +
       factor @ *
         myhcfilter2
-          3500
+          1500
             0.0
       hc-lowpass
     +
+    1.7 *
   0.5 panmix
   stereo-out
   t+
