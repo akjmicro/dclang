@@ -13,7 +13,10 @@ static void push_no_check(DCLANG_FLT a)
     data_stack[data_stack_ptr++] = a;
 }
 
-static DCLANG_FLT pop()
+static DCLANG_FLT dclang_pop()
+// special case -- has a return value b/c it can
+// be used in other calls to give a value, which
+// also means it can be an API call.
 {
     return data_stack[--data_stack_ptr];
 }
@@ -51,7 +54,7 @@ static void pickfunc()
          printf("pick -- stack underflow!\n");
          return;
     }
-    DCLANG_UINT pick_idx = (DCLANG_UINT) pop();
+    DCLANG_UINT pick_idx = (DCLANG_UINT) dclang_pop();
     if (data_stack_ptr < (pick_idx + 1)) {
         printf("pick -- stack not deep enough!\n");
         return;
@@ -65,8 +68,8 @@ static void swapfunc()
         printf("swap -- stack underflow!\n");
         return;
     }
-    DCLANG_FLT val1 = pop();
-    DCLANG_FLT val2 = pop();
+    DCLANG_FLT val1 = dclang_pop();
+    DCLANG_FLT val2 = dclang_pop();
     push_no_check(val1);
     push_no_check(val2);
 }
@@ -123,7 +126,7 @@ static void svpushfunc()
         printf("svpush -- stack overflow!\n");
         save_data_stack_ptr = 0;
     }
-    DCLANG_FLT val = pop();
+    DCLANG_FLT val = dclang_pop();
     save_data_stack[save_data_stack_ptr++] = val;
 }
 
@@ -148,7 +151,7 @@ static void svpickfunc()
          printf("svpick -- stack underflow!\n");
          return;
     }
-    DCLANG_UINT svpick_idx = (DCLANG_UINT) pop();
+    DCLANG_UINT svpick_idx = (DCLANG_UINT) dclang_pop();
     if (save_data_stack_ptr < (svpick_idx + 1)) {
         printf("svpick -- stack not deep enough!\n");
         return;

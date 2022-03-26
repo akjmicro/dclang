@@ -11,6 +11,6 @@ static void isnullfunc()
         printf("'isnull' needs an element on the stack!\n");
         return;
     }
-    void *ptr = (void *)(DCLANG_INT)pop();
+    void *ptr = (void *)(DCLANG_INT)dclang_pop();
     push(ptr == NULL);
 }

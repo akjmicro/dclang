@@ -57,8 +57,8 @@ void treegetfunc()
         printf("so it can be referred to later.\n");
         return;
     }
-    DCLANG_UINT tree_idx = (DCLANG_UINT) pop();
-    char *search_key = (char *)(DCLANG_UINT) pop();
+    DCLANG_UINT tree_idx = (DCLANG_UINT) dclang_pop();
+    char *search_key = (char *)(DCLANG_UINT) dclang_pop();
     struct tree_entry *te = make_tree_entry(strdup(search_key), 0);
     struct tree_entry *retval = tfind(te, &tree_roots[tree_idx], tree_compare_func);
     if (retval == NULL)
@@ -78,9 +78,9 @@ void treesetfunc()
         printf("so it can be referred to later.\n");
         return;
     }
-    DCLANG_UINT tree_idx = (DCLANG_UINT) pop();
-    char *search_key = (char *)(DCLANG_UINT) pop();
-    DCLANG_FLT value = pop();
+    DCLANG_UINT tree_idx = (DCLANG_UINT) dclang_pop();
+    char *search_key = (char *)(DCLANG_UINT) dclang_pop();
+    DCLANG_FLT value = dclang_pop();
     struct tree_entry *te_del = make_tree_entry(strdup(search_key), value);
     tdelete(te_del, &tree_roots[tree_idx], tree_compare_func);
     struct tree_entry *te = make_tree_entry(strdup(search_key), value);
@@ -106,7 +106,7 @@ void treewalkfunc()
         printf("treewalk -- stack underflow! Need <tree_index> on the stack.\n");
         return;
     }
-    DCLANG_UINT tree_idx = (DCLANG_UINT) pop();
+    DCLANG_UINT tree_idx = (DCLANG_UINT) dclang_pop();
     twalk(tree_roots[tree_idx], print_node);
 }
 
@@ -116,8 +116,8 @@ void treedelfunc()
         printf("treedel -- stack underflow! Need <key> <tree_index> on the stack.\n");
         return;
     }
-    DCLANG_UINT tree_idx = (DCLANG_UINT) pop();
-    char *key = (char *)(DCLANG_UINT) pop();
+    DCLANG_UINT tree_idx = (DCLANG_UINT) dclang_pop();
+    char *key = (char *)(DCLANG_UINT) dclang_pop();
     struct tree_entry *te_del = make_tree_entry(strdup(key), 0);
     tdelete(te_del, &tree_roots[tree_idx], tree_compare_func);
     free(te_del);
@@ -129,7 +129,7 @@ void treedestroyfunc()
         printf("treedestroy -- stack underflow! Need <tree_index> on the stack.\n");
         return;
     }
-    DCLANG_UINT tree_idx = (DCLANG_UINT) pop();
+    DCLANG_UINT tree_idx = (DCLANG_UINT) dclang_pop();
     tdestroy(tree_roots[tree_idx], free);
     tree_roots[tree_idx] = NULL;
 }

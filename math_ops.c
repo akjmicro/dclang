@@ -6,7 +6,7 @@ static void addfunc()
         printf("'+' needs two numbers on the stack!\n");
         return;
     }
-    push(pop() + pop());
+    push(dclang_pop() + dclang_pop());
 }
 
 static void subfunc()
@@ -16,8 +16,8 @@ static void subfunc()
         printf("'-' needs two numbers on the stack!\n");
         return;
     }
-    DCLANG_FLT subtrahend = pop();
-    push(pop() - subtrahend);
+    DCLANG_FLT subtrahend = dclang_pop();
+    push(dclang_pop() - subtrahend);
 }
 
 static void mulfunc()
@@ -27,7 +27,7 @@ static void mulfunc()
         printf("'*' needs two numbers on the stack!\n");
         return;
     }
-    push(pop() * pop());
+    push(dclang_pop() * dclang_pop());
 }
 
 static void divfunc()
@@ -37,8 +37,8 @@ static void divfunc()
         printf("'/' needs two numbers on the stack!\n");
         return;
     }
-    DCLANG_FLT divisor = pop();
-    push(pop() / divisor);
+    DCLANG_FLT divisor = dclang_pop();
+    push(dclang_pop() / divisor);
 }
 
 static void modfunc()
@@ -48,8 +48,8 @@ static void modfunc()
         printf("'%%' needs two numbers on the stack!\n");
         return;
     }
-    DCLANG_FLT modulus = pop();
-    push(fmod(pop(), modulus));
+    DCLANG_FLT modulus = dclang_pop();
+    push(fmod(dclang_pop(), modulus));
 }
 
 static void lshiftfunc()
@@ -59,8 +59,8 @@ static void lshiftfunc()
         printf("'<<' needs two numbers on the stack!\n");
         return;
     }
-    DCLANG_UINT shift_amt = (DCLANG_UINT) pop();
-    DCLANG_UINT base = (DCLANG_UINT) pop();
+    DCLANG_UINT shift_amt = (DCLANG_UINT) dclang_pop();
+    DCLANG_UINT base = (DCLANG_UINT) dclang_pop();
     push((DCLANG_UINT) base << shift_amt);
 }
 
@@ -71,8 +71,8 @@ static void rshiftfunc()
         printf("'>>' needs two numbers on the stack!\n");
         return;
     }
-    DCLANG_UINT shift_amt = (DCLANG_UINT) pop();
-    DCLANG_UINT base = (DCLANG_UINT) pop();
+    DCLANG_UINT shift_amt = (DCLANG_UINT) dclang_pop();
+    DCLANG_UINT base = (DCLANG_UINT) dclang_pop();
     push((DCLANG_UINT) base >> shift_amt);
 }
 
@@ -83,7 +83,7 @@ static void absfunc()
         printf("'abs' needs a number on the stack!\n");
         return;
     }
-    push(fabs(pop()));
+    push(fabs(dclang_pop()));
 }
 
 static void minfunc()
@@ -93,8 +93,8 @@ static void minfunc()
         printf("'min' needs two numbers on the stack!\n");
         return;
     }
-    DCLANG_FLT a = pop();
-    DCLANG_FLT b = pop();
+    DCLANG_FLT a = dclang_pop();
+    DCLANG_FLT b = dclang_pop();
     DCLANG_FLT c = (a < b) ? a : b;
     push(c);
 }
@@ -106,8 +106,8 @@ static void maxfunc()
         printf("'max' needs two numbers on the stack!\n");
         return;
     }
-    DCLANG_FLT a = pop();
-    DCLANG_FLT b = pop();
+    DCLANG_FLT a = dclang_pop();
+    DCLANG_FLT b = dclang_pop();
     DCLANG_FLT c = (a > b) ? a : b;
     push(c);
 }
@@ -119,7 +119,7 @@ static void roundfunc()
         printf("'round' needs a number on the stack!\n");
         return;
     }
-    push((DCLANG_INT) round(pop()));
+    push((DCLANG_INT) round(dclang_pop()));
 }
 
 static void floorfunc()
@@ -129,7 +129,7 @@ static void floorfunc()
         printf("'floor' needs a number on the stack!\n");
         return;
     }
-    push((DCLANG_INT) floor(pop()));
+    push((DCLANG_INT) floor(dclang_pop()));
 }
 
 static void ceilfunc()
@@ -139,7 +139,7 @@ static void ceilfunc()
         printf("'ceil' needs a number on the stack!\n");
         return;
     }
-    push((DCLANG_INT) ceil(pop()));
+    push((DCLANG_INT) ceil(dclang_pop()));
 }
 
 /* scientific math words */
@@ -151,8 +151,8 @@ static void powerfunc()
         printf("'pow' needs two numbers on the stack!\n");
         return;
     }
-    DCLANG_FLT raise = pop();
-    push(pow(pop(), raise));
+    DCLANG_FLT raise = dclang_pop();
+    push(pow(dclang_pop(), raise));
 }
 
 static void sqrtfunc()
@@ -162,7 +162,7 @@ static void sqrtfunc()
         printf("'sqrt' needs a number on the stack!\n");
         return;
     }
-    push(sqrt(pop()));
+    push(sqrt(dclang_pop()));
 }
 
 static void logfunc()
@@ -172,7 +172,7 @@ static void logfunc()
         printf("'log' needs a number on the stack!\n");
         return;
     }
-    push(log(pop()));
+    push(log(dclang_pop()));
 }
 
 static void log2func()
@@ -182,7 +182,7 @@ static void log2func()
         printf("'log2' needs a number on the stack!\n");
         return;
     }
-    push(log2(pop()));
+    push(log2(dclang_pop()));
 }
 
 static void log10func()
@@ -192,7 +192,7 @@ static void log10func()
         printf("'log10' needs a number on the stack!\n");
         return;
     }
-    push(log10(pop()));
+    push(log10(dclang_pop()));
 }
 
 static void efunc()
@@ -213,7 +213,7 @@ static void sinefunc()
         printf("'sin' needs two numbers on the stack!\n");
         return;
     }
-    push(sin(pop()));
+    push(sin(dclang_pop()));
 }
 
 static void cosfunc()
@@ -223,7 +223,7 @@ static void cosfunc()
         printf("'cos' needs two numbers on the stack!\n");
         return;
     }
-    push(cos(pop()));
+    push(cos(dclang_pop()));
 }
 
 static void tanfunc()
@@ -233,7 +233,7 @@ static void tanfunc()
         printf("'tan' needs two numbers on the stack!\n");
         return;
     }
-    push(tan(pop()));
+    push(tan(dclang_pop()));
 }
 
 /* randomness */

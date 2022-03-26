@@ -37,7 +37,8 @@ static DCLANG_INT is_special_form(const char *token)
     return checkval;
 }
 
-// function to compile (or interpret) each incoming token
+
+// Function to compile (or interpret) each incoming token
 static void compile_or_interpret(const char *argument)
 {
     char *endPointer = 0;
@@ -48,26 +49,19 @@ static void compile_or_interpret(const char *argument)
         return;
     }
 
-    // search user-defined functions (words)
-    for (DCLANG_INT x = num_user_words - 1; x > -1 ; x--) {
-        if (strcmp(user_words[x].name, argument) == 0) {
-            if (def_mode) {
-                prog[iptr].function.with_param = callfunc;
-                prog[iptr++].param = user_words[x].word_start;
-            } else {
-                DCLANG_INT cur_iptr = iptr;
-                callfunc(user_words[x].word_start);
-                // run the function
-                while (iptr < max_iptr) {
-                    iptr += 1;
-                    (*(prog[iptr].function.with_param)) (prog[iptr].param);
-                }
-            }
-            return;
+    // Search user-defined functions (words)
+    int found = dclang_findword(argument);
+    if (found > -1) {
+        if (def_mode) {
+            prog[iptr].function.with_param = callword;
+            prog[iptr++].param = found;
+        } else {
+            dclang_callword(found);
         }
+        return;
     }
 
-    // search dictionary (list, not hash) entry
+    // Search for a primitive word
     while (pr->name != 0) {
         if (strcmp(pr->name, argument) == 0) {
             if ((def_mode) && (!is_special_form(pr->name))) {
@@ -82,8 +76,8 @@ static void compile_or_interpret(const char *argument)
         pr++;
     }
 
-    /* primitive not found, user definitions not found.  OK, so next, try to
-    convert to a number */
+    // Neither user word nor primitive word was found.
+    // OK, so next, try to convert to a number
     d = strtod(argument, &endPointer);
     if (endPointer != argument) {
         if (def_mode) {
@@ -95,15 +89,15 @@ static void compile_or_interpret(const char *argument)
         return;
     }
 
-    /* nothing found, we've reached an error condition, so report
-    the situation and reset the stack */
+    // Nothing found, we've reached an error condition.
+    // Report the situation and reset the stack.
     data_stack_ptr = 0;
     printf("%s -- syntax error.\n", argument);
     return;
 }
 
 
-static void repl() {
+void repl() {
     char *token;
     while (strcmp(token = get_token(), "EOF")) {
         // are we dealing with a function definition?
@@ -125,7 +119,7 @@ static void repl() {
 }
 
 
-static void import(char *infilestr) {
+void import(char *infilestr) {
     char *prefix = getenv("DCLANG_LIBS");
     if (prefix == NULL) {
         printf("DCLANG_LIBS env variable is unset!\n");
@@ -166,7 +160,7 @@ static void importfunc() {
         printf("import -- stack underflow! ");
         return;
     }
-    char *importfile = (char *)(unsigned long) pop();
+    char *importfile = (char *)(unsigned long) dclang_pop();
     return import(importfile);
 }
 

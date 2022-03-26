@@ -32,6 +32,6 @@ static void exitfunc()
         printf("exit -- need an integer exit code on the stack");
         return;
     }
-    DCLANG_INT32 code = (DCLANG_INT32) pop();
+    DCLANG_INT32 code = (DCLANG_INT32) dclang_pop();
     exit(code);
 }

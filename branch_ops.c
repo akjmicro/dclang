@@ -15,7 +15,7 @@ DCLANG_INT times_ptr;
 static void timesfunc()
 {
     return_stack[return_stack_ptr++] = iptr;
-    times_info[times_ptr++] = (DCLANG_INT) pop();
+    times_info[times_ptr++] = (DCLANG_INT) dclang_pop();
     loop_counter[loop_counter_ptr++] = 0;
 }
 
@@ -45,9 +45,9 @@ static void againfunc()
 static void forfunc()
 {
     return_stack[return_stack_ptr++] = iptr;
-    fl_stack[fl_ptr].step = (DCLANG_INT) pop();
-    loop_counter[loop_counter_ptr++] = (DCLANG_INT) pop();
-    fl_stack[fl_ptr++].limit = (DCLANG_INT) pop();
+    fl_stack[fl_ptr].step = (DCLANG_INT) dclang_pop();
+    loop_counter[loop_counter_ptr++] = (DCLANG_INT) dclang_pop();
+    fl_stack[fl_ptr++].limit = (DCLANG_INT) dclang_pop();
 }
 
 static void _contfor()
@@ -103,8 +103,8 @@ static void kfunc()
 // jump if zero (false)
 static void jumpzfunc()
 {
-    DCLANG_INT where = (DCLANG_INT) pop();
-    DCLANG_INT truth = (DCLANG_INT) pop();
+    DCLANG_INT where = (DCLANG_INT) dclang_pop();
+    DCLANG_INT truth = (DCLANG_INT) dclang_pop();
     if (!truth) {
         iptr = where;
     }
@@ -113,7 +113,7 @@ static void jumpzfunc()
 // unconditional jump
 static void jumpufunc()
 {
-    DCLANG_INT where = (DCLANG_INT) pop();
+    DCLANG_INT where = (DCLANG_INT) dclang_pop();
     iptr = where;
 }
 

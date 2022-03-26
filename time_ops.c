@@ -23,7 +23,7 @@ static void sleepfunc() {
         printf("sleep -- need a time amount in seconds on the stack!\n");
         return;
     }
-    DCLANG_FLT sleeptime = pop();
+    DCLANG_FLT sleeptime = dclang_pop();
     struct timespec t1, t2;
     t1.tv_sec = floor(sleeptime);
     t1.tv_nsec = round(fmod(sleeptime, 1) * 1000000000);
@@ -40,8 +40,8 @@ static void dt_to_epochfunc()
         return;
     }
     // input string setup
-    DCLANG_UINT fmt = (DCLANG_UINT) pop();
-    DCLANG_UINT to_conv = (DCLANG_UINT) pop();
+    DCLANG_UINT fmt = (DCLANG_UINT) dclang_pop();
+    DCLANG_UINT to_conv = (DCLANG_UINT) dclang_pop();
     if (fmt < MIN_STR || fmt > MAX_STR)
     {
         printf("dt->epoch -- <input_format> string address out-of-range.\n");
@@ -74,13 +74,13 @@ static void epoch_to_dtfunc()
         return;
     }
     // input string setup
-    DCLANG_UINT fmt = (DCLANG_UINT) pop();
+    DCLANG_UINT fmt = (DCLANG_UINT) dclang_pop();
     if (fmt < MIN_STR || fmt > MAX_STR)
     {
         printf("epoch->dt -- <output_format> string address out-of-range.\n");
         return;
     }
-    DCLANG_UINT in_epoch_uint = (DCLANG_UINT) pop();
+    DCLANG_UINT in_epoch_uint = (DCLANG_UINT) dclang_pop();
     time_t in_epoch = (time_t) in_epoch_uint;
     char tmbuf[256];
     memset(&tmbuf[0], 0, 256);

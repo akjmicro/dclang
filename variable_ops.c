@@ -9,13 +9,13 @@ static void pokefunc()
         printf("! -- stack underflow! ");
         return;
     }
-    DCLANG_UINT idx = (DCLANG_UINT) pop();
+    DCLANG_UINT idx = (DCLANG_UINT) dclang_pop();
     if (idx < 0 || idx > NUMVARS)
     {
         printf("! -- variable slot number out-of-range!\n");
         return;
     }
-    DCLANG_FLT val = pop();
+    DCLANG_FLT val = dclang_pop();
     vars[idx] = val;
 }
 
@@ -26,7 +26,7 @@ static void peekfunc()
         printf("@ -- stack underflow! ");
         return;
     }
-    DCLANG_INT idx = (DCLANG_INT) pop();
+    DCLANG_INT idx = (DCLANG_INT) dclang_pop();
     if (idx < 0 || idx > NUMVARS)
     {
         printf("@ -- variable slot number out-of-range!\n");
@@ -40,7 +40,7 @@ static void constantfunc()
 {
     startword();
     prog[iptr].function.with_param = push;
-    prog[iptr++].param = pop();
+    prog[iptr++].param = dclang_pop();
     endword();
 }
 
@@ -84,7 +84,7 @@ static void allotfunc()
         printf("allot -- stack underflow! ");
         return;
     }
-    varsidx += (DCLANG_UINT) pop() - 1;
+    varsidx += (DCLANG_UINT) dclang_pop() - 1;
 }
 
 static void createfunc()
@@ -100,7 +100,7 @@ static void commafunc()
         printf(", -- stack underflow! ");
         return;
     }
-    DCLANG_FLT val = pop();
+    DCLANG_FLT val = dclang_pop();
     vars[varsidx++] = val;
 }
 
@@ -130,7 +130,7 @@ static void hashsetfunc()
         return;
     }
     /* grab the key */
-    char *key = (char *)(DCLANG_UINT)pop();
+    char *key = (char *)(DCLANG_UINT)dclang_pop();
     DCLANG_UINT key_addr = (DCLANG_UINT) key;
     if (key_addr < MIN_STR || key_addr > MAX_STR)
     {
@@ -138,7 +138,7 @@ static void hashsetfunc()
         return;
     }
     /* grab the value */
-    char *data = (char *)(DCLANG_UINT) pop();
+    char *data = (char *)(DCLANG_UINT) dclang_pop();
     ENTRY item = {key, data};
     /* see if we have an entry for the given key first */
     ENTRY *entry = hsearch(item, FIND);
@@ -160,7 +160,7 @@ static void hashgetfunc()
         return;
     }
     /* grab the key */
-    char *key = (char *)(DCLANG_UINT)pop();
+    char *key = (char *)(DCLANG_UINT)dclang_pop();
     DCLANG_UINT key_addr = (DCLANG_UINT) key;
     if (key_addr < MIN_STR || key_addr > MAX_STR)
     {
@@ -188,7 +188,7 @@ static void hashkeysfunc()
         return;
     }
     /* grab the key index */
-    DCLANG_UINT keyidx = (DCLANG_UINT)pop();
+    DCLANG_UINT keyidx = (DCLANG_UINT)dclang_pop();
     push((DCLANG_UINT)hashwords[keyidx]);
 }
 
@@ -217,8 +217,8 @@ static void sortnumsfunc()
         printf("sortnums -- need <arrstart_index> <size> on the stack.\n");
         return;
     }
-    int size = (DCLANG_UINT) pop();
-    int arrstart = (DCLANG_UINT) pop();
+    int size = (DCLANG_UINT) dclang_pop();
+    int arrstart = (DCLANG_UINT) dclang_pop();
     qsort (vars+arrstart, size, sizeof(DCLANG_FLT), compare_doubles);
 }
 
@@ -228,8 +228,8 @@ static void sortstrsfunc()
     {
         printf("sortstrs -- need <arrstart_index> <size> on the stack.\n");
     }
-    int size = (DCLANG_UINT) pop();
-    int arrstart = (DCLANG_UINT) pop();
+    int size = (DCLANG_UINT) dclang_pop();
+    int arrstart = (DCLANG_UINT) dclang_pop();
     qsort (vars+arrstart, size, sizeof(DCLANG_FLT), compare_strings);
 }
 
@@ -242,7 +242,7 @@ static void envgetfunc()
         printf("envget -- need <env_key> string on the stack.\n");
     }
     /* grab the key */
-    char *env_key = (char *)(DCLANG_UINT)pop();
+    char *env_key = (char *)(DCLANG_UINT)dclang_pop();
     DCLANG_UINT env_key_addr = (DCLANG_UINT) env_key;
     if (env_key_addr < MIN_STR || env_key_addr > MAX_STR)
     {
@@ -269,7 +269,7 @@ static void envsetfunc()
         printf("envset -- need <env_val> <env_key> strings on the stack.\n");
     }
     // grab the key from the stack
-    char *env_key = (char *)(DCLANG_UINT)pop();
+    char *env_key = (char *)(DCLANG_UINT)dclang_pop();
     DCLANG_UINT env_key_addr = (DCLANG_UINT) env_key;
     if (env_key_addr < MIN_STR || env_key_addr > MAX_STR)
     {
@@ -277,7 +277,7 @@ static void envsetfunc()
         return;
     }
     // grab the value from the stack
-    char *env_val = (char *)(DCLANG_UINT)pop();
+    char *env_val = (char *)(DCLANG_UINT)dclang_pop();
     DCLANG_UINT env_val_addr = (DCLANG_UINT) env_val;
     if (env_val_addr < MIN_STR || env_val_addr > MAX_STR)
     {

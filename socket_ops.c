@@ -21,7 +21,7 @@ static void tcplistenfunc()
        perror("tcplisten -- ERROR opening socket.");
     }
     bzero((char *) &serv_addr, sizeof(serv_addr));
-    DCLANG_INT32 portno = (DCLANG_INT32) pop();
+    DCLANG_INT32 portno = (DCLANG_INT32) dclang_pop();
     serv_addr.sin_family = AF_INET;
     serv_addr.sin_addr.s_addr = INADDR_ANY;
     serv_addr.sin_port = htons(portno);
@@ -44,7 +44,7 @@ static void tcpacceptfunc()
         return;
     }
     DCLANG_UINT32 clilen = sizeof(cli_addr);
-    DCLANG_INT32 sockfd = (DCLANG_INT32) pop();
+    DCLANG_INT32 sockfd = (DCLANG_INT32) dclang_pop();
     DCLANG_INT32 newsockfd = accept(sockfd, (struct sockaddr *) &cli_addr, &clilen);
     if (newsockfd < 0) perror("tcpaccept -- ERROR on accept step!");
     push((DCLANG_INT32) newsockfd);
@@ -61,9 +61,9 @@ static void tcpconnectfunc()
     }
     DCLANG_INT32 sockfd = socket(AF_INET, SOCK_STREAM, 0);
     if (sockfd < 0) perror("tcpconnect -- ERROR opening socket");
-    DCLANG_INT32 portno = (DCLANG_INT32) pop();
+    DCLANG_INT32 portno = (DCLANG_INT32) dclang_pop();
     struct sockaddr_in host_addr;
-    char *servername = (char *) (DCLANG_UINT) pop();
+    char *servername = (char *) (DCLANG_UINT) dclang_pop();
     struct hostent *server = gethostbyname(servername);
     if (server == NULL) {
         fprintf(stderr, "tcpconnect -- ERROR, no such host\n");

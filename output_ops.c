@@ -5,7 +5,7 @@ static void showfunc()
         printf(". (pop) -- stack underflow! ");
         return;
     }
-    fprintf(ofp, "%0.19g ", pop());
+    fprintf(ofp, "%0.19g ", dclang_pop());
     fflush(ofp);
 }
 
@@ -15,7 +15,7 @@ static void shownospacefunc()
         printf("stack underflow! ");
         return;
     }
-    fprintf(ofp, "%0.19g", pop());
+    fprintf(ofp, "%0.19g", dclang_pop());
     fflush(ofp);
 }
 
@@ -58,9 +58,9 @@ static void showrjfunc()
         return;
     }
     // right-justified for pretty printing!
-    int precision = (DCLANG_INT) pop();
-    int width = (DCLANG_INT) pop();
-    fprintf(ofp, "%*.*f ", width, precision, pop());
+    int precision = (DCLANG_INT) dclang_pop();
+    int width = (DCLANG_INT) dclang_pop();
+    fprintf(ofp, "%*.*f ", width, precision, dclang_pop());
     fflush(ofp);
 }
 
@@ -70,7 +70,7 @@ static void redirectfunc()
         printf("Stack underflow! 'redirect' needs an output file pointer before being called\n");
         return;
     }
-    ofp = (FILE *)(DCLANG_UINT) pop();
+    ofp = (FILE *)(DCLANG_UINT) dclang_pop();
 }
 
 static void resetoutfunc()

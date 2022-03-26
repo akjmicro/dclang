@@ -11,9 +11,9 @@ static void fileopenfunc()
         return;
     }
     // file mode string
-    char *mode = (char *)(DCLANG_UINT) pop();
+    char *mode = (char *)(DCLANG_UINT) dclang_pop();
     // file path
-    char *path = (char *)(DCLANG_UINT) pop();
+    char *path = (char *)(DCLANG_UINT) dclang_pop();
     // if mode is read or append, file must exist:
     if ( (access(path, F_OK) == -1)
          && ( !strcmp("r", mode) || !strcmp("r+", mode) ) )
@@ -34,7 +34,7 @@ static void fileclosefunc()
         printf("'fclose' needs <fpointer> on the stack\n");
         return;
     }
-    FILE *file_to_close = (FILE *)(DCLANG_UINT) pop();
+    FILE *file_to_close = (FILE *)(DCLANG_UINT) dclang_pop();
     fclose(file_to_close);
 }
 
@@ -46,9 +46,9 @@ static void filereadfunc()
         printf("'fread' needs <buf_pointer> <fpointer> <number-of-bytes> on the stack\n");
         return;
     }
-    DCLANG_INT num_bytes = (DCLANG_UINT) pop();
-    FILE *file_to_read = (FILE *)(DCLANG_UINT) pop();
-    char *buf = (char *)(DCLANG_UINT) pop();
+    DCLANG_INT num_bytes = (DCLANG_UINT) dclang_pop();
+    FILE *file_to_read = (FILE *)(DCLANG_UINT) dclang_pop();
+    char *buf = (char *)(DCLANG_UINT) dclang_pop();
     DCLANG_UINT num_bytes_read = fread(buf, 1, num_bytes + 1, file_to_read);
     // update print safety:
     if ((DCLANG_UINT)buf < MIN_STR || MIN_STR == 0)
@@ -73,7 +73,7 @@ static void filereadlinefunc()
         printf("'freadline' needs <fpointer> on the stack\n");
         return;
     }
-    FILE *file_to_read = (FILE *)(DCLANG_UINT) pop();
+    FILE *file_to_read = (FILE *)(DCLANG_UINT) dclang_pop();
     DCLANG_UINT num_bytes_read = getline(&linebuf, &linelen, file_to_read);
     // update print safety:
     if ((DCLANG_UINT) linebuf < MIN_STR || MIN_STR == 0)
@@ -103,7 +103,7 @@ static void filereadallfunc()
     DCLANG_INT ch;
     char *allbuf = (char *) malloc(sizeof(char) * bufsize);
     memset(allbuf, 0, bufsize);
-    FILE *file_to_read = (FILE *)(DCLANG_UINT) pop();
+    FILE *file_to_read = (FILE *)(DCLANG_UINT) dclang_pop();
     while ((ch = fgetc(file_to_read)) != EOF)
     {
         chr_cnt += 1;
@@ -139,14 +139,14 @@ static void fileseekfunc()
         printf("'Whence' must be 0 (SEEK_SET), 1 (SEEK_CUR), or 2 (SEEK_END).\n");
         return;
     }
-    FILE *file_to_seek = (FILE *)(DCLANG_UINT) pop();
-    DCLANG_UINT whence = (DCLANG_UINT) pop();
+    FILE *file_to_seek = (FILE *)(DCLANG_UINT) dclang_pop();
+    DCLANG_UINT whence = (DCLANG_UINT) dclang_pop();
     if (!(whence >= 0 && whence <= 2))
     {
         printf("Whence parameter must be between 0 and 2 inclusive!\n");
         return;
     }
-    DCLANG_INT offset = (DCLANG_INT) pop();
+    DCLANG_INT offset = (DCLANG_INT) dclang_pop();
     fseek(file_to_seek, offset, whence);
 }
 
@@ -158,7 +158,7 @@ static void filetellfunc()
         printf("'ftell' needs a <fpointer> on the stack\n");
         return;
     }
-    FILE *file_to_tell = (FILE *)(DCLANG_UINT) pop();
+    FILE *file_to_tell = (FILE *)(DCLANG_UINT) dclang_pop();
     DCLANG_UINT mylen = ftell(file_to_tell);
     push((DCLANG_UINT) mylen);
 }
@@ -170,8 +170,8 @@ static void filewritefunc()
         printf("'fwrite' -- needs <string-address> <fpointer> on the stack\n");
         return;
     }
-    FILE *file_to_write = (FILE *)(DCLANG_UINT) pop();
-    char *str = (char *)(DCLANG_UINT) pop();
+    FILE *file_to_write = (FILE *)(DCLANG_UINT) dclang_pop();
+    char *str = (char *)(DCLANG_UINT) dclang_pop();
     DCLANG_INT result = fwrite(str, 1, strlen(str), file_to_write);
     push(result);
 }
@@ -183,7 +183,7 @@ static void fileflushfunc()
         printf("'fflush' -- needs <fpointer> on the stack\n");
         return;
     }
-    FILE *file_to_flush = (FILE *)(DCLANG_UINT) pop();
+    FILE *file_to_flush = (FILE *)(DCLANG_UINT) dclang_pop();
     fflush(file_to_flush);
 }
 
@@ -197,8 +197,8 @@ static void openfunc()
         printf("'open' needs <filestr> <flagint> on the stack\n");
         return;
     }
-    DCLANG_UINT flagint = (DCLANG_UINT) pop();
-    char *path = (char *)(DCLANG_UINT)pop();
+    DCLANG_UINT flagint = (DCLANG_UINT) dclang_pop();
+    char *path = (char *)(DCLANG_UINT)dclang_pop();
     int fd = open(path, flagint);
     push((DCLANG_UINT) fd);
 }
@@ -211,9 +211,9 @@ static void readfunc()
         printf("'read' needs <fpointer> <buffer-pointer> <numbytes> on the stack\n");
         return;
     }
-    DCLANG_UINT numbytes = (DCLANG_UINT) pop();
-    void *buf = (void *)(DCLANG_UINT)pop();
-    int fd = (int) pop();
+    DCLANG_UINT numbytes = (DCLANG_UINT) dclang_pop();
+    void *buf = (void *)(DCLANG_UINT)dclang_pop();
+    int fd = (int) dclang_pop();
     int res = read(fd, buf, numbytes);
     push((int)res);
 }
@@ -226,9 +226,9 @@ static void writefunc()
         printf("'write' needs <fpointer> <buffer-pointer> <numbytes> on the stack\n");
         return;
     }
-    DCLANG_UINT numbytes = (DCLANG_UINT) pop();
-    void *buf = (void *)(DCLANG_UINT)pop();
-    int fd = (int) pop();
+    DCLANG_UINT numbytes = (DCLANG_UINT) dclang_pop();
+    void *buf = (void *)(DCLANG_UINT)dclang_pop();
+    int fd = (int) dclang_pop();
     int res = write(fd, buf, numbytes);
     push((int)res);
 }
@@ -241,7 +241,7 @@ static void closefunc()
         printf("'close' needs <fpointer> on the stack\n");
         return;
     }
-    int fp = (int) pop();
+    int fp = (int) dclang_pop();
     int res = close(fp);
     push(res);
 }
