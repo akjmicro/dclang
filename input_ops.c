@@ -119,7 +119,7 @@ void repl() {
 }
 
 
-void import(char *infilestr) {
+void dclang_import(char *infilestr) {
     char *prefix = getenv("DCLANG_LIBS");
     if (prefix == NULL) {
         printf("DCLANG_LIBS env variable is unset!\n");
@@ -161,7 +161,7 @@ static void importfunc() {
         return;
     }
     char *importfile = (char *)(unsigned long) dclang_pop();
-    return import(importfile);
+    return dclang_import(importfile);
 }
 
 // a small buffer for use by `grabinput`
