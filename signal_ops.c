@@ -1,6 +1,6 @@
 sigset_t block_sigint;
 
-static void blocksigintfunc()
+void blocksigintfunc()
 {
   sigemptyset(&block_sigint);
   sigaddset(&block_sigint, SIGINT);
@@ -8,13 +8,13 @@ static void blocksigintfunc()
 }
 
 
-static void unblocksigintfunc()
+void unblocksigintfunc()
 {
   sigprocmask(SIG_UNBLOCK, &block_sigint, NULL);
 }
 
 
-static void forkfunc()
+void forkfunc()
 {
     // This function mainly exists so that a multi-client capable tcp/web server
     // can be had. It is assumed that the return value will be caught, inspected,
@@ -26,7 +26,7 @@ static void forkfunc()
 }
 
 
-static void exitfunc()
+void exitfunc()
 {
     if (data_stack_ptr < 1) {
         printf("exit -- need an integer exit code on the stack");

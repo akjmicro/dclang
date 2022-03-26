@@ -6,7 +6,7 @@
 struct sockaddr_in serv_addr, cli_addr;
 
 
-static void tcplistenfunc()
+void tcplistenfunc()
 {
     // Sets up a new listening TCP socket 'object' for listening
     // and returns its address onto the stack
@@ -33,7 +33,7 @@ static void tcplistenfunc()
 }
 
 
-static void tcpacceptfunc()
+void tcpacceptfunc()
 {
     // Take a given tcplisten-ready socket object and actually make it
     // accept a connection. Returns a handle to the established connection.
@@ -51,7 +51,7 @@ static void tcpacceptfunc()
 }
 
 
-static void tcpconnectfunc()
+void tcpconnectfunc()
 {
     // A tcp client word. This can reach out to a pre-established tcp server
     // already set up with the above words.

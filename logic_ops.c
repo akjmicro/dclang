@@ -1,5 +1,5 @@
 /* logical words */
-static void andfunc()
+void andfunc()
 {
     if (data_stack_ptr < 2)
     {
@@ -9,7 +9,7 @@ static void andfunc()
     push((DCLANG_INT) dclang_pop() & (DCLANG_INT) dclang_pop());
 }
 
-static void orfunc()
+void orfunc()
 {
     if (data_stack_ptr < 2)
     {
@@ -19,7 +19,7 @@ static void orfunc()
     push((DCLANG_INT) dclang_pop() | (DCLANG_INT) dclang_pop());
 }
 
-static void xorfunc()
+void xorfunc()
 {
     if (data_stack_ptr < 2)
     {
@@ -29,7 +29,7 @@ static void xorfunc()
     push((DCLANG_INT) dclang_pop() ^ (DCLANG_INT) dclang_pop());
 }
 
-static void notfunc()
+void notfunc()
 {
     if (data_stack_ptr < 1)
     {
@@ -40,7 +40,7 @@ static void notfunc()
 }
 
 /* comparison booleans */
-static void eqfunc()
+void eqfunc()
 {
     if (data_stack_ptr < 2)
     {
@@ -50,7 +50,7 @@ static void eqfunc()
     push((DCLANG_FLT) dclang_pop() == (DCLANG_FLT) dclang_pop());
 }
 
-static void noteqfunc()
+void noteqfunc()
 {
     if (data_stack_ptr < 2)
     {
@@ -60,7 +60,7 @@ static void noteqfunc()
     push((DCLANG_FLT) dclang_pop() != (DCLANG_FLT) dclang_pop());
 }
 
-static void gtfunc()
+void gtfunc()
 {
     if (data_stack_ptr < 2)
     {
@@ -70,7 +70,7 @@ static void gtfunc()
     push((DCLANG_FLT) dclang_pop() < (DCLANG_FLT) dclang_pop());
 }
 
-static void ltfunc()
+void ltfunc()
 {
     if (data_stack_ptr < 2)
     {
@@ -80,7 +80,7 @@ static void ltfunc()
     push((DCLANG_FLT) dclang_pop() > (DCLANG_FLT) dclang_pop());
 }
 
-static void gtefunc()
+void gtefunc()
 {
     if (data_stack_ptr < 2)
     {
@@ -90,7 +90,7 @@ static void gtefunc()
     push((DCLANG_FLT) dclang_pop() <= (DCLANG_FLT) dclang_pop());
 }
 
-static void ltefunc()
+void ltefunc()
 {
     if (data_stack_ptr < 2)
     {
@@ -101,7 +101,7 @@ static void ltefunc()
 }
 
 // assertions
-static void assertfunc()
+void assertfunc()
 {
     if (data_stack_ptr < 1)
     {
@@ -115,12 +115,12 @@ static void assertfunc()
 }
 
 // true/false syntactic sugar
-static void truefunc()
+void truefunc()
 {
     push(1);
 }
 
-static void falsefunc()
+void falsefunc()
 {
     push(0);
 }

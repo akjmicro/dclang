@@ -2,7 +2,7 @@
 char *linebuf = NULL;
 size_t linelen = 0;
 
-static void fileopenfunc()
+void fileopenfunc()
 {
     if (data_stack_ptr < 2)
     {
@@ -26,7 +26,7 @@ static void fileopenfunc()
     push((DCLANG_UINT)openfptr);
 }
 
-static void fileclosefunc()
+void fileclosefunc()
 {
     if (data_stack_ptr < 1)
     {
@@ -38,7 +38,7 @@ static void fileclosefunc()
     fclose(file_to_close);
 }
 
-static void filereadfunc()
+void filereadfunc()
 {
     if (data_stack_ptr < 3)
     {
@@ -65,7 +65,7 @@ static void filereadfunc()
     push((DCLANG_INT) num_bytes_read);
 }
 
-static void filereadlinefunc()
+void filereadlinefunc()
 {
     if (data_stack_ptr < 1)
     {
@@ -90,7 +90,7 @@ static void filereadlinefunc()
     push((DCLANG_INT) num_bytes_read);
 }
 
-static void filereadallfunc()
+void filereadallfunc()
 {
     if (data_stack_ptr < 1)
     {
@@ -130,7 +130,7 @@ static void filereadallfunc()
     push((DCLANG_INT) chr_cnt);
 }
 
-static void fileseekfunc()
+void fileseekfunc()
 {
     if (data_stack_ptr < 3)
     {
@@ -150,7 +150,7 @@ static void fileseekfunc()
     fseek(file_to_seek, offset, whence);
 }
 
-static void filetellfunc()
+void filetellfunc()
 {
     if (data_stack_ptr < 1)
     {
@@ -163,7 +163,7 @@ static void filetellfunc()
     push((DCLANG_UINT) mylen);
 }
 
-static void filewritefunc()
+void filewritefunc()
 {
     if (data_stack_ptr < 2)
     {
@@ -176,7 +176,7 @@ static void filewritefunc()
     push(result);
 }
 
-static void fileflushfunc()
+void fileflushfunc()
 {
     if (data_stack_ptr < 1)
     {
@@ -189,7 +189,7 @@ static void fileflushfunc()
 
 // lower-level OS calls:
 
-static void openfunc()
+void openfunc()
 {
     if (data_stack_ptr < 2)
     {
@@ -203,7 +203,7 @@ static void openfunc()
     push((DCLANG_UINT) fd);
 }
 
-static void readfunc()
+void readfunc()
 {
     if (data_stack_ptr < 1)
     {
@@ -218,7 +218,7 @@ static void readfunc()
     push((int)res);
 }
 
-static void writefunc()
+void writefunc()
 {
     if (data_stack_ptr < 3)
     {
@@ -233,7 +233,7 @@ static void writefunc()
     push((int)res);
 }
 
-static void closefunc()
+void closefunc()
 {
     if (data_stack_ptr < 1)
     {

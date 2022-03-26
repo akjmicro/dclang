@@ -2,7 +2,7 @@ char **hashwords;
 DCLANG_UINT hashwords_size = 32;
 DCLANG_UINT hashwords_cnt = 0;
 
-static void pokefunc()
+void pokefunc()
 {
     if (data_stack_ptr < 2)
     {
@@ -19,7 +19,7 @@ static void pokefunc()
     vars[idx] = val;
 }
 
-static void peekfunc()
+void peekfunc()
 {
     if (data_stack_ptr < 1)
     {
@@ -36,7 +36,7 @@ static void peekfunc()
 }
 
 /* implement constants */
-static void constantfunc()
+void constantfunc()
 {
     startword();
     prog[iptr].function.with_param = push;
@@ -44,7 +44,7 @@ static void constantfunc()
     endword();
 }
 
-static void _variable_common()
+void _variable_common()
 {
     // In reality, a variable is a named word that simply pushes
     // an address to its associated memory
@@ -52,7 +52,7 @@ static void _variable_common()
     prog[iptr++].param = varsidx++;
 }
 
-static void variablefunc()
+void variablefunc()
 {
     if (iptr < max_iptr)
     {
@@ -77,7 +77,7 @@ static void variablefunc()
     }
 }
 
-static void allotfunc()
+void allotfunc()
 {
     if (data_stack_ptr < 1)
     {
@@ -87,13 +87,13 @@ static void allotfunc()
     varsidx += (DCLANG_UINT) dclang_pop() - 1;
 }
 
-static void createfunc()
+void createfunc()
 {
     variablefunc();
     --varsidx;
 }
 
-static void commafunc()
+void commafunc()
 {
     if (data_stack_ptr < 1)
     {
@@ -104,14 +104,14 @@ static void commafunc()
     vars[varsidx++] = val;
 }
 
-static void herefunc()
+void herefunc()
 {
     push((DCLANG_UINT) varsidx);
 }
 
 /* global hash space, a la 'redis', but in local memory */
 
-static void _add_key(char *key){
+void _add_key(char *key){
     if (hashwords_cnt > hashwords_size)
     {
         hashwords_size *= 2;
@@ -122,7 +122,7 @@ static void _add_key(char *key){
     ++hashwords_cnt;
 }
 
-static void hashsetfunc()
+void hashsetfunc()
 {
     if (data_stack_ptr < 2)
     {
@@ -152,7 +152,7 @@ static void hashsetfunc()
     }
 }
 
-static void hashgetfunc()
+void hashgetfunc()
 {
     if (data_stack_ptr < 1)
     {
@@ -180,7 +180,7 @@ static void hashgetfunc()
     }
 }
 
-static void hashkeysfunc()
+void hashkeysfunc()
 {
     if (data_stack_ptr < 1)
     {
@@ -210,7 +210,7 @@ int compare_strings (const void *a, const void *b)
 
 // end helper functions
 
-static void sortnumsfunc()
+void sortnumsfunc()
 {
     if (data_stack_ptr < 2)
     {
@@ -222,7 +222,7 @@ static void sortnumsfunc()
     qsort (vars+arrstart, size, sizeof(DCLANG_FLT), compare_doubles);
 }
 
-static void sortstrsfunc()
+void sortstrsfunc()
 {
     if (data_stack_ptr < 2)
     {
@@ -235,7 +235,7 @@ static void sortstrsfunc()
 
 // environment variables:
 
-static void envgetfunc()
+void envgetfunc()
 {
     if (data_stack_ptr < 1)
     {
@@ -262,7 +262,7 @@ static void envgetfunc()
     push(val_addr);
 }
 
-static void envsetfunc()
+void envsetfunc()
 {
     if (data_stack_ptr < 2)
     {

@@ -1,5 +1,5 @@
 /* stack operations */
-static void push(DCLANG_FLT a)
+void push(DCLANG_FLT a)
 {
     if (data_stack_ptr >= DATA_STACK_SIZE) {
         printf("push -- stack overflow!\n");
@@ -8,12 +8,12 @@ static void push(DCLANG_FLT a)
     data_stack[data_stack_ptr++] = a;
 }
 
-static void push_no_check(DCLANG_FLT a)
+void push_no_check(DCLANG_FLT a)
 {
     data_stack[data_stack_ptr++] = a;
 }
 
-static DCLANG_FLT dclang_pop()
+DCLANG_FLT dclang_pop()
 // special case -- has a return value b/c it can
 // be used in other calls to give a value, which
 // also means it can be an API call.
@@ -21,7 +21,7 @@ static DCLANG_FLT dclang_pop()
     return data_stack[--data_stack_ptr];
 }
 
-static void dropfunc()
+void dropfunc()
 {
     if (data_stack_ptr < 1) {
         printf("drop -- stack underflow!\n");
@@ -30,7 +30,7 @@ static void dropfunc()
     --data_stack_ptr;
 }
 
-static void dupfunc()
+void dupfunc()
 {
     if (data_stack_ptr < 1) {
         printf("dup -- stack underflow!\n");
@@ -39,7 +39,7 @@ static void dupfunc()
     push(data_stack[data_stack_ptr - 1]);
 }
 
-static void overfunc()
+void overfunc()
 {
     if (data_stack_ptr < 2) {
         printf("over -- stack underflow!\n");
@@ -48,7 +48,7 @@ static void overfunc()
     push(data_stack[data_stack_ptr - 2]);
 }
 
-static void pickfunc()
+void pickfunc()
 {
     if (data_stack_ptr < 1) {
          printf("pick -- stack underflow!\n");
@@ -62,7 +62,7 @@ static void pickfunc()
     push(data_stack[data_stack_ptr - (pick_idx + 1)]);
 }
 
-static void swapfunc()
+void swapfunc()
 {
     if (data_stack_ptr < 2) {
         printf("swap -- stack underflow!\n");
@@ -74,7 +74,7 @@ static void swapfunc()
     push_no_check(val2);
 }
 
-static void drop2func()
+void drop2func()
 {
     if (data_stack_ptr < 2) {
         printf("2drop -- stack underflow!\n");
@@ -84,7 +84,7 @@ static void drop2func()
     --data_stack_ptr;
 }
 
-static void dup2func()
+void dup2func()
 {
     if (data_stack_ptr < 2) {
         printf("2dup -- stack underflow!\n");
@@ -95,7 +95,7 @@ static void dup2func()
     push(data_stack[data_stack_ptr - 2]);
 }
 
-static void over2func()
+void over2func()
 {
     if (data_stack_ptr < 4) {
         printf("2over -- stack underflow!\n");
@@ -105,13 +105,13 @@ static void over2func()
     push(data_stack[data_stack_ptr - 4]);
 }
 
-static void depthfunc()
+void depthfunc()
 {
     DCLANG_UINT size = data_stack_ptr;
     push((DCLANG_FLT)size);
 }
 
-static void clearfunc()
+void clearfunc()
 {
     // clears the stack!
     data_stack_ptr = 0;
@@ -120,7 +120,7 @@ static void clearfunc()
 /////////////////////
 // save data stack //
 /////////////////////
-static void svpushfunc()
+void svpushfunc()
 {
     if (save_data_stack_ptr >= DATA_STACK_SIZE) {
         printf("svpush -- stack overflow!\n");
@@ -130,13 +130,13 @@ static void svpushfunc()
     save_data_stack[save_data_stack_ptr++] = val;
 }
 
-static void svpopfunc()
+void svpopfunc()
 {
     DCLANG_FLT val = save_data_stack[--save_data_stack_ptr];
     push_no_check(val);
 }
 
-static void svdropfunc()
+void svdropfunc()
 {
     if (save_data_stack_ptr < 1) {
         printf("svdrop -- stack underflow!\n");
@@ -145,7 +145,7 @@ static void svdropfunc()
     --save_data_stack_ptr;
 }
 
-static void svpickfunc()
+void svpickfunc()
 {
     if (save_data_stack_ptr < 1) {
          printf("svpick -- stack underflow!\n");
@@ -159,13 +159,13 @@ static void svpickfunc()
     push(save_data_stack[save_data_stack_ptr - (svpick_idx + 1)]);
 }
 
-static void svdepthfunc()
+void svdepthfunc()
 {
     DCLANG_UINT size = save_data_stack_ptr;
     push((DCLANG_FLT)size);
 }
 
-static void svclearfunc()
+void svclearfunc()
 {
     // clears the stack!
     save_data_stack_ptr = 0;

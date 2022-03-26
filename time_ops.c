@@ -4,21 +4,21 @@
 struct timeval tval;
 
 
-static void clockfunc()
+void clockfunc()
 {
     gettimeofday(&tval, NULL);
     DCLANG_FLT now = ((DCLANG_FLT) tval.tv_sec) + (((DCLANG_FLT) tval.tv_usec) / 1000000);
     push(now);
 }
 
-static void epochfunc()
+void epochfunc()
 {
     gettimeofday(&tval, NULL);
     DCLANG_FLT now = (tval.tv_sec);
     push(now);
 }
 
-static void sleepfunc() {
+void sleepfunc() {
     if (data_stack_ptr < 1) {
         printf("sleep -- need a time amount in seconds on the stack!\n");
         return;
@@ -32,7 +32,7 @@ static void sleepfunc() {
 
 // date functions
 
-static void dt_to_epochfunc()
+void dt_to_epochfunc()
 {
     if (data_stack_ptr < 2)
     {
@@ -66,7 +66,7 @@ static void dt_to_epochfunc()
     push((DCLANG_UINT) res_time);
 }
 
-static void epoch_to_dtfunc()
+void epoch_to_dtfunc()
 {
     if (data_stack_ptr < 1)
     {

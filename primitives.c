@@ -5,7 +5,7 @@ struct primitive {
 } primitive;
 
 
-static struct primitive *primitives;
+struct primitive *primitives;
 int primitives_idx = -1;
 
 

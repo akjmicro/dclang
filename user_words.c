@@ -24,7 +24,7 @@ user_word user_words[1024];
 DCLANG_UINT num_user_words;
 
 /* for debugging */
-static void showdefined()
+void showdefined()
 {
     for (int x=0; x < num_user_words; x++) {
         printf("Word %i: %s @ %li\n", x, user_words[x].name,\
@@ -32,7 +32,7 @@ static void showdefined()
     }
 }
 
-static DCLANG_INT dclang_findword(const char *word)
+DCLANG_INT dclang_findword(const char *word)
 {
     for (DCLANG_INT x = num_user_words - 1; x > -1 ; x--) {
         if (strcmp(user_words[x].name, word) == 0) {
@@ -42,7 +42,7 @@ static DCLANG_INT dclang_findword(const char *word)
     return -1;
 }
 
-static void callword(DCLANG_FLT where)
+void callword(DCLANG_FLT where)
 {
     /* Don't consume more of the return stack if we are going nowhere.
        This will allow better recursion */
@@ -54,7 +54,7 @@ static void callword(DCLANG_FLT where)
     (*(prog[iptr].function.with_param)) (prog[iptr].param);
 }
 
-static void dclang_callword(DCLANG_FLT where)
+void dclang_callword(DCLANG_FLT where)
 {
     callword(where);
     // execute all until we reach the end of the iptr queue
@@ -67,13 +67,13 @@ static void dclang_callword(DCLANG_FLT where)
 /* This word will restore 'iptr' to what it was before going on its
 fancy journey into a word.  It won't "Make America Great Again", but it's
 a start. */
-static void returnfunc()
+void returnfunc()
 {
     iptr = return_stack[--return_stack_ptr];
 }
 
 /* respond to ':' token: */
-static void startword()
+void startword()
 {
     /* grab name */
     char *this_token;
@@ -85,7 +85,7 @@ static void startword()
 }
 
 /* respond to ';' token: */
-static void endword()
+void endword()
 {
     /* Simply insert a return call into 'prog' where 'iptr' now points. */
     prog[iptr].function.without_param = returnfunc;

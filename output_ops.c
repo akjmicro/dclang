@@ -1,5 +1,5 @@
 /* output */
-static void showfunc()
+void showfunc()
 {
     if (data_stack_ptr < 1) {
         printf(". (pop) -- stack underflow! ");
@@ -9,7 +9,7 @@ static void showfunc()
     fflush(ofp);
 }
 
-static void shownospacefunc()
+void shownospacefunc()
 {
     if (data_stack_ptr < 1) {
         printf("stack underflow! ");
@@ -19,12 +19,12 @@ static void shownospacefunc()
     fflush(ofp);
 }
 
-static void crfunc()
+void crfunc()
 {
     fprintf(ofp, "\n");
 }
 
-static void showstackfunc()
+void showstackfunc()
 {
     DCLANG_INT x;
     char *joiner;
@@ -51,7 +51,7 @@ static void showstackfunc()
     fprintf(ofp, "\n");
 }
 
-static void showrjfunc()
+void showrjfunc()
 {
     if (data_stack_ptr < 3) {
         printf("Stack underflow! '.rj' needs: value, width, precision on the stack\n");
@@ -64,7 +64,7 @@ static void showrjfunc()
     fflush(ofp);
 }
 
-static void redirectfunc()
+void redirectfunc()
 {
     if (data_stack_ptr < 1) {
         printf("Stack underflow! 'redirect' needs an output file pointer before being called\n");
@@ -73,12 +73,12 @@ static void redirectfunc()
     ofp = (FILE *)(DCLANG_UINT) dclang_pop();
 }
 
-static void resetoutfunc()
+void resetoutfunc()
 {
     ofp = stdout;
 }
 
-static void flushoutfunc()
+void flushoutfunc()
 {
     fflush(ofp);
 }

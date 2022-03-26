@@ -1,7 +1,7 @@
 /* utf-8 char buffer */
 char utf8_buf[5];
 
-static long utf8_encode(char *out, uint64_t utf)
+long utf8_encode(char *out, uint64_t utf)
 {
     if (utf <= 0x7F)
     {
@@ -56,7 +56,7 @@ int get_unicode_by_hex(char *chbuf, int usize)
     return status;
 }
 
-static void stringfunc()
+void stringfunc()
 {
     char ch;
     char escape_ch;
@@ -157,7 +157,7 @@ static void stringfunc()
     }
 }
 
-static void printfunc()
+void printfunc()
 {
     if (data_stack_ptr < 1)
     {
@@ -179,7 +179,7 @@ static void printfunc()
     fflush(ofp);
 }
 
-static void mkbuffunc()
+void mkbuffunc()
 {
     if (data_stack_ptr < 1)
     {
@@ -205,7 +205,7 @@ static void mkbuffunc()
     push(bufaddr);
 }
 
-static void freefunc()
+void freefunc()
 {
     if (data_stack_ptr < 1)
     {
@@ -216,7 +216,7 @@ static void freefunc()
     free((char *) loc_uint);
 }
 
-static void emitfunc()
+void emitfunc()
 {
     if (data_stack_ptr < 1)
     {
@@ -228,7 +228,7 @@ static void emitfunc()
     fflush(ofp);
 }
 
-static void uemitfunc()
+void uemitfunc()
 {
     if (data_stack_ptr < 1)
     {
@@ -241,7 +241,7 @@ static void uemitfunc()
     fflush(ofp);
 }
 
-static void ordfunc()
+void ordfunc()
 {
     if (data_stack_ptr < 1)
     {
@@ -252,7 +252,7 @@ static void ordfunc()
     push((int) *string_loc);
 }
 
-static void tohexfunc()
+void tohexfunc()
 {
     if (data_stack_ptr < 1)
     {
@@ -264,7 +264,7 @@ static void tohexfunc()
     fflush(ofp);
 }
 
-static void tonumfunc()
+void tonumfunc()
 {
     if (data_stack_ptr < 1)
     {
@@ -282,7 +282,7 @@ static void tonumfunc()
     push(num);
 }
 
-static void tostrfunc()
+void tostrfunc()
 {
     if (data_stack_ptr < 1)
     {
@@ -305,7 +305,7 @@ static void tostrfunc()
     push((DCLANG_UINT) string_uint_addr);
 }
 
-static void strlenfunc()
+void strlenfunc()
 {
     if (data_stack_ptr < 1)
     {
@@ -322,7 +322,7 @@ static void strlenfunc()
     push((DCLANG_UINT) strlen(mystr));
 }
 
-static void streqfunc()
+void streqfunc()
 {
     if (data_stack_ptr < 2)
     {
@@ -346,7 +346,7 @@ static void streqfunc()
     push(((DCLANG_INT) strcmp(str1, str2) == 0) * -1);
 }
 
-static void strltfunc()
+void strltfunc()
 {
     if (data_stack_ptr < 2)
     {
@@ -370,7 +370,7 @@ static void strltfunc()
     push(((DCLANG_INT) strcmp(str1, str2) < 0) * -1);
 }
 
-static void strgtfunc()
+void strgtfunc()
 {
     if (data_stack_ptr < 2)
     {
@@ -394,7 +394,7 @@ static void strgtfunc()
     push(((DCLANG_INT) strcmp(str1, str2) > 0) * -1);
 }
 
-static void strfindfunc()
+void strfindfunc()
 {
     if (data_stack_ptr < 2)
     {
@@ -419,7 +419,7 @@ static void strfindfunc()
 }
 
 
-static void strtokfunc()
+void strtokfunc()
 {
     if (data_stack_ptr < 3)
     {
@@ -451,7 +451,7 @@ static void strtokfunc()
 }
 
 
-static void mempcpyfunc()
+void mempcpyfunc()
 {
     if (data_stack_ptr < 3)
     {
@@ -474,7 +474,7 @@ static void mempcpyfunc()
     push((DCLANG_UINT) mempcpy((char *)dest, (char *)source, (DCLANG_UINT) size));
 }
 
-static void memsetfunc()
+void memsetfunc()
 {
     if (data_stack_ptr < 3)
     {
@@ -492,7 +492,7 @@ static void memsetfunc()
     push((DCLANG_INT) memset((char *)dest, (int)chr, (int)times));
 }
 
-static void bytes32func()
+void bytes32func()
 {
     DCLANG_INT32 val = (DCLANG_INT32) dclang_pop();
     char low = (char) val & 0xff;

@@ -1,5 +1,5 @@
 /* math */
-static void addfunc()
+void addfunc()
 {
     if (data_stack_ptr < 2)
     {
@@ -9,7 +9,7 @@ static void addfunc()
     push(dclang_pop() + dclang_pop());
 }
 
-static void subfunc()
+void subfunc()
 {
     if (data_stack_ptr < 2)
     {
@@ -20,7 +20,7 @@ static void subfunc()
     push(dclang_pop() - subtrahend);
 }
 
-static void mulfunc()
+void mulfunc()
 {
     if (data_stack_ptr < 2)
     {
@@ -30,7 +30,7 @@ static void mulfunc()
     push(dclang_pop() * dclang_pop());
 }
 
-static void divfunc()
+void divfunc()
 {
     if (data_stack_ptr < 2)
     {
@@ -41,7 +41,7 @@ static void divfunc()
     push(dclang_pop() / divisor);
 }
 
-static void modfunc()
+void modfunc()
 {
     if (data_stack_ptr < 2)
     {
@@ -52,7 +52,7 @@ static void modfunc()
     push(fmod(dclang_pop(), modulus));
 }
 
-static void lshiftfunc()
+void lshiftfunc()
 {
     if (data_stack_ptr < 2)
     {
@@ -64,7 +64,7 @@ static void lshiftfunc()
     push((DCLANG_UINT) base << shift_amt);
 }
 
-static void rshiftfunc()
+void rshiftfunc()
 {
     if (data_stack_ptr < 2)
     {
@@ -76,7 +76,7 @@ static void rshiftfunc()
     push((DCLANG_UINT) base >> shift_amt);
 }
 
-static void absfunc()
+void absfunc()
 {
     if (data_stack_ptr < 1)
     {
@@ -86,7 +86,7 @@ static void absfunc()
     push(fabs(dclang_pop()));
 }
 
-static void minfunc()
+void minfunc()
 {
     if (data_stack_ptr < 2)
     {
@@ -99,7 +99,7 @@ static void minfunc()
     push(c);
 }
 
-static void maxfunc()
+void maxfunc()
 {
     if (data_stack_ptr < 2)
     {
@@ -112,7 +112,7 @@ static void maxfunc()
     push(c);
 }
 
-static void roundfunc()
+void roundfunc()
 {
     if (data_stack_ptr < 1)
     {
@@ -122,7 +122,7 @@ static void roundfunc()
     push((DCLANG_INT) round(dclang_pop()));
 }
 
-static void floorfunc()
+void floorfunc()
 {
     if (data_stack_ptr < 1)
     {
@@ -132,7 +132,7 @@ static void floorfunc()
     push((DCLANG_INT) floor(dclang_pop()));
 }
 
-static void ceilfunc()
+void ceilfunc()
 {
     if (data_stack_ptr < 1)
     {
@@ -144,7 +144,7 @@ static void ceilfunc()
 
 /* scientific math words */
 
-static void powerfunc()
+void powerfunc()
 {
     if (data_stack_ptr < 2)
     {
@@ -155,7 +155,7 @@ static void powerfunc()
     push(pow(dclang_pop(), raise));
 }
 
-static void sqrtfunc()
+void sqrtfunc()
 {
     if (data_stack_ptr < 1)
     {
@@ -165,7 +165,7 @@ static void sqrtfunc()
     push(sqrt(dclang_pop()));
 }
 
-static void logfunc()
+void logfunc()
 {
     if (data_stack_ptr < 1)
     {
@@ -175,7 +175,7 @@ static void logfunc()
     push(log(dclang_pop()));
 }
 
-static void log2func()
+void log2func()
 {
     if (data_stack_ptr < 1)
     {
@@ -185,7 +185,7 @@ static void log2func()
     push(log2(dclang_pop()));
 }
 
-static void log10func()
+void log10func()
 {
     if (data_stack_ptr < 1)
     {
@@ -195,18 +195,18 @@ static void log10func()
     push(log10(dclang_pop()));
 }
 
-static void efunc()
+void efunc()
 {
     push(M_E);
 }
 
 /* Trig, pi, etc. */
-static void pifunc()
+void pifunc()
 {
     push(M_PI);
 }
 
-static void sinefunc()
+void sinefunc()
 {
     if (data_stack_ptr < 1)
     {
@@ -216,7 +216,7 @@ static void sinefunc()
     push(sin(dclang_pop()));
 }
 
-static void cosfunc()
+void cosfunc()
 {
     if (data_stack_ptr < 1)
     {
@@ -226,7 +226,7 @@ static void cosfunc()
     push(cos(dclang_pop()));
 }
 
-static void tanfunc()
+void tanfunc()
 {
     if (data_stack_ptr < 1)
     {
@@ -237,7 +237,7 @@ static void tanfunc()
 }
 
 /* randomness */
-static void randfunc()
+void randfunc()
 {
     push((double)rand()/(double)RAND_MAX);
 }

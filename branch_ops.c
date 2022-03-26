@@ -12,27 +12,27 @@ DCLANG_INT times_info[3];
 DCLANG_INT times_ptr;
 
 // looping
-static void timesfunc()
+void timesfunc()
 {
     return_stack[return_stack_ptr++] = iptr;
     times_info[times_ptr++] = (DCLANG_INT) dclang_pop();
     loop_counter[loop_counter_ptr++] = 0;
 }
 
-static void _conttimes()
+void _conttimes()
 {
     loop_counter[loop_counter_ptr - 1] += 1;
     iptr = return_stack[return_stack_ptr - 1];
 }
 
-static void exittimesfunc()
+void exittimesfunc()
 {
     loop_counter[--loop_counter_ptr] = 0;
     --return_stack_ptr;
     --times_ptr;
 }
 
-static void againfunc()
+void againfunc()
 {
     if (loop_counter[loop_counter_ptr - 1] < times_info[times_ptr - 1] - 1) {
         _conttimes();
@@ -42,7 +42,7 @@ static void againfunc()
 }
 
 /* these 'for' loops are more flexible, allowing from/to/step parameters. */
-static void forfunc()
+void forfunc()
 {
     return_stack[return_stack_ptr++] = iptr;
     fl_stack[fl_ptr].step = (DCLANG_INT) dclang_pop();
@@ -50,20 +50,20 @@ static void forfunc()
     fl_stack[fl_ptr++].limit = (DCLANG_INT) dclang_pop();
 }
 
-static void _contfor()
+void _contfor()
 {
     loop_counter[loop_counter_ptr - 1] += fl_stack[fl_ptr - 1].step;
     iptr = return_stack[return_stack_ptr - 1];
 }
 
-static void exitforfunc()
+void exitforfunc()
 {
     --fl_ptr;
     loop_counter[--loop_counter_ptr] = 0;
     --return_stack_ptr;
 }
 
-static void nextfunc()
+void nextfunc()
 {
     if (fl_stack[fl_ptr - 1].step > 0) {
         if (loop_counter[loop_counter_ptr - 1] < \
@@ -84,24 +84,24 @@ static void nextfunc()
     }
 }
 
-static void ifunc()
+void ifunc()
 {
     push_no_check(loop_counter[loop_counter_ptr - 1]);
 }
 
-static void jfunc()
+void jfunc()
 {
     push_no_check(loop_counter[loop_counter_ptr - 2]);
 }
 
-static void kfunc()
+void kfunc()
 {
     push_no_check(loop_counter[loop_counter_ptr - 3]);
 }
 
 
 // jump if zero (false)
-static void jumpzfunc()
+void jumpzfunc()
 {
     DCLANG_INT where = (DCLANG_INT) dclang_pop();
     DCLANG_INT truth = (DCLANG_INT) dclang_pop();
@@ -111,14 +111,14 @@ static void jumpzfunc()
 }
 
 // unconditional jump
-static void jumpufunc()
+void jumpufunc()
 {
     DCLANG_INT where = (DCLANG_INT) dclang_pop();
     iptr = where;
 }
 
 // if-else-endif
-static void iffunc()
+void iffunc()
 {
     // mark our location
     return_stack[return_stack_ptr++] = iptr;
@@ -127,7 +127,7 @@ static void iffunc()
     prog[iptr++].function.without_param = jumpzfunc;
 }
 
-static void elsefunc()
+void elsefunc()
 {
     // get the last 'if' value
     DCLANG_INT if_val = return_stack[--return_stack_ptr];
@@ -143,7 +143,7 @@ static void elsefunc()
 }
 
 
-static void endiffunc()
+void endiffunc()
 {
     DCLANG_INT last_val = return_stack[--return_stack_ptr];
     prog[last_val].param = iptr - 1;

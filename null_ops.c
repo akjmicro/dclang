@@ -1,10 +1,10 @@
-static void nullfunc()
+void nullfunc()
 {
     void *ptr = NULL;
     push((DCLANG_INT)ptr);
 }
 
-static void isnullfunc()
+void isnullfunc()
 {
     if (data_stack_ptr < 1)
     {

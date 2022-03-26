@@ -8,7 +8,7 @@ DCLANG_INT num_special = sizeof(special) / sizeof(special[0]);
 
 /* function to validate and return an error message if we are using control
  * structures outside of a definition */
-static DCLANG_INT validate(const char *token)
+DCLANG_INT validate(const char *token)
 {
     DCLANG_INT checkval = 1;
     for (DCLANG_INT i=0; i < num_illegal; i++) {
@@ -25,7 +25,7 @@ static DCLANG_INT validate(const char *token)
 
 /* conditionals are 'special forms' that need to be handled in a certain
    way by the compilation process: */
-static DCLANG_INT is_special_form(const char *token)
+DCLANG_INT is_special_form(const char *token)
 {
     DCLANG_INT checkval = 0;
     for (DCLANG_INT i=0; i < num_special; i++) {
@@ -39,7 +39,7 @@ static DCLANG_INT is_special_form(const char *token)
 
 
 // Function to compile (or interpret) each incoming token
-static void compile_or_interpret(const char *argument)
+void compile_or_interpret(const char *argument)
 {
     char *endPointer = 0;
     double d;
@@ -119,11 +119,11 @@ void repl() {
 }
 
 
-void dclang_import(char *infilestr) {
+int dclang_import(char *infilestr) {
     char *prefix = getenv("DCLANG_LIBS");
     if (prefix == NULL) {
         printf("DCLANG_LIBS env variable is unset!\n");
-        return;
+        return -1;
     }
     // check existence of file:
     if (access(infilestr, F_OK) == 0) {
@@ -131,7 +131,7 @@ void dclang_import(char *infilestr) {
         infile = fopen(infilestr, "r");
         setinput(infile);
         repl();
-        return;
+        return 0;
     }
     char *full_path = malloc(512);
     memset(full_path, 0, 512);
@@ -143,7 +143,7 @@ void dclang_import(char *infilestr) {
         FILE *infile = fopen(full_path, "r");
         setinput(infile);
         repl();
-        return;
+        return 0;
     }
     printf(
         "The file named %s doesn't appear to exist in the current " \
@@ -151,14 +151,14 @@ void dclang_import(char *infilestr) {
         "You may want to check its existence and permissions!\n",
         infilestr, prefix, full_path
     );
-    return;
+    return -1;
 }
 
 
-static void importfunc() {
+int importfunc() {
     if (data_stack_ptr < 1) {
         printf("import -- stack underflow! ");
-        return;
+        return -1;
     }
     char *importfile = (char *)(unsigned long) dclang_pop();
     return dclang_import(importfile);
@@ -168,7 +168,7 @@ static void importfunc() {
 char string_pad[512];
 int string_here;
 
-static void grabinput() {
+void grabinput() {
     setinput(stdin);
     char ch;
     // get a starting marker for length
@@ -213,7 +213,7 @@ static void grabinput() {
     revertinput();
 }
 
-static void inputfunc() {
+void inputfunc() {
     if (def_mode) {
         prog[iptr++].function.without_param = grabinput;
     } else {
