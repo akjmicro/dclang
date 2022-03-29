@@ -40,11 +40,7 @@
   panmix
 
   # send outputs:
-  stereo-out
+  stereo-stack
   # advance sample clock, clear channels
   t+
-  # recur
-  bells_of_doom
 ;
-
-bells_of_doom

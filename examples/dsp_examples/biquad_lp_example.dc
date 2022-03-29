@@ -5,7 +5,7 @@ make-biquad myflt2
 make-biquad myflt3
 make-biquad myflt4
 
-: biquad-example
+: biquad_lp_example
   #####################
   # fat source (left) #
   #####################
@@ -49,11 +49,7 @@ make-biquad myflt4
       0.95
   panmix
   # put to output
-  stereo-out
+  stereo-stack
   # advance counter
   t+
-  # recur (loop)
-  biquad-example
 ;
-
-biquad-example

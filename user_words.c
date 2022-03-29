@@ -54,9 +54,9 @@ void callword(DCLANG_FLT where)
     (*(prog[iptr].function.with_param)) (prog[iptr].param);
 }
 
-void dclang_callword(DCLANG_FLT where)
+void dclang_callword(DCLANG_INT where)
 {
-    callword(where);
+    callword((DCLANG_FLT) where);
     // execute all until we reach the end of the iptr queue
     while (iptr < max_iptr) {
         iptr += 1;

@@ -3,7 +3,7 @@
 make-biquad mylp
 make-biquad mylp2
 
-: fm-example
+: fm_example
   # left chn
   45 1 0.5 fm 0.3 *
   45.3 1 0.1 sine 2 * 4.1 + fm 0.007 *
@@ -23,9 +23,6 @@ make-biquad mylp2
   dup 0.9 > if drop 0.9 endif
   0.97 panmix
   # output
-  stereo-out
+  stereo-stack
   t+
-  fm-example
 ;
-
-fm-example

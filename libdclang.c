@@ -127,7 +127,7 @@ void execfunc() {
     const struct primitive *pr = primitives;
 
     // search user-defined functions (words)
-    int found = dclang_findword(argument);
+    DCLANG_INT found = dclang_findword(argument);
     if (found > -1) {
         if (def_mode) {
             prog[iptr].function.with_param = callword;

@@ -2,22 +2,17 @@
 
 To run each of these examples:
 
-- Set up a `DCLANG_LIBS` environment variable in your `~/.bashrc` or equivalent, e.g:
+- Make sure that `DCLANG_LIBS` environment variable is defined in your `~/.bashrc` or equivalent, e.g:
   ```
   export DCLANG_LIBS=/usr/local/lib/dclang
   ```
-- If desired, make that variable symlink to your local repo copy:
+- Have `portaudio19-dev` installed on your machine:
   ```
-  sudo ln -s /home/yourname/Downloads/dclang/lib /usr/local/lib/dclang
+  sudo apt-get install portaudio19-dev
   ```
-- Create an alias command for piping through `aplay`:
+- Execute the helper script:
   ```
-  alias dcplayer=aplay -f S32_LE -r 48000 -c 2
-  ```
-- Pipe the example by running dclang on it:
-  ```
-  cd examples/dsp_examples
-  dclang biquad_lp_example.dc | dcplayer
+  run-example allpass_reverb.dc
   ```
 
 Have fun!

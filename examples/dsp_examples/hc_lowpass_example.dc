@@ -9,7 +9,7 @@ var modwave
 var res
 var slmem
 
-: hc-lowpass-example
+: hc_lowpass_example
   # sweeping mod
   # do from 0.08 - 0.02
   0.2 sine 200 * 600 +
@@ -29,11 +29,7 @@ var slmem
   # panning
   0.9 panmix
   # output
-  stereo-out
+  stereo-stack
   # advance time
   t+
-  # recur
-  hc-lowpass-example
 ;
-
-hc-lowpass-example

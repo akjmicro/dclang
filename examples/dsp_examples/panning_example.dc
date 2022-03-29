@@ -1,13 +1,10 @@
 "dsp.dc" import
 
-: dsp-panning-example
+: panning_example
   300.0 sine 0.4 *
   400.0 sine 0.4 *
   +
   0.1 sine 0.4 * 0.5 + panmix
-  stereo-out
+  stereo-stack
   t+
-  dsp-panning-example
 ;
-
-dsp-panning-example

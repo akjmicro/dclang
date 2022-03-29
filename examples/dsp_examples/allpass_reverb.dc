@@ -35,7 +35,7 @@ var feedback
 # split and sent to 4 parallel feedback delay lines.                                 #
 ######################################################################################
 
-: allpass_reverb_example
+: allpass_reverb
     noise 0.87 *
     myhcfilter 1500 0.1 hc-lowpass
       0.01 0.34 rand 0.14 * 0.14 + - gate
@@ -92,9 +92,6 @@ var feedback
     +
     1.7 *
   0.5 panmix
-  stereo-out
+  stereo-stack
   t+
-  allpass_reverb_example
 ;
-
-allpass_reverb_example

@@ -3,7 +3,7 @@
 make-hc-filter mylp
 1 make-delay-line mydelay
 
-: ebow-example
+: ebow_example
   # trigger, will be nozzled off:
     noise 0.5 *
       mylp
@@ -31,9 +31,6 @@ make-hc-filter mylp
       mydelay
   delay-write             # ( )
   # final output
-  stereo-out
+  stereo-stack
   t+
-  ebow-example
 ;
-
-ebow-example

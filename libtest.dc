@@ -1,4 +1,5 @@
 : libtest
   "Hello world! This is a test of dclang as a library." print cr
   2 2 +
+  4 3 +
 ;

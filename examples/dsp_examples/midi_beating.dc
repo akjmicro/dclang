@@ -44,9 +44,6 @@ var sl4
   sineloop 48 vol_ctl *
   0.95 panmix
   # output
-  stereo-out
+  stereo-stack
   t+
-  midi_beating
 ;
-
-midi_beating

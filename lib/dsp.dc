@@ -580,6 +580,11 @@ var cmp
   rcget sendout
 ;
 
+# stereo signals to stack for pick-up by external API calls
+: stereo-stack
+  rcget lcget
+;
+
 # word to advance the clock
 : t+
   1 sample_clock @ + sample_clock !

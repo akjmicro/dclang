@@ -27,7 +27,7 @@ var rntrg
 
 : octfac 31 / 2 swap pow ;
 
-: delay-example
+: delay_example
   # random trigger
   0.01 randtrig dup curtrig !
   # reference array for port and portamento call
@@ -58,14 +58,11 @@ var rntrg
   0.35 panmix
   0.65 panmix
   # output
-  stereo-out
+  stereo-stack
   # 89% feedback
   + 0.5 * mydelay delay-write
   # update trigger state
   curtrig @ lasttrig !
   # update clock
   t+
-  delay-example
 ;
-
-delay-example

@@ -17,7 +17,9 @@ int main()
         printf("Word not found, exiting!\n");
         return -1;
     }
-    dclang_callword((double) wordint);
+    dclang_callword(wordint);
     result = dclang_pop();
-    printf("The result is %g\n", result);
+    printf("The first result is: %g\n", result);
+    result = dclang_pop();
+    printf("The second result is: %g\n", result);
 }

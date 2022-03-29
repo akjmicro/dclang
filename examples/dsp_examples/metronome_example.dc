@@ -2,7 +2,7 @@
 
 0.09 1.00 make-port myport
 
-: mymetronome
+: metronome_example
     400 sine
       2.01 metro
       1.2 *
@@ -29,9 +29,6 @@
     *
       0.6
   panmix
-  stereo-out
+  stereo-stack
   t+
-  mymetronome
 ;
-
-mymetronome

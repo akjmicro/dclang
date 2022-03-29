@@ -6,7 +6,7 @@ var modwave
 make-hc-filter mylp
 make-hc-filter mylp2
 
-: sineloop-example
+: sineloop_example
   0.1 sine 0.5 * 0.5 + 0.5 * 0.6 + modwave !
   # left channel
   sl1 60 modwave @ sineloop 0.99 *
@@ -17,9 +17,7 @@ make-hc-filter mylp2
   mylp2 1205 0.1 hc-lowpass 0.3 *
   0.98 panmix
   # output
-  stereo-out
+  stereo-stack
   t+
-  sineloop-example
+  sineloop_example
 ;
-
-sineloop-example

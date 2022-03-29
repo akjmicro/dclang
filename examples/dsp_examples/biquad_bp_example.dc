@@ -2,7 +2,7 @@
 
 make-biquad myflt
 
-: biquad-example
+: biquad_bp_example
   # some noise, scaled to 0.8 max amplitude
     noise 0.8 *
       myflt
@@ -18,11 +18,7 @@ make-biquad myflt
       0.5
   panmix
   # put to output
-  stereo-out
+  stereo-stack
   # advance counter
   t+
-  # recur (loop)
-  biquad-example
 ;
-
-biquad-example

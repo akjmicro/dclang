@@ -6,7 +6,7 @@
 0.03 0.6 make-port myport
 
 # example function
-: simple-delay-example
+: simple_delay_example
   440 sine
   0.4333 metro 0.8 *
   myport port *
@@ -20,11 +20,7 @@
   # center pan
   0.5 panmix
   # output
-  stereo-out
+  stereo-stack
   # advance the clock
   t+
-  # loop
-  simple-delay-example
 ;
-
-simple-delay-example

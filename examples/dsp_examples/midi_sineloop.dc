@@ -36,7 +36,7 @@ make-hc-filter mylp2
   hc-lowpass 0.23 *
   0.98 panmix
   # output
-  stereo-out
+  stereo-stack
   t+
   midi-sineloop-example
 ;
