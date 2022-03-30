@@ -49,7 +49,7 @@ void callword(DCLANG_FLT where)
     if (return_stack[return_stack_ptr - 1] != iptr) {
         return_stack[return_stack_ptr++] = iptr;
     }
-    // set word taret; execute word target
+    // set word target; execute word target
     iptr = (DCLANG_UINT) where;
     (*(prog[iptr].function.with_param)) (prog[iptr].param);
 }

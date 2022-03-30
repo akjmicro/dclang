@@ -16,7 +16,7 @@
       again
       cr
     again
-  0.055 sleep
+  0.005 sleep
   again
 ;
 
