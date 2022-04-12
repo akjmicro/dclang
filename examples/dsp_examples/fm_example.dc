@@ -1,28 +1,29 @@
 "dsp.dc" import
 
-make-biquad mylp
-make-biquad mylp2
 
 : fm_example
   # left chn
-  45 1 0.5 fm 0.3 *
-  45.3 1 0.1 sine 2 * 4.1 + fm 0.007 *
-  +
-  mylp false
-  720
-  1 biquad-lp 0.17 *
-  dup 0.9 > if drop 0.9 endif
-  0.03 panmix
+        45 1 0.5
+    fm 0.3 *
+          45.3 1 0.1
+                 sine 2 *
+                 4.1 +
+      fm 0.007 *
+    +
+      0.3
+  panmix
   # right chn
-  45.523 1 0.5 fm 0.3 *
-  45.533 1 0.1 sine 2 * 4.1 + fm 0.007 *
-  +
-  mylp2 false
-  720
-  1 biquad-lp 0.17 *
-  dup 0.9 > if drop 0.9 endif
-  0.97 panmix
+        45.523 1 0.5
+    fm 0.3 *
+          45.533 1 0.1
+                   sine 2 *
+                   4.1 +
+      fm 0.007 *
+    +
+      0.7
+  panmix
   # output
   stereo-stack
   t+
 ;
+

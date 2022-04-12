@@ -40,9 +40,10 @@
 #include <dclang.h>
 #include "portaudio.h"
 
-#define NUM_SECONDS            (20)
-#define SAMPLE_RATE         (44100)
-#define FRAMES_PER_BUFFER    (4096)
+#define DEVICE_NUM             2
+#define NUM_SECONDS           10
+#define SAMPLE_RATE        44100
+#define FRAMES_PER_BUFFER   4096
 
 typedef struct
 {
@@ -122,7 +123,9 @@ int main(void)
     err = Pa_Initialize();
     if( err != paNoError ) goto error;
 
-    outputParameters.device = Pa_GetDefaultOutputDevice(); /* default output device */
+
+    //outputParameters.device = Pa_GetDefaultOutputDevice(); /* default output device */
+    outputParameters.device = DEVICE_NUM;
     if (outputParameters.device == paNoDevice) {
         fprintf(stderr,"Error: No default output device.\n");
         goto error;
@@ -131,12 +134,13 @@ int main(void)
     outputParameters.sampleFormat = paFloat32; /* 32 bit floating point output */
     outputParameters.suggestedLatency = Pa_GetDeviceInfo( outputParameters.device )->defaultLowOutputLatency;
     outputParameters.hostApiSpecificStreamInfo = NULL;
+    double sr = Pa_GetDeviceInfo(outputParameters.device)->defaultSampleRate;
 
     err = Pa_OpenStream(
               &stream,
-              NULL, /* no input */
+              NULL,
               &outputParameters,
-              SAMPLE_RATE,
+              sr,
               FRAMES_PER_BUFFER,
               paClipOff,      /* we won't output out of range samples so don't bother clipping them */
               patestCallback,

@@ -9,11 +9,11 @@ fi
 example=$1
 exampleword=$(echo ${example} | sed -E 's/\.dc//g')
 
-rm -rf portaudio_example.c
+make clean
+
 echo "#define DSP_FILE \"${example}\""      >> portaudio_example.c
 echo "#define DSP_WORD \"${exampleword}\""  >> portaudio_example.c
 cat portaudio_stub.c                        >> portaudio_example.c
 
-make clean
 make
-./portaudio_example
+nice -19 ./portaudio_example

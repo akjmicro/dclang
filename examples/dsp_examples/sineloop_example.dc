@@ -19,5 +19,4 @@ make-hc-filter mylp2
   # output
   stereo-stack
   t+
-  sineloop_example
 ;

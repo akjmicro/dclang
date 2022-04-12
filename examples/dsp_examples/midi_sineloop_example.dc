@@ -11,7 +11,7 @@ make-hc-filter mylp2
 
 : midi-sineloop-example
   # get a midi control signal every 32 samples
-  t 0x1f and 0 =
+  t 0x07 and 0 =
   if
     refresh_midictl
   endif
@@ -38,7 +38,5 @@ make-hc-filter mylp2
   # output
   stereo-stack
   t+
-  midi-sineloop-example
 ;
 
-midi-sineloop-example
