@@ -103,6 +103,7 @@ DCLANG_INT fsp;
 #include "file_ops.c"
 #include "socket_ops.c"
 #include "string_ops.c"
+#include "char_ops.c"
 #include "token.c"
 #include "user_words.c"
 #include "variable_ops.c"

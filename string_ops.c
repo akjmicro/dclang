@@ -507,3 +507,73 @@ void bytes32func()
     fputc(highmid, ofp);
     fputc(high, ofp);
 }
+
+void tolowerfunc()
+{
+    if (data_stack_ptr < 1)
+    {
+        printf("tolower -- needs a <source_str> pointer on the stack! ");
+        return;
+    }
+    DCLANG_UINT string_uint_addr = (DCLANG_UINT) dclang_pop();
+    if (string_uint_addr < MIN_STR || string_uint_addr > MAX_STR)
+    {
+        perror("tolower -- String address out-of-range.");
+        return;
+    }
+    char *mystr = (char *) string_uint_addr;
+    DCLANG_UINT buflen = (DCLANG_UINT) strlen(mystr);
+    char *buf = (char *) malloc(buflen);
+    DCLANG_UINT string_dest_uint = (DCLANG_UINT) buf;
+    int i = 0;
+    int c = 0;
+    while(*(mystr + i)) {
+      c = (int) *(mystr + i);
+      memset(buf + i, tolower(c), 1);
+      i++;
+    }
+    if (string_dest_uint < MIN_STR || MIN_STR == 0)
+    {
+        MIN_STR = string_dest_uint;
+    }
+    if (string_dest_uint + buflen > MAX_STR || MAX_STR == 0)
+    {
+        MAX_STR = string_dest_uint + buflen;
+    }
+    push((DCLANG_UINT) buf);
+}
+
+void toupperfunc()
+{
+    if (data_stack_ptr < 1)
+    {
+        printf("toupper -- needs a <source_str> pointer on the stack! ");
+        return;
+    }
+    DCLANG_UINT string_uint_addr = (DCLANG_UINT) dclang_pop();
+    if (string_uint_addr < MIN_STR || string_uint_addr > MAX_STR)
+    {
+        perror("toupper -- String address out-of-range.");
+        return;
+    }
+    char *mystr = (char *) string_uint_addr;
+    DCLANG_UINT buflen = (DCLANG_UINT) strlen(mystr);
+    char *buf = (char *) malloc(buflen);
+    DCLANG_UINT string_dest_uint = (DCLANG_UINT) buf;
+    int i = 0;
+    int c = 0;
+    while(*(mystr + i)) {
+      c = (int) *(mystr + i);
+      memset(buf + i, toupper(c), 1);
+      i++;
+    }
+    if (string_dest_uint < MIN_STR || MIN_STR == 0)
+    {
+        MIN_STR = string_dest_uint;
+    }
+    if (string_dest_uint + buflen > MAX_STR || MAX_STR == 0)
+    {
+        MAX_STR = string_dest_uint + buflen;
+    }
+    push((DCLANG_UINT) buf);
+}

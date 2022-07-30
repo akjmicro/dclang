@@ -152,6 +152,19 @@ void add_all_primitives()
     add_primitive("free", freefunc);
     add_primitive("mempcpy", mempcpyfunc);
     add_primitive("memset", memsetfunc);
+    add_primitive("isalnum", isalnumfunc);
+    add_primitive("isalpha", isalphafunc);
+    add_primitive("iscntrl", iscntrlfunc);
+    add_primitive("isdigit", isdigitfunc);
+    add_primitive("isgraph", isgraphfunc);
+    add_primitive("islower", islowerfunc);
+    add_primitive("isprint", isprintfunc);
+    add_primitive("ispunct", ispunctfunc);
+    add_primitive("isspace", isspacefunc);
+    add_primitive("isupper", isupperfunc);
+    add_primitive("isxdigit", isxdigitfunc);
+    add_primitive("tolower", tolowerfunc);
+    add_primitive("toupper", toupperfunc);
     // file
     add_primitive("fopen", fileopenfunc);
     add_primitive("fread", filereadfunc);

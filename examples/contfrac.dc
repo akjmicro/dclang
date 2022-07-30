@@ -87,3 +87,5 @@ pi 7 continued-fraction
 : phi 1 5 sqrt + 2 / ;
 phi 16 continued-fraction
 
+"Expansion of a step of 5-edo: " print cr
+2 1 5 / pow 12 continued-fraction
