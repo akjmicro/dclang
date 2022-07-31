@@ -252,7 +252,9 @@ Implemented thus far:
     bar                          # <-- tree@ output
 
     cr :mytree @ treewalk        # walk the tree with treewalk
-    key=foo, value=bar           # <-- treewalk output
+
+    key=foo, value=bar           # <-- treewalk output, not the line break via `cr`
+
     "vanilla" "favorite ice cream flavor" :mytree @ tree!
     :mytree @ treewalk           # walk thte tree again; see new values
     key=foo, value=bar
