@@ -3,26 +3,30 @@
 ### TO INSTALL:
 ____________
 
-* Have the gcc compiler on your machine
+* Have the gcc compiler on your machine:
 
-```
-    git clone https://github.com/akjmicro/dclang
-    cd dclang
-    make
-    ./dclang -i examples/some_primes.dc
-```
+  ```
+  git clone https://github.com/akjmicro/dclang
+  cd dclang
+  make
+  ./dclang -i examples/some_primes.dc
+  ```
 
-* You can also put the executable in /usr/local/bin or what-have-you.
+* You can also put the executable in `/usr/local/bin` or what-have-you.
+  `make install` should be able to do this for you on say, Linux or MacOSX.
 
 * Experiment as you wish with compiler optimizations in the Makefile,
   particularly with float-point options, since 'dclang' is heavily
   reliant on them.
 
 * For interaction, it's nice to use 'rlwrap' to get readline line-history:
-
-```
-    rlwrap ./dclang
-```
+  ```
+  rlwrap ./dclang
+  ```
+  One can also create an alias to `dclang` that uses `rlwrap`:
+  ```
+  alias dclang='rlwrap dclang`
+  ```
 
 ### ABOUT:
 
@@ -170,6 +174,10 @@ Implemented thus far:
     strings that need them.
     * convert character bytes to equivalent numerical value with `ord`
     * convert integers to hex-string with `tohex`.
+    * `isalnum`, `isalpha`, `iscntrl`, `isdigit`, `isgraph`, `islower`, `isprint`
+      `ispunct`, `isspace`, `isupper`, `isxdigit` -- all of these can take the integer output
+      from `ord` and return `1` (true) or `0` (false) for determinng the class of a given character.
+      (N.B.: If given a string of len > 1, `ord` uses the first character of the string by default.)
   * Variables/Arrays:
     * Declare a constant with `const`:
         ```
@@ -217,7 +225,6 @@ Implemented thus far:
         myvar @ .
         7.4231
         ```
-
     * This works in a similar fashion for something like a string variable
     (which is, in reality an address and a length):
       ```
@@ -233,11 +240,34 @@ Implemented thus far:
     "mykey" h@ print cr
     some value
     ```
+  * Private tree-based key/value stores, similar to the hash above, but access is a slightly slower
+    (won't be very noticeable in most use-cases) `O(log n)` access time. Based on the `tsearch` `glibc` functions:
+    ```
+    var :mytree                  # sets up a variable to store our tree data
+    treemake :mytree !           # make a tree, put it on the variable :mytree that we made
+    "bar" "foo" :mytree @ tree!  # Usage: <value> <key> <which-tree> tree! (tree! sets a value on <key>, on <which-tree>)
+    "foo" :mytree @ tree@        # Usage: <key> <which-tree> tree@         (tree@ gets a value from <key>, on <which-tree>) 
+    cr print cr                     # Let's print the output!
+
+    bar                          # <-- tree@ output
+
+    cr :mytree @ treewalk        # walk the tree with treewalk
+    key=foo, value=bar           # <-- treewalk output
+    "vanilla" "favorite ice cream flavor" :mytree @ tree!
+    :mytree @ treewalk           # walk thte tree again; see new values
+    key=foo, value=bar
+    key=favorite ice cream flavor, value=vanilla
+    "foo" :mytree @ treedel                        # delete a key
+    :mytree @ treewalk
+    key=favorite ice cream flavor, value=vanilla
+    :mytree @ treedestroy                          # delete (destroy) the whole tree
+    :mytree @ treewalk
+                                                   # no output -- nothing to see
+    ```
   * Timing:
     * a clock function ('clock') so we can time execution in nanoseconds for benchmarking.
     * A hook into CPU-cycle clock, called 'rdtsc'. (not available on RPi)
     * A sleep function (C's `nanosleep` under-the-hood)
-
   * Importing a file of dclang code:
     * From the interpreter
         ```
@@ -247,7 +277,6 @@ Implemented thus far:
         ```
         ./dclang -i examples/some_primes.dc
         ```
-
   * Read/write of file:
     ```
     var myfile

@@ -107,7 +107,7 @@ DCLANG_INT fsp;
 #include "token.c"
 #include "user_words.c"
 #include "variable_ops.c"
-#include "tree.c"
+#include "tree_ops.c"
 #include "signal_ops.c"
 #include "primitives.c"
 #include "input_ops.c"
