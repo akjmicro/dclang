@@ -9,6 +9,11 @@
   endif
 ;
 
+: divmod
+  2dup % svpush
+  / floor svpop
+;
+
 : _digit_sum_helper
   over 0 >
   if
