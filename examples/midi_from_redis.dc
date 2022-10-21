@@ -30,17 +30,11 @@ scale_size !
 
 : _get_next_note
     _get_remainder
-      _get_div
-          2dup
-        /
-        floor
-        dup svpush
-      *
-    -
       _get_base
     *
-  _set_remainder
-    svpop
+      _get_div
+      divmod
+    _set_remainder
       _get_mode
     +
       scale_size @
@@ -51,6 +45,7 @@ scale_size !
       _get_transpose
     +
 ;
+
 
 : _get_on_length
   _get_tempo
@@ -91,5 +86,4 @@ scale_size !
 ;
 
 midi_from_redis
-
 panic
