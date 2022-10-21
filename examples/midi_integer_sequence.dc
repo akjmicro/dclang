@@ -46,16 +46,16 @@ var x
 
 : _get_next_note
   # x @ 13 * 17 xor 19 +
-  x @ _get_div *
-    _get_base
+  x @ get_div *
+    get_base
   digit_sum
-    _get_mode
+    get_mode
   +
     scale_size @
   absmod
     scale
   + @
-    _get_transpose
+    get_transpose
   +
   x++
 ;

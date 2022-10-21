@@ -23,8 +23,35 @@ var _tok7
 # for chaos-based randomness:
 "chaos" const :CHAOS
 
-: _get_remainder remainder @ dup 0 = if drop 1 endif ;
-: _set_remainder remainder ! ;
+#############################################################
+# Helpers for algorithmic MIDI processes...                 #
+# At the moment, there are two: fraction-based sequences    #
+# that use digit expansion to a certain base, and a "chaos" #
+# factor concept.                                           #
+#############################################################
+
+: get_remainder remainder @ dup 0 = if drop 1 endif ;
+: set_remainder remainder ! ;
+
+: get_div
+  :DIV redis_get :NL _tok5 strtok drop
+  0 :NL _tok5 strtok tonum round
+  dup 0 = if drop 1 endif
+;
+
+: get_base
+  :BASE redis_get :NL _tok6 strtok drop
+  0 :NL _tok6 strtok tonum round
+;
+
+: get_chaos
+  :CHAOS redis_get :NL _tok7 strtok drop
+  0 :NL _tok7 strtok tonum round
+;
+
+###########################################
+# private words for dealing with duration #
+###########################################
 
 : _get_tempo
   :TEMPO redis_get :NL _tok1 strtok drop
@@ -36,40 +63,34 @@ var _tok7
   0 :NL _tok2 strtok tonum 100 /
 ;
 
-: _get_mode
-  :MODE redis_get :NL _tok3 strtok drop
-  0 :NL _tok3 strtok tonum round
-;
+###############################################################
+# public API "duration" words to be used in calling code.     #
+# The idea is to just call on/off durations directly          #
+# and let the tempo and gate do the work in the background... #
+###############################################################
 
-: _get_transpose
-  :TRANSPOSE redis_get :NL _tok4 strtok drop
-  0 :NL _tok4 strtok tonum round
-;
-
-: _get_div
-  :DIV redis_get :NL _tok5 strtok drop
-  0 :NL _tok5 strtok tonum round
-  dup 0 = if drop 1 endif
-;
-
-: _get_base
-  :BASE redis_get :NL _tok6 strtok drop
-  0 :NL _tok6 strtok tonum round
-;
-
-: _get_chaos
-  :CHAOS redis_get :NL _tok7 strtok drop
-  0 :NL _tok7 strtok tonum round
-;
-
-: _get_on_gate
+: get_on_gate
   _get_tempo
   _get_gate *
   0.25 *
 ;
 
-: _get_off_gate
+: get_off_gate
   _get_tempo
   1 _get_gate - *
   0.25 *
+;
+
+########################
+# mode & transposition #
+########################
+
+: get_mode
+  :MODE redis_get :NL _tok3 strtok drop
+  0 :NL _tok3 strtok tonum round
+;
+
+: get_transpose
+  :TRANSPOSE redis_get :NL _tok4 strtok drop
+  0 :NL _tok4 strtok tonum round
 ;

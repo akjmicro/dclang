@@ -53,30 +53,30 @@ var scale_size
 dummy scale -
 scale_size !
 
-: _get_remainder remainder @ dup 0 = if drop 1 endif ;
+: get_remainder remainder @ dup 0 = if drop 1 endif ;
 : _set_remainder remainder ! ;
 
 : _get_next_note
-    _get_remainder
-      _get_div
+    get_remainder
+      get_div
           2dup
         /
         floor
         dup svpush
       *
     -
-      _get_base
+      get_base
     *
   _set_remainder
     svpop
-      _get_mode
+      get_mode
     +
       scale_size @
     absmod
       scale
     +
     @
-      _get_transpose
+      get_transpose
     +
 ;
 
