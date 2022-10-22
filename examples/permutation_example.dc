@@ -1,0 +1,18 @@
+"permutations.dc" import
+
+var perm_space
+5 setup_permutation_space
+perm_space !
+
+: run_through_permutations
+  "Here are the 120 permutations of 5 items!" print cr
+  120 5 * times
+    perm_space @ next_permutation .
+    i 5 % 4 =
+    if
+      cr
+    endif
+  again
+;
+
+run_through_permutations

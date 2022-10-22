@@ -1,0 +1,159 @@
+# An implementation of ageneric "change-ringing" type permutation
+# algorithm that has a "generator-like" behavior, i.e. the list
+# of unfolding changes doesn't sit in memory all at once, but
+# is called via a word `next_permutation` to deliver the "next"
+# permuted item.
+#
+# A "permutation object" will be a space in memory that the user creates manually via `create`
+# or via a convenience word, "setup_permutation_space" that, given a single item representing a
+# number of items to permute, will return the appropriate structure for the user, with
+# sensible defaults
+#
+# The layout of memory cells:
+#
+# | num_values | read_index | x | y | direction | val0 | val1 | val2 | ...
+#
+# So, the 1st 4 slots manage all the algorithm would need to produce generating output.
+#
+# "num_values" represents the number of values starting with "val0" that are actually being
+# put through permutation. So, permuting (0, 1, 2, 3) would mean this would be set to 4.
+#
+# The "read_index" is actually the thing that will be used to iterate through the values
+# here represented by "val0", "val1" and so on.
+#
+# The "x" and "y" are also pointers to a pair of memory addresses that will be subject
+# to cell swapping, which actually performs the active. "direction" is needed for the zig-zag
+# of the swapped value pair across the collection.
+
+: setup_permutation_space
+  here svpush
+  dup ,
+  0 ,
+  dup 2 - ,
+  dup 1 - ,
+  -1 ,
+  times i , again
+  svpop
+;
+
+: _pmswap
+  2dup @ svpush @ swap ! svpop swap !
+;
+
+: _get_num_items
+  0 svpick @
+;
+
+: _get_read_index
+  0 svpick 1 + @
+;
+
+: _get_x
+  0 svpick 2 + @
+;
+
+: _get_y
+  0 svpick 3 + @
+;
+
+: _get_direction
+  0 svpick 4 + @
+;
+
+: _get_values_start
+  0 svpick 5 +
+;
+
+: _reset_read_index_to_0
+  0 0 svpick 1 + !
+;
+
+: _show_value
+  _get_values_start _get_read_index + @
+;
+
+: _increment_read_index
+    _get_read_index 1 +
+      0 svpick 1 +
+  !
+;
+
+: _swap_last_two
+    _get_values_start _get_num_items + 1 -
+      dup 1 -
+  _pmswap
+;
+
+: _swap_first_two
+  _get_values_start dup 1 + _pmswap
+;
+
+: _swap_x_y_vals
+    _get_values_start _get_x +
+      _get_values_start _get_y +
+  _pmswap
+;
+
+: _positive_direction
+    1
+      0 svpick 4 +
+  !
+;
+
+: _negative_direction
+    -1
+      0 svpick 4 +
+  !
+;
+
+: _x_addr
+  0 svpick 2 +
+;
+
+: _y_addr
+  0 svpick 3 +
+;
+
+: _update_x_and_y
+  _get_x _get_direction + _x_addr !
+  _get_y _get_direction + _y_addr !
+;
+
+: _next_permutation_helper
+  # check bounds
+  # if x = -1, swap PSIZE - 1 and PSIZE -2 indices
+  # then change direction to +1
+    _get_x -1 =    # 'x' index has dipped below the
+                                      # starting point of values.
+  if
+    _swap_last_two
+    _positive_direction
+  # on the other hand, if y = PSIZE, swap slots 0 and 1
+  # and change direction to -1
+  else
+    _get_y _get_num_items >=
+  if
+    _swap_first_two
+    _negative_direction
+  else
+    _swap_x_y_vals
+  endif endif
+  # update the slots for next round
+  _update_x_and_y
+;
+
+: next_permutation
+  # A word that does a different algorithm for permutation, one that
+  # requires less 'state' (simpler) and does not have a recursive-based
+  # basic description.
+  svpush
+    _get_read_index _get_num_items >=
+  if
+    _reset_read_index_to_0
+    _next_permutation_helper
+  endif
+  _show_value
+  # update the data pointer for grabbing the permutation
+  _increment_read_index
+  svdrop
+;
