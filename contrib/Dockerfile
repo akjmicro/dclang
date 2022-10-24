@@ -5,7 +5,10 @@ RUN apk add \
     cd / && \
     git clone https://github.com/akjmicro/dclang && \
     cd /dclang && \
-    make && \
+    make dclang && \
+    make lib && \
+    ln -s /dclang/dclang.h /usr/local/include && \
+    ln -s /dclang/libdclang.so /usr/local/lib && \
     ln -s /dclang/dclang /usr/local/bin && \
     echo 'export DCLANG_LIBS="/dclang/lib"' >> /etc/profile && \
     echo 'alias dclang="rlwrap dclang"' >> /etc/profile && \

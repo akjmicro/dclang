@@ -56,6 +56,16 @@ int get_unicode_by_hex(char *chbuf, int usize)
     return status;
 }
 
+int get_ascii(char *chbuf, int usize)
+{
+    char numstr[usize];
+    long int status = (long int) fgets(numstr, usize, ifp);
+    int acode = strtol(numstr, NULL, 16);
+    chbuf[0] = (char) acode;
+    chbuf[1] = 0;
+    return status;
+}
+
 void stringfunc()
 {
     char ch;
@@ -98,6 +108,15 @@ void stringfunc()
                 case 'r' :
                     chbuf[0] = 13;
                     chbuf[1] = 0;
+                    break;
+                /* 1-byte ASCII code */
+                case 'x' :
+                    stat = get_ascii(chbuf, 3);
+                    if (stat == 0)
+                    {
+                        printf("Illegal 1-byte ASCII string denoted with \\x.\n");
+                        return;
+                    }
                     break;
                 /* 2-byte unicode */
                 case 'u' :

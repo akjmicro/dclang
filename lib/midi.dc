@@ -1,50 +1,59 @@
-# In this file, I'm experimenting with what I call "stack indentation" w/tabbing
-# 2021-03-30
-
 var mididev
 var inbuf
+var outbuf
 var direction
 var midi_ctl_slots 128 allot
 var midi_channel_last_note 16 allot
 
-: setup_port
-    "DCLANG_MIDI_PORT_DIRECTION"
-    envget
-      "write"
-    str=
+"DCLANG_MIDI_PORT_DIRECTION" const :PORT_DIRECTION
+"DCLANG_MIDI_PORT" const :PORT_STR
+
+: _test_port_definition
+  :PORT_DIRECTION envget 0 =
   if
-      "DCLANG_MIDI_PORT"
-      envget
-        "wb"
-      fopen
-        mididev
-    !
+    "There is no defined " print :PORT_DIRECTION print cr
+    false
   else
-      "DCLANG_MIDI_PORT"
-      envget
-        2048    # 2048 = non-blocking read-only
-      open
+  :PORT_STR envget 0 =
+  if
+    "There is no defined " print :PORT_STR print cr
+    false
+  else
+    true
+  endif endif
+;
+
+: setup_port
+  _test_port_definition false =
+  if
+    "returning" print cr
+    return
+  endif
+  :PORT_DIRECTION envget "write" str=
+  if
+    :PORT_STR envget "wb" fopen
     mididev !
-      1
-      mkbuf
-    inbuf !
+    3 mkbuf outbuf !
+  else
+    # 2048 = non-blocking read-only
+    :PORT_STR envget 2048 open
+    mididev !
+    1 mkbuf inbuf !
   endif
 ;
 
 setup_port
 
-: get_mididev mididev @ ;
-: get_inbuf inbuf @ ;
+: _get_mididev mididev @ ;
+: _get_inbuf inbuf @ ;
+: _get_outbuf outbuf @ ;
 
 : _get_midi_byte
-        get_mididev get_inbuf 1
-    read
-      0
-    >
+  _get_mididev _get_inbuf 1 read
+  0 >
   if
-      inbuf @
-      ord
-        0xff
+      inbuf @ ord
+      0xff
     and
   else
     0xff
@@ -54,16 +63,11 @@ setup_port
 # Use this every 16, 32, 64, etc. samples or so
 # This will update the `midi_ctl_slots` variable
 : refresh_midictl
-      _get_midi_byte 0xf0
-    and
-      0xb0
-    =
+  _get_midi_byte 0xf0 and 0xb0 =
   if
-        _get_midi_byte _get_midi_byte
-        swap  # ( val ctrlnum )
-          midi_ctl_slots
-        +
-    !
+    _get_midi_byte _get_midi_byte
+    swap  # ( val ctrlnum )
+    midi_ctl_slots + !
   endif
 ;
 
@@ -74,16 +78,12 @@ setup_port
 # output words
 : send_midi
   # ( status_byte v1 v2 )
-        get_mididev redirect
-      svpush
-    svpush
-  emit
-    svpop
-  emit
-    svpop
-  emit
-  flush
-  resetout
+  _get_outbuf
+  # ( status_byte v1 v2 buf )
+  2 + swap 1 memset
+  1 - swap 1 memset
+  1 - swap 1 memset
+  _get_mididev swap over fwrite drop fflush
 ;
 
 : send_midi_reverse
@@ -92,13 +92,21 @@ setup_port
   # for example put the volume, then the note, then the status_byte
   # on the stack in that order. Then it's a simple matter of emitting
   # three times with zero stack-dancing or svpush or swapping involved.
-  get_mididev redirect
-  emit emit emit
-  flush resetout
+  #
+  # ( status_byte v1 v2 )
+  _get_outbuf
+  # ( v2 v1 status_byte buf )
+  swap 1 memset
+  1 +
+  swap 1 memset
+  1 +
+  swap 1 memset
+  2 -
+  _get_mididev swap over fwrite drop fflush
 ;
 
 : panic
-    get_mididev
+    _get_mididev
   redirect
         128 0 1
   for
