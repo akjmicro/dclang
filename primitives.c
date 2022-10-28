@@ -50,7 +50,6 @@ void add_all_primitives()
     add_primitive(">=", gtefunc);
     // logic
     add_primitive("assert", assertfunc);
-    add_primitive("isnull", isnullfunc);
     add_primitive("and", andfunc);
     add_primitive("or", orfunc);
     add_primitive("not", notfunc);

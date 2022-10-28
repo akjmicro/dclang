@@ -20,7 +20,7 @@ color yellow start="\"" end="\""
 color brightmagenta "(^|[[:space:]])((null|false|true|pi|e)($|[[:space:]]))*"
 # math primitives
 color brightyellow "(^|[[:space:]])((\+|-|\*|\/|\%|abs|min|max|<<|>>)($|[[:space:]]))*"
-color brightyellow "(^|[[:space:]])((=|<>|<|>|<=|>=|assert|isnull|and|or|not|xor)($|[[:space:]]))*"
+color brightyellow "(^|[[:space:]])((=|<>|<|>|<=|>=|assert|and|or|not|xor)($|[[:space:]]))*"
 color brightyellow "(^|[[:space:]])((round|ceil|floor|pow|sqrt|log|log2|log10|sin|cos|tan|rand)($|[[:space:]]))*"
 # stack manipulation
 color brightblue "(^|[[:space:]])((drop|dup|over|pick|swap|2drop|2dup|2over|depth|clear|\.|\.\.|\.rj|\.s|svpush|svpop|svdrop|svpick|svdepth|svclear)($|[[:space:]]))*"

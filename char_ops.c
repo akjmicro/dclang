@@ -8,9 +8,9 @@ void isalnumfunc()
     }
     DCLANG_UINT char_uint = (DCLANG_UINT) dclang_pop();
     if (isalnum(char_uint)) {
-        push((DCLANG_UINT) 1);
+        push((DCLANG_INT) -1);
     } else {
-        push((DCLANG_UINT) 0);
+        push((DCLANG_INT) 0);
     }
 }
 
@@ -23,9 +23,9 @@ void isalphafunc()
     }
     DCLANG_UINT char_uint = (DCLANG_UINT) dclang_pop();
     if (isalpha(char_uint)) {
-        push((DCLANG_UINT) 1);
+        push((DCLANG_INT) -1);
     } else {
-        push((DCLANG_UINT) 0);
+        push((DCLANG_INT) 0);
     }
 }
 
@@ -38,9 +38,9 @@ void iscntrlfunc()
     }
     DCLANG_UINT char_uint = (DCLANG_UINT) dclang_pop();
     if (iscntrl(char_uint)) {
-        push((DCLANG_UINT) 1);
+        push((DCLANG_INT) -1);
     } else {
-        push((DCLANG_UINT) 0);
+        push((DCLANG_INT) 0);
     }
 }
 
@@ -53,9 +53,9 @@ void isdigitfunc()
     }
     DCLANG_UINT char_uint = (DCLANG_UINT) dclang_pop();
     if (isdigit(char_uint)) {
-        push((DCLANG_UINT) 1);
+        push((DCLANG_INT) -1);
     } else {
-        push((DCLANG_UINT) 0);
+        push((DCLANG_INT) 0);
     }
 }
 
@@ -68,9 +68,9 @@ void isgraphfunc()
     }
     DCLANG_UINT char_uint = (DCLANG_UINT) dclang_pop();
     if (isgraph(char_uint)) {
-        push((DCLANG_UINT) 1);
+        push((DCLANG_INT) -1);
     } else {
-        push((DCLANG_UINT) 0);
+        push((DCLANG_INT) 0);
     }
 }
 
@@ -83,9 +83,9 @@ void islowerfunc()
     }
     DCLANG_UINT char_uint = (DCLANG_UINT) dclang_pop();
     if (islower(char_uint)) {
-        push((DCLANG_UINT) 1);
+        push((DCLANG_INT) -1);
     } else {
-        push((DCLANG_UINT) 0);
+        push((DCLANG_INT) 0);
     }
 }
 
@@ -98,9 +98,9 @@ void isprintfunc()
     }
     DCLANG_UINT char_uint = (DCLANG_UINT) dclang_pop();
     if (isprint(char_uint)) {
-        push((DCLANG_UINT) 1);
+        push((DCLANG_INT) -1);
     } else {
-        push((DCLANG_UINT) 0);
+        push((DCLANG_INT) 0);
     }
 }
 
@@ -113,9 +113,9 @@ void ispunctfunc()
     }
     DCLANG_UINT char_uint = (DCLANG_UINT) dclang_pop();
     if (ispunct(char_uint)) {
-        push((DCLANG_UINT) 1);
+        push((DCLANG_INT) -1);
     } else {
-        push((DCLANG_UINT) 0);
+        push((DCLANG_INT) 0);
     }
 }
 
@@ -128,9 +128,9 @@ void isspacefunc()
     }
     DCLANG_UINT char_uint = (DCLANG_UINT) dclang_pop();
     if (isspace(char_uint)) {
-        push((DCLANG_UINT) 1);
+        push((DCLANG_INT) -1);
     } else {
-        push((DCLANG_UINT) 0);
+        push((DCLANG_INT) 0);
     }
 }
 
@@ -143,9 +143,9 @@ void isupperfunc()
     }
     DCLANG_UINT char_uint = (DCLANG_UINT) dclang_pop();
     if (isupper(char_uint)) {
-        push((DCLANG_UINT) 1);
+        push((DCLANG_INT) -1);
     } else {
-        push((DCLANG_UINT) 0);
+        push((DCLANG_INT) 0);
     }
 }
 
@@ -158,8 +158,8 @@ void isxdigitfunc()
     }
     DCLANG_UINT char_uint = (DCLANG_UINT) dclang_pop();
     if (isxdigit(char_uint)) {
-        push((DCLANG_UINT) 1);
+        push((DCLANG_INT) -1);
     } else {
-        push((DCLANG_UINT) 0);
+        push((DCLANG_INT) 0);
     }
 }

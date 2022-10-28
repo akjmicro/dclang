@@ -94,7 +94,6 @@ DCLANG_INT fsp;
 
 // inline dclang code
 #include "stack_ops.c"
-#include "null_ops.c"
 #include "logic_ops.c"
 #include "math_ops.c"
 #include "branch_ops.c"
