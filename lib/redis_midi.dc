@@ -72,13 +72,11 @@ var _tok7
 : get_on_gate
   _get_tempo
   _get_gate *
-  0.25 *
 ;
 
 : get_off_gate
   _get_tempo
   1 _get_gate - *
-  0.25 *
 ;
 
 ########################

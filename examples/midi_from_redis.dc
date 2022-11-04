@@ -46,19 +46,6 @@ scale_size !
     +
 ;
 
-
-: _get_on_length
-  _get_tempo
-  _get_gate *
-  0.25 *
-;
-
-: _get_off_length
-  _get_tempo
-  1 _get_gate - *
-  0.25 *
-;
-
 : _midi_from_redis
   block_sigint
   ###
@@ -68,11 +55,11 @@ scale_size !
         0
   edo_degree_to_midi
   ###
-    _get_on_length
+    get_on_gate
   sleep
         0 svpop 0
   edo_degree_to_midi
-    _get_off_length
+    get_off_gate
   sleep
   unblock_sigint
   _midi_from_redis

@@ -1,64 +1,67 @@
 "midi.dc" import
-"string.dc" import
+"redis_midi.dc" import
+"permutations.dc" import
 
-var strsav
-var lnpnt
-var fpnt
-"change_ring.txt" "r" fopen fpnt !
+var perm_space
+5 setup_permutation_space
+perm_space !
 
-create pentatonic 50 , 52 , 55 , 57 , 60 ,
-create lengths     1 , 1 , 1 , 1 , 1 , 1 , 1 , 1 ,
-create vols       96 , 96 , 96 , 96 , 96 , 0 , 0 , 0 ,
-5 const CYCLE_SIZE
-var length_idx
-0.152 const BASE_LEN
-BASE_LEN 0.95 * const ON_LEN
-BASE_LEN 0.05 * const OFF_LEN
-6 const TRANSPOSE
+create oct_perm_space 3 , 0 , 1 , 2 , -1 , 0 , 0 , 0 ,
+create lengths 1 , 1 , 1 , 2 , 2 ,
+var len_idx
+0 len_idx !
+len_idx lengths - const RHYTHM_CYCLE
+41 midi_edo !
 
-: length_idx++ length_idx dup @ 1 + swap ! ;
+: generate_interval
+  / log2 midi_edo @ * round
+;
 
-: _get_on_length lengths length_idx @ CYCLE_SIZE % + @ ON_LEN * ;
+7 6 generate_interval const 7_6
+3 2 generate_interval const 3_2
+7 4 generate_interval const 7_4
+9 4 generate_interval const 9_4
 
-: _get_off_length lengths length_idx @ CYCLE_SIZE % + @ OFF_LEN * ;
+create scale 0 , 9_8 , 7_6 , 3_2 , 7_4 , 9_4 ,
 
-: _get_vol vols length_idx @ CYCLE_SIZE % + @ ;
+: _get_len
+  lengths len_idx @ RHYTHM_CYCLE % + @
+;
 
-: _get_next
-    strsav lnpnt fpnt
-  next_num_from_file
-  dup 0 =
-  if
-    drop
-    0 strsav !
-    0 lnpnt !
-    0 0 fpnt @ fseek  # reset to beginning of file
-    _get_next
-  else
-    tonum 1 -
-    5 %
-  endif
+: _advance_len_idx
+  len_idx dup @ 1 + swap !
+;
+
+: _get_local_on_len
+  get_on_gate _get_len *
+;
+
+: _get_local_off_len
+  get_off_gate _get_len *
 ;
 
 : _midi_change_ring
   block_sigint
   ###
-    0x90
-      pentatonic
-        _get_next
+    100
+      scale
+        perm_space @ next_permutation
       +
       @
-        TRANSPOSE
+        get_transpose
+      +
+        oct_perm_space next_permutation
+        midi_edo @ *
       +
       dup svpush
-    _get_vol
-  send_midi
+    0
+  edo_degree_to_midi
   ###
-  _get_on_length sleep
-  0x90 svpop 0 send_midi
-  _get_off_length sleep
+  _get_local_on_len sleep
+  0 svpop 0 edo_degree_to_midi
+  _get_local_off_len sleep
+  _advance_len_idx
   unblock_sigint
-  length_idx++
   _midi_change_ring
 ;
 
