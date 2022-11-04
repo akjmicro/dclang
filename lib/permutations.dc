@@ -1,4 +1,4 @@
-# An implementation of ageneric "change-ringing" type permutation
+# An implementation of a generic "change-ringing" type permutation
 # algorithm that has a "generator-like" behavior, i.e. the list
 # of unfolding changes doesn't sit in memory all at once, but
 # is called via a word `next_permutation` to deliver the "next"
@@ -16,7 +16,7 @@
 # So, the 1st 4 slots manage all the algorithm would need to produce generating output.
 #
 # "num_values" represents the number of values starting with "val0" that are actually being
-# put through permutation. So, permuting (0, 1, 2, 3) would mean this would be set to 4.
+# put through permutation. So, permuting [ 0, 1, 2, 3 ] would mean this would be set to 4.
 #
 # The "read_index" is actually the thing that will be used to iterate through the values
 # here represented by "val0", "val1" and so on.
