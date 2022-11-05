@@ -4,13 +4,7 @@
 redis_connect
 
 var remainder 1 remainder !
-var _tok1
-var _tok2
-var _tok3
-var _tok4
-var _tok5
-var _tok6
-var _tok7
+
 # some symbols
 "\n" const :NL
 "tempo" const :TEMPO
@@ -34,19 +28,16 @@ var _tok7
 : set_remainder remainder ! ;
 
 : get_div
-  :DIV redis_get :NL _tok5 strtok drop
-  0 :NL _tok5 strtok tonum round
+  :DIV redis_get tonum round
   dup 0 = if drop 1 endif
 ;
 
 : get_base
-  :BASE redis_get :NL _tok6 strtok drop
-  0 :NL _tok6 strtok tonum round
+  :BASE redis_get tonum round
 ;
 
 : get_chaos
-  :CHAOS redis_get :NL _tok7 strtok drop
-  0 :NL _tok7 strtok tonum round
+  :CHAOS redis_get tonum round
 ;
 
 ###########################################
@@ -54,13 +45,11 @@ var _tok7
 ###########################################
 
 : _get_tempo
-  :TEMPO redis_get :NL _tok1 strtok drop
-  0 :NL _tok1 strtok tonum 60 swap /
+  :TEMPO redis_get tonum 60 swap /
 ;
 
 : _get_gate
-  :GATE redis_get :NL _tok2 strtok drop
-  0 :NL _tok2 strtok tonum 100 /
+  :GATE redis_get tonum 100 /
 ;
 
 ###############################################################
@@ -70,8 +59,7 @@ var _tok7
 ###############################################################
 
 : get_on_gate
-  _get_tempo
-  _get_gate *
+  _get_tempo _get_gate *
 ;
 
 : get_off_gate
@@ -84,11 +72,9 @@ var _tok7
 ########################
 
 : get_mode
-  :MODE redis_get :NL _tok3 strtok drop
-  0 :NL _tok3 strtok tonum round
+  :MODE redis_get tonum round
 ;
 
 : get_transpose
-  :TRANSPOSE redis_get :NL _tok4 strtok drop
-  0 :NL _tok4 strtok tonum round
+  :TRANSPOSE redis_get tonum round
 ;

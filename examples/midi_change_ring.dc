@@ -3,7 +3,7 @@
 "permutations.dc" import
 
 var perm_space
-5 setup_permutation_space
+6 setup_permutation_space
 perm_space !
 
 create oct_perm_space 3 , 0 , 1 , 2 , -1 , 0 , 0 , 0 ,

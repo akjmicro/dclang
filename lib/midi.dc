@@ -156,10 +156,20 @@ var midi_edo
   _bend_to_MSB_LSB_bytes
   # now we have
   # ( volume midi_note_number bend_MSB bend_LSB ) ( midi_channel )
-  # send the bend
-  0 svpick 0xE0 +
-  send_midi_reverse
-  # send the note
-  svpop 0x90 +
-  send_midi_reverse
+  # choose what to do based on if there is volume, i.e.: if the volume
+  # is 0, we don't need to worry about bemd, etc. and just send the
+  # simple note info
+  3 pick 0 =
+  if
+    2drop  # drop the bend
+    svpop 0x90 +
+    send_midi_reverse
+  else
+    # send the bend
+    0 svpick 0xE0 +
+    send_midi_reverse
+    # send the note
+    svpop 0x90 +
+    send_midi_reverse
+  endif
 ;

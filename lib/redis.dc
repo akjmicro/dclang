@@ -1,7 +1,17 @@
-###################################################################
-# Still in early stages, but the idea is to implement a Redis API #
-###################################################################
+####################################################################
+# Still in early stages, but the idea is to implement a Redis API  #
+#                                                                  #
+# 2022-11-05: updated with a refactor to not use string templates, #
+#             but rather, append elements continuously to the r/w  #
+#             buffer. The first substring added is a 'header'.     #
+#                                                                  #
+# TODO: There is a limit now for buffer size, and thus the code is #
+#       usuable for 90% of cases where there are small keys/vals,  #
+#       but it not yet particularly robust for dynamically and     #
+#       arbitrary message length. (Buffer size now is 1024 bytes.) #
+####################################################################
 
+"deprecated_stack.dc" import
 "string.dc" import
 
 # constants
@@ -10,69 +20,17 @@
 1024 const REDIS_BUFSIZE
 REDIS_BUFSIZE mkbuf const REDIS_BUFFER
 
-# msg variable, socket pointer variable
-var msg
+# token_save space for `strtok` variable; socket pointer variable
+var token_save
 var redis_socket -1 redis_socket !
 
-# various redis function API string templates
-"*3\r\n$3\r\nSET\r\n${keylen}\r\n{key}\r\n${vallen}\r\n{val}\r\n" const REDIS_SET_TEMPLATE
-"*2\r\n$3\r\nGET\r\n${keylen}\r\n{key}\r\n" const REDIS_GET_TEMPLATE
-"{key}" const REDIS_KEY_WD
-"{val}" const REDIS_VAL_WD
-"{keylen}" const REDIS_KEYLEN_WD
-"{vallen}" const REDIS_VALLEN_WD
-"*2\r\n$4\r\nKEYS\r\n${searchlen}\r\n{search}\r\n" const REDIS_KEYSEARCH_TEMPLATE
-"{search}" const REDIS_SEARCH_WD
-"{searchlen}" const REDIS_SEARCHLEN_WD
-"*2\r\n$3\r\nDEL\r\n${dellen}\r\n{delkey}\r\n" const REDIS_DELETE_TEMPLATE
-"{delkey}" const REDIS_DELKEY_WD
-"{dellen}" const REDIS_DELLEN_WD
-
-#######################
-# setters and getters #
-#######################
-
-: _get_msg msg @ ;
-: _get_msglen msg @ strlen ;
-: _set_msg msg ! ;
-
-################################
-# template replacement helpers #
-################################
-
-: _replace_keylen
-  # ( K Tmpl ) -> ( K repl1  )
-  over strlen REDIS_KEYLEN_WD swap tostr
-  strreplace
-;
-
-: _replace_key
-  # ( K repl1 ) (  ) -> ( repl2 ) ( )
-  REDIS_KEY_WD rot
-  strreplace
-;
-
-: _replace_vallen
-  # ( V repl2 ) ( ) -> ( V repl3 ) ( )
-  over strlen REDIS_VALLEN_WD swap tostr
-  strreplace
-;
-
-: _replace_val
-  # ( V repl3 ) ( ) -> ( repl3 VWD V ) ( )
-  swap REDIS_VAL_WD swap
-  strreplace
-;
-
-: _replace_searchlen
-  over strlen REDIS_SEARCHLEN_WD swap tostr
-  strreplace
-;
-
-: _replace_search
-  swap REDIS_SEARCH_WD swap
-  strreplace
-;
+# various redis function API string 'headers'
+"\r\n" const :RN
+"\r\n$" const :RN$
+"*3\r\n$3\r\nSET\r\n$" const :REDIS_SET_TEMPLATE
+"*2\r\n$3\r\nGET\r\n$" const :REDIS_GET_TEMPLATE
+"*2\r\n$4\r\nKEYS\r\n$" const :REDIS_SEARCH_TEMPLATE
+"*2\r\n$3\r\nDEL\r\n$" const :REDIS_DELETE_TEMPLATE
 
 ######################################
 # buffer and tcp communication words #
@@ -82,29 +40,29 @@ var redis_socket -1 redis_socket !
   REDIS_BUFFER 0 REDIS_BUFSIZE memset
 ;
 
-: _msg_to_buf
-  _set_msg
-  _zero_redis_buffer
-  _get_msg str+
-  drop
-;
-
 : redis_connect
   REDIS_HOST REDIS_PORT tcpconnect redis_socket !
 ;
 
 : _write_redis_buffer
-  redis_socket @ REDIS_BUFFER _get_msglen write drop
+    redis_socket @
+      REDIS_BUFFER
+        #_get_msglen
+        dup strlen
+    write
+  drop
 ;
 
 : _read_redis_buffer
-  _zero_redis_buffer
-  redis_socket @ swap REDIS_BUFSIZE read drop
+    _zero_redis_buffer
+      redis_socket @ swap
+        REDIS_BUFSIZE
+    read
+  drop
   REDIS_BUFFER
 ;
 
 : _redis_write_read
-  _msg_to_buf
   _write_redis_buffer
   _read_redis_buffer
 ;
@@ -119,12 +77,21 @@ var redis_socket -1 redis_socket !
     "redis_set needs <val_str> <key_str> on the stack!" print cr
     return
   endif
-  REDIS_SET_TEMPLATE strdup
-  _replace_keylen
-  _replace_key
-  _replace_vallen
-  _replace_val
+  swap svpush svpush
+  _zero_redis_buffer
+  :REDIS_SET_TEMPLATE str+
+  0 svpick strlen tostr str+
+  :RN str+
+  svpop str+
+  :RN$ str+
+  0 svpick strlen tostr str+
+  :RN str+
+  svpop str+
+  :RN str+
+  drop
   _redis_write_read
+  # TODO: actually check status
+  drop
 ;
 
 : redis_get
@@ -133,10 +100,19 @@ var redis_socket -1 redis_socket !
     "redis_get needs <key_str> on the stack!" print cr
     return
   endif
-  REDIS_GET_TEMPLATE strdup
-  _replace_keylen
-  _replace_key
-  _redis_write_read
+  svpush
+  _zero_redis_buffer
+  :REDIS_GET_TEMPLATE str+
+  0 svpick strlen tostr str+
+  :RN str+
+  svpop str+
+  :RN str+
+  drop
+  # for now, ignore the status string and length which represents
+  # the first line of the response. Our key's value sits in the
+  # second line.
+  _redis_write_read :RN token_save strtok drop
+  null :RN token_save strtok
 ;
 
 : redis_keys
@@ -147,9 +123,14 @@ var redis_socket -1 redis_socket !
     "\"*\" redis_keys print cr" print cr
     return
   endif
-  REDIS_KEYSEARCH_TEMPLATE strdup
-  _replace_searchlen
-  _replace_search
+  svpush
+  _zero_redis_buffer
+  :REDIS_SEARCH_TEMPLATE str+
+  0 svpick strlen tostr str+
+  :RN str+
+  svpop str+
+  :RN str+
+  drop
   _redis_write_read
 ;
 
@@ -160,12 +141,14 @@ var redis_socket -1 redis_socket !
     return
   endif
   svpush
-  REDIS_DELETE_TEMPLATE strdup
-  REDIS_DELLEN_WD
-  0 svpick strlen tostr
-  strreplace
-  REDIS_DELKEY_WD
-  svpop
-  strreplace
+  _zero_redis_buffer
+  :REDIS_DELETE_TEMPLATE str+
+  0 svpick strlen tostr str+
+  :RN str+
+  svpop str+
+  :RN str+
+  drop
   _redis_write_read
+  # TODO: actually check status
+  drop
 ;

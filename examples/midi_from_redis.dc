@@ -52,7 +52,7 @@ scale_size !
     100
       _get_next_note
       dup svpush
-        0
+      0
   edo_degree_to_midi
   ###
     get_on_gate
