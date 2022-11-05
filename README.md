@@ -284,7 +284,7 @@ Implemented thus far:
     var myfile
     "test_file.txt" "w+" fopen myfile !  # save the open file ptr to a var slot
     "Some text in my file! Woo-hoo!\n"
-    myfile @ fwrite                       # write a sentence
+    dup strlen myfile @ fwrite            # write a sentence, specifying its length, to the file
     myfile @ fclose                       # close the file
     "test-file.txt" "r" fopen myfile !    # re-open for reading
     var buf 1024 mkbuf buf !              # create a memory buffer

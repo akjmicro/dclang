@@ -13,7 +13,7 @@ sky_safari_file !
 var this_obj 0 this_obj !
 
 : _writeblock
-  sky_safari_file @ fwrite drop
+  dup strlen sky_safari_file @ fwrite drop
 ;
 
 : _writeheader

@@ -78,12 +78,24 @@ setup_port
 # output words
 : send_midi
   # ( status_byte v1 v2 )
-  _get_outbuf
+    _get_outbuf
   # ( status_byte v1 v2 buf )
-  2 + swap 1 memset
-  1 - swap 1 memset
-  1 - swap 1 memset
-  _get_mididev swap over fwrite drop fflush
+    2 + swap 1 memset
+    1 - swap 1 memset
+    1 - swap 1 memset
+      _get_mididev
+  # ( buf file )
+      swap
+  # ( file buf )
+        3
+  # ( file buf 3 )
+          2 pick
+  # ( file buf 3 file )
+      fwrite
+  # ( file num_bytes_written )
+    drop
+  # ( file )
+  fflush
 ;
 
 : send_midi_reverse
@@ -94,15 +106,25 @@ setup_port
   # three times with zero stack-dancing or svpush or swapping involved.
   #
   # ( status_byte v1 v2 )
-  _get_outbuf
+    _get_outbuf
   # ( v2 v1 status_byte buf )
-  swap 1 memset
-  1 +
-  swap 1 memset
-  1 +
-  swap 1 memset
-  2 -
-  _get_mididev swap over fwrite drop fflush
+    swap 1 memset
+    1 + swap 1 memset
+    1 + swap 1 memset
+    2 -
+      _get_mididev
+  # ( buf file )
+      swap
+  # ( file buf )
+        3
+  # ( file buf 3 )
+        2 pick
+  # ( file buf 3 file )
+      fwrite
+  # ( file num_bytes_written )
+    drop
+  # ( file )
+  fflush
 ;
 
 : panic

@@ -165,14 +165,15 @@ void filetellfunc()
 
 void filewritefunc()
 {
-    if (data_stack_ptr < 2)
+    if (data_stack_ptr < 3)
     {
-        printf("'fwrite' -- needs <string-address> <fpointer> on the stack\n");
+        printf("'fwrite' -- needs <string-address> <num_of_bytes> <fpointer> on the stack\n");
         return;
     }
     FILE *file_to_write = (FILE *)(DCLANG_UINT) dclang_pop();
+    DCLANG_UINT num_bytes = (DCLANG_UINT) dclang_pop();
     char *str = (char *)(DCLANG_UINT) dclang_pop();
-    DCLANG_INT result = fwrite(str, 1, strlen(str), file_to_write);
+    DCLANG_INT result = fwrite(str, 1, num_bytes, file_to_write);
     push(result);
 }
 
