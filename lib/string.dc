@@ -12,6 +12,8 @@ const :STRSLICE_UNDERFLOW_ERROR
 const :STRSLICE_NOT_LTE_ERROR
 "strslice: error -- cannot slice a string with negative indices!"
 const :STRSLICE_NEG_ERROR
+"str_between: stack underflow -- must have <straddr> <bottom_str> <top_str> on the stack!"
+const :STRBETWEEN_UNDERFLOW_ERROR
 
 : strdup
   # copies a string; leaves the new string's
@@ -71,6 +73,11 @@ const :STRSLICE_NEG_ERROR
 ;
 
 : str_between
+  depth 3 <
+  if
+    :STRBETWEEN_UNDERFLOW_ERROR print cr
+    clear return
+  endif
   # ( str_pnt bottom top ) .s
   2 pick           # ( str_pnt bottom top str_pnt )
   str< not svpush  # ( str_pnt bottom ) ( not_outside )

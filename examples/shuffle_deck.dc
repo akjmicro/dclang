@@ -1,46 +1,316 @@
 # N.B. this is a newer, more efficient algorithm, simply using swaps
 # change on 2021-11-27: use the more correct Fisher-Yates algorithm
 
-: TEMP-SLOT 0 ;
-: DECK-START 1 ;
-: NUM-CARDS 52 ;
+##############################################################################################
+# To make a more efficient calculation mechanism, I opted to use integers to represent       #
+# the suits and ranks of typical playing cards. Each card is represented by a 3-digit        #
+# integer. It's really up to the user to determine the meaning of the highest-order          #
+# digit; for instance, 102, 202, 302, and 402 might represent "2 of clubs, 2 of diamonds,    #
+# 2 of hearts, 2 of spades" if the mental model is bridge suits. (It matters less in poker). #
+# In any event, the lowest 'number' in the deck will be 102, and the highest will be 414,    #
+# which can be considered the "Ace of Spades". Here's an example shuffled deck:              #
+#                                                                                            #
+#    208 211 214 111 405 203 309 402 412 304 308 107 403                                     #
+#    408 103 414 102 110 404 112 105 311 310 307 108 213                                     #
+#    212 104 305 206 314 413 312 106 202 313 113 306 209                                     #
+#    205 302 411 207 410 109 303 406 210 204 407 409 114                                     #
+#                                                                                            #
+##############################################################################################
 
-: deck-setup
-  NUM-CARDS 0 1 for
-    i i DECK-START + !
+52 const NUM_CARDS
+# slot for holdsing swap
+var temp
+var deck 52 allot
+var deck_idx 0 deck_idx !
+
+: _push_val_to_deck
+  deck deck_idx @ + !
+;
+
+: _increment_deck_idx
+  deck_idx @ 1 + deck_idx !
+;
+
+: _deck_setup
+  5 1 1 for
+    15 2 1 for
+      j 100 * i +
+      _push_val_to_deck
+      _increment_deck_idx
+    next
   next
+  0 deck_idx !
 ;
+_deck_setup
 
-: cell-swap
+var rank_data 13 allot
+var suit_data 4 allot
+
+: _cell_swap
   2dup
-  @ TEMP-SLOT !
-  @ swap !
-  TEMP-SLOT @ swap !
+  # ( A B A B )
+  @
+  # ( A B A Bval )
+  temp !  # temp: Bval
+  # ( A B A )
+  @
+  # ( A B Aval )
+  swap !  # B: Aval
+  # ( A )
+  temp @
+  # ( A Bval )
+  swap !  # A: Bval
 ;
 
-: shuffle-deck
-  0 TEMP-SLOT !
-    1
-      NUM-CARDS
+: shuffle_deck
+  0 deck + temp !
+    -1
+      NUM_CARDS 1 -
         -1
     for
-      i
-      rand i * floor
-      cell-swap
+      i deck +
+      rand i * floor deck +
+      _cell_swap
   next
 ;
 
-: printout-deck
-  NUM-CARDS times
-    i DECK-START + @ .
+: show_deck
+  NUM_CARDS times
+    i deck + @ . again
+  cr
+;
+
+: _zero_rank_data
+  13 times
+    0 rank_data i + !
+  again
+;
+
+: _zero_suit_data
+  4 times
+    0 suit_data i + !
+  again
+;
+
+: _get_rank_slice
+  deck + @
+  dup 100 / floor 100 * -
+  2 -
+;
+
+: _get_suit_slice
+  deck + @ 100 / floor
+  1 -
+;
+
+: _load_rank_data
+  _zero_rank_data
+  # loop through first 5 cards
+  5 times
+    i _get_rank_slice rank_data +
+    dup
+    # ( rank_slot rank_slot )
+    @ 1 + swap !
+  again
+;
+
+: _load_suit_data
+  _zero_suit_data
+  # loop through first 5 cards
+  5 times
+    i _get_suit_slice suit_data +
+    dup
+    # ( suit_slot suit_slot )
+    @ 1 + swap !
+  again
+;
+
+: show_rank_data
+  13 times
+    rank_data i + @ .
   again
   cr
 ;
 
-: do-shuffle
-  deck-setup
-  shuffle-deck
-  printout-deck
+: show_suit_data
+  4 times
+    suit_data i + @ .
+  again
+  cr
 ;
 
-do-shuffle
+#########################################
+# Now, we can run some deck simulations #
+#########################################
+
+1000000 const SIMULATIONS
+var simulation_data 10 allot
+0 const PAIR_SLOT
+1 const TWO_PAIR_SLOT
+2 const THREE_OF_A_KIND_SLOT
+3 const STRAIGHT_SLOT
+4 const FLUSH_SLOT
+5 const FULL_HOUSE_SLOT
+6 const FOUR_OF_A_KIND_SLOT
+7 const STRAIGHT_FLUSH_SLOT
+
+# some display constants
+6 const WIDTH
+0 const PRECISION
+
+: _zero_simulation_data
+  10 times
+    0 simulation_data i + !
+  again
+;
+
+: _increment_data
+  # To be called with the 'SLOT' as the immediate stack arg
+  simulation_data + dup @ 1 + swap !
+;
+
+: _show_simulation_data
+  "We ran " print SIMULATIONS . "simulated shuffles. Here are the results:" print cr
+  "One pair:        " print simulation_data PAIR_SLOT            + @ WIDTH PRECISION .rj cr
+  "Two pair:        " print simulation_data TWO_PAIR_SLOT        + @ WIDTH PRECISION .rj cr
+  "Three-of-a-kind: " print simulation_data THREE_OF_A_KIND_SLOT + @ WIDTH PRECISION .rj cr
+  "Straight:        " print simulation_data STRAIGHT_SLOT        + @ WIDTH PRECISION .rj cr
+  "Flush:           " print simulation_data FLUSH_SLOT           + @ WIDTH PRECISION .rj cr
+  "Full House:      " print simulation_data FULL_HOUSE_SLOT      + @ WIDTH PRECISION .rj cr
+  "Four-of-a-kind:  " print simulation_data FOUR_OF_A_KIND_SLOT  + @ WIDTH PRECISION .rj cr
+  "Straight flush:  " print simulation_data STRAIGHT_FLUSH_SLOT  + @ WIDTH PRECISION .rj cr
+;
+
+############################################################
+# These are helpers used to detect conditions on the first #
+############################################################
+
+: _num_of_pairs
+  0
+  13 times
+    rank_data i + @ 2 = -1 *
+    +
+  again
+;
+
+: _num_of_triplets
+  0
+  13 times
+    rank_data i + @ 3 = -1 *
+    +
+  again
+;
+
+: _num_of_quartets
+  0
+  13 times
+    rank_data i + @ 4 = -1 *
+    +
+  again
+;
+
+##########################################################
+# `is_straight_5` needs special logic to detect unbroken #
+# "continuity" between ranks. These helpers handle that. #
+##########################################################
+
+var _current_lowest_present_rank
+
+: _set_lowest_present_rank_helper
+  rank_data over + @ 0 <>
+  if
+  else
+    1 +
+    _set_lowest_present_rank_helper
+  endif
+;
+
+: _set_lowest_present_rank
+  0 _set_lowest_present_rank_helper
+  _current_lowest_present_rank !
+;
+
+: _is_straight_5
+   _set_lowest_present_rank
+  -1
+  5 times
+      rank_data
+        _current_lowest_present_rank @
+          i
+        +
+      +
+      @
+        0
+      <>
+    and
+  again
+;
+
+: _is_flush_5
+  0
+  4 times
+    suit_data i + @ 5 =
+    or
+  again
+;
+
+: simulation
+  "\nShuffling deck " print SIMULATIONS . "times; standby." print
+  _zero_simulation_data
+  SIMULATIONS times
+    shuffle_deck
+    _load_rank_data
+    _load_suit_data
+    # number of pairs
+    _num_of_pairs 1 =
+    if
+      PAIR_SLOT _increment_data
+    endif
+    # number of two pairs
+    _num_of_pairs 2 =
+    if
+      TWO_PAIR_SLOT _increment_data
+    endif
+    # three-of-a-kind
+    _num_of_triplets 1 =
+    if
+      THREE_OF_A_KIND_SLOT _increment_data
+    endif
+    # straights
+    _is_straight_5
+    if
+      STRAIGHT_SLOT _increment_data
+    endif
+    # flushes
+    _is_flush_5
+    if
+      FLUSH_SLOT _increment_data
+    endif
+    # full houses
+    _num_of_pairs 1 =
+    _num_of_triplets 1 =
+    and
+    if
+      FULL_HOUSE_SLOT _increment_data
+    endif
+    # four of a kind
+    _num_of_quartets 1 =
+    if
+      FOUR_OF_A_KIND_SLOT _increment_data
+    endif
+    # straight flush
+    _is_straight_5
+    _is_flush_5
+    and
+    if
+      STRAIGHT_FLUSH_SLOT _increment_data
+    endif
+    # update display
+    i 100000 % 0 =
+    if
+      "." print
+    endif
+  again
+  cr
+  _show_simulation_data
+;

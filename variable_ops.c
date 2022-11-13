@@ -26,10 +26,10 @@ void peekfunc()
         printf("@ -- stack underflow! ");
         return;
     }
-    DCLANG_INT idx = (DCLANG_INT) dclang_pop();
+    DCLANG_UINT idx = (DCLANG_UINT) dclang_pop();
     if (idx < 0 || idx > NUMVARS)
     {
-        printf("@ -- variable slot number out-of-range!\n");
+        printf("@ -- variable slot number %lu is out-of-range!\n", idx);
         return;
     }
     push(vars[idx]);
