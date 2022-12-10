@@ -146,6 +146,7 @@ void add_all_primitives()
     add_primitive("str<", strltfunc);
     add_primitive("str>", strgtfunc);
     add_primitive("strfind", strfindfunc);
+    add_primitive("strcspn", strcspnfunc);
     add_primitive("strtok", strtokfunc);
     add_primitive("mkbuf", mkbuffunc);
     add_primitive("free", freefunc);

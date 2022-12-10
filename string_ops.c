@@ -437,6 +437,28 @@ void strfindfunc()
     push((DCLANG_INT) strstr(str1, str2));
 }
 
+void strcspnfunc()
+{
+    if (data_stack_ptr < 2)
+    {
+        printf("strcspn -- needs <str> <test_chars_str> pointers on the stack!\n");
+    }
+    DCLANG_UINT test_chars_addr =  (DCLANG_UINT) dclang_pop();
+    DCLANG_UINT big_str_addr =  (DCLANG_UINT) dclang_pop();
+    if ((test_chars_addr != 0) && (test_chars_addr < MIN_STR || test_chars_addr > MAX_STR))
+    {
+        perror("strcspn -- <test_chars_str> string address out-of-range.");
+        return;
+    }
+    if (big_str_addr < MIN_STR || big_str_addr > MAX_STR)
+    {
+        perror("stcspn -- <str> string address out-of-range.");
+        return;
+    }
+    char *big_str    = (char *) big_str_addr;
+    char *test_chars = (char *) test_chars_addr;
+    push((DCLANG_INT) strcspn(big_str, test_chars));
+}
 
 void strtokfunc()
 {
