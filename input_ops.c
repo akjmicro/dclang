@@ -39,22 +39,31 @@ DCLANG_INT is_special_form(const char *token)
 
 
 // Function to compile (or interpret) each incoming token
-void compile_or_interpret(const char *argument)
+void compile_or_interpret(const char *token)
 {
     char *endPointer = 0;
     double d;
     const struct primitive *pr = primitives;
 
-    if (argument == 0) {
+    if (token == 0) {
         return;
     }
 
     // Search user-defined functions (words)
-    DCLANG_INT found = dclang_findword(argument);
+    DCLANG_INT found = dclang_findword(token);
     if (found > -1) {
         if (def_mode) {
-            prog[iptr].function.with_param = callword;
-            prog[iptr++].param = found;
+            if (strcmp(user_words[num_user_words - 1].name, token) == 0) {
+                // If the word found is the word immediately being
+                // defined, we can avoid `callword`, because that consumes
+                // the return stack. Instead, unconditionally jump
+                // to the start of the definition.
+                prog[iptr].function.with_param = jumpufunc;
+                prog[iptr++].param = found;
+            } else {
+                prog[iptr].function.with_param = callword;
+                prog[iptr++].param = found;
+            }
         } else {
             dclang_callword(found);
         }
@@ -63,11 +72,11 @@ void compile_or_interpret(const char *argument)
 
     // Search for a primitive word
     while (pr->name != 0) {
-        if (strcmp(pr->name, argument) == 0) {
+        if (strcmp(pr->name, token) == 0) {
             if ((def_mode) && (!is_special_form(pr->name))) {
                 prog[iptr++].function.without_param = pr->function;
             } else {
-                if (validate(argument)) {
+                if (validate(token)) {
                     (*(pr->function)) ();
                 }
             }
@@ -78,8 +87,8 @@ void compile_or_interpret(const char *argument)
 
     // Neither user word nor primitive word was found.
     // OK, so next, try to convert to a number
-    d = strtod(argument, &endPointer);
-    if (endPointer != argument) {
+    d = strtod(token, &endPointer);
+    if (endPointer != token) {
         if (def_mode) {
             prog[iptr].function.with_param = push;
             prog[iptr++].param = d;
@@ -92,7 +101,7 @@ void compile_or_interpret(const char *argument)
     // Nothing found, we've reached an error condition.
     // Report the situation and reset the stack.
     data_stack_ptr = 0;
-    printf("%s -- syntax error.\n", argument);
+    printf("%s -- syntax error.\n", token);
     return;
 }
 

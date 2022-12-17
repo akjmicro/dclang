@@ -45,19 +45,19 @@ Born on 2018-05-05 */
 
 // data stack
 DCLANG_FLT data_stack[DATA_STACK_SIZE * 2];
-int data_stack_ptr;
+uintptr_t data_stack_ptr;
 // save data stack
 DCLANG_FLT save_data_stack[DATA_STACK_SIZE];
-int save_data_stack_ptr;
+uintptr_t save_data_stack_ptr;
 // variables space
 DCLANG_FLT vars[NUMVARS];
 DCLANG_UINT varsidx;
 // return stack
 DCLANG_INT return_stack[RETURN_STACK_SIZE];
-int return_stack_ptr;
+uintptr_t return_stack_ptr;
 // loop 'stack'
 DCLANG_INT loop_counter[3];
-int loop_counter_ptr;
+uintptr_t loop_counter_ptr;
 // min and max string buffer addresses
 DCLANG_UINT MIN_STR = 0;
 DCLANG_UINT MAX_STR = 0;

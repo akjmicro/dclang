@@ -1,109 +1,98 @@
 : test_isalnum
-  "Testing isalnum" print cr
-  "k" ord isalnum 1 = assert
-  "J" ord isalnum 1 = assert
-  "1" ord isalnum 1 = assert
-  "9" ord isalnum 1 = assert
-  ";" ord isalnum 0 = assert
+  "k" ord isalnum     assert
+  "J" ord isalnum     assert
+  "1" ord isalnum     assert
+  "9" ord isalnum     assert
+  ";" ord isalnum not assert
 ;
 
 : test_isalpha
-  "Testing isalpha" print cr
-  "k" ord isalpha 1 = assert
-  "9" ord isalpha 0 = assert
-  ";" ord isalpha 0 = assert
+  "k" ord isalpha     assert
+  "9" ord isalpha not assert
+  ";" ord isalpha not assert
 ;
 
 : test_iscntrl
-  "Testing iscntrl" print cr
-  "k" ord iscntrl 0 = assert
-  20 iscntrl 1 = assert
+  "k" ord iscntrl not assert
+  20 iscntrl     assert
 ;
 
 : test_isdigit
-  "Testing isdigit" print cr
-  "k" ord isdigit 0 = assert
-  "J" ord isdigit 0 = assert
-  "!" ord isdigit 0 = assert
-  "1" ord isdigit 1 = assert
-  "7" ord isdigit 1 = assert
+  "k" ord isdigit not assert
+  "J" ord isdigit not assert
+  "!" ord isdigit not assert
+  "1" ord isdigit     assert
+  "7" ord isdigit     assert
 ;
 
 : test_isgraph
-  "Testing isgraph" print cr
-  "\n" ord isgraph 0 = assert
-  " " ord isgraph 0 = assert
-  "!" ord isgraph 1 = assert
-  "1" ord isgraph 1 = assert
-  "7" ord isgraph 1 = assert
+  "\n" ord isgraph not assert
+  " "  ord isgraph not assert
+  "!"  ord isgraph     assert
+  "1"  ord isgraph     assert
+  "7"  ord isgraph     assert
 ;
 
 : test_islower
-  "Testing islower" print cr
-  "k" ord islower 1 = assert
-  "K" ord islower 0 = assert
-  "a" ord islower 1 = assert
-  "A" ord islower 0 = assert
-  "7" ord islower 0 = assert
+  "k" ord islower     assert
+  "K" ord islower not assert
+  "a" ord islower     assert
+  "A" ord islower not assert
+  "7" ord islower not assert
 ;
 
 : test_isprint
-  "Testing isprint" print cr
-  "k" ord isprint 1 = assert
-  "\n" ord isprint 0 = assert
-  3 isprint 0 = assert
+  "k"  ord isprint     assert
+  "\n" ord isprint not assert
+  3        isprint not assert
 ;
 
 : test_ispunct
-  "Testing ispunct" print cr
-  "!" ord ispunct 1 = assert
-  ";" ord ispunct 1 = assert
-  "0" ord ispunct 0 = assert
-  "X" ord ispunct 0 = assert
+  "!" ord ispunct     assert
+  ";" ord ispunct     assert
+  "0" ord ispunct not assert
+  "X" ord ispunct not assert
 ;
 
 : test_isspace
-  "Testing isspace" print cr
-  " " ord isspace 1 = assert
-  "\n" ord isspace 1 = assert
-  "\t" ord isspace 1 = assert
-  " " ord isspace 1 = assert
-  "5" ord isspace 0 = assert
-  "F" ord isspace 0 = assert
+  " "  ord isspace     assert
+  "\n" ord isspace     assert
+  "\t" ord isspace     assert
+  " "  ord isspace     assert
+  "5"  ord isspace not assert
+  "F"  ord isspace not assert
 ;
 
 : test_isupper
-  "Testing isupper" print cr
-  "k" ord isupper 0 = assert
-  "K" ord isupper 1 = assert
-  "a" ord isupper 0 = assert
-  "A" ord isupper 1 = assert
-  "7" ord isupper 0 = assert
+  "k" ord isupper not assert
+  "K" ord isupper     assert
+  "a" ord isupper not assert
+  "A" ord isupper     assert
+  "7" ord isupper not assert
 ;
 
 : test_isxdigit
-  "Testing isxdigit" print cr
-  "0" ord isxdigit 1 = assert
-  "5" ord isxdigit 1 = assert
-  "9" ord isxdigit 1 = assert
-  "A" ord isxdigit 1 = assert
-  "B" ord isxdigit 1 = assert
-  "C" ord isxdigit 1 = assert
-  "D" ord isxdigit 1 = assert
-  "E" ord isxdigit 1 = assert
-  "F" ord isxdigit 1 = assert
-  "a" ord isxdigit 1 = assert
-  "b" ord isxdigit 1 = assert
-  "c" ord isxdigit 1 = assert
-  "d" ord isxdigit 1 = assert
-  "e" ord isxdigit 1 = assert
-  "f" ord isxdigit 1 = assert
+  "0" ord isxdigit     assert
+  "5" ord isxdigit     assert
+  "9" ord isxdigit     assert
+  "A" ord isxdigit     assert
+  "B" ord isxdigit     assert
+  "C" ord isxdigit     assert
+  "D" ord isxdigit     assert
+  "E" ord isxdigit     assert
+  "F" ord isxdigit     assert
+  "a" ord isxdigit     assert
+  "b" ord isxdigit     assert
+  "c" ord isxdigit     assert
+  "d" ord isxdigit     assert
+  "e" ord isxdigit     assert
+  "f" ord isxdigit     assert
   # exceptions
-  "G" ord isxdigit 0 = assert
-  "g" ord isxdigit 0 = assert
-  "!" ord isxdigit 0 = assert
-  ":" ord isxdigit 0 = assert
-  "\n" ord isxdigit 0 = assert
+  "G"  ord isxdigit not assert
+  "g"  ord isxdigit not assert
+  "!"  ord isxdigit not assert
+  ":"  ord isxdigit not assert
+  "\n" ord isxdigit not assert
 ;
 
 test_isalnum
@@ -120,3 +109,5 @@ test_ispunct
 test_isspace
 test_isupper
 test_isxdigit
+
+"If you are only seeing this msg, all tests have passed!" print cr

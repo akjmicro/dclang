@@ -46,12 +46,10 @@ void callword(DCLANG_FLT where)
 {
     /* Don't consume more of the return stack if we are going nowhere.
        This will allow better recursion */
-    if (return_stack[return_stack_ptr - 1] != iptr) {
-        return_stack[return_stack_ptr++] = iptr;
-    }
+    return_stack[return_stack_ptr++] = iptr;
     // set word target; execute word target
     iptr = (DCLANG_UINT) where;
-    (*(prog[iptr].function.with_param)) (prog[iptr].param);
+    (*(prog[iptr].function.with_param)) (prog[iptr++].param);
 }
 
 void dclang_callword(DCLANG_INT where)
@@ -59,8 +57,7 @@ void dclang_callword(DCLANG_INT where)
     callword((DCLANG_FLT) where);
     // execute all until we reach the end of the iptr queue
     while (iptr < max_iptr) {
-        iptr += 1;
-        (*(prog[iptr].function.with_param)) (prog[iptr].param);
+        (*(prog[iptr].function.with_param)) (prog[iptr++].param);
     }
 }
 

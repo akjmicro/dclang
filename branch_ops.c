@@ -101,20 +101,18 @@ void kfunc()
 
 
 // jump if zero (false)
-void jumpzfunc()
+void jumpzfunc(DCLANG_FLT where)
 {
-    DCLANG_INT where = (DCLANG_INT) dclang_pop();
     DCLANG_INT truth = (DCLANG_INT) dclang_pop();
     if (!truth) {
-        iptr = where;
+        iptr = (uintptr_t) where;
     }
 }
 
 // unconditional jump
-void jumpufunc()
+void jumpufunc(DCLANG_FLT where)
 {
-    DCLANG_INT where = (DCLANG_INT) dclang_pop();
-    iptr = where;
+    iptr = (uintptr_t) where;
 }
 
 // if-else-endif
@@ -122,29 +120,29 @@ void iffunc()
 {
     // mark our location
     return_stack[return_stack_ptr++] = iptr;
-    prog[iptr].function.with_param = push;
+    // set jump location for 'else'...w/o 'where' location
+    // will be filled in by 'else'
+    prog[iptr].function.with_param = jumpzfunc;
     prog[iptr++].param = 0;
-    prog[iptr++].function.without_param = jumpzfunc;
 }
 
 void elsefunc()
 {
-    // get the last 'if' value
+    // get the last starting point of the 'if' clause
     DCLANG_INT if_val = return_stack[--return_stack_ptr];
-    // replace the return stack location value with 'here'
-    // so, we are re-marking our location
+    // mark out current location on the return stack
     return_stack[return_stack_ptr++] = iptr;
-    // push the next unconditional jump value, starting with a dummy
-    prog[iptr].function.with_param = push;
+    // set the unconditional jump, but no 'where' yet
+    // (will be filled in later by 'endif')....
+    prog[iptr].function.with_param = jumpufunc;
     prog[iptr++].param = 0;
-    prog[iptr++].function.without_param = jumpufunc;
     // update old if val goto:
-    prog[if_val].param = iptr - 1;
+    prog[if_val].param = iptr;
 }
 
 
 void endiffunc()
 {
     DCLANG_INT last_val = return_stack[--return_stack_ptr];
-    prog[last_val].param = iptr - 1;
+    prog[last_val].param = iptr;
 }
