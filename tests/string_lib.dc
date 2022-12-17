@@ -8,6 +8,7 @@ teststr !
 
 # run `substr_count` as a test!
 teststr @ :BLAH
+
 substr_count
 
 # make an assertion that our test string has 4 instances

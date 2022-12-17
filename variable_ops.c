@@ -9,7 +9,7 @@ void pokefunc()
         printf("! -- stack underflow! ");
         return;
     }
-    DCLANG_UINT idx = (DCLANG_UINT) dclang_pop();
+    DCLANG_UINT32 idx = (DCLANG_UINT32) dclang_pop();
     if (idx < 0 || idx > NUMVARS)
     {
         printf("! -- variable slot number out-of-range!\n");
@@ -26,7 +26,7 @@ void peekfunc()
         printf("@ -- stack underflow! ");
         return;
     }
-    DCLANG_UINT idx = (DCLANG_UINT) dclang_pop();
+    DCLANG_UINT32 idx = (DCLANG_UINT32) dclang_pop();
     if (idx < 0 || idx > NUMVARS)
     {
         printf("@ -- variable slot number %lu is out-of-range!\n", idx);
@@ -57,7 +57,7 @@ void variablefunc()
     if (iptr < max_iptr)
     {
         // mark current position
-        DCLANG_UINT ret_iptr = iptr;
+        DCLANG_UINT32 ret_iptr = iptr;
         // jump to end (when this is called in the future)
         iptr = return_stack[--return_stack_ptr];
         return_stack[return_stack_ptr++] = ret_iptr;
@@ -84,7 +84,7 @@ void allotfunc()
         printf("allot -- stack underflow! ");
         return;
     }
-    varsidx += (DCLANG_UINT) dclang_pop() - 1;
+    varsidx += (DCLANG_UINT32) dclang_pop() - 1;
 }
 
 void createfunc()
@@ -106,7 +106,7 @@ void commafunc()
 
 void herefunc()
 {
-    push((DCLANG_UINT) varsidx);
+    push((DCLANG_UINT32) varsidx);
 }
 
 /* global hash space, a la 'redis', but in local memory */

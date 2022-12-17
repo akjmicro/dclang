@@ -85,6 +85,6 @@ void startword()
 void endword()
 {
     /* Simply insert a return call into 'prog' where 'iptr' now points. */
-    prog[iptr].function.without_param = returnfunc;
-    max_iptr = iptr++;
+    prog[iptr++].function.without_param = returnfunc;
+    max_iptr = iptr;
 }
