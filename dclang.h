@@ -7,6 +7,8 @@
    I've found it crawls to a halt on the benchmarks if you use 'float'!
 */
 
+#include <inttypes.h>
+
 // data type macros
 #define DCLANG_FLT     double
 #define DCLANG_INT     long
@@ -101,10 +103,10 @@ DCLANG_PTR fsp;
 
 extern void dclang_initialize();
 
-extern int dclang_import(char *infilestr);
+extern DCLANG_INT dclang_import(char *infilestr);
 
-DCLANG_INT dclang_findword(const char *word);
+extern DCLANG_INT dclang_findword(const char *word);
 
-extern void dclang_callword(unsigned long int where);
+extern void dclang_callword(DCLANG_PTR where);
 
-extern double dclang_pop();
+extern DCLANG_FLT dclang_pop();
