@@ -1,22 +1,35 @@
 # run this in an 80x24 terminal
 
-32 0 !
-45 1 !
+var mybuf
+80 24 * 1 + mkbuf
+mybuf !
+
+32 1 !
 43 2 !
+45 3 !
+48 4 !
+
+: bufadd
+  over mybuf @ + swap 1 memset drop
+;
 
 : kaleidoscope
   4096 times
+    0
     24 times
       80 times
-        i  60 / 0.64 - dup *   # This is all distance formula stuff:
-        j  24 / 0.5 - dup *   # sqrt(a^2 + b^2)...distance from origin
-        + sqrt sin            # (sine of the distance from origin)
-        k * sin 1.5 * 1.5 + floor
-        @ emit
+        i  80 / 0.5 - dup *   # This is all distance formula stuff:
+        j  24 / 0.5 - dup *    # sqrt(a^2 + b^2)...distance from origin
+        + sqrt sin             # (sine of the distance from origin)
+        k * sin 0.5 * 0.51 + 3.9 * floor
+        1 + @ bufadd
+        1 +
       again
-      cr
     again
-  0.005 sleep
+    mybuf @ 80 24 * +   0   1   memset drop
+    mybuf @ print
+    0.05 sleep
+    drop
   again
 ;
 

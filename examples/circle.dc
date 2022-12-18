@@ -1,14 +1,30 @@
+var mybuf
+80 24 * mkbuf
+mybuf !
+
+: bufadd
+  over mybuf @ + swap 1 memset drop
+;
+
 : circle-draw
   1024 times
-    -12 11 -1 for
-      39 -40 1 for
-        i 47 / dup * j 24 / dup * + sqrt
+    0
+    24 times
+      80 times
+        i 80 1.666 / / 0.8 - dup *
+          j 24 / 0.5 - dup *
+        + sqrt
         # radius
-        0.005 k 32 / pi * cos 0.23 * 0.23 + +
-        < if 42 else 32 endif emit
-      next cr
-    next
-  0.055 sleep
+        k 32 / pi * cos 0.5 * 0.5 +
+        0.46 *
+        < if 42 else 32 endif bufadd
+        1 +
+      again
+    again
+    mybuf @ 80 24 * +   0   1   memset drop
+    mybuf @ print
+    drop
+    0.05 sleep
   again
 ;
 

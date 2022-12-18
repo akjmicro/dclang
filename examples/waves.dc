@@ -1,15 +1,42 @@
+80                const  WIDTH
+24                const  HEIGHT
+1 WIDTH /         const  INV_WIDTH
+1 HEIGHT /        const  INV_HEIGHT
+WIDTH HEIGHT *    const  AREA
+HEIGHT    2  /    const  HIGHROW
+WIDTH     2  /    const  HIGHCOL
+HIGHROW  -1  *    const  LOWROW
+HIGHCOL  -1  *    const  LOWCOL
+
+var mybuf
+AREA mkbuf
+mybuf !
+
+: bufadd
+  over mybuf @ + swap 1 memset drop
+;
+
 : waves
   4096 times
-    17 -17 1 for
-      50 -50 1 for
-        i 100 / sin
-        j  34 / sin
-        -
-        k * sin 0.5 <
-        if 32 else 42 endif emit
-      next cr
+    0
+    HIGHROW LOWROW 1 for
+      HIGHCOL LOWCOL 1 for
+          i  INV_WIDTH * dup *    sin
+            j INV_HEIGHT * dup *  cos
+          * sqrt
+            k
+          *
+          sin
+            0.5
+          <
+          if 32 else 42 endif   bufadd
+          1 +   # increment the original 0 counter
+      next
     next
-  0.055 sleep
+    mybuf @ AREA  +   0   1   memset drop
+    mybuf @ print
+    0.065 sleep
+    drop
   again
 ;
 
