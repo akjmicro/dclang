@@ -128,7 +128,7 @@ void repl() {
 }
 
 
-int dclang_import(char *infilestr) {
+DCLANG_INT dclang_import(char *infilestr) {
     char *prefix = getenv("DCLANG_LIBS");
     if (prefix == NULL) {
         printf("DCLANG_LIBS env variable is unset!\n");
