@@ -1,13 +1,3 @@
-/* we need to populate the dictionary first with primitives */
-struct primitive {
-  const char *name;
-  void (*function) (void);
-} primitive;
-
-
-struct primitive *primitives;
-int primitives_idx = -1;
-
 
 void add_primitive(char *name, void *func_ptr)
 {
@@ -19,7 +9,6 @@ void add_primitive(char *name, void *func_ptr)
     (primitives + primitives_idx) -> name = name;
     (primitives + primitives_idx) -> function = func_ptr;
 };
-
 
 void add_all_primitives()
 {

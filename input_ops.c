@@ -206,19 +206,19 @@ void grabinput() {
         string_pad[string_here++] = ch;
         if ((ch = getchar()) == EOF) exit(0);
     }
-    DCLANG_UINT string_addr = (DCLANG_UINT) string_start;
-    DCLANG_UINT string_size = (DCLANG_UINT)(string_here - string_start);
+    DCLANG_PTR string_addr = (DCLANG_PTR) string_start;
+    DCLANG_PTR string_size = (DCLANG_PTR)(string_here - string_start);
     char *string_dest = malloc(string_size + 1);
     char nullstr[] = "\0";
-    memcpy(string_dest, (char *)((DCLANG_UINT)&string_pad[0] + string_addr), string_size);
-    DCLANG_UINT string_dest_uint = (DCLANG_UINT) string_dest;
-    if (string_dest_uint < MIN_STR || MIN_STR == 0) {
-        MIN_STR = string_dest_uint;
+    memcpy(string_dest, (char *)((DCLANG_PTR)&string_pad[0] + string_addr), string_size);
+    DCLANG_PTR string_dest_PTR = (DCLANG_PTR) string_dest;
+    if (string_dest_PTR < MIN_STR || MIN_STR == 0) {
+        MIN_STR = string_dest_PTR;
     }
-    if (string_dest_uint + string_size + 1 > MAX_STR || MAX_STR == 0) {
-        MAX_STR = string_dest_uint + string_size + 1;
+    if (string_dest_PTR + string_size + 1 > MAX_STR || MAX_STR == 0) {
+        MAX_STR = string_dest_PTR + string_size + 1;
     }
-    push(string_dest_uint);
+    push(string_dest_PTR);
     revertinput();
 }
 

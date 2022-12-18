@@ -54,7 +54,7 @@ void pickfunc()
          printf("pick -- stack underflow!\n");
          return;
     }
-    DCLANG_UINT pick_idx = (DCLANG_UINT) dclang_pop();
+    DCLANG_PTR pick_idx = (DCLANG_PTR) dclang_pop();
     if (data_stack_ptr < (pick_idx + 1)) {
         printf("pick -- stack not deep enough!\n");
         return;
@@ -107,7 +107,7 @@ void over2func()
 
 void depthfunc()
 {
-    DCLANG_UINT size = data_stack_ptr;
+    DCLANG_PTR size = data_stack_ptr;
     push((DCLANG_FLT)size);
 }
 
@@ -151,7 +151,7 @@ void svpickfunc()
          printf("svpick -- stack underflow!\n");
          return;
     }
-    DCLANG_UINT svpick_idx = (DCLANG_UINT) dclang_pop();
+    DCLANG_PTR svpick_idx = (DCLANG_PTR) dclang_pop();
     if (save_data_stack_ptr < (svpick_idx + 1)) {
         printf("svpick -- stack not deep enough!\n");
         return;
@@ -161,7 +161,7 @@ void svpickfunc()
 
 void svdepthfunc()
 {
-    DCLANG_UINT size = save_data_stack_ptr;
+    DCLANG_PTR size = save_data_stack_ptr;
     push((DCLANG_FLT)size);
 }
 

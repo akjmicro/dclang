@@ -63,7 +63,7 @@ void tcpconnectfunc()
     if (sockfd < 0) perror("tcpconnect -- ERROR opening socket");
     DCLANG_INT32 portno = (DCLANG_INT32) dclang_pop();
     struct sockaddr_in host_addr;
-    char *servername = (char *) (DCLANG_UINT) dclang_pop();
+    char *servername = (char *) (DCLANG_PTR) dclang_pop();
     struct hostent *server = gethostbyname(servername);
     if (server == NULL) {
         fprintf(stderr, "tcpconnect -- ERROR, no such host\n");

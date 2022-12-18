@@ -15,13 +15,6 @@
  put into 'prog' is a call to 'callfunc', with the parameter to that call
  being the index in 'prog' where the word resides. */
 
-typedef struct {
-    const char *name;
-    DCLANG_UINT word_start;
-} user_word;
-
-user_word user_words[1024];
-DCLANG_UINT num_user_words;
 
 /* for debugging */
 void showdefined()
@@ -48,11 +41,11 @@ void callword(DCLANG_FLT where)
        This will allow better recursion */
     return_stack[return_stack_ptr++] = iptr;
     // set word target; execute word target
-    iptr = (DCLANG_UINT) where;
+    iptr = (DCLANG_PTR) where;
     (*(prog[iptr].function.with_param)) (prog[iptr++].param);
 }
 
-void dclang_callword(DCLANG_INT where)
+void dclang_callword(DCLANG_PTR where)
 {
     callword((DCLANG_FLT) where);
     // execute all until we reach the end of the iptr queue

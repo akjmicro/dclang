@@ -37,7 +37,7 @@ void treemakefunc()
         printf("You can change the limit when compiling via the NUM_TREE_ROOTS variable\n");
         return;
     }
-    push((DCLANG_UINT) tree_roots_idx);
+    push((DCLANG_PTR) tree_roots_idx);
 }
 
 int tree_compare_func(const void *l, const void *r)
@@ -57,13 +57,13 @@ void treegetfunc()
         printf("so it can be referred to later.\n");
         return;
     }
-    DCLANG_UINT tree_idx = (DCLANG_UINT) dclang_pop();
-    char *search_key = (char *)(DCLANG_UINT) dclang_pop();
+    DCLANG_PTR tree_idx = (DCLANG_PTR) dclang_pop();
+    char *search_key = (char *)(DCLANG_PTR) dclang_pop();
     struct tree_entry *te = make_tree_entry(strdup(search_key), 0);
     struct tree_entry *retval = tfind(te, &tree_roots[tree_idx], tree_compare_func);
     if (retval == NULL)
     {
-        push((DCLANG_UINT) 0);
+        push((DCLANG_PTR) 0);
         return;
     }
     push((DCLANG_FLT)((*(struct tree_entry **)retval)->value));
@@ -78,8 +78,8 @@ void treesetfunc()
         printf("so it can be referred to later.\n");
         return;
     }
-    DCLANG_UINT tree_idx = (DCLANG_UINT) dclang_pop();
-    char *search_key = (char *)(DCLANG_UINT) dclang_pop();
+    DCLANG_PTR tree_idx = (DCLANG_PTR) dclang_pop();
+    char *search_key = (char *)(DCLANG_PTR) dclang_pop();
     DCLANG_FLT value = dclang_pop();
     struct tree_entry *te_del = make_tree_entry(strdup(search_key), value);
     tdelete(te_del, &tree_roots[tree_idx], tree_compare_func);
@@ -95,7 +95,7 @@ void print_node(const void *node, const VISIT order, const int depth)
 		    printf(
 		        "key=%s, value=%s\n",
 		        (*(struct tree_entry **)node)->key,
-		        (char *)(DCLANG_UINT)((*(struct tree_entry **)node)->value)
+		        (char *)(DCLANG_PTR)((*(struct tree_entry **)node)->value)
 		    );
     }
 }
@@ -106,7 +106,7 @@ void treewalkfunc()
         printf("treewalk -- stack underflow! Need <tree_index> on the stack.\n");
         return;
     }
-    DCLANG_UINT tree_idx = (DCLANG_UINT) dclang_pop();
+    DCLANG_PTR tree_idx = (DCLANG_PTR) dclang_pop();
     twalk(tree_roots[tree_idx], print_node);
 }
 
@@ -116,8 +116,8 @@ void treedelfunc()
         printf("treedel -- stack underflow! Need <key> <tree_index> on the stack.\n");
         return;
     }
-    DCLANG_UINT tree_idx = (DCLANG_UINT) dclang_pop();
-    char *key = (char *)(DCLANG_UINT) dclang_pop();
+    DCLANG_PTR tree_idx = (DCLANG_PTR) dclang_pop();
+    char *key = (char *)(DCLANG_PTR) dclang_pop();
     struct tree_entry *te_del = make_tree_entry(strdup(key), 0);
     tdelete(te_del, &tree_roots[tree_idx], tree_compare_func);
     free(te_del);
@@ -129,7 +129,7 @@ void treedestroyfunc()
         printf("treedestroy -- stack underflow! Need <tree_index> on the stack.\n");
         return;
     }
-    DCLANG_UINT tree_idx = (DCLANG_UINT) dclang_pop();
+    DCLANG_PTR tree_idx = (DCLANG_PTR) dclang_pop();
     tdestroy(tree_roots[tree_idx], free);
     tree_roots[tree_idx] = NULL;
 }

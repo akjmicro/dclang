@@ -90,7 +90,7 @@ void epoch_to_dtfunc()
         printf("'strftime', a low-level call of 'epoch->dt', returned an error.\n");
         return;
     }
-    DCLANG_UINT bufaddr = (DCLANG_UINT) tmbuf;
+    DCLANG_PTR bufaddr = (DCLANG_PTR) tmbuf;
     if (bufaddr > MAX_STR || MAX_STR == 0)
     {
         MAX_STR = bufaddr;

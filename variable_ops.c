@@ -1,6 +1,3 @@
-char **hashwords;
-DCLANG_UINT hashwords_size = 32;
-DCLANG_UINT hashwords_cnt = 0;
 
 void pokefunc()
 {
@@ -9,7 +6,7 @@ void pokefunc()
         printf("! -- stack underflow! ");
         return;
     }
-    DCLANG_UINT32 idx = (DCLANG_UINT32) dclang_pop();
+    DCLANG_PTR idx = (DCLANG_PTR) dclang_pop();
     if (idx < 0 || idx > NUMVARS)
     {
         printf("! -- variable slot number out-of-range!\n");
@@ -26,7 +23,7 @@ void peekfunc()
         printf("@ -- stack underflow! ");
         return;
     }
-    DCLANG_UINT32 idx = (DCLANG_UINT32) dclang_pop();
+    DCLANG_PTR idx = (DCLANG_PTR) dclang_pop();
     if (idx < 0 || idx > NUMVARS)
     {
         printf("@ -- variable slot number %lu is out-of-range!\n", idx);
@@ -57,7 +54,7 @@ void variablefunc()
     if (iptr < max_iptr)
     {
         // mark current position
-        DCLANG_UINT32 ret_iptr = iptr;
+        DCLANG_PTR ret_iptr = iptr;
         // jump to end (when this is called in the future)
         iptr = return_stack[--return_stack_ptr];
         return_stack[return_stack_ptr++] = ret_iptr;
@@ -84,7 +81,7 @@ void allotfunc()
         printf("allot -- stack underflow! ");
         return;
     }
-    varsidx += (DCLANG_UINT32) dclang_pop() - 1;
+    varsidx += (DCLANG_PTR) dclang_pop() - 1;
 }
 
 void createfunc()
@@ -106,7 +103,7 @@ void commafunc()
 
 void herefunc()
 {
-    push((DCLANG_UINT32) varsidx);
+    push((DCLANG_PTR) varsidx);
 }
 
 /* global hash space, a la 'redis', but in local memory */
@@ -130,15 +127,15 @@ void hashsetfunc()
         return;
     }
     /* grab the key */
-    char *key = (char *)(DCLANG_UINT)dclang_pop();
-    DCLANG_UINT key_addr = (DCLANG_UINT) key;
+    char *key = (char *)(DCLANG_PTR) dclang_pop();
+    DCLANG_PTR key_addr = (DCLANG_PTR) key;
     if (key_addr < MIN_STR || key_addr > MAX_STR)
     {
         perror("h! -- String address for hash key out-of-range.");
         return;
     }
     /* grab the value */
-    char *data = (char *)(DCLANG_UINT) dclang_pop();
+    char *data = (char *)(DCLANG_PTR) dclang_pop();
     ENTRY item = {key, data};
     /* see if we have an entry for the given key first */
     ENTRY *entry = hsearch(item, FIND);
@@ -160,8 +157,8 @@ void hashgetfunc()
         return;
     }
     /* grab the key */
-    char *key = (char *)(DCLANG_UINT)dclang_pop();
-    DCLANG_UINT key_addr = (DCLANG_UINT) key;
+    char *key = (char *)(DCLANG_PTR) dclang_pop();
+    DCLANG_PTR key_addr = (DCLANG_PTR) key;
     if (key_addr < MIN_STR || key_addr > MAX_STR)
     {
         perror("h@ -- String address for hash key out-of-range.");
@@ -176,7 +173,7 @@ void hashgetfunc()
     {
         push(0);
     } else {
-        push((DCLANG_UINT)(char *)entry->data);
+        push((DCLANG_PTR)(char *) entry->data);
     }
 }
 
@@ -188,8 +185,8 @@ void hashkeysfunc()
         return;
     }
     /* grab the key index */
-    DCLANG_UINT keyidx = (DCLANG_UINT)dclang_pop();
-    push((DCLANG_UINT)hashwords[keyidx]);
+    DCLANG_PTR keyidx = (DCLANG_PTR) dclang_pop();
+    push((DCLANG_PTR) hashwords[keyidx]);
 }
 
 // helper functions for sorting
@@ -203,8 +200,8 @@ int compare_doubles (const void *a, const void *b)
 
 int compare_strings (const void *a, const void *b)
 {
-    const char *sa = (const char *) (DCLANG_UINT) * (DCLANG_FLT *) a;
-    const char *sb = (const char *) (DCLANG_UINT) * (DCLANG_FLT *) b;
+    const char *sa = (const char *) (DCLANG_PTR) * (DCLANG_FLT *) a;
+    const char *sb = (const char *) (DCLANG_PTR) * (DCLANG_FLT *) b;
     return strcmp(sa, sb);
 }
 
@@ -217,8 +214,8 @@ void sortnumsfunc()
         printf("sortnums -- need <arrstart_index> <size> on the stack.\n");
         return;
     }
-    int size = (DCLANG_UINT) dclang_pop();
-    int arrstart = (DCLANG_UINT) dclang_pop();
+    int size = (DCLANG_PTR) dclang_pop();
+    int arrstart = (DCLANG_PTR) dclang_pop();
     qsort (vars+arrstart, size, sizeof(DCLANG_FLT), compare_doubles);
 }
 
@@ -228,8 +225,8 @@ void sortstrsfunc()
     {
         printf("sortstrs -- need <arrstart_index> <size> on the stack.\n");
     }
-    int size = (DCLANG_UINT) dclang_pop();
-    int arrstart = (DCLANG_UINT) dclang_pop();
+    int size = (DCLANG_PTR) dclang_pop();
+    int arrstart = (DCLANG_PTR) dclang_pop();
     qsort (vars+arrstart, size, sizeof(DCLANG_FLT), compare_strings);
 }
 
@@ -242,15 +239,15 @@ void envgetfunc()
         printf("envget -- need <env_key> string on the stack.\n");
     }
     /* grab the key */
-    char *env_key = (char *)(DCLANG_UINT)dclang_pop();
-    DCLANG_UINT env_key_addr = (DCLANG_UINT) env_key;
+    char *env_key = (char *)(DCLANG_PTR) dclang_pop();
+    DCLANG_PTR env_key_addr = (DCLANG_PTR) env_key;
     if (env_key_addr < MIN_STR || env_key_addr > MAX_STR)
     {
         perror("envget -- String address for hash key out-of-range.");
         return;
     }
     char *val = getenv(env_key);
-    DCLANG_UINT val_addr = (DCLANG_UINT) val;
+    DCLANG_PTR val_addr = (DCLANG_PTR) val;
     if (val_addr > MAX_STR || MAX_STR == 0)
     {
         MAX_STR = val_addr;
@@ -269,16 +266,16 @@ void envsetfunc()
         printf("envset -- need <env_val> <env_key> strings on the stack.\n");
     }
     // grab the key from the stack
-    char *env_key = (char *)(DCLANG_UINT)dclang_pop();
-    DCLANG_UINT env_key_addr = (DCLANG_UINT) env_key;
+    char *env_key = (char *)(DCLANG_PTR) dclang_pop();
+    DCLANG_PTR env_key_addr = (DCLANG_PTR) env_key;
     if (env_key_addr < MIN_STR || env_key_addr > MAX_STR)
     {
         perror("envset -- String address for environment key out-of-range.");
         return;
     }
     // grab the value from the stack
-    char *env_val = (char *)(DCLANG_UINT)dclang_pop();
-    DCLANG_UINT env_val_addr = (DCLANG_UINT) env_val;
+    char *env_val = (char *)(DCLANG_PTR) dclang_pop();
+    DCLANG_PTR env_val_addr = (DCLANG_PTR) env_val;
     if (env_val_addr < MIN_STR || env_val_addr > MAX_STR)
     {
         perror("envset -- String address for environment value out-of-range.");
