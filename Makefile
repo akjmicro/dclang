@@ -1,8 +1,7 @@
 CC = gcc
-CFLAGS = -c -march=native -O3
+CFLAGS = -c -march=native -O3 -static -finline-functions
 LDFLAGS = -lm
 LDDCLANG = -ldclang
-SOURCES = main.c
 OBJECTS = main.o
 EXECUTABLE = dclang
 LIBOBJ = libdclang.o

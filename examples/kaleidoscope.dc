@@ -1,13 +1,14 @@
 # run this in an 80x24 terminal
+#
+# use:   nice -19 dclang kaleidoscope
 
 var mybuf
 80 24 * 1 + mkbuf
 mybuf !
 
 32 1 !
-43 2 !
-45 3 !
-48 4 !
+42 2 !
+32 3 !
 
 : bufadd
   over mybuf @ + swap 1 memset drop
@@ -18,17 +19,17 @@ mybuf !
     0
     24 times
       80 times
-        i  80 / 0.5 - dup *   # This is all distance formula stuff:
-        j  24 / 0.5 - dup *    # sqrt(a^2 + b^2)...distance from origin
+        i  160 / 0.25 - dup *   # This is all distance formula stuff:
+        j  48 / 0.25 - dup *    # sqrt(a^2 + b^2)...distance from origin
         + sqrt sin             # (sine of the distance from origin)
-        k * sin 0.5 * 0.51 + 3.9 * floor
+        k 0.5 * * cos 0.5 * 0.51 + 2.9 * floor
         1 + @ bufadd
         1 +
       again
     again
     mybuf @ 80 24 * +   0   1   memset drop
     mybuf @ print
-    0.05 sleep
+    0.045 sleep
     drop
   again
 ;
