@@ -210,7 +210,7 @@ void sinefunc()
 {
     if (data_stack_ptr < 1)
     {
-        printf("'sin' needs two numbers on the stack!\n");
+        printf("'sin' needs a number on the stack!\n");
         return;
     }
     push(sin(dclang_pop()));
@@ -220,7 +220,7 @@ void cosfunc()
 {
     if (data_stack_ptr < 1)
     {
-        printf("'cos' needs two numbers on the stack!\n");
+        printf("'cos' needs a number on the stack!\n");
         return;
     }
     push(cos(dclang_pop()));
@@ -230,10 +230,40 @@ void tanfunc()
 {
     if (data_stack_ptr < 1)
     {
-        printf("'tan' needs two numbers on the stack!\n");
+        printf("'tan' needs a number on the stack!\n");
         return;
     }
     push(tan(dclang_pop()));
+}
+
+void asinefunc()
+{
+    if (data_stack_ptr < 1)
+    {
+        printf("'asin' needs a number on the stack!\n");
+        return;
+    }
+    push(asin(dclang_pop()));
+}
+
+void acosfunc()
+{
+    if (data_stack_ptr < 1)
+    {
+        printf("'acos' needs a numbera on the stack!\n");
+        return;
+    }
+    push(acos(dclang_pop()));
+}
+
+void atanfunc()
+{
+    if (data_stack_ptr < 1)
+    {
+        printf("'atan' needs a number on the stack!\n");
+        return;
+    }
+    push(atan(dclang_pop()));
 }
 
 /* randomness */

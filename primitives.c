@@ -57,6 +57,9 @@ void add_all_primitives()
     add_primitive("sin", sinefunc);
     add_primitive("cos", cosfunc);
     add_primitive("tan", tanfunc);
+    add_primitive("asin", asinefunc);
+    add_primitive("acos", acosfunc);
+    add_primitive("atan", atanfunc);
     // randomness
     add_primitive("rand", randfunc);
     // stack manipulation
