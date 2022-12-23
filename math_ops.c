@@ -165,6 +165,16 @@ void sqrtfunc()
     push(sqrt(dclang_pop()));
 }
 
+void expfunc()
+{
+    if (data_stack_ptr < 1)
+    {
+        printf("'exp' need a number on the stack!\n");
+        return;
+    }
+    push(exp(dclang_pop()));
+}
+
 void logfunc()
 {
     if (data_stack_ptr < 1)
@@ -264,6 +274,48 @@ void atanfunc()
         return;
     }
     push(atan(dclang_pop()));
+}
+
+void atan2func()
+{
+    if (data_stack_ptr < 2)
+    {
+        printf("'atan2' needs two numbers on the stack!\n");
+        return;
+    }
+    DCLANG_FLT x = dclang_pop();
+    DCLANG_FLT y = dclang_pop();
+    push(atan2(y, x));
+}
+
+void sinhfunc()
+{
+    if (data_stack_ptr < 1)
+    {
+        printf("'sinh' needs a number on the stack!\n");
+        return;
+    }
+    push(sinh(dclang_pop()));
+}
+
+void coshfunc()
+{
+    if (data_stack_ptr < 1)
+    {
+        printf("'cosh' needs a number on the stack!\n");
+        return;
+    }
+    push(cosh(dclang_pop()));
+}
+
+void tanhfunc()
+{
+    if (data_stack_ptr < 1)
+    {
+        printf("'tanh' needs a number on the stack!\n");
+        return;
+    }
+    push(tanh(dclang_pop()));
 }
 
 /* randomness */

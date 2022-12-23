@@ -50,6 +50,7 @@ void add_all_primitives()
     // higher math
     add_primitive("pow", powerfunc);
     add_primitive("sqrt", sqrtfunc);
+    add_primitive("exp", expfunc);
     add_primitive("log", logfunc);
     add_primitive("log2", log2func);
     add_primitive("log10", log10func);
@@ -60,6 +61,10 @@ void add_all_primitives()
     add_primitive("asin", asinefunc);
     add_primitive("acos", acosfunc);
     add_primitive("atan", atanfunc);
+    add_primitive("atan2", atan2func);
+    add_primitive("sinh", atanfunc);
+    add_primitive("cosh", atanfunc);
+    add_primitive("tanh", atanfunc);
     // randomness
     add_primitive("rand", randfunc);
     // stack manipulation
