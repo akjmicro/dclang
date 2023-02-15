@@ -64,6 +64,19 @@ void showrjfunc()
     fflush(ofp);
 }
 
+void showpzfunc()
+{
+    // left pad with zeros
+    if (data_stack_ptr < 3) {
+        printf("Stack underflow! '.pz' needs: value, width, precision on the stack\n");
+        return;
+    }
+    int precision = (DCLANG_INT) dclang_pop();
+    int width = (DCLANG_INT) dclang_pop();
+    fprintf(ofp, "%0*.*f ", width, precision, dclang_pop());
+    fflush(ofp);
+}
+
 void redirectfunc()
 {
     if (data_stack_ptr < 1) {

@@ -81,6 +81,7 @@ void add_all_primitives()
     add_primitive(".", showfunc);
     add_primitive("..", shownospacefunc);
     add_primitive(".rj", showrjfunc);
+    add_primitive(".pz", showpzfunc);
     add_primitive(".s", showstackfunc);
     // extra stack
     add_primitive("svpush", svpushfunc);
