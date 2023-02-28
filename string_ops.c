@@ -72,8 +72,12 @@ void stringfunc()
     char escape_ch;
     char chbuf[5];
     int stat;
-    DCLANG_PTR chr_cnt = 0;
-    DCLANG_PTR bufsize = 32;
+    DCLANG_UINT chr_cnt = 0;
+    // N.B. `bufsize` used to be 32 bytes, but it was having problems in
+    // Alpine Linux (musl) with the calls to `realloc` making crashes.
+    // The solution here is to give a larger initial buffer and copy the
+    // resulting string to a smaller buffer, then free this initial 'scratch' buffer.
+    DCLANG_UINT bufsize = 1024;
     char *scratch = (char *) malloc(sizeof(char) * bufsize);
     // ZERO OUT buffer:
     memset(scratch, 0, bufsize);
@@ -146,33 +150,36 @@ void stringfunc()
         chr_cnt += strlen(chbuf);
         if (chr_cnt > bufsize)
         {
-            bufsize += 32;
+            bufsize *= 2;
             scratch = realloc(scratch, bufsize);
         }
         strcat(scratch, chbuf);
         if ((ch = fgetc(ifp)) == EOF) exit(0);
     }
-    scratch = realloc(scratch, chr_cnt + 1);
-    // Number for stack needs to be a double.
-    // Notice the use of "advance" to go beyond any buffer
-    // overflow garbage that might appear when the initial
-    // buffer is allocated.
-    DCLANG_PTR string_dest_PTR = (DCLANG_PTR) scratch;
-    DCLANG_PTR buflen = (DCLANG_PTR) strlen(scratch);
-    if (string_dest_PTR < MIN_STR || MIN_STR == 0)
+    // Now that we have the string in place, copy it to its own space,
+    // and free the original scratch buffer.
+    char *result = (char *) malloc(sizeof(char) * strlen(scratch));
+    memset(result, 0, strlen(scratch));
+    memcpy(result, scratch, strlen(scratch));
+    free(scratch);
+    // register the string with MIN_STR and MAX_STR
+    DCLANG_PTR string_dest_ptr = (DCLANG_PTR) result;
+    DCLANG_PTR buflen = (DCLANG_PTR) strlen(result);
+    if (string_dest_ptr < MIN_STR || MIN_STR == 0)
     {
-        MIN_STR = string_dest_PTR;
+        MIN_STR = string_dest_ptr;
     }
-    if (string_dest_PTR + buflen > MAX_STR || MAX_STR == 0)
+    if (string_dest_ptr + buflen > MAX_STR || MAX_STR == 0)
     {
-        MAX_STR = string_dest_PTR + buflen;
+        MAX_STR = string_dest_ptr + buflen;
     }
+    // Do the right thing depending on def_mode
     if (def_mode)
     {
         prog[iptr].function.with_param = push;
-        prog[iptr++].param = string_dest_PTR;
+        prog[iptr++].param = string_dest_ptr;
     } else {
-        push(string_dest_PTR);
+        push(string_dest_ptr);
     }
 }
 

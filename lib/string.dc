@@ -5,15 +5,26 @@
 1024 const SLICEBUFSIZE
 var _slicebuf
 SLICEBUFSIZE mkbuf _slicebuf !
+
 # Some error messages we re-use
 "strslice: stack underflow -- must have <straddr> <start_idx> <end_idx> on the stack!"
 const :STRSLICE_UNDERFLOW_ERROR
+
 "strslice: error -- cannot slice a string with the start_idx > end_idx!"
 const :STRSLICE_NOT_LTE_ERROR
+
 "strslice: error -- cannot slice a string with negative indices!"
 const :STRSLICE_NEG_ERROR
+
 "str_between: stack underflow -- must have <straddr> <bottom_str> <top_str> on the stack!"
 const :STRBETWEEN_UNDERFLOW_ERROR
+
+"strreplace needs <haystack> <needle> <replacement_needle> on the stack"
+const :STRREPLACE_UNDERFLOW_ERROR
+
+"freadall needs <buf_ptr> <file_ptr> on the stack!"
+const :FREADALL_UNDERFLOW_ERROR
+
 
 : strdup
   # copies a string; leaves the new string's
@@ -161,8 +172,7 @@ const :STRBETWEEN_UNDERFLOW_ERROR
 : strreplace
   depth 3 <
   if
-    "strreplace needs <haystack> <needle> <replacement_needle> on the stack"
-    print cr
+    :STRREPLACE_UNDERFLOW_ERROR print cr
     return
   endif
   _strreplace_setup
@@ -242,7 +252,7 @@ const :STRBETWEEN_UNDERFLOW_ERROR
   # read an entire file into a memory buffer
   depth 2 <
   if
-    "freadall needs <buf_ptr> <file_ptr> on the stack!" print cr
+    :FREADALL_UNDERFLOW_ERROR print cr
     return
   endif
   _freadall_helper
