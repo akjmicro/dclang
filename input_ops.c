@@ -137,20 +137,29 @@ DCLANG_INT dclang_import(char *infilestr) {
     // check existence of file:
     if (access(infilestr, F_OK) == 0) {
         FILE *infile;
+        printf("import file found, opening\n");
         infile = fopen(infilestr, "r");
+        printf("setting input\n");
         setinput(infile);
+        printf("starting repl()\n");
         repl();
         return 0;
     }
     char *full_path = malloc(512);
+    printf("doing memset 512\n");
     memset(full_path, 0, 512);
     char *slash = "/";
+    printf("starting strcat block\n");
     strcat(full_path, prefix);
     strcat(full_path, slash);
     strcat(full_path, infilestr);
+    printf("ending strcat block\n");
     if (access(full_path, F_OK) == 0) {
+        printf("full-path import file found, opening\n");
         FILE *infile = fopen(full_path, "r");
+        printf("full-path setting input\n");
         setinput(infile);
+        printf("full-path starting repl()\n");
         repl();
         return 0;
     }

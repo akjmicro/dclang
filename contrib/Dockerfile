@@ -3,7 +3,7 @@ FROM jeanblanchard/alpine-glibc:latest
 RUN apk add \
     musl-dev gcc make git rlwrap && \
     cd / && \
-    git clone https://github.com/akjmicro/dclang && \
+    git clone --branch alpine_container_bugfix https://github.com/akjmicro/dclang && \
     cd /dclang && \
     make dclang && \
     make lib && \
