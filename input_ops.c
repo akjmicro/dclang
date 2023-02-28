@@ -157,10 +157,13 @@ DCLANG_INT dclang_import(char *infilestr) {
     if (access(full_path, F_OK) == 0) {
         printf("full-path import file found, opening\n");
         FILE *infile = fopen(full_path, "r");
+        sleep(1);
         printf("full-path setting input\n");
         setinput(infile);
+        sleep(1);
         printf("full-path starting repl()\n");
         repl();
+        sleep(1);
         return 0;
     }
     printf(
