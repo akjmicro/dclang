@@ -1,11 +1,9 @@
 FROM jeanblanchard/alpine-glibc:latest
 
-COPY . /dclang
-
 RUN apk add \
     musl-dev gcc make git rlwrap && \
     cd / && \
-    #git clone --branch alpine_container_bugfix https://github.com/akjmicro/dclang && \
+    git clone https://github.com/akjmicro/dclang && \
     cd /dclang && \
     make clean && \
     make dclang && \
