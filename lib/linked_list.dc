@@ -2,11 +2,6 @@ var __private_ll_token_holder__
 
 " " const :blank
 
-
-: ll_setup
-  var 2 allot   # [ head tail ]
-;
-
 : _ll_is_empty  # ( list_struct ) -- ( list_struct is_empty  )
   dup dup 1 + @ 0 = swap @ 0 = and
 ;
@@ -37,7 +32,7 @@ var __private_ll_token_holder__
   2 + @
 ;
 
-: ll_append_tail  # ( val list_struct )
+: _ll_append
   _ll_is_empty
   if
     _ll_seed
@@ -54,9 +49,36 @@ var __private_ll_token_holder__
   if
     2drop
   else
-    tonum over ll_append_tail
+    tonum over _ll_append
     _ll_init_nums_helper
   endif
+;
+
+: _ll_execute  # ( exec_str addr ) -- ( exec_str addr )
+  dup @ 2 pick exec
+;
+
+: _ll_map_helper  # ( exec_str next_addr  )
+  _ll_get_next
+  dup 0 =
+  if
+    2drop
+  else
+    _ll_execute
+    _ll_map_helper
+  endif
+;
+
+##############
+# Public API #
+##############
+
+: ll_setup
+  var 2 allot   # [ head tail ]
+;
+
+: ll_append  # ( val list_struct )
+  _ll_append
 ;
 
 : ll_init_nums  # ( all_nums_str list_struct ) -- ( ls  )
@@ -66,27 +88,12 @@ var __private_ll_token_holder__
   if
     2drop
   else
-    tonum over ll_append_tail
+    tonum over _ll_append
     _ll_init_nums_helper
   endif
 ;
 
-: _ll_execute  # ( exec_str addr ) -- ( exec_str addr )
-  dup @ 2 pick exec
-;
-
-: _ll_map_forward_helper  # ( exec_str next_addr  )
-  _ll_get_next
-  dup 0 =
-  if
-    2drop
-  else
-    _ll_execute
-    _ll_map_forward_helper
-  endif
-;
-
-: ll_map_forward  # ( exec_str list_struct ) -- ( exec_str head_addr )
+: ll_map  # ( exec_str list_struct ) -- ( exec_str head_addr )
   _ll_is_empty
   if
     2drop
@@ -95,6 +102,6 @@ var __private_ll_token_holder__
     _ll_get_head
     swap drop
     _ll_execute
-    _ll_map_forward_helper
+    _ll_map_helper
   endif
 ;

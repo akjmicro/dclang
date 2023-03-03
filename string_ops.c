@@ -73,11 +73,7 @@ void stringfunc()
     char chbuf[5];
     int stat;
     DCLANG_UINT chr_cnt = 0;
-    // N.B. `bufsize` used to be 32 bytes, but it was having problems in
-    // Alpine Linux (musl) with the calls to `realloc` making crashes.
-    // The solution here is to give a larger initial buffer and copy the
-    // resulting string to a smaller buffer, then free this initial 'scratch' buffer.
-    DCLANG_UINT bufsize = 1024;
+    DCLANG_UINT bufsize = 128;
     char *scratch = (char *) malloc(sizeof(char) * bufsize);
     // ZERO OUT buffer:
     memset(scratch, 0, bufsize);
@@ -151,7 +147,17 @@ void stringfunc()
         if (chr_cnt > bufsize)
         {
             bufsize *= 2;
-            scratch = realloc(scratch, bufsize);
+            // Alpine Linux (musl) seems to not like `realloc`, causing crashes.
+            // So, the solution here is a homemade `realloc`!
+            char *new_scratch = (char *) malloc(sizeof(char) * bufsize);
+            if (new_scratch != NULL) {
+                memcpy(new_scratch, scratch, bufsize);
+                free(scratch);
+                scratch = new_scratch;
+            } else {
+                printf("Re-allocation of memory failed during string gulping. Exiting.\n");
+                exit(1);
+            }
         }
         strcat(scratch, chbuf);
         if ((ch = fgetc(ifp)) == EOF) exit(0);
