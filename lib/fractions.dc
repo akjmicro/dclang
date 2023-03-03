@@ -1,0 +1,13 @@
+"deprecated_stack.dc" import
+
+: gcd swap over % dup 0 <> if gcd else drop endif ;
+
+: simplify 2dup gcd dup rot swap / -rot / swap ;
+
+: fracadd rot 2dup * dup -2rot rot * -rot * + -rot drop simplify ;
+
+: fracsub swap -1 * swap fracadd ;
+
+: fracmul rot * -rot * swap simplify ;
+
+: fracdiv swap fracmul ;
