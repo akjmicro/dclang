@@ -14,8 +14,6 @@
 "midi.dc" import
 "redis_midi.dc" import
 
-var remainder 1 remainder !
-
 # our EDO var
 17 midi_edo !
 
@@ -25,24 +23,20 @@ var scale_size
 dummy scale -
 scale_size !
 
-: get_remainder remainder @ dup 0 = if drop 1 endif ;
-: _set_remainder remainder ! ;
+var gen_struct 3 allot
 
 : _get_next_note
-    get_remainder
-      get_base
-    *
-      get_div
-      divmod
-    _set_remainder
-      get_mode
+    redis_midi.get_base gen_struct _set_base
+    redis_midi.get_div  gen_struct _set_div
+    gen_struct gen_digit_expansion
+      redis_midi.get_mode
     +
       scale_size @
     absmod
       scale
     +
     @
-      get_transpose
+      redis_midi.get_transpose
     +
 ;
 
@@ -55,11 +49,11 @@ scale_size !
       0
   edo_degree_to_midi
   ###
-    get_on_gate
+    redis_midi.get_on_gate
   sleep
         0 svpop 0
   edo_degree_to_midi
-    get_off_gate
+    redis_midi.get_off_gate
   sleep
   unblock_sigint
   _midi_from_redis
@@ -73,4 +67,5 @@ scale_size !
 ;
 
 midi_from_redis
+
 panic

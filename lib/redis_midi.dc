@@ -27,16 +27,16 @@ var remainder 1 remainder !
 : get_remainder remainder @ dup 0 = if drop 1 endif ;
 : set_remainder remainder ! ;
 
-: get_div
+: redis_midi.get_div
   :DIV redis_get tonum round
   dup 0 = if drop 1 endif
 ;
 
-: get_base
+: redis_midi.get_base
   :BASE redis_get tonum round
 ;
 
-: get_chaos
+: redis_midi.get_chaos
   :CHAOS redis_get tonum round
 ;
 
@@ -58,11 +58,11 @@ var remainder 1 remainder !
 # and let the tempo and gate do the work in the background... #
 ###############################################################
 
-: get_on_gate
+: redis_midi.get_on_gate
   _get_tempo _get_gate *
 ;
 
-: get_off_gate
+: redis_midi.get_off_gate
   _get_tempo
   1 _get_gate - *
 ;
@@ -71,10 +71,10 @@ var remainder 1 remainder !
 # mode & transposition #
 ########################
 
-: get_mode
+: redis_midi.get_mode
   :MODE redis_get tonum round
 ;
 
-: get_transpose
+: redis_midi.get_transpose
   :TRANSPOSE redis_get tonum round
 ;

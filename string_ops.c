@@ -73,7 +73,7 @@ void stringfunc()
     char chbuf[5];
     int stat;
     DCLANG_UINT chr_cnt = 0;
-    DCLANG_UINT bufsize = 128;
+    DCLANG_UINT bufsize = 32;
     char *scratch = (char *) malloc(sizeof(char) * bufsize);
     // ZERO OUT buffer:
     memset(scratch, 0, bufsize);
@@ -151,6 +151,8 @@ void stringfunc()
             // So, the solution here is a homemade `realloc`!
             char *new_scratch = (char *) malloc(sizeof(char) * bufsize);
             if (new_scratch != NULL) {
+                // ZERO OUT buffer:
+                memset(new_scratch, 0, bufsize);
                 memcpy(new_scratch, scratch, bufsize);
                 free(scratch);
                 scratch = new_scratch;
@@ -162,15 +164,9 @@ void stringfunc()
         strcat(scratch, chbuf);
         if ((ch = fgetc(ifp)) == EOF) exit(0);
     }
-    // Now that we have the string in place, copy it to its own space,
-    // and free the original scratch buffer.
-    char *result = (char *) malloc(sizeof(char) * strlen(scratch));
-    memset(result, 0, strlen(scratch));
-    memcpy(result, scratch, strlen(scratch));
-    free(scratch);
     // register the string with MIN_STR and MAX_STR
-    DCLANG_PTR string_dest_ptr = (DCLANG_PTR) result;
-    DCLANG_PTR buflen = (DCLANG_PTR) strlen(result);
+    DCLANG_PTR string_dest_ptr = (DCLANG_PTR) scratch;
+    DCLANG_PTR buflen = (DCLANG_PTR) strlen(scratch);
     if (string_dest_ptr < MIN_STR || MIN_STR == 0)
     {
         MIN_STR = string_dest_ptr;

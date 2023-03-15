@@ -33,11 +33,11 @@ create scale 0 , 9_8 , 7_6 , 3_2 , 7_4 , 9_4 ,
 ;
 
 : _get_local_on_len
-  get_on_gate _get_len *
+  redis_midi.get_on_gate _get_len *
 ;
 
 : _get_local_off_len
-  get_off_gate _get_len *
+  redis_midi.get_off_gate _get_len *
 ;
 
 : _midi_change_ring
@@ -48,7 +48,7 @@ create scale 0 , 9_8 , 7_6 , 3_2 , 7_4 , 9_4 ,
         perm_space @ next_permutation
       +
       @
-        get_transpose
+        redis_midi.get_transpose
       +
         oct_perm_space next_permutation
         midi_edo @ *

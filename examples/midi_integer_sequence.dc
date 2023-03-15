@@ -46,16 +46,16 @@ var x
 
 : _get_next_note
   # x @ 13 * 17 xor 19 +
-  x @ get_div *
-    get_base
+  x @ redis_midi.get_div *
+    redis_midi.get_base
   digit_sum
-    get_mode
+    redis_midi.get_mode
   +
     scale_size @
   absmod
     scale
   + @
-    get_transpose
+    redis_midi.get_transpose
   +
   x++
 ;
@@ -69,11 +69,11 @@ var x
         0
   edo_degree_to_midi
   ###
-    get_on_gate
+    redis_midi.get_on_gate
   sleep
         0 svpop 0
   edo_degree_to_midi
-    get_off_gate
+    redis_midi.get_off_gate
   sleep
   unblock_sigint
   _midi_from_redis

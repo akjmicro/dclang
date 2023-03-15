@@ -1,3 +1,5 @@
+"digit_sum: need <number> and <base> on the stack!" const :DIGIT_SUM_ERROR
+
 : absmod
   dup svpush
   %
@@ -31,8 +33,34 @@
 ;
 
 : digit_sum
+  depth 2 <
+  if
+   :DIGIT_SUM_ERROR print cr
+   return
+  endif
   svpush svpush
   0
   svpop svpop
   _digit_sum_helper
+;
+
+: _get_base @ ;
+: _set_base ! ;
+: _get_div 1 + @ ;
+: _set_div 1 + ! ;
+: _get_remainder 2 + @ dup 0 = if drop 1 endif ;
+: _set_remainder 2 + ! ;
+
+: gen_digit_expansion
+  # ( data_struct )
+  dup svpush      # ( ds )      ( ds )
+  _get_remainder  # ( rem )     ( ds )
+  0 svpick        # ( rem ds )  ( ds )
+  _get_base       # ( rem base ) ( ds )
+  *               # ( rem*base ) ( ds )
+  0 svpick        # ( rem*base ds )  ( ds )
+  _get_div        # ( rem*base div )  ( ds )
+  divmod          # ( quot new_rem )  ( ds )
+  svpop           # ( quot new_rem ds ) ( )
+  _set_remainder  # ( quot )
 ;
