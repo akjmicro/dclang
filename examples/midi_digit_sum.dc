@@ -1,0 +1,125 @@
+# Makes MIDI music via `digit_sum`
+#
+# First, make sure you have a running redis server on your machine
+#
+# Then, to run, do `redis-cli` in a shell, making sure you set the following
+# vars:
+#     tempo, base, mul, mode, transp
+# (they should all be integers)
+#
+# Then, in another shell, open this script, your command should be:
+# dclang midi_digit_sum.dc
+
+"math.dc" import
+"midi.dc" import
+"redis_midi.dc" import
+
+# our EDO var
+41 midi_edo !
+
+: generate_interval
+  / log2 midi_edo @ * round
+;
+
+: O- midi_edo @ - ;
+
+: O+ midi_edo @ + ;
+
+9 8 generate_interval const  2ND
+5 4 generate_interval const  3RD
+7 5 generate_interval const ^4TH
+3 2 generate_interval const  5TH
+8 5 generate_interval const  6TH
+7 4 generate_interval const H7TH
+
+create scale 0 O- ,                           5TH O- ,      H7TH O- ,
+             0     , 2ND    , 3RD    , 4TH^ , 5TH    , 6TH, H7TH ,
+             0 O+ ,  2ND O+ , 3RD O+ ,
+var dummy
+var scale_size
+dummy scale -
+scale_size !
+
+create rhythm  5 , 3 , 5 , 2 , 3 , 2 , 1 , 5 , 2 , 3 , 6 , 2 ,
+create vol     1 , 1 , 1 , 1 , 1 , 1 , 1 , 1 , 1 , 1 , 1 , 0 ,
+
+vol rhythm -
+const RHYTHM_SIZE
+
+var x
+0 x !
+
+var y
+0 y !
+
+: x++
+  x @ 1 +
+  x !
+;
+
+: y++
+  y @ 1 + dup  # ( y1val y1val )
+  RHYTHM_SIZE >
+  if
+    drop 0 y !
+  else
+    y !
+  endif
+;
+
+: _get_next_note
+  x @ redis_midi.get_mul *
+    redis_midi.get_base
+  digit_sum
+    redis_midi.get_mode
+  +
+    scale_size @
+  absmod
+    scale
+  + @
+    redis_midi.get_transpose
+  +
+  x++
+;
+
+: _get_next_rhythm
+  rhythm y @ + @
+  y++
+;
+
+: _get_next_vol
+  vol y @ + @ 8 <<
+;
+
+: _main
+  block_sigint
+  ###
+    100
+      _get_next_note
+      dup svpush
+        0
+  edo_degree_to_midi
+  ###
+    redis_midi.get_on_gate
+  _get_next_rhythm dup svpush
+  *
+  sleep
+          svpop 0 svpop 0
+  edo_degree_to_midi
+    redis_midi.get_off_gate
+  *
+  sleep
+  unblock_sigint
+  _main
+;
+
+: main
+  "You are now entering an endless loop, hit CTRL-C to stop..." print cr
+  "Notice that you won't be able to stop until a note off event hits." print cr
+  "In this way, the notes end cleanly!" print cr
+  _main
+;
+
+main
+
+panic

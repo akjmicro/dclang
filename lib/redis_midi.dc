@@ -5,40 +5,22 @@ redis_connect
 
 var remainder 1 remainder !
 
-# some symbols
+# some common symbols
 "\n" const :NL
 "tempo" const :TEMPO
 "gate" const :GATE
 "mode" const :MODE
 "transp" const :TRANSPOSE
-# for fraction/remainder based "randomess":
+# used for keeping a value within a certain range:
+"wrap" const :WRAP
+# common for things like "gen_digit_expansion" and "digit_sum" algorithms:
 "base" const :BASE
+# for "gen_digit_expansion" based algorithms:
 "div" const :DIV
+# for "digit_sum" fractal algorithms:
+"mul" const :MUL
 # for chaos-based randomness:
 "chaos" const :CHAOS
-
-#############################################################
-# Helpers for algorithmic MIDI processes...                 #
-# At the moment, there are two: fraction-based sequences    #
-# that use digit expansion to a certain base, and a "chaos" #
-# factor concept.                                           #
-#############################################################
-
-: get_remainder remainder @ dup 0 = if drop 1 endif ;
-: set_remainder remainder ! ;
-
-: redis_midi.get_div
-  :DIV redis_get tonum round
-  dup 0 = if drop 1 endif
-;
-
-: redis_midi.get_base
-  :BASE redis_get tonum round
-;
-
-: redis_midi.get_chaos
-  :CHAOS redis_get tonum round
-;
 
 ###########################################
 # private words for dealing with duration #
@@ -77,4 +59,38 @@ var remainder 1 remainder !
 
 : redis_midi.get_transpose
   :TRANSPOSE redis_get tonum round
+;
+
+#############################################################
+# Helpers for algorithmic MIDI processes...                 #
+# At the moment, there are two: fraction-based sequences    #
+# that use digit expansion to a certain base, and a "chaos" #
+# factor concept.                                           #
+#############################################################
+
+: get_remainder remainder @ dup 0 = if drop 1 endif ;
+: set_remainder remainder ! ;
+
+: redis_midi.get_base
+  :BASE redis_get tonum round
+  dup 2 < if drop 2 endif
+;
+
+: redis_midi.get_div
+  :DIV redis_get tonum round
+  dup 0 = if drop 1 endif
+;
+
+: redis_midi.get_mul
+  :MUL redis_get tonum round
+  dup 1 < if drop 1 endif
+;
+
+: redis_midi.get_chaos
+  :CHAOS redis_get tonum round
+;
+
+: redis_midi.get_wrap
+  :WRAP redis_get tonum round
+  dup 1 < if drop 1 endif
 ;

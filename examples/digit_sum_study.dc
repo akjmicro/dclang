@@ -1,0 +1,67 @@
+"math.dc" import
+
+32 const FIGURE_STORAGE_SIZE
+
+var start
+0 start !
+
+var end
+8192 end !
+
+var mul
+31 mul !
+
+var base
+2 base !
+
+var shift
+0 shift !
+
+var wrap
+8 wrap !
+
+var outer_wrap
+8 outer_wrap !
+
+var figures FIGURE_STORAGE_SIZE allot
+
+: _clear_figures
+  FIGURE_STORAGE_SIZE times
+    0 figures i + !
+  again
+;
+
+: _show_figures
+  FIGURE_STORAGE_SIZE times
+    i 2 0 .pz "\b: " print
+    figures i + @ 5 0 .pz cr
+  again
+;
+
+: _run_sample_inner
+  end @ start @ 1
+  for
+    mul @ i * base @ digit_sum
+    wrap @ absmod shift @ + outer_wrap @ absmod
+    figures + dup @ 1 + swap !
+  next
+;
+
+: run_sample
+  _clear_figures
+  _run_sample_inner
+  _show_figures
+;
+
+: range_sample
+  513 2 1
+  for
+    i mul !
+    _clear_figures
+    _run_sample_inner
+    figures wrap @ sortnums
+    i 3 0 .pz
+    figures @ figures wrap @ 1 - + @
+    swap 2dup 4 0 .pz 4 0 .pz / . cr
+  next
+;
