@@ -39,7 +39,7 @@ var modulations_pointer
   dup 1 + modulations_pointer !
 ;
 
-: _add_interval
+: _update_arpeggio
   svpush
   ARPEGGIO_SIZE times
     arpeggio i + @
@@ -61,7 +61,7 @@ var modulations_pointer
     modulations
     _get_modulations_pointer
     + @
-    _add_interval
+    _update_arpeggio
   endif
 ;
 
