@@ -18,7 +18,7 @@
 ##############################################################################################
 
 52 const NUM_CARDS
-# slot for holdsing swap
+# slot for holding swap
 var temp
 var deck 52 allot
 var deck_idx 0 deck_idx !
