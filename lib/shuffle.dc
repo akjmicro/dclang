@@ -1,0 +1,16 @@
+: _cell_swap
+  2dup @ svpush @ swap ! svpop swap !
+;
+
+: shuffle_cells
+  # ( starting_cell size )
+    -1
+      swap 1 -
+        -1
+  for
+    dup i +
+    over rand i * floor +
+    _cell_swap
+  next
+  drop
+;
