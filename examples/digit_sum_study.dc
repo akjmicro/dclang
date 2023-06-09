@@ -1,6 +1,33 @@
+############################################################################
+# This module was written so that I could have a clearer understanding     #
+# of the musical implications of the various variable settings involved    #
+# in the midi_digit_sum* examples.                                         #
+#                                                                          #
+# There are 2 public words: `run_sample` and `range_sample`                #
+#                                                                          #
+# `run_sample` will show `end - start` (default 8192) iterations of        #
+# the output of `digit_sum`, given the variables set by the user.          #
+# These variables are defined below, but can be changed so various         #
+# behaviors can be studied, and a new run kicked off with `run_sample`.    #
+# Some documention of these variables is inline below, as comments.        #
+#                                                                          #
+# `range_sample` will vary the `mul` from 2 to 512 and do a `run_sample`   #
+# on each iteration. It will output lines that represent:                  #
+#                                                                          #
+#   <current_mul> <min_count> <max_count> <max_count / min_count>          #
+#                                                                          #
+# ....where <min_count> is the digit_sum __least hit__ during the run,     #
+# and <max_count> represents the digit_sum __most hit__ during the run.    #
+# This allow one to understand the "meta-features" of a given run of       #
+# `digit_sum` given a certain `base`, `wrap`, `shift`, and `outer_wrap`,   #
+# while the `mul` changes. Using the MIDI examples, this will have musical #
+# implications.                                                            #
+############################################################################
+
 "math.dc" import
 
 32 const FIGURE_STORAGE_SIZE
+var figures FIGURE_STORAGE_SIZE allot
 
 var start
 0 start !
@@ -8,22 +35,27 @@ var start
 var end
 8192 end !
 
+# `mul` and `base` are the core args consumed by `digit_sum`
 var mul
-31 mul !
+1 mul !
 
 var base
 2 base !
 
+# `wrap` is the largest digit sum (prior to shifting) that you
+# want to "wrap" (AKA do a modulus operation) around.
+var wrap
+32 wrap !
+
+# `shift` offsets the resulting digit_sum by the assigned amount.
 var shift
 0 shift !
 
-var wrap
-8 wrap !
-
+# `outer_wrap` would, for example, represent the largest digit_sum
+# _after shifting_ that you'd want to "wrap" (AKA do an `absmod` modulus wrap)
+# around. Can be the same.
 var outer_wrap
-8 outer_wrap !
-
-var figures FIGURE_STORAGE_SIZE allot
+32 outer_wrap !
 
 : _clear_figures
   FIGURE_STORAGE_SIZE times
@@ -46,6 +78,10 @@ var figures FIGURE_STORAGE_SIZE allot
     figures + dup @ 1 + swap !
   next
 ;
+
+################
+# The main API #
+################
 
 : run_sample
   _clear_figures
