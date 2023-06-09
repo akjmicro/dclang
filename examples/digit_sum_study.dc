@@ -53,7 +53,9 @@ var shift
 
 # `outer_wrap` would, for example, represent the largest digit_sum
 # _after shifting_ that you'd want to "wrap" (AKA do an `absmod` modulus wrap)
-# around. Can be the same.
+# around. If you set/keep `wrap` and `outer_wrap` to 32, and `shift` to 0,
+# the "natural behavior" of `digit_sum` is shown, which can be useful for
+# understanding.
 var outer_wrap
 32 outer_wrap !
 
