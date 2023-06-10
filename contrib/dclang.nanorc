@@ -30,9 +30,10 @@ color brightred "(^|[[:space:]])((\!|\@|const|var|allot|create|\,|h\@|h\!|hkeys|
 color brightgreen "(^|[[:space:]])((times|again|exittimes|for|next|exitfor|i|j|k|if|else|endif|return)($|[[:space:]]))*"
 # other words
 color cyan "(^|[[:space:]])((cr|print|emit|uemit|ord|tohex|bytes32)($|[[:space:]]))*"
-color cyan "(^|[[:space:]])((strlen|str=|str<|str>|strfind|strtok|mempcpy|memset|mkbuf|free|clock|sleep)($|[[:space:]]))*"
+color cyan "(^|[[:space:]])((strlen|str=|str<|str>|strfind|strtok|mempcpy|memset|mkbuf|free)($|[[:space:]]))*"
+color cyan "(^|[[:space:]])((isalnum|isalpha|iscntrl|isdigit|isgraph|islower|isprint|ispunct|isspace|isupper|isxdigit|tolower|toupper)($|[[:space:]]))*"
 color cyan "(^|[[:space:]])((fopen|fread|fseek|ftell|fwrite|fflush|fclose|redirect|resetout|flush|open|mkbuf|read|write|close)($|[[:space:]]))*"
-color cyan "(^|[[:space:]])((tcplisten|tcpaccept|tcpconnect|block_sigint|unblock_sigint)($|[[:space:]]))*"
+color cyan "(^|[[:space:]])((tcplisten|tcpaccept|tcpconnect|clock|sleep|epoch|dt->epoch|epoch->dt|block_sigint|unblock_sigint)($|[[:space:]]))*"
 color yellow "(^|[[:space:]])((words|primitives|import|input)($|[[:space:]]))*"
 # definition delimiters
 color brightred "(^|[[:space:]])((\:|;)($|[[:space:]]))*"
