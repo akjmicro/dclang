@@ -169,7 +169,7 @@ Implemented thus far:
     * `strtok`, `mempcpy`, `memset`, `mkbuf`, `free`
     * strong comparison with: `strlen`, `str=`, `str<`, `str>`
     * find a substring with `strfind`
-    * '#' to end-of-line' for comments
+    * '#' to end-of-line for comments
     * `uemit`, a unicode-character emitter which can help to contruct
     strings that need them.
     * convert character bytes to equivalent numerical value with `ord`
@@ -256,7 +256,7 @@ Implemented thus far:
     key=foo, value=bar           # <-- treewalk output, not the line break via `cr`
 
     "vanilla" "favorite ice cream flavor" :mytree @ tree!
-    :mytree @ treewalk           # walk thte tree again; see new values
+    :mytree @ treewalk           # walk the tree again; see new values
     key=foo, value=bar
     key=favorite ice cream flavor, value=vanilla
     "foo" :mytree @ treedel                        # delete a key
