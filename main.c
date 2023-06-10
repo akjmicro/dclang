@@ -17,7 +17,7 @@ int main(int argc, char **argv)
         live_repl = 1;
     }
     if (live_repl) {
-        printf("Welcome to dclang! Aaron Krister Johnson, 2022\n");
+        printf("Welcome to dclang! Aaron Krister Johnson, 2018-2023\n");
         printf("Make sure to peruse README.md to get your bearings!\n");
         printf("You can type 'primitives' to see a list of all the primitive (c-builtin) words.\n");
         printf("You can type 'words' to see a list of functions defined within dclang.\n");
