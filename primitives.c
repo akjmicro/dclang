@@ -196,6 +196,13 @@ void add_all_primitives()
     // block a SIGINT
     add_primitive("block_sigint", blocksigintfunc);
     add_primitive("unblock_sigint", unblocksigintfunc);
+    // portmidi
+    add_primitive("portmidi_list", portmidi_listfunc);
+    add_primitive("portmidi_open", portmidi_openfunc);
+    add_primitive("portmidi_ws", portmidi_wsfunc);
+    add_primitive("portmidi_wsr", portmidi_wsrfunc);
+    add_primitive("portmidi_close", portmidi_closefunc);
+    add_primitive("portmidi_terminate", portmidi_terminatefunc);
     // os fork and exit
     add_primitive("fork", forkfunc);
     add_primitive("exit", exitfunc);
