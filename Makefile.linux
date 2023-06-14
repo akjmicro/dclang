@@ -32,7 +32,6 @@ libtest: lib install
 install: lib dclang
 	sudo cp -a $(HEADER) $(PREFIX)/include
 	sudo cp -a $(LIBSOOBJ) $(PREFIX)/lib
-	sudo ln -s $(shell pwd)/lib $(PREFIX)/lib/dclang
 	sudo ldconfig
 	sudo cp -a $(EXECUTABLE) $(PREFIX)/bin
 
