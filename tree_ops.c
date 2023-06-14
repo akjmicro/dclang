@@ -123,6 +123,7 @@ void treedelfunc()
     free(te_del);
 }
 
+#ifdef HAS_TREEDESTROY
 void treedestroyfunc()
 {
     if (data_stack_ptr < 1) {
@@ -133,3 +134,4 @@ void treedestroyfunc()
     tdestroy(tree_roots[tree_idx], free);
     tree_roots[tree_idx] = NULL;
 }
+#endif

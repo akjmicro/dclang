@@ -1,6 +1,6 @@
 CC = gcc
 CFLAGS = -c -march=native -O3 -static -finline-functions
-LDFLAGS = -lm
+LDFLAGS = -lm -lportmidi
 LDDCLANG = -ldclang
 OBJECTS = main.o
 EXECUTABLE = dclang
@@ -32,6 +32,7 @@ libtest: lib install
 install: lib dclang
 	sudo cp -a $(HEADER) $(PREFIX)/include
 	sudo cp -a $(LIBSOOBJ) $(PREFIX)/lib
+	sudo ln -s $(shell pwd)/lib $(PREFIX)/lib/dclang
 	sudo ldconfig
 	sudo cp -a $(EXECUTABLE) $(PREFIX)/bin
 

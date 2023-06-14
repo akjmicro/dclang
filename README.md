@@ -1,23 +1,49 @@
 ## dclang
 
-### TO INSTALL:
+### TO INSTALL AND SETUP:
 ____________
 
-* Have the gcc compiler on your machine:
+* Have the gcc (Linux) or clang (Mac) compiler on your machine.
+
+* Install `portmidi` and the `portmidi.h` and `porttime.h` headers onto your system.
+
+* Copy the appropriate `Makefile.[linux|mac]` based on your OS to `Makefile`:
 
   ```
+  # Linux
+  cp Makefile.linux Makefile
+
+  # MacOS
+  cp Makefile.mac Makefile
+  ```
+
+  ```
+  # clone the repo and build
   git clone https://github.com/akjmicro/dclang
   cd dclang
-  make
-  ./dclang -i examples/some_primes.dc
+  sudo make install
+
+  # try running the primes example:
+  dclang -i examples/some_primes.dc
   ```
 
-* You can also put the executable in `/usr/local/bin` or what-have-you.
-  `make install` should be able to do this for you on say, Linux or MacOSX.
+* `make install` puts the executable `dclang` into `/usr/local/bin` by default.
 
 * Experiment as you wish with compiler optimizations in the Makefile,
   particularly with float-point options, since 'dclang' is heavily
   reliant on them.
+
+* You'll need to set `DCLANG_LIBS` to the location of your dclang source folder.
+  ```
+  export DCLANG_LIBS=/<this>/<source>/<folder>/<location>/lib
+  ```
+
+  If you use the `Makefile` directive `make install`; it will link
+  the libs to `/usr/local/dclang/lib`, so you'd do:
+  ```
+  export DCLANG_LIBS=/usr/local/dclang/lib
+  ```
+  You can add this export statement to your shell (`bash`, `zsh`, etc.) startup script, of course.
 
 * For interaction, it's nice to use 'rlwrap' to get readline line-history:
   ```
@@ -26,6 +52,31 @@ ____________
   One can also create an alias to `dclang` that uses `rlwrap`:
   ```
   alias dclang='rlwrap dclang`
+  ```
+
+* For MIDI, you'll also want to use `portmidi_list` in the `dclang` interpreter
+  to determine the number code for the device you want to write to
+  (will be an "output" device). So, for example, if one runs `dclang`, you can do this:
+  ```
+  portmidi_list
+  ```
+  ...and you'll see output similar to this:
+
+  ```
+  0: ALSA, Midi Through Port-0 (default output)
+  1: ALSA, Midi Through Port-0 (default input)
+  2: ALSA, VirMIDI 1-0 (output)
+  3: ALSA, VirMIDI 1-0 (input)
+  4: ALSA, VirMIDI 1-1 (output)
+  5: ALSA, VirMIDI 1-1 (input)
+  6: ALSA, VirMIDI 1-2 (output)
+  7: ALSA, VirMIDI 1-2 (input)
+  8: ALSA, VirMIDI 1-3 (output)
+  9: ALSA, VirMIDI 1-3 (input)
+  ```
+  ...so, if I want to use `VirMIDI 1-0 (output)`, I'd tell the shell environment:
+  ```
+  export DCLANG_PORTMIDI_DEVNUM=2
   ```
 
 ### ABOUT:
@@ -262,9 +313,6 @@ Implemented thus far:
     "foo" :mytree @ treedel                        # delete a key
     :mytree @ treewalk
     key=favorite ice cream flavor, value=vanilla
-    :mytree @ treedestroy                          # delete (destroy) the whole tree
-    :mytree @ treewalk
-                                                   # no output -- nothing to see
     ```
   * Timing:
     * a clock function ('clock') so we can time execution in nanoseconds for benchmarking.
