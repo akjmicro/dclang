@@ -38,6 +38,7 @@ Born on 2018-05-05 */
 #include "user_words.c"
 #include "variable_ops.c"
 #include "tree_ops.c"
+#include "portmidi_ops.c"
 #include "primitives.c"
 #include "input_ops.c"
 
