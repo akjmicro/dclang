@@ -1,5 +1,5 @@
 CC = gcc
-CFLAGS = -c -march=native -O3 -static -finline-functions
+CFLAGS = -c -DHAS_TREEDESTROY -march=native -O3 -static -finline-functions
 LDFLAGS = -lm -lportmidi
 LDDCLANG = -ldclang
 OBJECTS = main.o
