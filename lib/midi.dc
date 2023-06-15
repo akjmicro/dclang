@@ -1,19 +1,47 @@
-portmidi_list
-"DCLANG_PORTMIDI_DEVNUM" envget tonum dup portmidi_open
-"Opening device number: " print . cr
+"DCLANG_MIDI_DEVNUM" const :DCLANG_MIDI_DEVNUM
 
+# These will be used again (unused ATM) once MIDI read functionality
+# is re-implemented via `portmidi`
 var midi_ctl_slots 128 allot
 var midi_channel_last_note 16 allot
+
+# Set the default variable 'midi_edo' to 31. Can be changed by the user later...
+var midi_edo
+31 midi_edo !
+
+: check_mididev
+  cr "Here are your available MIDI devices:" print cr
+  _pm_list cr
+  :DCLANG_MIDI_DEVNUM envget dup
+  0 =
+  if
+    :DCLANG_MIDI_DEVNUM print " is not set in your environment!" print cr
+    "MIDI functionality will not work. Please exit from dclang, set that value, and try again!" print cr
+    drop
+    return
+  else
+    tonum dup _pm_open_out
+    "Opening device number: " print . cr
+  endif
+;
+
+check_mididev
 
 # This is the main API for grabbing a controller variable
 # ( ctrlnum -- sig )
 : midictl midi_ctl_slots + @ ;
 
-# output words
-: send_midi portmidi_ws ;
+# basic connection words
+: send_midi _pm_ws ;
 
-: send_midi_reverse portmidi_wsr ;
+: send_midi_reverse _pm_wsr ;
 
+: midi_shutdown
+  _pm_close
+  _pm_terminate
+;
+
+# useful for when things go nuts!
 : panic
         128 0 1
   for
@@ -34,10 +62,6 @@ var midi_channel_last_note 16 allot
   dup 7 >>
   swap 0x7f and
 ;
-
-# Set the default variable 'midi_edo' to 31. Can be changed by the user later...
-var midi_edo
-31 midi_edo !
 
 : edo_degree_to_midi
   # input stack (rightmost is "top":

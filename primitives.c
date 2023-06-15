@@ -197,12 +197,12 @@ void add_all_primitives()
     add_primitive("block_sigint", blocksigintfunc);
     add_primitive("unblock_sigint", unblocksigintfunc);
     // portmidi
-    add_primitive("portmidi_list", portmidi_listfunc);
-    add_primitive("portmidi_open", portmidi_openfunc);
-    add_primitive("portmidi_ws", portmidi_wsfunc);
-    add_primitive("portmidi_wsr", portmidi_wsrfunc);
-    add_primitive("portmidi_close", portmidi_closefunc);
-    add_primitive("portmidi_terminate", portmidi_terminatefunc);
+    add_primitive("_pm_list", _pm_listfunc);
+    add_primitive("_pm_open_out", _pm_openoutfunc);
+    add_primitive("_pm_ws", _pm_wsfunc);
+    add_primitive("_pm_wsr", _pm_wsrfunc);
+    add_primitive("_pm_close", _pm_closefunc);
+    add_primitive("_pm_terminate", _pm_terminatefunc);
     // os fork and exit
     add_primitive("fork", forkfunc);
     add_primitive("exit", exitfunc);

@@ -35,8 +35,8 @@
 : digit_sum
   depth 2 <
   if
-   :DIGIT_SUM_ERROR print cr
-   return
+    :DIGIT_SUM_ERROR print cr
+    return
   endif
   svpush svpush
   0
