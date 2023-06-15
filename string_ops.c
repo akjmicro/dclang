@@ -521,7 +521,7 @@ void mempcpyfunc()
         perror("mempcpy -- <source> string address out-of-range.");
         return;
     }
-    push((DCLANG_PTR) mempcpy((char *)dest, (char *)source, (DCLANG_PTR) size));
+    push((DCLANG_PTR) memcpy((char *)dest, (char *)source, (DCLANG_PTR) size) + size);
 }
 
 void memsetfunc()
