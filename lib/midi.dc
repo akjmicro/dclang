@@ -1,4 +1,6 @@
-"DCLANG_PORTMIDI_DEVNUM" envget tonum portmidi_open
+portmidi_list
+"DCLANG_PORTMIDI_DEVNUM" envget tonum dup portmidi_open
+"Opening device number: " print . cr
 
 var midi_ctl_slots 128 allot
 var midi_channel_last_note 16 allot
