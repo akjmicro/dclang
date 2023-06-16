@@ -214,8 +214,8 @@ void add_all_primitives()
 void show_primitivesfunc()
 {
     printf("\nThere are currently %i primitives implemented.\n", primitives_idx);
-    printf("The following are primitives are visible; "
-           "invisible primitives start with '_' and are meant to be used privately by libraries:\n"
+    printf("The following primitives are visible; invisible primitives start "
+           "with '_' and are meant to be used privately by libraries:\n"
     );
     const struct primitive *pr = primitives;
     char *old_category = " ";
