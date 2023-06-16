@@ -94,13 +94,13 @@ void execfunc() {
 // needed so we can add 'import' to primitives
 void load_extra_primitives()
 {
-    add_primitive("primitives", show_primitivesfunc);
-    add_primitive("import", importfunc);
-    add_primitive("input", inputfunc);
-    add_primitive("exec", execfunc);
+    add_primitive("primitives", "Other", show_primitivesfunc);
+    add_primitive("import", "Other", importfunc);
+    add_primitive("input", "Other", inputfunc);
+    add_primitive("exec", "Other", execfunc);
     /* final endpoint must be zeros,
        and they won't count in the 'count': */
-    add_primitive(0, 0);
+    add_primitive(0, 0, 0);
 }
 
 void dclang_initialize()

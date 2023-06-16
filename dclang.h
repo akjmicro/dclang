@@ -69,6 +69,7 @@ DCLANG_PTR MAX_STR = 0;
 // we need to populate the dictionary first with primitives
 struct primitive {
   const char *name;
+  char *category;
   void (*function) (void);
 } primitive;
 
