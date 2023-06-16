@@ -17,13 +17,14 @@ person i Malmö, säger Anna Åberg."
 
 var :delims " \n\t.,!?;:-*" :delims !
 
+var savepoint
 
 : _hash_entry
   dup h@ 1 + swap h!
 ;
 
 : splitter_main
-  0 :delims @ strtok
+  0 :delims @ savepoint strtok
   dup 0 <>
   if
     _hash_entry
@@ -32,7 +33,7 @@ var :delims " \n\t.,!?;:-*" :delims !
 ;
 
 : splitter
-  :text_to_count @ :delims @ strtok
+  :text_to_count @ :delims @ savepoint strtok
   dup 0 <>
   if
     _hash_entry
