@@ -1,5 +1,5 @@
-#include "portmidi.h"
-#include "porttime.h"
+#include <portmidi.h>
+#include <porttime.h>
 
 // will be the private pointer to the working MIDI stream
 PmStream *midi_stream;
