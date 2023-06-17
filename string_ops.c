@@ -446,27 +446,46 @@ void strfindfunc()
     push((DCLANG_INT) strstr(str1, str2));
 }
 
+void strspnfunc()
+{
+    if (data_stack_ptr < 2)
+    {
+        printf("strspn -- needs <str> <test_chars_str> pointers on the stack!\n");
+    }
+    DCLANG_PTR delim = (DCLANG_PTR) dclang_pop();
+    DCLANG_PTR str = (DCLANG_PTR) dclang_pop();
+    if ((delim != 0) && (delim < MIN_STR || delim > MAX_STR))
+    {
+        perror("strspn -- <delim> string address out-of-range.");
+        return;
+    }
+    if (str < MIN_STR || str > MAX_STR)
+    {
+        perror("stcspn -- <str> string address out-of-range.");
+        return;
+    }
+    push((DCLANG_INT) strcspn((char *)str, (char *)delim));
+}
+
 void strcspnfunc()
 {
     if (data_stack_ptr < 2)
     {
         printf("strcspn -- needs <str> <test_chars_str> pointers on the stack!\n");
     }
-    DCLANG_PTR test_chars_addr =  (DCLANG_PTR) dclang_pop();
-    DCLANG_PTR big_str_addr =  (DCLANG_PTR) dclang_pop();
-    if ((test_chars_addr != 0) && (test_chars_addr < MIN_STR || test_chars_addr > MAX_STR))
+    DCLANG_PTR delim = (DCLANG_PTR) dclang_pop();
+    DCLANG_PTR str = (DCLANG_PTR) dclang_pop();
+    if ((delim != 0) && (delim < MIN_STR || delim > MAX_STR))
     {
         perror("strcspn -- <test_chars_str> string address out-of-range.");
         return;
     }
-    if (big_str_addr < MIN_STR || big_str_addr > MAX_STR)
+    if (str < MIN_STR || str > MAX_STR)
     {
         perror("stcspn -- <str> string address out-of-range.");
         return;
     }
-    char *big_str    = (char *) big_str_addr;
-    char *test_chars = (char *) test_chars_addr;
-    push((DCLANG_INT) strcspn(big_str, test_chars));
+    push((DCLANG_INT) strcspn((char *)str, (char *)delim));
 }
 
 void strtokfunc()
@@ -483,23 +502,20 @@ void strtokfunc()
     }
     DCLANG_PTR savepoint = (DCLANG_PTR) dclang_pop();
     char **savepoint_ptr = (char **) &vars[savepoint];
-    DCLANG_PTR string_PTR_addr2 = (DCLANG_PTR) dclang_pop();
-    DCLANG_PTR string_PTR_addr1 = (DCLANG_PTR) dclang_pop();
-    if ((string_PTR_addr1 != 0) && (string_PTR_addr1 < MIN_STR || string_PTR_addr1 > MAX_STR))
+    DCLANG_PTR delim = (DCLANG_PTR) dclang_pop();
+    DCLANG_PTR str = (DCLANG_PTR) dclang_pop();
+    if ((str != 0) && (str < MIN_STR || str > MAX_STR))
     {
         perror("strtok -- <str> (first) string address out-of-range.");
         return;
     }
-    if (string_PTR_addr2 < MIN_STR || string_PTR_addr2 > MAX_STR)
+    if (delim < MIN_STR || delim > MAX_STR)
     {
         perror("strtok -- <delim> (second) string address out-of-range.");
         return;
     }
-    char *str1 = (char *) string_PTR_addr1;
-    char *str2 = (char *) string_PTR_addr2;
-    push((DCLANG_INT) strtok_r(str1, str2, savepoint_ptr));
+    push((DCLANG_INT) strtok_r((char *)str, (char *)delim, savepoint_ptr));
 }
-
 
 void mempcpyfunc()
 {

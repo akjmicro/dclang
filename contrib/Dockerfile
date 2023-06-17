@@ -1,10 +1,14 @@
 FROM jeanblanchard/alpine-glibc:latest
 
+WORKDIR /dclang
+
+COPY . ./
+
 RUN apk add \
-    musl-dev gcc make git rlwrap && \
+    musl-dev gcc make git rlwrap portmidi-dev && \
     cd / && \
-    git clone https://github.com/akjmicro/dclang && \
     cd /dclang && \
+    cp -a Makefile.linux Makefile && \
     make clean && \
     make dclang && \
     make lib && \
@@ -12,7 +16,7 @@ RUN apk add \
     ln -s /dclang/libdclang.so /usr/local/lib && \
     ln -s /dclang/dclang /usr/local/bin && \
     echo 'export DCLANG_LIBS="/dclang/lib"' >> /etc/profile && \
-    echo 'alias dclang="rlwrap dclang"' >> /etc/profile && \
+    echo 'alias dclang="rlwrap dclang"' >> /etc/profile
     apk del git make gcc
 
 CMD sh -l
