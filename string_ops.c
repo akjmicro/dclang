@@ -461,10 +461,10 @@ void strspnfunc()
     }
     if (str < MIN_STR || str > MAX_STR)
     {
-        perror("stcspn -- <str> string address out-of-range.");
+        perror("strspn -- <str> string address out-of-range.");
         return;
     }
-    push((DCLANG_INT) strcspn((char *)str, (char *)delim));
+    push((DCLANG_INT) strspn((char *)str, (char *)delim));
 }
 
 void strcspnfunc()
@@ -482,7 +482,7 @@ void strcspnfunc()
     }
     if (str < MIN_STR || str > MAX_STR)
     {
-        perror("stcspn -- <str> string address out-of-range.");
+        perror("strcspn -- <str> string address out-of-range.");
         return;
     }
     push((DCLANG_INT) strcspn((char *)str, (char *)delim));
