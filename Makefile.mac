@@ -1,5 +1,5 @@
 CC = clang
-CFLAGS = -c -O3 -static -finline-functions
+CFLAGS = -w -O3 -static -finline-functions
 LDFLAGS = -lm -lportmidi
 LDDCLANG = -ldclang
 OBJECTS = main.o
@@ -30,10 +30,10 @@ libtest: lib install
 	$(CC) $(LIBTESTC) -o $@ $(LDDCLANG)
 
 install: lib dclang
-	sudo cp -a $(HEADER) $(PREFIX)/include
-	sudo cp -a $(LIBSOOBJ) $(PREFIX)/lib
-	sudo ln -s $(shell pwd)/lib $(PREFIX)/lib/dclang
-	sudo cp -a $(EXECUTABLE) $(PREFIX)/bin
+	cp -a $(HEADER) $(PREFIX)/include
+	cp -a $(LIBSOOBJ) $(PREFIX)/lib
+	ln -s $(shell pwd)/lib $(PREFIX)/lib/dclang
+	cp -a $(EXECUTABLE) $(PREFIX)/bin
 
 clean:
 	rm -rf examples/*~ *~ dclang libtest *.o *.so
