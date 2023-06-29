@@ -22,10 +22,6 @@ const :STRBETWEEN_UNDERFLOW_ERROR
 "strreplace needs <haystack> <needle> <replacement_needle> on the stack"
 const :STRREPLACE_UNDERFLOW_ERROR
 
-"freadall needs <buf_ptr> <file_ptr> on the stack!"
-const :FREADALL_UNDERFLOW_ERROR
-
-
 : strdup
   # copies a string; leaves the new string's
   # beginning address on the stack
@@ -233,27 +229,4 @@ const :FREADALL_UNDERFLOW_ERROR
     svdrop svdrop svdrop
     return
   endif
-;
-
-: _freadall_helper
-  dup svpush
-  1024 fread
-  1024 <
-  if
-    svpop 2drop
-    return
-  else
-    svpop
-    _freadall_helper
-  endif
-;
-
-: freadall
-  # read an entire file into a memory buffer
-  depth 2 <
-  if
-    :FREADALL_UNDERFLOW_ERROR print cr
-    return
-  endif
-  _freadall_helper
 ;

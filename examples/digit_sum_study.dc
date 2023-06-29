@@ -11,7 +11,7 @@
 # behaviors can be studied, and a new run kicked off with `run_sample`.    #
 # Some documention of these variables is inline below, as comments.        #
 #                                                                          #
-# `range_sample` will vary the `mul` from 2 to 512 and do a `run_sample`   #
+# `mul_study` will vary the `mul` from 2 to 512 and do a `run_sample`      #
 # on each iteration. It will output lines that represent:                  #
 #                                                                          #
 #   <current_mul> <min_count> <max_count> <max_count / min_count>          #
@@ -19,12 +19,13 @@
 # ....where <min_count> is the digit_sum __least hit__ during the run,     #
 # and <max_count> represents the digit_sum __most hit__ during the run.    #
 # This allow one to understand the "meta-features" of a given run of       #
-# `digit_sum` given a certain `base`, `wrap`, `shift`, and `outer_wrap`,   #
+# `digit_sum` given a certain `base`, `wrap`, `shift`, and `slots`,        #
 # while the `mul` changes. Using the MIDI examples, this will have musical #
 # implications.                                                            #
 ############################################################################
 
 "math.dc" import
+"string.dc" import
 
 32 const FIGURE_STORAGE_SIZE
 var figures FIGURE_STORAGE_SIZE allot
@@ -33,7 +34,7 @@ var start
 0 start !
 
 var end
-8192 end !
+1024 end !
 
 # `mul` and `base` are the core args consumed by `digit_sum`
 var mul
@@ -47,17 +48,24 @@ var base
 var wrap
 32 wrap !
 
+# `scale` is an experimental scaling extension
+var scale
+2 scale !
+
 # `shift` offsets the resulting digit_sum by the assigned amount.
 var shift
 0 shift !
 
-# `outer_wrap` would, for example, represent the largest digit_sum
+# `slots` would, for example, represent the largest digit_sum
 # _after shifting_ that you'd want to "wrap" (AKA do an `absmod` modulus wrap)
-# around. If you set/keep `wrap` and `outer_wrap` to 32, and `shift` to 0,
+# around. If you set/keep `wrap` and `slots` to 32, and `shift` to 0,
 # the "natural behavior" of `digit_sum` is shown, which can be useful for
 # understanding.
-var outer_wrap
-32 outer_wrap !
+var slots
+32 slots !
+
+var drawchars
+"0123456789abcdefghijklmnopqrstuvwxyz" drawchars !
 
 : _clear_figures
   FIGURE_STORAGE_SIZE times
@@ -66,7 +74,7 @@ var outer_wrap
 ;
 
 : _show_figures
-  FIGURE_STORAGE_SIZE times
+  slots @ times
     i 2 0 .pz "\b: " print
     figures i + @ 5 0 .pz cr
   again
@@ -76,9 +84,48 @@ var outer_wrap
   end @ start @ 1
   for
     mul @ i * base @ digit_sum
-    wrap @ absmod shift @ + outer_wrap @ absmod
+    wrap @ absmod shift @ + slots @ absmod
     figures + dup @ 1 + swap !
   next
+;
+
+: _draw_row
+  dup
+  0 >
+  if
+    dup
+    times
+      " " print
+    again
+  endif
+  drawchars @ swap dup 1 + strslice print cr
+;
+
+: _draw_sample_inner
+  end @ start @ 1
+  for
+    mul @ i * base @ digit_sum
+      scale @
+    * round
+    wrap @ absmod
+      shift @
+    +
+    slots @ absmod
+    _draw_row
+  next
+;
+
+: _get_non_zero_size
+  slots @ 1 -
+  -1 slots @ 1 - -1
+  for
+    figures i + @
+    0 <>
+    if
+      i min
+    endif
+  next
+  slots @ swap -
 ;
 
 ################
@@ -91,15 +138,37 @@ var outer_wrap
   _show_figures
 ;
 
-: range_sample
-  513 2 1
+: draw_sample
+  _clear_figures
+  _draw_sample_inner
+;
+
+: mul_study
+  "mul num_nz_slots min_cnt max_cnt max_cnt/min_cnt" print cr
+  513 1 1
   for
     i mul !
     _clear_figures
     _run_sample_inner
     figures wrap @ sortnums
     i 3 0 .pz
+    _get_non_zero_size 2 0 .pz
     figures @ figures wrap @ 1 - + @
-    swap 2dup 4 0 .pz 4 0 .pz / . cr
+    swap 2dup 4 0 .pz 4 0 .pz / .  cr
+  next
+;
+
+: wrap_study
+  "wrap num_nz_slots min_cnt max_cnt max_cnt/min_cnt" print cr
+  slots @ 1 +  5  1
+  for
+    i wrap !
+    _clear_figures
+    _run_sample_inner
+    figures wrap @ sortnums
+    i 3 0 .pz
+    _get_non_zero_size 2 0 .pz
+    figures @ figures wrap @ 1 - + @
+    swap 2dup 4 0 .pz 4 0 .pz / .  cr
   next
 ;

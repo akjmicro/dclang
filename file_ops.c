@@ -101,7 +101,7 @@ void filereadallfunc()
     DCLANG_PTR chr_cnt = 0;
     DCLANG_PTR bufsize = 64;
     DCLANG_INT ch;
-    char *allbuf = (char *) malloc(sizeof(char) * bufsize);
+    char *allbuf = (char *) calloc(bufsize, sizeof(char));
     memset(allbuf, 0, bufsize);
     FILE *file_to_read = (FILE *)(DCLANG_PTR) dclang_pop();
     while ((ch = fgetc(file_to_read)) != EOF)
@@ -109,8 +109,8 @@ void filereadallfunc()
         chr_cnt += 1;
         if (chr_cnt > bufsize)
         {
-            bufsize += 64;
-            allbuf = realloc(allbuf, bufsize);
+            bufsize *= 2;
+            allbuf = (char *) realloc(allbuf, bufsize);
         }
         memset(allbuf + chr_cnt - 1, ch, 1);
     }
