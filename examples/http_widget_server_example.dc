@@ -3,23 +3,54 @@
 
 redis_connect
 
-"widget.html" "r" fopen dup
-freadall drop const WIDGET_HTML fclose
+"sliders.html" "r" fopen dup
+freadall drop const SLIDER_HTML fclose
+
+# string constants
+"base" const :base
+"mul" const :mul
+"wrap" const :wrap
+"mode" const :mode
+"<html><body>OK<br>\n</body></html>\n" const :OK
 
 : custom_response
   get_path
   "/send_value" str=
   if
-    "slider" h@ dup
+    get_query :base strfind
     if
-      "slider" redis_set
-    endif
+      :base h@ dup
+      if
+        :base redis_set
+      endif
+    else
+    get_query :mul strfind
+    if
+      :mul h@ dup
+      if
+        :mul redis_set
+      endif
+    else
+    get_query :wrap strfind
+    if
+      :wrap h@ dup
+      if
+        :wrap redis_set
+      endif
+    else
+    get_query :mode strfind
+    if
+      :mode h@ dup
+      if
+        :mode redis_set
+      endif
+    endif endif endif endif
     zerobuf HTTP_HTML_HEADER str+
-    "<html><body>OK<br>\n</body></html>\n" str+
+    :OK str+
     drop
   else
     zerobuf HTTP_HTML_HEADER str+
-    WIDGET_HTML str+
+    SLIDER_HTML str+
     drop
   endif
 ;

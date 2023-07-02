@@ -26,6 +26,7 @@
 
 "math.dc" import
 "string.dc" import
+"redis_midi.dc" import
 
 32 const FIGURE_STORAGE_SIZE
 var figures FIGURE_STORAGE_SIZE allot
@@ -35,6 +36,9 @@ var start
 
 var end
 1024 end !
+
+var cnt
+0 cnt !
 
 # `mul` and `base` are the core args consumed by `digit_sum`
 var mul
@@ -115,6 +119,18 @@ var drawchars
   next
 ;
 
+: _draw_sample_infinite
+  redis_midi.get_mul cnt @ * redis_midi.get_base digit_sum
+  redis_midi.get_wrap absmod
+    redis_midi.get_mode
+  +
+  14 absmod
+  _draw_row
+  redis_midi.get_on_gate sleep
+  cnt dup @ 1 + swap !
+  _draw_sample_infinite
+;
+
 : _get_non_zero_size
   slots @ 1 -
   -1 slots @ 1 - -1
@@ -141,6 +157,12 @@ var drawchars
 : draw_sample
   _clear_figures
   _draw_sample_inner
+;
+
+: draw_sample_infinite
+  0 cnt !
+  _clear_figures
+  _draw_sample_infinite
 ;
 
 : mul_study
