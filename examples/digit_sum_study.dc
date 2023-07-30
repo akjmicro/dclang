@@ -58,7 +58,7 @@ var wrap
 
 # `scale` is an experimental scaling extension
 var scale
-2 scale !
+1 scale !
 
 # `shift` offsets the resulting digit_sum by the assigned amount.
 # If in a musical scale/gamut situation, this would be a "mode".
