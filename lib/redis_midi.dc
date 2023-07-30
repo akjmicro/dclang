@@ -87,7 +87,7 @@ var remainder 1 remainder !
 ;
 
 : redis_midi.get_chaos
-  :CHAOS redis_get tonum round
+  :CHAOS redis_get tonum
 ;
 
 : redis_midi.get_wrap

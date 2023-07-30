@@ -5,14 +5,14 @@
 #                                                                          #
 # There are 2 public words: `run_sample` and `range_sample`                #
 #                                                                          #
-# `run_sample` will show `end - start` (default 8192) iterations of        #
+# `run_sample` will show `end - start` (default 1024) iterations of        #
 # the output of `digit_sum`, given the variables set by the user.          #
 # These variables are defined below, but can be changed so various         #
 # behaviors can be studied, and a new run kicked off with `run_sample`.    #
 # Some documention of these variables is inline below, as comments.        #
 #                                                                          #
-# `mul_study` will vary the `mul` from 2 to 512 and do a `run_sample`      #
-# on each iteration. It will output lines that represent:                  #
+# `mul_study` will vary the `mul` from 2 to `study_end` and do a           #
+# `run_sample` on each iteration. It will output lines that represent:     #
 #                                                                          #
 #   <current_mul> <min_count> <max_count> <max_count / min_count>          #
 #                                                                          #
@@ -37,8 +37,12 @@ var start
 var end
 1024 end !
 
-var cnt
-0 cnt !
+var study_end
+129 study_end !
+
+# used by the `draw_sample_infinite` routines as a global index
+var x
+0 x !
 
 # `mul` and `base` are the core args consumed by `digit_sum`
 var mul
@@ -57,6 +61,7 @@ var scale
 2 scale !
 
 # `shift` offsets the resulting digit_sum by the assigned amount.
+# If in a musical scale/gamut situation, this would be a "mode".
 var shift
 0 shift !
 
@@ -120,20 +125,20 @@ var drawchars
 ;
 
 : _draw_sample_infinite
-  redis_midi.get_mul cnt @ * redis_midi.get_base digit_sum
+  redis_midi.get_mul x @ * redis_midi.get_base digit_sum
   redis_midi.get_wrap absmod
     redis_midi.get_mode
   +
   14 absmod
   _draw_row
   redis_midi.get_on_gate sleep
-  cnt dup @ 1 + swap !
+  x dup @ 1 + swap !
   _draw_sample_infinite
 ;
 
 : _get_non_zero_size
   slots @ 1 -
-  -1 slots @ 1 - -1
+  -1 over -1
   for
     figures i + @
     0 <>
@@ -142,6 +147,22 @@ var drawchars
     endif
   next
   slots @ swap -
+;
+
+: _get_lowest_figure
+  slots @
+    _get_non_zero_size
+  -
+    figures
+  +
+  @
+;
+
+: _get_highest_figure
+  figures
+    slots @ 1 -
+  +
+  @
 ;
 
 ################
@@ -160,23 +181,26 @@ var drawchars
 ;
 
 : draw_sample_infinite
-  0 cnt !
+  0 x !
   _clear_figures
   _draw_sample_infinite
 ;
 
 : mul_study
   "mul num_nz_slots min_cnt max_cnt max_cnt/min_cnt" print cr
-  513 1 1
+  study_end @ 1 1
   for
     i mul !
     _clear_figures
     _run_sample_inner
-    figures wrap @ sortnums
+    figures slots @ sortnums
     i 3 0 .pz
     _get_non_zero_size 2 0 .pz
-    figures @ figures wrap @ 1 - + @
-    swap 2dup 4 0 .pz 4 0 .pz / .  cr
+    _get_highest_figure _get_lowest_figure
+    2dup
+    4 0 .pz
+    4 0 .pz
+    / .  cr
   next
 ;
 
@@ -187,10 +211,13 @@ var drawchars
     i wrap !
     _clear_figures
     _run_sample_inner
-    figures wrap @ sortnums
+    figures slots @ sortnums
     i 3 0 .pz
     _get_non_zero_size 2 0 .pz
-    figures @ figures wrap @ 1 - + @
-    swap 2dup 4 0 .pz 4 0 .pz / .  cr
+    _get_highest_figure _get_lowest_figure
+    2dup
+    4 0 .pz
+    4 0 .pz
+    / .  cr
   next
 ;
