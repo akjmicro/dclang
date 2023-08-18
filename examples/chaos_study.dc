@@ -1,0 +1,94 @@
+"math.dc" import
+"string.dc" import
+"redis_midi.dc" import
+
+###########################################################################
+# To use the two functions here, `chaos_stats` and `draw_chaos_infinite`, #
+# make sure to call this module from the command line with:               #
+#   `dclang -i chaos_study.dc`                                            #
+###########################################################################
+
+# For saving the current value of 'x'
+var x
+
+#####################################################################
+# statistical study of chaos values for the first wrap*2 iterations #
+#####################################################################
+14 const FIGURE_STORAGE_SIZE
+var figures FIGURE_STORAGE_SIZE allot
+
+var unique
+0 unique !
+
+# A chaos loop -- will be divided by 1000
+var chaos_start
+1000 chaos_start !
+
+var chaos_end
+2001 chaos_end !
+
+var wrap
+14 wrap !
+
+: _clear_figures
+  0 x !
+  FIGURE_STORAGE_SIZE times
+    0 figures i + !
+  again
+  0 unique !
+;
+
+: _show_figures
+  FIGURE_STORAGE_SIZE times
+    figures i + @ .
+  again
+;
+
+: chaos_stats
+  chaos_end @ chaos_start @ 1
+  for
+    _clear_figures
+    wrap @ 2 * 0 1
+    for
+      x @ 1 + j 1000 / * 1 %         # get next result
+      dup x !                        # copy it for next iteration
+      wrap @ * floor                 # convert and scale to int
+      figures + dup @ 1 + swap !
+    next
+    _show_figures " : " print i . cr
+  next
+;
+
+######################################################
+# redis-value driven 'animation' of a chaos equation #
+######################################################
+var drawchars
+"0123456789abcdefghijklmnopqrstuvwxyz" drawchars !
+
+: _draw_row
+  dup
+  0 >
+  if
+    dup
+    times
+      " " print
+    again
+  endif
+  drawchars @ swap dup 1 + strslice print cr
+;
+
+: _draw_chaos_infinite
+  x @ 1 + redis_midi.get_chaos * 1 %
+  dup x !
+  redis_midi.get_wrap
+  *
+  floor
+  _draw_row
+  redis_midi.get_on_gate sleep
+  _draw_chaos_infinite
+;
+
+: draw_chaos_infinite
+  0 x !
+  _draw_chaos_infinite
+;
