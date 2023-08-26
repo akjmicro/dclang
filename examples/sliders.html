@@ -66,6 +66,11 @@
   <input type="range" min="-16" max="16" step="1" value="0" class="slider" id="mode_slider">
   <p>Mode offset: <span id="mode_val"></span></p>
 </div>
+
+<div class="slidecontainer">
+  <input type="range" min="1" max="99" step="1" value="10" class="slider" id="gate_slider">
+  <p>MIDI gate length: <span id="gate_val"></span></p>
+</div>
 </center>
 
 <script>
@@ -84,6 +89,10 @@ wrap_output.innerHTML = wrap_slider.value;
 var mode_slider = document.getElementById("mode_slider");
 var mode_output = document.getElementById("mode_val");
 mode_output.innerHTML = mode_slider.value;
+
+var gate_slider = document.getElementById("gate_slider");
+var gate_output = document.getElementById("gate_val");
+gate_output.innerHTML = gate_slider.value;
 
 base_slider.oninput = function() {
   base_output.innerHTML = this.value;
@@ -110,6 +119,13 @@ mode_slider.oninput = function() {
   mode_output.innerHTML = this.value;
   var xhttp = new XMLHttpRequest();
   xhttp.open("GET", "/send_value?mode=" + this.value, true);
+  xhttp.send();
+}
+
+gate_slider.oninput = function() {
+  gate_output.innerHTML = this.value;
+  var xhttp = new XMLHttpRequest();
+  xhttp.open("GET", "/send_value?gate=" + this.value, true);
   xhttp.send();
 }
 </script>

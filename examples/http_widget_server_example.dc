@@ -11,8 +11,9 @@ freadall drop const SLIDER_HTML fclose
 "mul"  const :mul
 "wrap" const :wrap
 "mode" const :mode
+"gate" const :gate
 "<html><body>OK<br>\n</body></html>\n" const :OK
-create keys_to_check :base , :mul , :wrap , :mode ,
+create keys_to_check :base , :mul , :wrap , :mode , :gate ,
 var dummy
 dummy keys_to_check - const LEN_KEYS
 
