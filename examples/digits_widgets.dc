@@ -3,7 +3,7 @@
 
 redis_connect
 
-"sliders.html" "r" fopen dup
+"digits_widgets.html" "r" fopen dup
 freadall drop const SLIDER_HTML fclose
 
 # string constants

@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+.slidecontainer {
+  width: 70%;
+}
+
+.slider {
+  -webkit-appearance: none;
+  width: 90%;
+  height: 10px;
+  border-radius: 5px;
+  background: #d3d3d3;
+  outline: none;
+  opacity: 0.7;
+  -webkit-transition: .2s;
+  transition: opacity .2s;
+}
+
+.slider:hover {
+  opacity: 1;
+}
+
+.slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 25px;
+  height: 25px;
+  background: #4CAF50;
+  cursor: pointer;
+  border-radius: 50%;
+}
+
+.slider::-moz-range-thumb {
+  width: 25px;
+  height: 25px;
+  background: #4CAF50;
+  cursor: pointer;
+}
+</style>
+</head>
+<body>
+
+<center>
+<h1>Digit Sum Control</h1>
+
+<div class="slidecontainer">
+  <input type="range" min="2" max="4" step="1" value="2" class="slider"
+         id="base" oninput="update(this)" onpageshow="update(this)">
+  <p>Numeric base: <span id="base_val">2</span></p>
+</div>
+
+<div class="slidecontainer">
+  <input type="range" min="1" max="128" step="1" value="31" class="slider"
+         id="mul" oninput="update(this)">
+  <p>Multiplier: <span id="mul_val">31</span></p>
+</div>
+
+<div class="slidecontainer">
+  <input type="range" min="5" max="32" step="1" value="14" class="slider"
+         id="wrap" oninput="update(this)">
+  <p>Wrap (modulus): <span id="wrap_val">14</span></p>
+</div>
+
+<div class="slidecontainer">
+  <input type="range" min="-16" max="16" step="1" value="-8" class="slider"
+         id="mode" oninput="update(this)">
+  <p>Mode offset: <span id="mode_val">-8</span></p>
+</div>
+
+<div class="slidecontainer">
+  <input type="range" min="1" max="99" step="1" value="10" class="slider"
+         id="gate" oninput="update(this)">
+  <p>MIDI gate length: <span id="gate_val">10</span></p>
+</div>
+</center>
+
+<script>
+function update(object) {
+  object_id = object.id
+  object_val = object.value
+  val_id = object.id + "_val"
+  document.getElementById(val_id).innerHTML = object_val;
+  var xhttp = new XMLHttpRequest();
+  xhttp.open("GET", "/send_value?" + object_id + "=" + object_val, true);
+  xhttp.send();
+}
+</script>
+
+</body>
+</html>
