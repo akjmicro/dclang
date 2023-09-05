@@ -2,7 +2,7 @@
 
 # some important constants
 7651 const HTTP_PORT
-8192 2 * const HTTP_BUFSIZE
+65536 const HTTP_BUFSIZE
 # create a listening server and its buffer
 var srv_queue HTTP_PORT tcplisten srv_queue !
 var connbuf HTTP_BUFSIZE mkbuf connbuf !

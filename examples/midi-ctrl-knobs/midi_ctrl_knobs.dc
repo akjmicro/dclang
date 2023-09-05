@@ -1,0 +1,98 @@
+"http_server.dc" import
+"redis.dc" import
+
+redis_connect
+
+"midi_ctrl_knobs.html" "r" fopen dup
+freadall drop const KNOB_HTML fclose
+
+# string constants
+"knob_21" const :knob_21
+"knob_22" const :knob_22
+"knob_23" const :knob_23
+"knob_24" const :knob_24
+"knob_25" const :knob_25
+"knob_26" const :knob_26
+"knob_27" const :knob_27
+"knob_28" const :knob_28
+"knob_41" const :knob_41
+"knob_42" const :knob_42
+"knob_43" const :knob_43
+"knob_44" const :knob_44
+"knob_45" const :knob_45
+"knob_46" const :knob_46
+"knob_47" const :knob_47
+"knob_48" const :knob_48
+
+"<html><body>OK<br>\n</body></html>\n" const :OK
+create keys_to_check :knob_21 ,
+                     :knob_22 ,
+                     :knob_23 ,
+                     :knob_24 ,
+                     :knob_25 ,
+                     :knob_26 ,
+                     :knob_27 ,
+                     :knob_28 ,
+                     :knob_41 ,
+                     :knob_42 ,
+                     :knob_43 ,
+                     :knob_44 ,
+                     :knob_45 ,
+                     :knob_46 ,
+                     :knob_47 ,
+                     :knob_48 ,
+var dummy
+dummy keys_to_check - const LEN_KEYS
+
+: _check_keys_and_set
+  LEN_KEYS 0 1
+  for
+    get_query
+      keys_to_check i + @
+      dup svpush
+    strfind
+    if
+      svpop dup h@ swap redis_set
+      exitfor
+    endif
+    svdepth 1 >=
+    if
+      svdrop
+    endif
+  next
+;
+
+: custom_response
+  get_path
+  "/send_value" str=
+  if
+    _check_keys_and_set
+    zerobuf HTTP_HTML_HEADER str+
+    :OK str+
+    drop
+  else
+    zerobuf HTTP_HTML_HEADER str+
+    KNOB_HTML str+
+    drop
+  endif
+;
+
+: write_response
+  custom_response                                        # To customize the response,
+  get_accepted_conn get_connbuf HTTP_BUFSIZE write drop  # should always be here
+  get_accepted_conn close drop                           # should always be here
+;
+
+: acceptloop
+  srv_queue @ tcpaccept accepted_conn !
+  read_incoming    # reads in the request
+  process_request  # does the basic necessities like splitting the page and query
+  write_response   # send the response
+  acceptloop       # infinite "wait for request" loop
+;
+
+"running acceptloop; serving on port " print HTTP_PORT . cr
+acceptloop
+
+# close down connection
+srv_queue @ close drop

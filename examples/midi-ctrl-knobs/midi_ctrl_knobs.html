@@ -1,0 +1,775 @@
+<!DOCTYPE html>
+<html lang="en" >
+<head>
+  <meta charset="UTF-8">
+  <title>CodePen - MIDI ctrl knobs</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/normalize/5.0.0/normalize.min.css">
+
+<style>
+* {
+  box-sizing: border-box;
+}
+
+html, body {
+  width: 70%;
+  height: 100%;
+}
+
+body {
+  padding: 1px;
+  background: radial-gradient(#1a1d22, #121318);
+}
+
+.defs {
+  position: absolute;
+  width: 100%;
+  height: 0;
+  opacity: 0;
+}
+
+.fl-studio-MIDI_controls_1, .fl-studio-MIDI_controls_2 {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.fl-studio-MIDI_controls_1 {
+  padding: 30px 0 0;
+  margin: 230px 100px 0px 100px;
+}
+
+.fl-studio-MIDI_controls_2 {
+  padding: 30px 0 0;
+  margin: 0px 100px 230px 100px;
+  padding-bottom: 230px;
+}
+
+.fl-studio-MIDI_control {
+  flex: 1 0 auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.fl-studio-MIDI_label {
+  flex: 0 0 auto;
+  display: inline-block;
+  padding: 10px 0;
+  width: 80px;
+  color: #c1c5c5;
+  font-size: 10px;
+  font-family: "Helvetica", sans-serif;
+  font-weight: 700;
+  text-align: center;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+}
+
+.fl-studio-MIDI_knob {
+  flex: 0 0 auto;
+}
+.fl-studio-MIDI_knob.MIDI-knob {
+  width: 80px;
+  height: 80px;
+}
+.fl-studio-MIDI_knob .knob-input__visual {
+  overflow: visible;
+}
+.fl-studio-MIDI_knob .dial {
+  transform-origin: 20px 20px;
+  transition: all 600ms cubic-bezier(0.39, 0.575, 0.565, 1);
+}
+.fl-studio-MIDI_knob .dial-highlight {
+  opacity: 0;
+  transition: all 300ms cubic-bezier(0.39, 0.575, 0.565, 1);
+}
+.fl-studio-MIDI_knob:hover .dial, .fl-studio-MIDI_knob.drag-active .dial {
+  transform: scale(0.9);
+  filter: brightness(10.2);
+  transition: all 300ms cubic-bezier(0.39, 0.575, 0.565, 1);
+}
+.fl-studio-MIDI_knob:hover .dial-highlight, .fl-studio-MIDI_knob.drag-active .dial-highlight {
+  opacity: 0.05;
+}
+.fl-studio-MIDI_knob .focus-indicator {
+  opacity: 0;
+  transition: all 300ms cubic-bezier(0.39, 0.575, 0.565, 1);
+}
+.fl-studio-MIDI_knob.focus-active .focus-indicator {
+  opacity: 0.8;
+}
+
+.knob-input {
+  position: relative;
+}
+
+.knob-input__visual {
+  pointer-events: none;
+  width: 100%;
+  height: 100%;
+}
+
+.knob-input__input {
+  cursor: -webkit-grab;
+  cursor: grab;
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  transform: rotate(-90deg);
+}
+
+body.knob-input__drag-active, body.knob-input__drag-active * {
+  cursor: -webkit-grabbing !important;
+  cursor: grabbing !important;
+}
+</style>
+
+</head>
+<body>
+<!-- partial:index.partial.html -->
+<svg class="defs">
+  <defs>
+    <radialGradient id="grad-dial-soft-shadow" cx="0.5" cy="0.5" r="0.5">
+      <stop offset="85%" stop-color="#242a2e" stop-opacity="0.4"></stop>
+      <stop offset="100%" stop-color="#242a2e" stop-opacity="0"></stop>
+    </radialGradient>
+    <linearGradient id="grad-dial-base" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#52595f"></stop>
+      <stop offset="100%" stop-color="#2b3238"></stop>
+    </linearGradient>
+    <linearGradient id="grad-dial-highlight" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#70777d" stop-opacity="1"></stop>
+      <stop offset="40%" stop-color="#70777d" stop-opacity="0"></stop>
+      <stop offset="55%" stop-color="#70777d" stop-opacity="0"></stop>
+      <stop offset="100%" stop-color="#70777d" stop-opacity="0.3"></stop>
+    </linearGradient>
+    <filter id="glow">
+      <feGaussianBlur in="SourceGraphic" result="blur" stdDeviation="2"></feGaussianBlur>
+      <feComposite in="blur" in2="SourceGraphic" operator="over"></feComposite>
+    </filter>
+  </defs>
+  <div class="fl-studio-MIDI_controls_1">
+    <div class="fl-studio-MIDI_control">
+      <div class="knob-input fl-studio-MIDI_knob MIDI-knob 21" id="21">
+        <svg class="knob-input__visual" viewBox="0 0 40 40">
+          <circle class="focus-indicator" cx="20" cy="20" r="18" fill="#4eccff" filter="url(#glow)"></circle>
+          <circle class="indicator-ring-bg" cx="20" cy="20" r="18" fill="#353b3f" stroke="#23292d"></circle>
+          <path class="indicator-ring" d="M20,20Z" fill="#4eccff"></path>
+          <g class="dial">
+            <circle cx="20" cy="20" r="16" fill="url(#grad-dial-soft-shadow)"></circle>
+            <ellipse cx="20" cy="22" rx="14" ry="14.5" fill="#242a2e" opacity="0.15"></ellipse>
+            <circle cx="20" cy="20" r="14" fill="url(#grad-dial-base)" stroke="#242a2e" stroke-width="1.5"></circle>
+            <circle cx="20" cy="20" r="13" fill="transparent" stroke="url(#grad-dial-highlight)" stroke-width="1.5"></circle>
+            <circle class="dial-highlight" cx="20" cy="20" r="14" fill="#ffffff"></circle>
+            <circle class="indicator-dot" cx="20" cy="30" r="1.5" fill="#4eccff"></circle>
+          </g>
+        </svg>
+      </div>
+      <div class="fl-studio-MIDI_label">21</div>
+    </div>
+    <div class="fl-studio-MIDI_control">
+      <div class="knob-input fl-studio-MIDI_knob MIDI-knob 22" id="22">
+        <svg class="knob-input__visual" viewBox="0 0 40 40">
+          <circle class="focus-indicator" cx="20" cy="20" r="18" fill="#4eccff" filter="url(#glow)"></circle>
+          <circle class="indicator-ring-bg" cx="20" cy="20" r="18" fill="#353b3f" stroke="#23292d"></circle>
+          <path class="indicator-ring" d="M20,20Z" fill="#4eccff"></path>
+          <g class="dial">
+            <circle cx="20" cy="20" r="16" fill="url(#grad-dial-soft-shadow)"></circle>
+            <ellipse cx="20" cy="22" rx="14" ry="14.5" fill="#242a2e" opacity="0.15"></ellipse>
+            <circle cx="20" cy="20" r="14" fill="url(#grad-dial-base)" stroke="#242a2e" stroke-width="1.5"></circle>
+            <circle cx="20" cy="20" r="13" fill="transparent" stroke="url(#grad-dial-highlight)" stroke-width="1.5"></circle>
+            <circle class="dial-highlight" cx="20" cy="20" r="14" fill="#ffffff"></circle>
+            <circle class="indicator-dot" cx="20" cy="30" r="1.5" fill="#4eccff"></circle>
+          </g>
+        </svg>
+      </div>
+      <div class="fl-studio-MIDI_label">22</div>
+    </div>
+    <div class="fl-studio-MIDI_control">
+      <div class="knob-input fl-studio-MIDI_knob MIDI-knob 23" id="23">
+        <svg class="knob-input__visual" viewBox="0 0 40 40">
+          <circle class="focus-indicator" cx="20" cy="20" r="18" fill="#4eccff" filter="url(#glow)"></circle>
+          <circle class="indicator-ring-bg" cx="20" cy="20" r="18" fill="#353b3f" stroke="#23292d"></circle>
+          <path class="indicator-ring" d="M20,20Z" fill="#4eccff"></path>
+          <g class="dial">
+            <circle cx="20" cy="20" r="16" fill="url(#grad-dial-soft-shadow)"></circle>
+            <ellipse cx="20" cy="22" rx="14" ry="14.5" fill="#242a2e" opacity="0.15"></ellipse>
+            <circle cx="20" cy="20" r="14" fill="url(#grad-dial-base)" stroke="#242a2e" stroke-width="1.5"></circle>
+            <circle cx="20" cy="20" r="13" fill="transparent" stroke="url(#grad-dial-highlight)" stroke-width="1.5"></circle>
+            <circle class="dial-highlight" cx="20" cy="20" r="14" fill="#ffffff"></circle>
+            <circle class="indicator-dot" cx="20" cy="30" r="1.5" fill="#4eccff"></circle>
+          </g>
+        </svg>
+      </div>
+      <div class="fl-studio-MIDI_label">23</div>
+    </div>
+    <div class="fl-studio-MIDI_control">
+      <div class="knob-input fl-studio-MIDI_knob MIDI-knob 24" id="24">
+        <svg class="knob-input__visual" viewBox="0 0 40 40">
+          <circle class="focus-indicator" cx="20" cy="20" r="18" fill="#4eccff" filter="url(#glow)"></circle>
+          <circle class="indicator-ring-bg" cx="20" cy="20" r="18" fill="#353b3f" stroke="#23292d"></circle>
+          <path class="indicator-ring" d="M20,20Z" fill="#4eccff"></path>
+          <g class="dial">
+            <circle cx="20" cy="20" r="16" fill="url(#grad-dial-soft-shadow)"></circle>
+            <ellipse cx="20" cy="22" rx="14" ry="14.5" fill="#242a2e" opacity="0.15"></ellipse>
+            <circle cx="20" cy="20" r="14" fill="url(#grad-dial-base)" stroke="#242a2e" stroke-width="1.5"></circle>
+            <circle cx="20" cy="20" r="13" fill="transparent" stroke="url(#grad-dial-highlight)" stroke-width="1.5"></circle>
+            <circle class="dial-highlight" cx="20" cy="20" r="14" fill="#ffffff"></circle>
+            <circle class="indicator-dot" cx="20" cy="30" r="1.5" fill="#4eccff"></circle>
+          </g>
+        </svg>
+      </div>
+      <div class="fl-studio-MIDI_label">24</div>
+    </div>
+    <div class="fl-studio-MIDI_control">
+      <div class="knob-input fl-studio-MIDI_knob MIDI-knob 25" id="25">
+        <svg class="knob-input__visual" viewBox="0 0 40 40">
+          <circle class="focus-indicator" cx="20" cy="20" r="18" fill="#4eccff" filter="url(#glow)"></circle>
+          <circle class="indicator-ring-bg" cx="20" cy="20" r="18" fill="#353b3f" stroke="#23292d"></circle>
+          <path class="indicator-ring" d="M20,20Z" fill="#4eccff"></path>
+          <g class="dial">
+            <circle cx="20" cy="20" r="16" fill="url(#grad-dial-soft-shadow)"></circle>
+            <ellipse cx="20" cy="22" rx="14" ry="14.5" fill="#242a2e" opacity="0.15"></ellipse>
+            <circle cx="20" cy="20" r="14" fill="url(#grad-dial-base)" stroke="#242a2e" stroke-width="1.5"></circle>
+            <circle cx="20" cy="20" r="13" fill="transparent" stroke="url(#grad-dial-highlight)" stroke-width="1.5"></circle>
+            <circle class="dial-highlight" cx="20" cy="20" r="14" fill="#ffffff"></circle>
+            <circle class="indicator-dot" cx="20" cy="30" r="1.5" fill="#4eccff"></circle>
+          </g>
+        </svg>
+      </div>
+      <div class="fl-studio-MIDI_label">25</div>
+    </div>
+    <div class="fl-studio-MIDI_control">
+      <div class="knob-input fl-studio-MIDI_knob MIDI-knob 26" id="26">
+        <svg class="knob-input__visual" viewBox="0 0 40 40">
+          <circle class="focus-indicator" cx="20" cy="20" r="18" fill="#4eccff" filter="url(#glow)"></circle>
+          <circle class="indicator-ring-bg" cx="20" cy="20" r="18" fill="#353b3f" stroke="#23292d"></circle>
+          <path class="indicator-ring" d="M20,20Z" fill="#4eccff"></path>
+          <g class="dial">
+            <circle cx="20" cy="20" r="16" fill="url(#grad-dial-soft-shadow)"></circle>
+            <ellipse cx="20" cy="22" rx="14" ry="14.5" fill="#242a2e" opacity="0.15"></ellipse>
+            <circle cx="20" cy="20" r="14" fill="url(#grad-dial-base)" stroke="#242a2e" stroke-width="1.5"></circle>
+            <circle cx="20" cy="20" r="13" fill="transparent" stroke="url(#grad-dial-highlight)" stroke-width="1.5"></circle>
+            <circle class="dial-highlight" cx="20" cy="20" r="14" fill="#ffffff"></circle>
+            <circle class="indicator-dot" cx="20" cy="30" r="1.5" fill="#4eccff"></circle>
+          </g>
+        </svg>
+      </div>
+      <div class="fl-studio-MIDI_label">26</div>
+    </div>
+    <div class="fl-studio-MIDI_control">
+      <div class="knob-input fl-studio-MIDI_knob MIDI-knob 27" id="27">
+        <svg class="knob-input__visual" viewBox="0 0 40 40">
+          <circle class="focus-indicator" cx="20" cy="20" r="18" fill="#4eccff" filter="url(#glow)"></circle>
+          <circle class="indicator-ring-bg" cx="20" cy="20" r="18" fill="#353b3f" stroke="#23292d"></circle>
+          <path class="indicator-ring" d="M20,20Z" fill="#4eccff"></path>
+          <g class="dial">
+            <circle cx="20" cy="20" r="16" fill="url(#grad-dial-soft-shadow)"></circle>
+            <ellipse cx="20" cy="22" rx="14" ry="14.5" fill="#242a2e" opacity="0.15"></ellipse>
+            <circle cx="20" cy="20" r="14" fill="url(#grad-dial-base)" stroke="#242a2e" stroke-width="1.5"></circle>
+            <circle cx="20" cy="20" r="13" fill="transparent" stroke="url(#grad-dial-highlight)" stroke-width="1.5"></circle>
+            <circle class="dial-highlight" cx="20" cy="20" r="14" fill="#ffffff"></circle>
+            <circle class="indicator-dot" cx="20" cy="30" r="1.5" fill="#4eccff"></circle>
+          </g>
+        </svg>
+      </div>
+      <div class="fl-studio-MIDI_label">27</div>
+    </div>
+    <div class="fl-studio-MIDI_control">
+      <div class="knob-input fl-studio-MIDI_knob MIDI-knob 28" id="28">
+        <svg class="knob-input__visual" viewBox="0 0 40 40">
+          <circle class="focus-indicator" cx="20" cy="20" r="18" fill="#4eccff" filter="url(#glow)"></circle>
+          <circle class="indicator-ring-bg" cx="20" cy="20" r="18" fill="#353b3f" stroke="#23292d"></circle>
+          <path class="indicator-ring" d="M20,20Z" fill="#4eccff"></path>
+          <g class="dial">
+            <circle cx="20" cy="20" r="16" fill="url(#grad-dial-soft-shadow)"></circle>
+            <ellipse cx="20" cy="22" rx="14" ry="14.5" fill="#242a2e" opacity="0.15"></ellipse>
+            <circle cx="20" cy="20" r="14" fill="url(#grad-dial-base)" stroke="#242a2e" stroke-width="1.5"></circle>
+            <circle cx="20" cy="20" r="13" fill="transparent" stroke="url(#grad-dial-highlight)" stroke-width="1.5"></circle>
+            <circle class="dial-highlight" cx="20" cy="20" r="14" fill="#ffffff"></circle>
+            <circle class="indicator-dot" cx="20" cy="30" r="1.5" fill="#4eccff"></circle>
+          </g>
+        </svg>
+      </div>
+      <div class="fl-studio-MIDI_label">28</div>
+    </div>
+  </div>
+  <div class="fl-studio-MIDI_controls_2">
+    <div class="fl-studio-MIDI_control">
+      <div class="knob-input fl-studio-MIDI_knob MIDI-knob 41" id="41">
+        <svg class="knob-input__visual" viewBox="0 0 40 40">
+          <circle class="focus-indicator" cx="20" cy="20" r="18" fill="#4eccff" filter="url(#glow)"></circle>
+          <circle class="indicator-ring-bg" cx="20" cy="20" r="18" fill="#353b3f" stroke="#23292d"></circle>
+          <path class="indicator-ring" d="M20,20Z" fill="#4eccff"></path>
+          <g class="dial">
+            <circle cx="20" cy="20" r="16" fill="url(#grad-dial-soft-shadow)"></circle>
+            <ellipse cx="20" cy="22" rx="14" ry="14.5" fill="#242a2e" opacity="0.15"></ellipse>
+            <circle cx="20" cy="20" r="14" fill="url(#grad-dial-base)" stroke="#242a2e" stroke-width="1.5"></circle>
+            <circle cx="20" cy="20" r="13" fill="transparent" stroke="url(#grad-dial-highlight)" stroke-width="1.5"></circle>
+            <circle class="dial-highlight" cx="20" cy="20" r="14" fill="#ffffff"></circle>
+            <circle class="indicator-dot" cx="20" cy="30" r="1.5" fill="#4eccff"></circle>
+          </g>
+        </svg>
+      </div>
+      <div class="fl-studio-MIDI_label">41</div>
+    </div>
+    <div class="fl-studio-MIDI_control">
+      <div class="knob-input fl-studio-MIDI_knob MIDI-knob 42" id="42">
+        <svg class="knob-input__visual" viewBox="0 0 40 40">
+          <circle class="focus-indicator" cx="20" cy="20" r="18" fill="#4eccff" filter="url(#glow)"></circle>
+          <circle class="indicator-ring-bg" cx="20" cy="20" r="18" fill="#353b3f" stroke="#23292d"></circle>
+          <path class="indicator-ring" d="M20,20Z" fill="#4eccff"></path>
+          <g class="dial">
+            <circle cx="20" cy="20" r="16" fill="url(#grad-dial-soft-shadow)"></circle>
+            <ellipse cx="20" cy="22" rx="14" ry="14.5" fill="#242a2e" opacity="0.15"></ellipse>
+            <circle cx="20" cy="20" r="14" fill="url(#grad-dial-base)" stroke="#242a2e" stroke-width="1.5"></circle>
+            <circle cx="20" cy="20" r="13" fill="transparent" stroke="url(#grad-dial-highlight)" stroke-width="1.5"></circle>
+            <circle class="dial-highlight" cx="20" cy="20" r="14" fill="#ffffff"></circle>
+            <circle class="indicator-dot" cx="20" cy="30" r="1.5" fill="#4eccff"></circle>
+          </g>
+        </svg>
+      </div>
+      <div class="fl-studio-MIDI_label">42</div>
+    </div>
+    <div class="fl-studio-MIDI_control">
+      <div class="knob-input fl-studio-MIDI_knob MIDI-knob 43" id="43">
+        <svg class="knob-input__visual" viewBox="0 0 40 40">
+          <circle class="focus-indicator" cx="20" cy="20" r="18" fill="#4eccff" filter="url(#glow)"></circle>
+          <circle class="indicator-ring-bg" cx="20" cy="20" r="18" fill="#353b3f" stroke="#23292d"></circle>
+          <path class="indicator-ring" d="M20,20Z" fill="#4eccff"></path>
+          <g class="dial">
+            <circle cx="20" cy="20" r="16" fill="url(#grad-dial-soft-shadow)"></circle>
+            <ellipse cx="20" cy="22" rx="14" ry="14.5" fill="#242a2e" opacity="0.15"></ellipse>
+            <circle cx="20" cy="20" r="14" fill="url(#grad-dial-base)" stroke="#242a2e" stroke-width="1.5"></circle>
+            <circle cx="20" cy="20" r="13" fill="transparent" stroke="url(#grad-dial-highlight)" stroke-width="1.5"></circle>
+            <circle class="dial-highlight" cx="20" cy="20" r="14" fill="#ffffff"></circle>
+            <circle class="indicator-dot" cx="20" cy="30" r="1.5" fill="#4eccff"></circle>
+          </g>
+        </svg>
+      </div>
+      <div class="fl-studio-MIDI_label">43</div>
+    </div>
+    <div class="fl-studio-MIDI_control">
+      <div class="knob-input fl-studio-MIDI_knob MIDI-knob 44" id="44">
+        <svg class="knob-input__visual" viewBox="0 0 40 40">
+          <circle class="focus-indicator" cx="20" cy="20" r="18" fill="#4eccff" filter="url(#glow)"></circle>
+          <circle class="indicator-ring-bg" cx="20" cy="20" r="18" fill="#353b3f" stroke="#23292d"></circle>
+          <path class="indicator-ring" d="M20,20Z" fill="#4eccff"></path>
+          <g class="dial">
+            <circle cx="20" cy="20" r="16" fill="url(#grad-dial-soft-shadow)"></circle>
+            <ellipse cx="20" cy="22" rx="14" ry="14.5" fill="#242a2e" opacity="0.15"></ellipse>
+            <circle cx="20" cy="20" r="14" fill="url(#grad-dial-base)" stroke="#242a2e" stroke-width="1.5"></circle>
+            <circle cx="20" cy="20" r="13" fill="transparent" stroke="url(#grad-dial-highlight)" stroke-width="1.5"></circle>
+            <circle class="dial-highlight" cx="20" cy="20" r="14" fill="#ffffff"></circle>
+            <circle class="indicator-dot" cx="20" cy="30" r="1.5" fill="#4eccff"></circle>
+          </g>
+        </svg>
+      </div>
+      <div class="fl-studio-MIDI_label">44</div>
+    </div>
+    <div class="fl-studio-MIDI_control">
+      <div class="knob-input fl-studio-MIDI_knob MIDI-knob 45" id="45">
+        <svg class="knob-input__visual" viewBox="0 0 40 40">
+          <circle class="focus-indicator" cx="20" cy="20" r="18" fill="#4eccff" filter="url(#glow)"></circle>
+          <circle class="indicator-ring-bg" cx="20" cy="20" r="18" fill="#353b3f" stroke="#23292d"></circle>
+          <path class="indicator-ring" d="M20,20Z" fill="#4eccff"></path>
+          <g class="dial">
+            <circle cx="20" cy="20" r="16" fill="url(#grad-dial-soft-shadow)"></circle>
+            <ellipse cx="20" cy="22" rx="14" ry="14.5" fill="#242a2e" opacity="0.15"></ellipse>
+            <circle cx="20" cy="20" r="14" fill="url(#grad-dial-base)" stroke="#242a2e" stroke-width="1.5"></circle>
+            <circle cx="20" cy="20" r="13" fill="transparent" stroke="url(#grad-dial-highlight)" stroke-width="1.5"></circle>
+            <circle class="dial-highlight" cx="20" cy="20" r="14" fill="#ffffff"></circle>
+            <circle class="indicator-dot" cx="20" cy="30" r="1.5" fill="#4eccff"></circle>
+          </g>
+        </svg>
+      </div>
+      <div class="fl-studio-MIDI_label">45</div>
+    </div>
+    <div class="fl-studio-MIDI_control">
+      <div class="knob-input fl-studio-MIDI_knob MIDI-knob 46" id="46">
+        <svg class="knob-input__visual" viewBox="0 0 40 40">
+          <circle class="focus-indicator" cx="20" cy="20" r="18" fill="#4eccff" filter="url(#glow)"></circle>
+          <circle class="indicator-ring-bg" cx="20" cy="20" r="18" fill="#353b3f" stroke="#23292d"></circle>
+          <path class="indicator-ring" d="M20,20Z" fill="#4eccff"></path>
+          <g class="dial">
+            <circle cx="20" cy="20" r="16" fill="url(#grad-dial-soft-shadow)"></circle>
+            <ellipse cx="20" cy="22" rx="14" ry="14.5" fill="#242a2e" opacity="0.15"></ellipse>
+            <circle cx="20" cy="20" r="14" fill="url(#grad-dial-base)" stroke="#242a2e" stroke-width="1.5"></circle>
+            <circle cx="20" cy="20" r="13" fill="transparent" stroke="url(#grad-dial-highlight)" stroke-width="1.5"></circle>
+            <circle class="dial-highlight" cx="20" cy="20" r="14" fill="#ffffff"></circle>
+            <circle class="indicator-dot" cx="20" cy="30" r="1.5" fill="#4eccff"></circle>
+          </g>
+        </svg>
+      </div>
+      <div class="fl-studio-MIDI_label">46</div>
+    </div>
+    <div class="fl-studio-MIDI_control">
+      <div class="knob-input fl-studio-MIDI_knob MIDI-knob 47" id="47">
+        <svg class="knob-input__visual" viewBox="0 0 40 40">
+          <circle class="focus-indicator" cx="20" cy="20" r="18" fill="#4eccff" filter="url(#glow)"></circle>
+          <circle class="indicator-ring-bg" cx="20" cy="20" r="18" fill="#353b3f" stroke="#23292d"></circle>
+          <path class="indicator-ring" d="M20,20Z" fill="#4eccff"></path>
+          <g class="dial">
+            <circle cx="20" cy="20" r="16" fill="url(#grad-dial-soft-shadow)"></circle>
+            <ellipse cx="20" cy="22" rx="14" ry="14.5" fill="#242a2e" opacity="0.15"></ellipse>
+            <circle cx="20" cy="20" r="14" fill="url(#grad-dial-base)" stroke="#242a2e" stroke-width="1.5"></circle>
+            <circle cx="20" cy="20" r="13" fill="transparent" stroke="url(#grad-dial-highlight)" stroke-width="1.5"></circle>
+            <circle class="dial-highlight" cx="20" cy="20" r="14" fill="#ffffff"></circle>
+            <circle class="indicator-dot" cx="20" cy="30" r="1.5" fill="#4eccff"></circle>
+          </g>
+        </svg>
+      </div>
+      <div class="fl-studio-MIDI_label">47</div>
+    </div>
+    <div class="fl-studio-MIDI_control">
+      <div class="knob-input fl-studio-MIDI_knob MIDI-knob 48" id="48">
+        <svg class="knob-input__visual" viewBox="0 0 40 40">
+          <circle class="focus-indicator" cx="20" cy="20" r="18" fill="#4eccff" filter="url(#glow)"></circle>
+          <circle class="indicator-ring-bg" cx="20" cy="20" r="18" fill="#353b3f" stroke="#23292d"></circle>
+          <path class="indicator-ring" d="M20,20Z" fill="#4eccff"></path>
+          <g class="dial">
+            <circle cx="20" cy="20" r="16" fill="url(#grad-dial-soft-shadow)"></circle>
+            <ellipse cx="20" cy="22" rx="14" ry="14.5" fill="#242a2e" opacity="0.15"></ellipse>
+            <circle cx="20" cy="20" r="14" fill="url(#grad-dial-base)" stroke="#242a2e" stroke-width="1.5"></circle>
+            <circle cx="20" cy="20" r="13" fill="transparent" stroke="url(#grad-dial-highlight)" stroke-width="1.5"></circle>
+            <circle class="dial-highlight" cx="20" cy="20" r="14" fill="#ffffff"></circle>
+            <circle class="indicator-dot" cx="20" cy="30" r="1.5" fill="#4eccff"></circle>
+          </g>
+        </svg>
+      </div>
+      <div class="fl-studio-MIDI_label">48</div>
+    </div>
+  </div>
+</svg>
+<!-- partial -->
+<script>
+class KnobInput {
+  constructor(containerElement, options) {
+    if (!options) {
+      options = {};
+    }
+    
+    // settings
+    var step = options.step || 'any';
+    var min = typeof options.min === 'number' ? options.min : 0;
+    var max = typeof options.max === 'number' ? options.max : 127;
+    var input_id = options.input_id;
+    this.initial = typeof options.initial === 'number' ? options.initial : 0.5 * (min + max);
+    this.visualElementClass = options.visualElementClass || 'knob-input__visual';
+    this.dragResistance = typeof options.dragResistance === 'number' ? options.dragResistance : 300;
+    this.dragResistance /= max-min;
+    this.wheelResistance = typeof options.wheelResistance === 'number' ? options.wheelResistance : 4000;
+    this.wheelResistance /= max-min;
+    this.setupVisualContext = typeof options.visualContext === 'function' ? options.visualContext : KnobInput.setupRotationContext(0, 360);
+    this.updateVisuals = typeof options.updateVisuals === 'function' ? options.updateVisuals : KnobInput.rotationUpdateFunction;
+    
+    // setup input
+    var rangeInput = document.createElement('input');
+    rangeInput.type = 'range';
+    rangeInput.step = step;
+    rangeInput.min = min;
+    rangeInput.max = max;
+    rangeInput.value = this.initial;
+    rangeInput.id = 'knob_' + containerElement.id;
+    containerElement.appendChild(rangeInput);
+    
+    // elements
+    this._container = containerElement;
+    this._container.classList.add('knob-input');
+    this._input = rangeInput;
+    this._input.classList.add('knob-input__input');
+    this._visualElement = this._container.querySelector(`.${this.visualElementClass}`);
+    this._visualElement.classList.add('knob-input__visual');
+    
+    // visual context
+    this._visualContext = { element: this._visualElement };
+    this.setupVisualContext.apply(this._visualContext);
+    this.updateVisuals = this.updateVisuals.bind(this._visualContext);
+    
+    // internals
+    this._activeDrag = false;
+    
+    // define event listeners
+    // have to store bound versions of handlers so they can be removed later
+    this._handlers = {
+      inputChange: this.handleInputChange.bind(this),
+      touchStart: this.handleTouchStart.bind(this),
+      touchMove: this.handleTouchMove.bind(this),
+      touchEnd: this.handleTouchEnd.bind(this),
+      touchCancel: this.handleTouchCancel.bind(this),
+      mouseDown: this.handleMouseDown.bind(this),
+      mouseMove: this.handleMouseMove.bind(this),
+      mouseUp: this.handleMouseUp.bind(this),
+      mouseWheel: this.handleMouseWheel.bind(this),
+      doubleClick: this.handleDoubleClick.bind(this),
+      focus: this.handleFocus.bind(this),
+      blur: this.handleBlur.bind(this),
+    };
+    // add listeners
+    this._input.addEventListener('change', this._handlers.inputChange);
+    this._input.addEventListener('touchstart', this._handlers.touchStart);
+    this._input.addEventListener('mousedown', this._handlers.mouseDown);
+    this._input.addEventListener('wheel', this._handlers.mouseWheel);
+    this._input.addEventListener('dblclick', this._handlers.doubleClick);
+    this._input.addEventListener('focus', this._handlers.focus);
+    this._input.addEventListener('blur', this._handlers.blur);
+    // init
+    this.updateToInputValue();
+  }
+  
+  static setupRotationContext(minRotation, maxRotation) {
+    return function() {
+      this.minRotation = minRotation;
+      this.maxRotation = maxRotation;
+    };
+  }
+  
+  static rotationUpdateFunction(norm) {
+    this.element.style[transformProp] = `rotate(${this.maxRotation*norm-this.minRotation*(norm-1)}deg)`;
+  }
+  
+  // handlers
+  handleInputChange(evt) {
+    // console.log('input change');
+    this.updateToInputValue();
+  }
+  
+  handleTouchStart(evt) {
+    // console.log('touch start');
+    this.clearDrag();
+    evt.preventDefault();
+    var touch = evt.changedTouches.item(evt.changedTouches.length - 1);
+    this._activeDrag = touch.identifier;
+    this.startDrag(touch.clientY);
+    // drag update/end listeners
+    document.body.addEventListener('touchmove', this._handlers.touchMove);
+    document.body.addEventListener('touchend', this._handlers.touchEnd);
+    document.body.addEventListener('touchcancel', this._handlers.touchCancel);
+  }
+  
+  handleTouchMove(evt) {
+    // console.log('touch move');
+    var activeTouch = this.findActiveTouch(evt.changedTouches);
+    if (activeTouch) {
+      this.updateDrag(activeTouch.clientY);
+    } else if (!this.findActiveTouch(evt.touches)) {
+      this.clearDrag();
+    }
+  }
+  
+  handleTouchEnd(evt) {
+    // console.log('touch end');
+    var activeTouch = this.findActiveTouch(evt.changedTouches);
+    if (activeTouch) {
+      this.finalizeDrag(activeTouch.clientY);
+    }
+  }
+  
+  handleTouchCancel(evt) {
+    // console.log('touch cancel');
+    if (this.findActiveTouch(evt.changedTouches)) {
+      this.clearDrag();
+    }
+  }
+  
+  handleMouseDown(evt) {
+    // console.log('mouse down');
+    this.clearDrag();
+    evt.preventDefault();
+    this._activeDrag = true;
+    this.startDrag(evt.clientY);
+    // drag update/end listeners
+    document.body.addEventListener('mousemove', this._handlers.mouseMove);
+    document.body.addEventListener('mouseup', this._handlers.mouseUp);
+  }
+  
+  handleMouseMove(evt) {
+    // console.log('mouse move');
+    if (evt.buttons&1) {
+      this.updateDrag(evt.clientY);
+    } else {
+      this.finalizeDrag(evt.clientY);
+    }
+  }
+  
+  handleMouseUp(evt) {
+    // console.log('mouse up');
+    this.finalizeDrag(evt.clientY);
+  }
+  
+  handleMouseWheel(evt) {
+    // console.log('mouse wheel');
+    this._input.focus();
+    this.clearDrag();
+    this._prevValue = parseFloat(this._input.value);
+    this.updateFromDrag(evt.deltaY, this.wheelResistance);
+  }
+  
+  handleDoubleClick(evt) {
+    // console.log('double click');
+    this.clearDrag();
+    this._input.value = this.initial;
+    this.updateToInputValue();
+  }
+  
+  handleFocus(evt) {
+    // console.log('focus on');
+    this._container.classList.add('focus-active');
+  }
+  
+  handleBlur(evt) {
+    // console.log('focus off');
+    this._container.classList.remove('focus-active');
+  }
+  
+  // dragging
+  startDrag(yPosition) {
+    this._dragStartPosition = yPosition;
+    this._prevValue = parseFloat(this._input.value);
+    
+    this._input.focus();
+    document.body.classList.add('knob-input__drag-active');
+    this._container.classList.add('drag-active');
+  }
+  
+  updateDrag(yPosition) {
+    var diff = yPosition - this._dragStartPosition;
+    this.updateFromDrag(diff, this.dragResistance);
+    this._input.dispatchEvent(new InputEvent('change'));
+  }
+  
+  finalizeDrag(yPosition) {
+    var diff = yPosition - this._dragStartPosition;
+    this.updateFromDrag(diff, this.dragResistance);
+    this.clearDrag();
+    this._input.dispatchEvent(new InputEvent('change'));
+  }
+  
+  clearDrag() {
+    document.body.classList.remove('knob-input__drag-active');
+    this._container.classList.remove('drag-active');
+    this._activeDrag = false;
+    this._input.dispatchEvent(new InputEvent('change'));
+    // clean up event listeners
+    document.body.removeEventListener('mousemove', this._handlers.mouseMove);
+    document.body.removeEventListener('mouseup', this._handlers.mouseUp);
+    document.body.removeEventListener('touchmove', this._handlers.touchMove);
+    document.body.removeEventListener('touchend', this._handlers.touchEnd);
+    document.body.removeEventListener('touchcancel', this._handlers.touchCancel);
+  }
+  
+  updateToInputValue() {
+    var object_id = this._input.id
+    var normVal = this.normalizeValue(parseFloat(this._input.value));
+    this.updateVisuals(normVal);
+    var xhttp = new XMLHttpRequest();
+    xhttp.open("GET", "/send_value?" + object_id + "=" + normVal, true);
+    xhttp.send();
+  }
+  
+  updateFromDrag(dragAmount, resistance) {
+    var newVal = this.clampValue(this._prevValue - (dragAmount/resistance));
+    this._input.value = newVal;
+    this.updateVisuals(this.normalizeValue(newVal));
+  }
+  
+  // utils
+  clampValue(val) {
+    var min = parseFloat(this._input.min);
+    var max = parseFloat(this._input.max);
+    return Math.min(Math.max(val, min), max);
+  }
+  
+  normalizeValue(val) {
+    var min = parseFloat(this._input.min);
+    var max = parseFloat(this._input.max);
+    return (val-min)/(max-min);
+  }
+
+  findActiveTouch(touchList) {
+    var i, len, touch;
+    for (i=0, len=touchList.length; i<len; i++)
+      if (this._activeDrag === touchList.item(i).identifier)
+        return touchList.item(i);
+    return null;
+  }
+  
+  // public passthrough methods
+  addEventListener() { this._input.addEventListener.apply(this._input, arguments); }
+  removeEventListener() { this._input.removeEventListener.apply(this._input, arguments); }
+  focus() { this._input.focus.apply(this._input, arguments); }
+  blur() { this._input.blur.apply(this._input, arguments); }
+  
+  // getters/setters
+  get value() {
+    return parseFloat(this._input.value);
+  }
+  set value(val) {
+    this._input.value = val;
+    this.updateToInputValue();
+    this._input.dispatchEvent(new Event('change'));
+  }
+}
+
+// Utils
+
+function getSupportedPropertyName(properties) {
+  for (var i = 0; i < properties.length; i++)
+    if (typeof document.body.style[properties[i]] !== 'undefined')
+      return properties[i];
+  return null;
+}
+
+function getTransformProperty() {
+  return getSupportedPropertyName([
+    'transform', 'msTransform', 'webkitTransform', 'mozTransform', 'oTransform'
+  ]);
+}
+
+function debounce(func, wait, immediate) {
+	var timeout;
+	return function() {
+		var context = this, args = arguments;
+		var later = function() {
+			timeout = null;
+			if (!immediate) func.apply(context, args);
+		};
+		var callNow = immediate && !timeout;
+		clearTimeout(timeout);
+		timeout = setTimeout(later, wait);
+		if (callNow) func.apply(context, args);
+	};
+};
+
+// Demo Setup - Knobs
+
+var transformProp = getTransformProperty();
+
+var MIDIKnobStartPositions = [];
+var MIDIKnobs = [...document.querySelectorAll('.fl-studio-MIDI_knob.MIDI-knob')];
+var MIDIKnobs = MIDIKnobs.map((el, idx) => new KnobInput(el, {
+  visualContext: function() {
+    this.indicatorRing = this.element.querySelector('.indicator-ring');
+    var ringStyle = getComputedStyle(this.element.querySelector('.indicator-ring-bg'));
+    this.r = parseFloat(ringStyle.r) - (parseFloat(ringStyle.strokeWidth) / 2);
+    this.indicatorDot = this.element.querySelector('.indicator-dot');
+    this.indicatorDot.style[`${transformProp}Origin`] = '20px 20px';
+  },
+  updateVisuals: function(norm) {
+    var theta = Math.PI*2*norm + 0.5*Math.PI;
+    var endX = this.r*Math.cos(theta) + 20;
+    var endY = this.r*Math.sin(theta) + 20;
+    // using 2 arcs rather than flags since one arc collapses if it gets near 360deg
+    this.indicatorRing.setAttribute('d',`M20,20l0,${this.r}${norm> 0.5?`A${this.r},${this.r},0,0,1,20,${20-this.r}`:''}A-${this.r},${this.r},0,0,1,${endX},${endY}Z`);
+    this.indicatorDot.style[transformProp] = `rotate(${360*norm}deg)`;
+  },
+  min: 0,
+  max: 127,
+  initial: MIDIKnobStartPositions[idx],
+}));
+</script>
+</body>
+</html>
