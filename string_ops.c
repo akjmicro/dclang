@@ -73,10 +73,8 @@ void stringfunc()
     char chbuf[5];
     int stat;
     DCLANG_UINT chr_cnt = 0;
-    DCLANG_UINT bufsize = 32;
-    char *scratch = (char *) malloc(sizeof(char) * bufsize);
-    // ZERO OUT buffer:
-    memset(scratch, 0, bufsize);
+    DCLANG_UINT bufsize = 2048;
+    char *scratch = (char *) calloc(bufsize, 1);
     // get the next character, and start the process for real:
     if ((ch = fgetc(ifp)) == EOF) exit(0);
     while (! strchr("\"", ch))
@@ -149,11 +147,9 @@ void stringfunc()
             bufsize *= 2;
             // Alpine Linux (musl) seems to not like `realloc`, causing crashes.
             // So, the solution here is a homemade `realloc`!
-            char *new_scratch = (char *) malloc(sizeof(char) * bufsize);
+            char *new_scratch = (char *) calloc(bufsize, 1);
             if (new_scratch != NULL) {
-                // ZERO OUT buffer:
-                memset(new_scratch, 0, bufsize);
-                memcpy(new_scratch, scratch, bufsize);
+                memcpy(new_scratch, scratch, strlen(scratch));
                 free(scratch);
                 scratch = new_scratch;
             } else {
@@ -164,9 +160,13 @@ void stringfunc()
         strcat(scratch, chbuf);
         if ((ch = fgetc(ifp)) == EOF) exit(0);
     }
+    // copy the scratch buf to the final location
+    char *final = calloc(chr_cnt + 1, 1);
+    memcpy(final, scratch, chr_cnt);
+    free(scratch);
     // register the string with MIN_STR and MAX_STR
-    DCLANG_PTR string_dest_ptr = (DCLANG_PTR) scratch;
-    DCLANG_PTR buflen = (DCLANG_PTR) strlen(scratch);
+    DCLANG_PTR string_dest_ptr = (DCLANG_PTR) final;
+    DCLANG_PTR buflen = (DCLANG_PTR) chr_cnt;
     if (string_dest_ptr < MIN_STR || MIN_STR == 0)
     {
         MIN_STR = string_dest_ptr;
@@ -215,7 +215,7 @@ void mkbuffunc()
         printf("'mkbuf' needs <size-as-integer> on the stack\n");
     }
     DCLANG_PTR size = (DCLANG_PTR) dclang_pop();
-    char *buf = (char *) malloc(size);
+    char *buf = (char *) calloc(size, 1);
     memset(buf, 0, size);
     int advance = strlen(buf);
     DCLANG_PTR bufaddr = (DCLANG_PTR) buf;
@@ -319,7 +319,7 @@ void tostrfunc()
     }
     DCLANG_FLT var = dclang_pop();
     int bufsize = snprintf( NULL, 0, "%g", var);
-    char *str = malloc(bufsize + 1);
+    char *str = calloc(bufsize + 1, 1);
     snprintf(str, bufsize + 1, "%g", var);
     DCLANG_PTR string_PTR_addr = (DCLANG_PTR) str;
     if (string_PTR_addr < MIN_STR || MIN_STR == 0)
@@ -589,7 +589,7 @@ void tolowerfunc()
     }
     char *mystr = (char *) string_PTR_addr;
     DCLANG_PTR buflen = (DCLANG_PTR) strlen(mystr);
-    char *buf = (char *) malloc(buflen);
+    char *buf = (char *) calloc(buflen, 1);
     DCLANG_PTR string_dest_PTR = (DCLANG_PTR) buf;
     int i = 0;
     int c = 0;
@@ -624,7 +624,7 @@ void toupperfunc()
     }
     char *mystr = (char *) string_PTR_addr;
     DCLANG_PTR buflen = (DCLANG_PTR) strlen(mystr);
-    char *buf = (char *) malloc(buflen);
+    char *buf = (char *) calloc(buflen, 1);
     DCLANG_PTR string_dest_PTR = (DCLANG_PTR) buf;
     int i = 0;
     int c = 0;

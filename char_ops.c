@@ -6,8 +6,8 @@ void isalnumfunc()
         printf("isalnum -- stack underflow! ");
         return;
     }
-    DCLANG_PTR char_ptr = (DCLANG_PTR) dclang_pop();
-    if (isalnum(char_ptr)) {
+    char *char_ptr = (char *)(DCLANG_PTR) dclang_pop();
+    if (isalnum(char_ptr[0])) {
         push((DCLANG_INT) -1);
     } else {
         push((DCLANG_INT) 0);
@@ -21,8 +21,8 @@ void isalphafunc()
         printf("isalpha -- stack underflow! ");
         return;
     }
-    DCLANG_PTR char_ptr = (DCLANG_PTR) dclang_pop();
-    if (isalpha(char_ptr)) {
+    char *char_ptr = (char *)(DCLANG_PTR) dclang_pop();
+    if (isalpha(char_ptr[0])) {
         push((DCLANG_INT) -1);
     } else {
         push((DCLANG_INT) 0);
@@ -36,8 +36,8 @@ void iscntrlfunc()
         printf("iscntrl -- stack underflow! ");
         return;
     }
-    DCLANG_PTR char_ptr = (DCLANG_PTR) dclang_pop();
-    if (iscntrl(char_ptr)) {
+    char *char_ptr = (char *)(DCLANG_PTR) dclang_pop();
+    if (iscntrl(char_ptr[0])) {
         push((DCLANG_INT) -1);
     } else {
         push((DCLANG_INT) 0);
@@ -51,8 +51,8 @@ void isdigitfunc()
         printf("isdigit -- stack underflow! ");
         return;
     }
-    DCLANG_PTR char_ptr = (DCLANG_PTR) dclang_pop();
-    if (isdigit(char_ptr)) {
+    char *char_ptr = (char *)(DCLANG_PTR) dclang_pop();
+    if (isdigit(char_ptr[0])) {
         push((DCLANG_INT) -1);
     } else {
         push((DCLANG_INT) 0);
@@ -66,8 +66,8 @@ void isgraphfunc()
         printf("isgraph -- stack underflow! ");
         return;
     }
-    DCLANG_PTR char_ptr = (DCLANG_PTR) dclang_pop();
-    if (isgraph(char_ptr)) {
+    char *char_ptr = (char *)(DCLANG_PTR) dclang_pop();
+    if (isgraph(char_ptr[0])) {
         push((DCLANG_INT) -1);
     } else {
         push((DCLANG_INT) 0);
@@ -81,8 +81,8 @@ void islowerfunc()
         printf("islower -- stack underflow! ");
         return;
     }
-    DCLANG_PTR char_ptr = (DCLANG_PTR) dclang_pop();
-    if (islower(char_ptr)) {
+    char *char_ptr = (char *)(DCLANG_PTR) dclang_pop();
+    if (islower(char_ptr[0])) {
         push((DCLANG_INT) -1);
     } else {
         push((DCLANG_INT) 0);
@@ -96,8 +96,8 @@ void isprintfunc()
         printf("isprint -- stack underflow! ");
         return;
     }
-    DCLANG_PTR char_ptr = (DCLANG_PTR) dclang_pop();
-    if (isprint(char_ptr)) {
+    char *char_ptr = (char *)(DCLANG_PTR) dclang_pop();
+    if (isprint(char_ptr[0])) {
         push((DCLANG_INT) -1);
     } else {
         push((DCLANG_INT) 0);
@@ -111,8 +111,8 @@ void ispunctfunc()
         printf("ispunct -- stack underflow! ");
         return;
     }
-    DCLANG_PTR char_ptr = (DCLANG_PTR) dclang_pop();
-    if (ispunct(char_ptr)) {
+    char *char_ptr = (char *)(DCLANG_PTR) dclang_pop();
+    if (ispunct(char_ptr[0])) {
         push((DCLANG_INT) -1);
     } else {
         push((DCLANG_INT) 0);
@@ -126,8 +126,8 @@ void isspacefunc()
         printf("isspace -- stack underflow! ");
         return;
     }
-    DCLANG_PTR char_ptr = (DCLANG_PTR) dclang_pop();
-    if (isspace(char_ptr)) {
+    char *char_ptr = (char *)(DCLANG_PTR) dclang_pop();
+    if (isspace(char_ptr[0])) {
         push((DCLANG_INT) -1);
     } else {
         push((DCLANG_INT) 0);
@@ -141,8 +141,8 @@ void isupperfunc()
         printf("isupper -- stack underflow! ");
         return;
     }
-    DCLANG_PTR char_ptr = (DCLANG_PTR) dclang_pop();
-    if (isupper(char_ptr)) {
+    char *char_ptr = (char *)(DCLANG_PTR) dclang_pop();
+    if (isupper(char_ptr[0])) {
         push((DCLANG_INT) -1);
     } else {
         push((DCLANG_INT) 0);
@@ -156,8 +156,8 @@ void isxdigitfunc()
         printf("isxdigit -- stack underflow! ");
         return;
     }
-    DCLANG_PTR char_ptr = (DCLANG_PTR) dclang_pop();
-    if (isxdigit(char_ptr)) {
+    char *char_ptr = (char *)(DCLANG_PTR) dclang_pop();
+    if (isxdigit(char_ptr[0])) {
         push((DCLANG_INT) -1);
     } else {
         push((DCLANG_INT) 0);
