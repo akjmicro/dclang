@@ -276,7 +276,13 @@ void ordfunc()
         printf("ord -- stack underflow! ");
         return;
     }
-    char *string_loc = (char *)(DCLANG_PTR) dclang_pop();
+    DCLANG_PTR string_PTR_addr = (DCLANG_PTR) dclang_pop();
+    if (string_PTR_addr < MIN_STR || string_PTR_addr > MAX_STR)
+    {
+        perror("ord -- String address out-of-range.");
+        return;
+    }
+    char *string_loc = (char *) string_PTR_addr;
     push((int) *string_loc);
 }
 
@@ -288,8 +294,19 @@ void tohexfunc()
         return;
     }
     DCLANG_INT val = (DCLANG_INT) dclang_pop();
-    fprintf(ofp, "0x%.2lx", val);
-    fflush(ofp);
+    int bufsize = snprintf(NULL, 0, "0x%.2lx", val);
+    char *str = calloc(bufsize + 1, 1);
+    snprintf(str, bufsize + 1, "0x%.2lx", val);
+    DCLANG_PTR string_PTR_addr = (DCLANG_PTR) str;
+    if (string_PTR_addr < MIN_STR || MIN_STR == 0)
+    {
+        MIN_STR = string_PTR_addr;
+    }
+    if (string_PTR_addr + bufsize + 1 > MAX_STR || MAX_STR == 0)
+    {
+        MAX_STR = string_PTR_addr + bufsize + 1;
+    }
+    push((DCLANG_PTR) string_PTR_addr);
 }
 
 void tonumfunc()
@@ -318,7 +335,7 @@ void tostrfunc()
         return;
     }
     DCLANG_FLT var = dclang_pop();
-    int bufsize = snprintf( NULL, 0, "%g", var);
+    int bufsize = snprintf(NULL, 0, "%g", var);
     char *str = calloc(bufsize + 1, 1);
     snprintf(str, bufsize + 1, "%g", var);
     DCLANG_PTR string_PTR_addr = (DCLANG_PTR) str;

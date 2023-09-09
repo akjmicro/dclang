@@ -1,98 +1,98 @@
 : test_isalnum
-  "k" ord isalnum     assert
-  "J" ord isalnum     assert
-  "1" ord isalnum     assert
-  "9" ord isalnum     assert
-  ";" ord isalnum not assert
+  "k" isalnum     assert
+  "J" isalnum     assert
+  "1" isalnum     assert
+  "9" isalnum     assert
+  ";" isalnum not assert
 ;
 
 : test_isalpha
-  "k" ord isalpha     assert
-  "9" ord isalpha not assert
-  ";" ord isalpha not assert
+  "k" isalpha     assert
+  "9" isalpha not assert
+  ";" isalpha not assert
 ;
 
 : test_iscntrl
-  "k" ord iscntrl not assert
-  20 iscntrl     assert
+  "k"       iscntrl not assert
+  "\u0014"  iscntrl     assert
 ;
 
 : test_isdigit
-  "k" ord isdigit not assert
-  "J" ord isdigit not assert
-  "!" ord isdigit not assert
-  "1" ord isdigit     assert
-  "7" ord isdigit     assert
+  "k" isdigit not assert
+  "J" isdigit not assert
+  "!" isdigit not assert
+  "1" isdigit     assert
+  "7" isdigit     assert
 ;
 
 : test_isgraph
-  "\n" ord isgraph not assert
-  " "  ord isgraph not assert
-  "!"  ord isgraph     assert
-  "1"  ord isgraph     assert
-  "7"  ord isgraph     assert
+  "\n" isgraph not assert
+  " "  isgraph not assert
+  "!"  isgraph     assert
+  "1"  isgraph     assert
+  "7"  isgraph     assert
 ;
 
 : test_islower
-  "k" ord islower     assert
-  "K" ord islower not assert
-  "a" ord islower     assert
-  "A" ord islower not assert
-  "7" ord islower not assert
+  "k" islower     assert
+  "K" islower not assert
+  "a" islower     assert
+  "A" islower not assert
+  "7" islower not assert
 ;
 
 : test_isprint
-  "k"  ord isprint     assert
-  "\n" ord isprint not assert
-  3        isprint not assert
+  "k"      isprint     assert
+  "\n"     isprint not assert
+  "\u0003" isprint not assert
 ;
 
 : test_ispunct
-  "!" ord ispunct     assert
-  ";" ord ispunct     assert
-  "0" ord ispunct not assert
-  "X" ord ispunct not assert
+  "!" ispunct     assert
+  ";" ispunct     assert
+  "0" ispunct not assert
+  "X" ispunct not assert
 ;
 
 : test_isspace
-  " "  ord isspace     assert
-  "\n" ord isspace     assert
-  "\t" ord isspace     assert
-  " "  ord isspace     assert
-  "5"  ord isspace not assert
-  "F"  ord isspace not assert
+  " "  isspace     assert
+  "\n" isspace     assert
+  "\t" isspace     assert
+  " "  isspace     assert
+  "5"  isspace not assert
+  "F"  isspace not assert
 ;
 
 : test_isupper
-  "k" ord isupper not assert
-  "K" ord isupper     assert
-  "a" ord isupper not assert
-  "A" ord isupper     assert
-  "7" ord isupper not assert
+  "k" isupper not assert
+  "K" isupper     assert
+  "a" isupper not assert
+  "A" isupper     assert
+  "7" isupper not assert
 ;
 
 : test_isxdigit
-  "0" ord isxdigit     assert
-  "5" ord isxdigit     assert
-  "9" ord isxdigit     assert
-  "A" ord isxdigit     assert
-  "B" ord isxdigit     assert
-  "C" ord isxdigit     assert
-  "D" ord isxdigit     assert
-  "E" ord isxdigit     assert
-  "F" ord isxdigit     assert
-  "a" ord isxdigit     assert
-  "b" ord isxdigit     assert
-  "c" ord isxdigit     assert
-  "d" ord isxdigit     assert
-  "e" ord isxdigit     assert
-  "f" ord isxdigit     assert
+  "0" isxdigit     assert
+  "5" isxdigit     assert
+  "9" isxdigit     assert
+  "A" isxdigit     assert
+  "B" isxdigit     assert
+  "C" isxdigit     assert
+  "D" isxdigit     assert
+  "E" isxdigit     assert
+  "F" isxdigit     assert
+  "a" isxdigit     assert
+  "b" isxdigit     assert
+  "c" isxdigit     assert
+  "d" isxdigit     assert
+  "e" isxdigit     assert
+  "f" isxdigit     assert
   # exceptions
-  "G"  ord isxdigit not assert
-  "g"  ord isxdigit not assert
-  "!"  ord isxdigit not assert
-  ":"  ord isxdigit not assert
-  "\n" ord isxdigit not assert
+  "G"  isxdigit not assert
+  "g"  isxdigit not assert
+  "!"  isxdigit not assert
+  ":"  isxdigit not assert
+  "\n" isxdigit not assert
 ;
 
 test_isalnum
