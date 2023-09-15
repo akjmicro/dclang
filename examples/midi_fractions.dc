@@ -7,8 +7,15 @@
 #     tempo, gate, base, div, mode, transp
 # (they should all be integers)
 #
+# Find which midi device you want to write to by running the midi module
+# from the commandline:
+#   dclang lib/midi.dc
+#
+# You'll see the integer of the device at the front. Use it for
+# DCLANG_MIDI_DEVNUM in the next command.
+#
 # Then, in another shell, open this script, your command should be:
-# dclang midi_from_redis.dc
+#   DCLANG_MIDI_DEVNUM=<some#> dclang midi_fractions.dc
 
 "math.dc" import
 "midi.dc" import
@@ -67,7 +74,7 @@ create scale 0 0- ,                      4_3 O- , 3_2 O- ,
              0 O+ , 28_27 O+  , 7_6 O+ , 4_3 O+ , 3_2 O+ ,
 #########################################
 # 17-edo diatonic, transposed up 1      #
-# change edo assignment to 17 (line 18) #
+# change edo assignment to 17 (line 25) #
 #########################################
 #create scale -6 , -3 , 1 , 4 , 8 , 11 , 14 , 18 , 21 , 25 , 28 ,
 
