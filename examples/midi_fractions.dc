@@ -15,9 +15,62 @@
 "redis_midi.dc" import
 
 # our EDO var
-17 midi_edo !
+16384 midi_edo !   # change this to your favorite EDO when not working
+                   # in 'virtual JI'
 
-create scale -6 , -3 , 1 , 4 , 8 , 11 , 14 , 18 , 21 , 25 , 28 ,
+: generate_interval
+  / log2 midi_edo @ * round
+;
+
+: O- midi_edo @ - ;
+: O+ midi_edo @ + ;
+
+64 63  generate_interval const 64_63
+28 27  generate_interval const 28_27
+21 20  generate_interval const 21_20
+ 9  8  generate_interval const  9_8
+ 7  6  generate_interval const  7_6
+ 5  4  generate_interval const  5_4
+ 4  3  generate_interval const  4_3
+11  8  generate_interval const 11_8
+ 3  2  generate_interval const  3_2
+14  9  generate_interval const 14_9
+ 8  5  generate_interval const  8_5
+ 5  3  generate_interval const  5_3
+16  9  generate_interval const 16_9
+ 7  4  generate_interval const  7_4
+
+
+# UNCOMMENT ONLY ONE OF THESE `create scale ...` sections.
+##########
+# otonal #
+##########
+#create scale 0 O- O- ,
+#             0 O- ,                              3_2 O- ,
+#             0    ,          5_4    ,            3_2    , 7_4 ,
+#             0 O+ , 9_8 O+ , 5_4 O+ , 11_8 O+ , 3_2 O+ ,
+##############
+# pentatonic #
+##############
+#create scale 0 O- , 9_8 O- , 4_3 O- , 3_2 O- , 16_9 O- ,
+#             0    , 9_8    , 4_3    , 3_2    , 16_9    ,
+#             0 O+ ,
+###########
+# 4:6:7:9 #
+###########
+#create scale 0 O- , 3_2 O- , 7_4 O- , 0 , 9_8 ,
+######################
+# Archytas' diatonic #
+######################
+create scale 0 0- ,                      4_3 O- , 3_2 O- ,
+             0    , 28_27     , 7_6    , 4_3    , 3_2    , 14_9 , 7_4 ,
+             0 O+ , 28_27 O+  , 7_6 O+ , 4_3 O+ , 3_2 O+ ,
+#########################################
+# 17-edo diatonic, transposed up 1      #
+# change edo assignment to 17 (line 18) #
+#########################################
+#create scale -6 , -3 , 1 , 4 , 8 , 11 , 14 , 18 , 21 , 25 , 28 ,
+
 var dummy
 var scale_size
 dummy scale -
