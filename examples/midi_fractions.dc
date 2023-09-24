@@ -22,8 +22,7 @@
 "redis_midi.dc" import
 
 # our EDO var
-16384 midi_edo !   # change this to your favorite EDO when not working
-                   # in 'virtual JI'
+17 midi_edo !   # change this to your favorite EDO; 'virtual JI' can be 16384
 
 : generate_interval
   / log2 midi_edo @ * round
@@ -35,8 +34,11 @@
 64 63  generate_interval const 64_63
 28 27  generate_interval const 28_27
 21 20  generate_interval const 21_20
+10  9  generate_interval const 10_9
+11 10  generate_interval const 11_10
  9  8  generate_interval const  9_8
  7  6  generate_interval const  7_6
+ 6  5  generate_interval const  6_5
  5  4  generate_interval const  5_4
  4  3  generate_interval const  4_3
 11  8  generate_interval const 11_8
@@ -44,9 +46,11 @@
 14  9  generate_interval const 14_9
  8  5  generate_interval const  8_5
  5  3  generate_interval const  5_3
-16  9  generate_interval const 16_9
  7  4  generate_interval const  7_4
-
+16  9  generate_interval const 16_9
+ 9  5  generate_interval const  9_5
+11  6  generate_interval const 11_6
+15  8  generate_interval const 15_8
 
 # UNCOMMENT ONLY ONE OF THESE `create scale ...` sections.
 ##########
@@ -69,21 +73,40 @@
 ######################
 # Archytas' diatonic #
 ######################
-create scale 0 0- ,                      4_3 O- , 3_2 O- ,
-             0    , 28_27     , 7_6    , 4_3    , 3_2    , 14_9 , 7_4 ,
-             0 O+ , 28_27 O+  , 7_6 O+ , 4_3 O+ , 3_2 O+ ,
+#create scale 0 0- ,                      4_3 O- , 3_2 O- ,
+#             0    , 28_27     , 7_6    , 4_3    , 3_2    , 14_9 , 7_4 ,
+#             0 O+ , 28_27 O+  , 7_6 O+ , 4_3 O+ , 3_2 O+ ,
 #########################################
-# 17-edo diatonic, transposed up 1      #
+# 17-edo diatonic dorian                #
 # change edo assignment to 17 (line 25) #
 #########################################
-#create scale -6 , -3 , 1 , 4 , 8 , 11 , 14 , 18 , 21 , 25 , 28 ,
-
+create scale  0 O- ,                7 O- , 10 O- ,
+              0    ,  3    , 4    , 7    , 10    , 13    , 14    ,
+              0 O+ ,  3 O+ , 4 O+ , 7 O+ , 10 O+ , 13 O+ , 14 O+ ,
+              0 O+ O+ ,
+####################
+# Equable diatonic #
+####################
+#create scale 0 O-    ,                     4_3 O- , 3_2 O- ,
+#             0       , 10_9    , 11_9    , 4_3    , 3_2    , 5_3    , 11_6    ,
+#             0 O+    , 10_9 O+ , 11_9 O+ , 4_3 O+ , 3_2 O+ , 5_3 O+ , 11_6 O+ ,
+#             0 O+ O+ ,
 var dummy
 var scale_size
 dummy scale -
 scale_size !
+create lengths 3 , 5 , 7 , 11 ,
+var dummy2
+var lengths_size
+dummy2 lengths -
+lengths_size !
 
 var gen_struct 3 allot
+
+: _get_next_length
+  rand lengths_size @ * floor
+  lengths + @
+;
 
 : _get_next_note
   # update the dynamic variables based on redis
@@ -103,18 +126,22 @@ var gen_struct 3 allot
 
 : _main
   block_sigint
-  ###
-    100
-      _get_next_note
-      dup svpush
-        0
-  edo_degree_to_midi
-  ###
-    redis_midi.get_on_gate
+  # note on
+    _get_next_length dup svpush
+      100
+        _get_next_note
+        dup svpush
+          0
+    edo_degree_to_midi
+      redis_midi.get_on_gate
+    *
   sleep
+  # note off
         0 svpop 0
   edo_degree_to_midi
     redis_midi.get_off_gate
+      svpop
+    *
   sleep
   unblock_sigint
   _main
