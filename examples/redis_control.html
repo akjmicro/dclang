@@ -44,10 +44,10 @@
 <body>
 
 <center>
-<h1>Digit Sum Control</h1>
+<h1>Redis Param Control</h1>
 
 <div class="slidecontainer">
-  <input type="range" min="2" max="4" step="1" value="2" class="slider"
+  <input type="range" min="2" max="32" step="1" value="8" class="slider"
          id="base" oninput="update(this)" onpageshow="update(this)">
   <p>Numeric base: <span id="base_val">2</span></p>
 </div>
@@ -65,9 +65,21 @@
 </div>
 
 <div class="slidecontainer">
-  <input type="range" min="-16" max="16" step="1" value="-8" class="slider"
+  <input type="range" min="1" max="128" step="1" value="47" class="slider"
+         id="div" oninput="update(this)">
+  <p>Divide (denominator): <span id="div_val">47</span></p>
+</div>
+
+<div class="slidecontainer">
+  <input type="range" min="1.0" max="2.0" step="0.001" value="1.727" class="slider"
+         id="chaos" oninput="update(this)">
+  <p>Chaos: <span id="chaos_val">1.727</span></p>
+</div>
+
+<div class="slidecontainer">
+  <input type="range" min="-17" max="17" step="1" value="0" class="slider"
          id="mode" oninput="update(this)">
-  <p>Mode offset: <span id="mode_val">-8</span></p>
+  <p>Mode offset: <span id="mode_val">0</span></p>
 </div>
 
 <div class="slidecontainer">

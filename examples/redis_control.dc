@@ -3,17 +3,19 @@
 
 redis_connect
 
-"digits_widgets.html" "r" fopen dup
+"redis_control.html" "r" fopen dup
 freadall drop const SLIDER_HTML fclose
 
 # string constants
-"base" const :base
-"mul"  const :mul
-"wrap" const :wrap
-"mode" const :mode
-"gate" const :gate
+"base"  const :base
+"mul"   const :mul
+"wrap"  const :wrap
+"div"   const :div
+"chaos" const :chaos
+"mode"  const :mode
+"gate"  const :gate
 "<html><body>OK<br>\n</body></html>\n" const :OK
-create keys_to_check :base , :mul , :wrap , :mode , :gate ,
+create keys_to_check :base , :mul , :wrap , :div , :chaos , :mode , :gate ,
 var dummy
 dummy keys_to_check - const LEN_KEYS
 
