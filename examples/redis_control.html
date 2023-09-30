@@ -83,6 +83,19 @@
 </div>
 
 <div class="slidecontainer">
+  <input type="range" min="1" max="64" step="1" value="16" class="slider"
+         id="euclid_numerator" oninput="update(this)">
+  <p>Euclid numerator: <span id="euclid_numerator_val">16</span></p>
+</div>
+
+<div class="slidecontainer">
+  <input type="range" min="1" max="64" step="1" value="6" class="slider"
+         id="euclid_denominator" oninput="update(this)">
+  <p>Euclid denominator: <span id="euclid_denominator_val">6</span></p>
+</div>
+
+
+<div class="slidecontainer">
   <input type="range" min="1" max="99" step="1" value="10" class="slider"
          id="gate" oninput="update(this)">
   <p>MIDI gate length: <span id="gate_val">10</span></p>

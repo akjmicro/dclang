@@ -1,0 +1,42 @@
+"redis_midi.dc" import
+
+var cur_euclid_numerator
+var cur_euclid_denominator
+var cur_euclid_count
+1 cur_euclid_count !
+var prev_euclid_int
+
+11 cur_euclid_numerator !
+3 cur_euclid_denominator !
+
+: euclidean_rhythm
+    redis_midi.get_euclid_numerator
+      redis_midi.get_euclid_denominator
+    /
+      cur_euclid_count @
+    *
+    round
+      prev_euclid_int @
+          2dup
+        -
+      svpush
+    drop
+  prev_euclid_int !
+  cur_euclid_count @ 1 + cur_euclid_count !
+    svpop
+      dup
+      1 <
+        over
+        redis_midi.get_euclid_numerator >
+      or
+      if
+        drop
+        euclidean_rhythm
+      endif
+;
+
+: euclidean_test_loop
+  euclidean_rhythm .
+  0.5 sleep
+  euclidean_test_loop
+;

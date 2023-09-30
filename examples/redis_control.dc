@@ -14,8 +14,14 @@ freadall drop const SLIDER_HTML fclose
 "chaos" const :chaos
 "mode"  const :mode
 "gate"  const :gate
+# Euclidean rhythm
+"euclid_numerator"   const :euclid_numerator
+"euclid_denominator" const :euclid_denominator
+# OK status
 "<html><body>OK<br>\n</body></html>\n" const :OK
-create keys_to_check :base , :mul , :wrap , :div , :chaos , :mode , :gate ,
+# setup vars
+create keys_to_check :base , :mul , :wrap , :div , :chaos , :mode ,
+                     :euclid_numerator , :euclid_denominator , :gate ,
 var dummy
 dummy keys_to_check - const LEN_KEYS
 

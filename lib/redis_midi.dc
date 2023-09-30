@@ -21,6 +21,9 @@ var remainder 1 remainder !
 "mul" const :MUL
 # for chaos-based randomness:
 "chaos" const :CHAOS
+# for euclidean rhythms
+"euclid_numerator"   const :EUCLID_NUMERATOR
+"euclid_denominator" const :EUCLID_DENOMINATOR
 
 ###########################################
 # private words for dealing with duration #
@@ -92,5 +95,15 @@ var remainder 1 remainder !
 
 : redis_midi.get_wrap
   :WRAP redis_get tonum round
+  dup 1 < if drop 1 endif
+;
+
+: redis_midi.get_euclid_numerator
+  :EUCLID_NUMERATOR redis_get tonum
+  dup 1 < if drop 1 endif
+;
+
+: redis_midi.get_euclid_denominator
+  :EUCLID_DENOMINATOR redis_get tonum
   dup 1 < if drop 1 endif
 ;
