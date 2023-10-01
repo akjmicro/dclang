@@ -6,9 +6,6 @@ var cur_euclid_count
 1 cur_euclid_count !
 var prev_euclid_int
 
-11 cur_euclid_numerator !
-3 cur_euclid_denominator !
-
 : euclidean_rhythm
     redis_midi.get_euclid_numerator
       redis_midi.get_euclid_denominator
