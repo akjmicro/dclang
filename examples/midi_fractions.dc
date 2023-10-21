@@ -15,18 +15,25 @@
 # DCLANG_MIDI_DEVNUM in the next command.
 #
 # Then, in another shell, open this script, your command should be:
-#   DCLANG_MIDI_DEVNUM=<some#> dclang midi_fractions.dc
+#   DCLANG_MIDI_DEVNUM=<some#> EDO=<some#> scale=<scale_choice> rhythm=<rhythm_choice> dclang midi_fractions.dc
+#
+# The various values for these environment variables:
+#
+# EDO can be 16384 for a 'virtual Just Intonation' sound. Otherwise, choose a lower-valued EDO of interest.
+# scale can be one of the scales defined below after each 'create' statement.
+# rhythm can be one of 'primes', 'simple', or 'euclidean' (euclidean rhtyhm would be controlled via redis varaiables)
+#                                                         (The variables are 'euclid_numerator' and 'euclid_denominator')
 
 "math.dc" import
 "midi.dc" import
 "euclidean_rhythm.dc" import
 
-# our EDO var
+# our edo var
 "EDO" envget tonum midi_edo !
-
 # our scale choice
 var scale_choice
 "scale" envget scale_choice !
+# our rhythm-type choice
 var rhythm_choice
 "rhythm" envget rhythm_choice !
 
