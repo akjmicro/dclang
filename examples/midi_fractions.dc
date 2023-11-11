@@ -154,7 +154,7 @@ _setup_rhythm
 var gen_struct 3 allot
 
 : _get_next_length
-  rhythm_choice @ :euclidean =
+  rhythm_choice @ :euclidean str=
   if
     euclidean_rhythm
   else
