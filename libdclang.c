@@ -12,6 +12,7 @@ Born on 2018-05-05 */
 #include <stdlib.h>
 #include <inttypes.h>
 #include <string.h>
+#include <regex.h>
 #include <unistd.h>
 #include <math.h>
 #include <time.h>
@@ -33,6 +34,7 @@ Born on 2018-05-05 */
 #include "time_ops.c"
 #include "string_ops.c"
 #include "char_ops.c"
+#include "regex_ops.c"
 #include "token.c"
 #include "branch_ops.c"
 #include "user_words.c"

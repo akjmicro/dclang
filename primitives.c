@@ -153,6 +153,10 @@ void add_all_primitives()
     add_primitive("free", "Strings", freefunc);
     add_primitive("mempcpy", "Strings", mempcpyfunc);
     add_primitive("memset", "Strings", memsetfunc);
+    // regex
+    add_primitive("regcomp", "Regex", regcompfunc);
+    add_primitive("regexec", "Regex", regexecfunc);
+    add_primitive("regread", "Regex", regreadfunc);
     // character types
     add_primitive("isalnum", "Character Types", isalnumfunc);
     add_primitive("isalpha", "Character Types", isalphafunc);
