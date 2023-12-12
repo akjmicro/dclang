@@ -1,0 +1,27 @@
+"string.dc" import
+
+var pattern
+"([[:digit:]]+)([[:blank:]]? things)" 1 regcomp   # using 1 for REG_EXTENDED
+pattern !                                         # syntax
+
+var phrase
+"I have 1024 things right here!"
+phrase !
+
+phrase @
+pattern @ over 0 regexec
+  0 regread strslice
+    "1024 things"
+  str= assert
+
+phrase @
+pattern @ over 0 regexec
+  1 regread strslice
+    "1024"
+  str= assert
+
+phrase @
+pattern @ over 0 regexec
+  2 regread strslice
+    " things"
+  str= assert
