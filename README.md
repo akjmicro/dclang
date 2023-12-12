@@ -229,6 +229,7 @@ Implemented thus far:
       `ispunct`, `isspace`, `isupper`, `isxdigit` -- all of these can take the integer output
       from `ord` and return `1` (true) or `0` (false) for determinng the class of a given character.
       (N.B.: If given a string of len > 1, `ord` uses the first character of the string by default.)
+    * regex primitives: `regcomp`, `regexec`, and `regread`
   * Variables/Arrays:
     * Declare a constant with `const`:
         ```
@@ -343,17 +344,6 @@ Implemented thus far:
     ```
 
   * `tcplisten`, `tcpaccept` for server primitives, `tcpconnect` for clients. See the examples directory.
-
-
-TODO:
-
-  * More time functions (e.g. date, calendar stuff, etc.)
-  * More string functions, as needed. We have most of the basic `string.h` C-level functions. What could be implemented
-  would be things like search/replace and `regex`.
-  * The `dsp.dc` lib has a good start! But it is growing still...this is an active
-    area for my interests!
-  * More OS-level integration (directories, permissions, etc.)
-  * Turtle graphics for the kids!?
 
 
 ### Contact
