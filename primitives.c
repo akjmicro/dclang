@@ -109,13 +109,13 @@ void add_all_primitives()
     add_primitive("h@", "Hashes", hashgetfunc);
     add_primitive("hkeys", "Hashes", hashkeysfunc);
     // tree storage
-    add_primitive("treemake", "Trees", treemakefunc);
-    add_primitive("tree!", "Trees", treesetfunc);
-    add_primitive("tree@", "Trees", treegetfunc);
-    add_primitive("treewalk", "Trees", treewalkfunc);
-    add_primitive("treedel", "Trees", treedelfunc);
+    add_primitive("tmake", "Trees", treemakefunc);
+    add_primitive("t!", "Trees", treesetfunc);
+    add_primitive("t@", "Trees", treegetfunc);
+    add_primitive("twalk", "Trees", treewalkfunc);
+    add_primitive("tdelete", "Trees", treedelfunc);
 #ifdef HAS_TREEDESTROY
-    add_primitive("treedestroy", "Trees", treedestroyfunc);
+    add_primitive("tdestroy", "Trees", treedestroyfunc);
 #endif
     // branching/control
     add_primitive("times", "Branching", timesfunc);

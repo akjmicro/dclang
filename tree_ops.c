@@ -33,7 +33,7 @@ void treemakefunc()
     tree_roots_idx += 1;
     if (tree_roots_idx > (NUM_TREE_ROOTS - 1))
     {
-        printf("treemake -- tree root limit reached!\n");
+        printf("tmake -- tree root limit reached!\n");
         printf("You can change the limit when compiling via the NUM_TREE_ROOTS variable\n");
         return;
     }
@@ -52,8 +52,8 @@ void treegetfunc()
 {
     if (data_stack_ptr < 2)
     {
-        printf("tree@ -- stack underflow! Need <keystr> <rootnode_addr> on the stack.\n");
-        printf("You can make a root node via 'treemake', and assign it to a variable ");
+        printf("t@ -- stack underflow! Need <keystr> <rootnode_addr> on the stack.\n");
+        printf("You can make a root node via 'tmake', and assign it to a variable ");
         printf("so it can be referred to later.\n");
         return;
     }
@@ -73,8 +73,8 @@ void treesetfunc()
 {
     if (data_stack_ptr < 3)
     {
-        printf("tree! -- stack underflow! Need <val> <keystr> <rootnode_addr> on the stack.\n");
-        printf("You can make a root node via 'treemake', and assign it to a variable ");
+        printf("t! -- stack underflow! Need <val> <keystr> <rootnode_addr> on the stack.\n");
+        printf("You can make a root node via 'tmake', and assign it to a variable ");
         printf("so it can be referred to later.\n");
         return;
     }
@@ -103,7 +103,7 @@ void print_node(const void *node, const VISIT order, const int depth)
 void treewalkfunc()
 {
     if (data_stack_ptr < 1) {
-        printf("treewalk -- stack underflow! Need <tree_index> on the stack.\n");
+        printf("twalk -- stack underflow! Need <tree_index> on the stack.\n");
         return;
     }
     DCLANG_PTR tree_idx = (DCLANG_PTR) dclang_pop();
@@ -113,7 +113,7 @@ void treewalkfunc()
 void treedelfunc()
 {
     if (data_stack_ptr < 2) {
-        printf("treedel -- stack underflow! Need <key> <tree_index> on the stack.\n");
+        printf("tdelete -- stack underflow! Need <key> <tree_index> on the stack.\n");
         return;
     }
     DCLANG_PTR tree_idx = (DCLANG_PTR) dclang_pop();
@@ -127,7 +127,7 @@ void treedelfunc()
 void treedestroyfunc()
 {
     if (data_stack_ptr < 1) {
-        printf("treedestroy -- stack underflow! Need <tree_index> on the stack.\n");
+        printf("tdestroy -- stack underflow! Need <tree_index> on the stack.\n");
         return;
     }
     DCLANG_PTR tree_idx = (DCLANG_PTR) dclang_pop();

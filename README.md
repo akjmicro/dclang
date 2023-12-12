@@ -296,23 +296,23 @@ Implemented thus far:
     (won't be very noticeable in most use-cases) `O(log n)` access time. Based on the `tsearch` `glibc` functions:
     ```
     var :mytree                  # sets up a variable to store our tree data
-    treemake :mytree !           # make a tree, put it on the variable :mytree that we made
-    "bar" "foo" :mytree @ tree!  # Usage: <value> <key> <which-tree> tree! (tree! sets a value on <key>, on <which-tree>)
-    "foo" :mytree @ tree@        # Usage: <key> <which-tree> tree@         (tree@ gets a value from <key>, on <which-tree>) 
+    tmake :mytree !              # make a tree, put it on the variable :mytree that we made
+    "bar" "foo" :mytree @ t!     # Usage: <value> <key> <which-tree> t! (tree! sets a value on <key>, on <which-tree>)
+    "foo" :mytree @ t@           # Usage: <key> <which-tree> t@         (tree@ gets a value from <key>, on <which-tree>)
     cr print cr                     # Let's print the output!
 
-    bar                          # <-- tree@ output
+    bar                          # <-- t@ output
 
-    cr :mytree @ treewalk        # walk the tree with treewalk
+    cr :mytree @ twalk           # walk the tree with treewalk
 
-    key=foo, value=bar           # <-- treewalk output, not the line break via `cr`
+    key=foo, value=bar           # <-- twalk output, note the line break via `cr`
 
-    "vanilla" "favorite ice cream flavor" :mytree @ tree!
-    :mytree @ treewalk           # walk the tree again; see new values
+    "vanilla" "favorite ice cream flavor" :mytree @ t!
+    :mytree @ twalk              # walk the tree again; see new values
     key=foo, value=bar
     key=favorite ice cream flavor, value=vanilla
-    "foo" :mytree @ treedel                        # delete a key
-    :mytree @ treewalk
+    "foo" :mytree @ tdelete      # delete a key
+    :mytree @ twalk
     key=favorite ice cream flavor, value=vanilla
     ```
   * Timing:
