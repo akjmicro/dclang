@@ -13,7 +13,7 @@ phrase !
 # but the trade-off is use of more vertical real-estate.
 
   phrase @            # 1 thing on the stack, so indent 2 spaces
-    pattern @         # 2 things on the stack, so indent 4 space, etc.
+    pattern @         # 2 things on the stack, so indent 4 spaces, etc.
       over
         0
     regexec           # `regexec` consumed 3 params and leaves 1...
