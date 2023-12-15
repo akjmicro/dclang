@@ -1,27 +1,49 @@
 "string.dc" import
 
 var pattern
-"([[:digit:]]+)([[:blank:]]? things)" 1 regcomp   # using 1 for REG_EXTENDED
-pattern !                                         # syntax
+"([[:digit:]]+)([[:blank:]]? things)" 1 regcomp   # using 1 for REG_EXTENDED syntax
+pattern !
 
 var phrase
 "I have 1024 things right here!"
 phrase !
 
-phrase @
-pattern @ over 0 regexec
-  0 regread strslice
+# Note the use below of the "stack depth formatting pattern" to show stack depth
+# as things are added, operated on, etc., on the stack. It makes things clearer,
+# but the trade-off is use of more vertical real-estate.
+
+  phrase @            # 1 thing on the stack, so indent 2 spaces
+    pattern @         # 2 things on the stack, so indent 4 spaces, etc.
+      over
+        0
+    regexec           # `regexec` consumed 3 params and leaves 1...
+      0
+      regread         # `regread` consumes 2 and leaves 2
+  strslice            # `strslice` consumes 3 -- the initial `phrase @` contents, and `regread` output
     "1024 things"
-  str= assert
+  str=
+assert
 
-phrase @
-pattern @ over 0 regexec
-  1 regread strslice
+  phrase @
+    pattern @
+      over
+        0
+    regexec
+      1
+      regread
+  strslice
     "1024"
-  str= assert
+  str=
+assert
 
-phrase @
-pattern @ over 0 regexec
-  2 regread strslice
+  phrase @
+    pattern @
+      over
+        0
+    regexec
+      2
+      regread
+  strslice
     " things"
-  str= assert
+  str=
+assert
