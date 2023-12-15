@@ -20,76 +20,16 @@ void listmakefunc() {
     push((DCLANG_PTR)list);
 }
 
-
-// Function to set the data of a node in the linked list
-void listsetfunc() {
-    if (data_stack_ptr < 3) {
-        printf("l! -- stack underflow; need <value> <slot> <list> on the stack! ");
-        return;
-    }
-
-    // Pop the list pointer, slot, and value from the stack
-    DCLANG_PTR list_ptr = (DCLANG_PTR)dclang_pop();
-    DCLANG_INT slot = (DCLANG_INT)dclang_pop();
-    DCLANG_FLT value = dclang_pop();
-
-    // Convert pointers to the actual node structure
-    struct Node *list = (struct Node *)list_ptr;
-
-    // Find the Nth node in the linked list
-    struct Node *node = list;
-    for (int i = 0; i < slot + 1; i++) {
-        if (node->next == list) {
-            // Reached the end of the list
-            printf("lset -- slot out of bounds! ");
-            return;
-        }
-        node = node->next;
-    }
-
-    // Set the data of the node
-    node->data = value;
-}
-
-// Function to get the data of a node in the linked list
-void listgetfunc() {
-    if (data_stack_ptr < 2) {
-        printf("l@ -- stack underflow; need <slot> <list> on the stack! ");
-        return;
-    }
-
-    // Pop the list pointer and slot from the stack
-    DCLANG_PTR list_ptr = (DCLANG_PTR)dclang_pop();
-    DCLANG_INT slot = (DCLANG_INT)dclang_pop();
-
-    // Convert pointers to the actual node structure
-    struct Node *list = (struct Node *)list_ptr;
-
-    // Find the Nth node in the linked list
-    struct Node *node = list;
-    for (int i = 0; i < slot + 1; i++) {
-        if (node->next == list) {
-            // Reached the end of the list
-            printf("lget -- slot out of bounds! ");
-            return;
-        }
-        node = node->next;
-    }
-
-    // Push the data of the node onto the stack
-    push((DCLANG_FLT)node->data);
-}
-
 // Function to append a node to the tail of the linked list
 void listpushfunc() {
     if (data_stack_ptr < 2) {
-        printf("lpush -- stack underflow; need <value> <list> on the stack! ");
+        printf("lpush -- stack underflow; need <list> <value> on the stack! ");
         return;
     }
 
-    // Pop the list pointer and value from the stack
-    DCLANG_PTR list_ptr = (DCLANG_PTR)dclang_pop();
+    // Pop args
     DCLANG_FLT value = dclang_pop();
+    DCLANG_PTR list_ptr = (DCLANG_PTR)dclang_pop();
 
     // Convert pointers to the actual node structure
     struct Node *list = (struct Node *)list_ptr;
@@ -111,7 +51,7 @@ void listpopfunc() {
         return;
     }
 
-    // Pop the list pointer from the stack
+    // Pop arg
     DCLANG_PTR list_ptr = (DCLANG_PTR)dclang_pop();
 
     // Convert pointers to the actual node structure
@@ -136,17 +76,77 @@ void listpopfunc() {
     free(tail_node);
 }
 
-// Function to insert a node into a linked list before a specified node
-void listinsertfunc() {
+// Function to set the data of a node in the linked list
+void listsetfunc() {
     if (data_stack_ptr < 3) {
-        printf("lins -- stack underflow; need <value> <node_slot> <list> on the stack! ");
+        printf("l! -- stack underflow; need <list> <slot> <value> on the stack! ");
         return;
     }
 
-    // Pop the list pointer, node slot, and value from the stack
-    DCLANG_PTR list_ptr = (DCLANG_PTR)dclang_pop();
-    DCLANG_INT node_slot = (DCLANG_INT)dclang_pop();
+    // Pop args
     DCLANG_FLT value = dclang_pop();
+    DCLANG_INT slot = (DCLANG_INT)dclang_pop();
+    DCLANG_PTR list_ptr = (DCLANG_PTR)dclang_pop();
+
+    // Convert pointers to the actual node structure
+    struct Node *list = (struct Node *)list_ptr;
+
+    // Find the Nth node in the linked list
+    struct Node *node = list;
+    for (int i = 0; i < slot + 1; i++) {
+        if (node->next == list) {
+            // Reached the end of the list
+            printf("l! -- slot out of bounds! ");
+            return;
+        }
+        node = node->next;
+    }
+
+    // Set the data of the node
+    node->data = value;
+}
+
+// Function to get the data of a node in the linked list
+void listgetfunc() {
+    if (data_stack_ptr < 2) {
+        printf("l@ -- stack underflow; need <list> <slot> on the stack! ");
+        return;
+    }
+
+    // Pop args
+    DCLANG_INT slot = (DCLANG_INT)dclang_pop();
+    DCLANG_PTR list_ptr = (DCLANG_PTR)dclang_pop();
+
+    // Convert pointers to the actual node structure
+    struct Node *list = (struct Node *)list_ptr;
+
+    // Find the Nth node in the linked list
+    struct Node *node = list;
+    for (int i = 0; i < slot + 1; i++) {
+        if (node->next == list) {
+            // Reached the end of the list
+            printf("l@ -- slot out of bounds! ");
+            return;
+        }
+        node = node->next;
+    }
+
+    // Push the data of the node onto the stack
+    push((DCLANG_FLT)node->data);
+}
+
+
+// Function to insert a node into a linked list before a specified node
+void listinsertfunc() {
+    if (data_stack_ptr < 3) {
+        printf("lins -- stack underflow; need <list> <node_slot> <value> on the stack! ");
+        return;
+    }
+
+    // Pop args
+    DCLANG_FLT value = dclang_pop();
+    DCLANG_INT node_slot = (DCLANG_INT)dclang_pop();
+    DCLANG_PTR list_ptr = (DCLANG_PTR)dclang_pop();
 
     // Convert pointers to the actual node structure
     struct Node *list = (struct Node *)list_ptr;
@@ -176,13 +176,13 @@ void listinsertfunc() {
 // Function to remove a node from a linked list at a specified node slot
 void listremovefunc() {
     if (data_stack_ptr < 2) {
-        printf("lrem -- stack underflow; need <node_slot> <list> on the stack! ");
+        printf("lrem -- stack underflow; need <list> <node_slot> on the stack! ");
         return;
     }
 
     // Pop the node slot and list pointer and node slot from the stack
-    DCLANG_PTR list_ptr = (DCLANG_PTR)dclang_pop();
     DCLANG_INT node_slot = (DCLANG_INT)dclang_pop();
+    DCLANG_PTR list_ptr = (DCLANG_PTR)dclang_pop();
 
     // Convert pointers to the actual node structure
     struct Node *list = (struct Node *)list_ptr;
