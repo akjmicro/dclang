@@ -23,7 +23,7 @@ tmake const :mytree2
 "A cat" str= assert
 
 # test deleting an element
-"Shakespeare" :mytree2 tdelete
+"Shakespeare" :mytree2 tdel
 "Shakespeare" :mytree2 t@
 0 = assert
 

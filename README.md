@@ -311,10 +311,11 @@ Implemented thus far:
     :mytree @ twalk              # walk the tree again; see new values
     key=foo, value=bar
     key=favorite ice cream flavor, value=vanilla
-    "foo" :mytree @ tdelete      # delete a key
+    "foo" :mytree @ tdel         # delete a key
     :mytree @ twalk
     key=favorite ice cream flavor, value=vanilla
     ```
+  * Linked lists: `lmake`, `lpush`, `lpop`, `l!`, `l@`, `lins`, `lrem`, `lsize`, `ldel`
   * Timing:
     * a clock function ('clock') so we can time execution in nanoseconds for benchmarking.
     * A hook into CPU-cycle clock, called 'rdtsc'. (not available on RPi)

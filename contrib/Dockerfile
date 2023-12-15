@@ -37,4 +37,5 @@ COPY --from=0 /usr/bin/rlwrap /usr/bin/
 COPY --from=0 /usr/local/bin/dclang /usr/bin/
 # environment
 COPY --from=0 /root/.profile /root/.profile
+COPY --from=0 /dclang* /dclang/
 CMD sh -l

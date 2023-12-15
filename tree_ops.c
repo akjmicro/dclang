@@ -110,10 +110,10 @@ void treewalkfunc()
     twalk(tree_roots[tree_idx], print_node);
 }
 
-void treedelfunc()
+void treedeletefunc()
 {
     if (data_stack_ptr < 2) {
-        printf("tdelete -- stack underflow! Need <key> <tree_index> on the stack.\n");
+        printf("tdel -- stack underflow! Need <key> <tree_index> on the stack.\n");
         return;
     }
     DCLANG_PTR tree_idx = (DCLANG_PTR) dclang_pop();
