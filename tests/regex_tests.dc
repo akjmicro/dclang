@@ -47,3 +47,29 @@ assert
     " things"
   str=
 assert
+
+
+# N.B. that when wanting a literal '\' for the compiled
+# pattern, one must double it up, b/c the normal string
+# parsing parses whatever character comes after '\' as
+# a literal. So for '\' to 'survive' and be part of the
+# compiled regex phrase, it must be doubled!
+# Also note here we're using basic regex (BRE), indicated
+# by the 0 before `regcomp`:
+
+
+"\\([[:alnum:]]\\{1,\\}\\.\\)" 0 regcomp pattern !
+"This. is. strange." phrase !
+  phrase @
+    pattern @
+      over
+        0
+    regexec
+      0
+    regread
+  strslice
+    "This."
+  str=
+assert
+
+"If you are only seeing this message, all regex tests have passed!"

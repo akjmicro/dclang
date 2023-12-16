@@ -32,6 +32,9 @@ const :STRREPLACE_UNDERFLOW_ERROR
 ;
 
 : str+
+  # N.B. the intention in using this is to start the "chain"
+  # of added strings with a user-initiated empty buffer
+  # of appropriate size.
   dup strlen mempcpy
 ;
 
