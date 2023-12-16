@@ -295,25 +295,24 @@ Implemented thus far:
   * Private tree-based key/value stores, similar to the hash above, but access is a slightly slower
     (won't be very noticeable in most use-cases) `O(log n)` access time. Based on the `tsearch` `glibc` functions:
     ```
-    tmake const :mytree            # make a tree, put it in the constant :mytree
-    :mytree "foo" "bar" "foo" t!   # Usage: <tree> <key> <val> t! (tree! sets a value on <key>, on <tree>)
-    :mytree "foo" t@               # Usage: <tree> <key> t@       (tree@ gets a value from <key>, on <tree>)
-    cr print cr                    # Let's print the output!
+    var :mytree                  # sets up a variable to store our tree data
+    tmake :mytree !              # make a tree, put it on the variable :mytree that we made
+    "bar" "foo" :mytree @ t!     # Usage: <value> <key> <which-tree> t! (tree! sets a value on <key>, on <which-tree>)
+    "foo" :mytree @ t@           # Usage: <key> <which-tree> t@         (tree@ gets a value from <key>, on <which-tree>)
+    cr print cr                     # Let's print the output!
+
     bar                          # <-- t@ output
 
-    cr :mytree twalk             # walk the tree with treewalk
+    cr :mytree @ twalk           # walk the tree with treewalk
 
     key=foo, value=bar           # <-- twalk output, note the line break via `cr`
 
-    :mytree "favorite ice cream flavor" "Pralines & Cream" t!
-    :mytree twalk                # walk the tree again; see new values
-
+    "Pralines & Cream" "favorite ice cream flavor" :mytree @ t!
+    :mytree @ twalk              # walk the tree again; see new values
     key=foo, value=bar
     key=favorite ice cream flavor, value=Pralines & Cream
-
-    :mytree "foo" tdel           # delete a key
-    :mytree twalk
-
+    "foo" :mytree @ tdelete      # delete a key
+    :mytree @ twalk
     key=favorite ice cream flavor, value=Pralines & Cream
     ```
   * Linked lists: `lmake`, `lpush`, `lpop`, `l!`, `l@`, `lins`, `lrem`, `lsize`, `ldel`

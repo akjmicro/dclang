@@ -104,16 +104,6 @@ void add_all_primitives()
     // sorting
     add_primitive("sortnums", "Array Sorting", sortnumsfunc);
     add_primitive("sortstrs", "Array Sorting", sortstrsfunc);
-    // linked lists
-    add_primitive("lmake", "Lists", listmakefunc);
-    add_primitive("l!", "Lists", listsetfunc);
-    add_primitive("l@", "Lists", listgetfunc);
-    add_primitive("lpush", "Lists", listpushfunc);
-    add_primitive("lpop", "Lists", listpopfunc);
-    add_primitive("lins", "Lists", listinsertfunc);
-    add_primitive("lrem", "Lists", listremovefunc);
-    add_primitive("lsize", "Lists", listsizefunc);
-    add_primitive("ldel", "Lists", listdeletefunc);
     // hash set & get
     add_primitive("h!", "Hashes", hashsetfunc);
     add_primitive("h@", "Hashes", hashgetfunc);
@@ -127,6 +117,16 @@ void add_all_primitives()
 #ifdef HAS_TREEDESTROY
     add_primitive("tdestroy", "Trees", treedestroyfunc);
 #endif
+    // linked lists
+    add_primitive("lmake", "Lists", listmakefunc);
+    add_primitive("l!", "Lists", listsetfunc);
+    add_primitive("l@", "Lists", listgetfunc);
+    add_primitive("lpush", "Lists", listpushfunc);
+    add_primitive("lpop", "Lists", listpopfunc);
+    add_primitive("lins", "Lists", listinsertfunc);
+    add_primitive("lrem", "Lists", listremovefunc);
+    add_primitive("lsize", "Lists", listsizefunc);
+    add_primitive("ldel", "Lists", listdeletefunc);
     // branching/control
     add_primitive("times", "Branching", timesfunc);
     add_primitive("again", "Branching", againfunc);

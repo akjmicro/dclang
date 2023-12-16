@@ -52,16 +52,13 @@ void treegetfunc()
 {
     if (data_stack_ptr < 2)
     {
-        printf("t@ -- stack underflow! Need <tree_root> <keystr> on the stack.\n");
+        printf("t@ -- stack underflow! Need <keystr> <tree> on the stack.\n");
         printf("You can make a root node via 'tmake', and assign it to a variable ");
         printf("so it can be referred to later.\n");
         return;
     }
-
-    // Pop args
-    char *search_key = (char *)(DCLANG_PTR) dclang_pop();
     DCLANG_PTR tree_idx = (DCLANG_PTR) dclang_pop();
-
+    char *search_key = (char *)(DCLANG_PTR) dclang_pop();
     struct tree_entry *te = make_tree_entry(strdup(search_key), 0);
     struct tree_entry *retval = tfind(te, &tree_roots[tree_idx], tree_compare_func);
     if (retval == NULL)
@@ -76,17 +73,14 @@ void treesetfunc()
 {
     if (data_stack_ptr < 3)
     {
-        printf("t! -- stack underflow! Need <tree_root> <keystr> <val> on the stack.\n");
+        printf("t! -- stack underflow! Need <val> <keystr> <tree> on the stack.\n");
         printf("You can make a root node via 'tmake', and assign it to a variable ");
         printf("so it can be referred to later.\n");
         return;
     }
-
-    // Pop args
-    DCLANG_FLT value = dclang_pop();
-    char *search_key = (char *)(DCLANG_PTR) dclang_pop();
     DCLANG_PTR tree_idx = (DCLANG_PTR) dclang_pop();
-
+    char *search_key = (char *)(DCLANG_PTR) dclang_pop();
+    DCLANG_FLT value = dclang_pop();
     struct tree_entry *te_del = make_tree_entry(strdup(search_key), value);
     tdelete(te_del, &tree_roots[tree_idx], tree_compare_func);
     struct tree_entry *te = make_tree_entry(strdup(search_key), value);
@@ -109,7 +103,7 @@ void print_node(const void *node, const VISIT order, const int depth)
 void treewalkfunc()
 {
     if (data_stack_ptr < 1) {
-        printf("twalk -- stack underflow! Need <tree_root> on the stack.\n");
+        printf("twalk -- stack underflow! Need <tree> on the stack.\n");
         return;
     }
     DCLANG_PTR tree_idx = (DCLANG_PTR) dclang_pop();
@@ -119,14 +113,11 @@ void treewalkfunc()
 void treedeletefunc()
 {
     if (data_stack_ptr < 2) {
-        printf("tdel -- stack underflow! Need <tree_root> <key> on the stack.\n");
+        printf("tdel -- stack underflow! Need <key> <tree> on the stack.\n");
         return;
     }
-
-    // Pop args
-    char *key = (char *)(DCLANG_PTR) dclang_pop();
     DCLANG_PTR tree_idx = (DCLANG_PTR) dclang_pop();
-
+    char *key = (char *)(DCLANG_PTR) dclang_pop();
     struct tree_entry *te_del = make_tree_entry(strdup(key), 0);
     tdelete(te_del, &tree_roots[tree_idx], tree_compare_func);
     free(te_del);
@@ -136,7 +127,7 @@ void treedeletefunc()
 void treedestroyfunc()
 {
     if (data_stack_ptr < 1) {
-        printf("tdestroy -- stack underflow! Need <tree_root> on the stack.\n");
+        printf("tdestroy -- stack underflow! Need <tree> on the stack.\n");
         return;
     }
     DCLANG_PTR tree_idx = (DCLANG_PTR) dclang_pop();
