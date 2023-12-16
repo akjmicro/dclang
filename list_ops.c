@@ -23,13 +23,13 @@ void listmakefunc() {
 // Function to append a node to the tail of the linked list
 void listpushfunc() {
     if (data_stack_ptr < 2) {
-        printf("lpush -- stack underflow; need <value> <list> on the stack! ");
+        printf("lpush -- stack underflow; need <list> <value> on the stack! ");
         return;
     }
 
     // Pop args
-    DCLANG_PTR list_ptr = (DCLANG_PTR)dclang_pop();
     DCLANG_FLT value = dclang_pop();
+    DCLANG_PTR list_ptr = (DCLANG_PTR)dclang_pop();
 
     // Convert pointers to the actual node structure
     struct Node *list = (struct Node *)list_ptr;
@@ -79,14 +79,14 @@ void listpopfunc() {
 // Function to set the data of a node in the linked list
 void listsetfunc() {
     if (data_stack_ptr < 3) {
-        printf("l! -- stack underflow; need <value> <slot> <list> on the stack! ");
+        printf("l! -- stack underflow; need <list> <slot> <value> on the stack! ");
         return;
     }
 
     // Pop args
-    DCLANG_PTR list_ptr = (DCLANG_PTR)dclang_pop();
-    DCLANG_INT slot = (DCLANG_INT)dclang_pop();
     DCLANG_FLT value = dclang_pop();
+    DCLANG_INT slot = (DCLANG_INT)dclang_pop();
+    DCLANG_PTR list_ptr = (DCLANG_PTR)dclang_pop();
 
     // Convert pointers to the actual node structure
     struct Node *list = (struct Node *)list_ptr;
@@ -109,13 +109,13 @@ void listsetfunc() {
 // Function to get the data of a node in the linked list
 void listgetfunc() {
     if (data_stack_ptr < 2) {
-        printf("l@ -- stack underflow; need <lost> <list> on the stack! ");
+        printf("l@ -- stack underflow; need <list> <slot> on the stack! ");
         return;
     }
 
     // Pop args
-    DCLANG_PTR list_ptr = (DCLANG_PTR)dclang_pop();
     DCLANG_INT slot = (DCLANG_INT)dclang_pop();
+    DCLANG_PTR list_ptr = (DCLANG_PTR)dclang_pop();
 
     // Convert pointers to the actual node structure
     struct Node *list = (struct Node *)list_ptr;
@@ -139,14 +139,14 @@ void listgetfunc() {
 // Function to insert a node into a linked list before a specified node
 void listinsertfunc() {
     if (data_stack_ptr < 3) {
-        printf("lins -- stack underflow; need <value> <slot> <list> on the stack! ");
+        printf("lins -- stack underflow; need <list> <node_slot> <value> on the stack! ");
         return;
     }
 
     // Pop args
-    DCLANG_PTR list_ptr = (DCLANG_PTR)dclang_pop();
-    DCLANG_INT slot = (DCLANG_INT)dclang_pop();
     DCLANG_FLT value = dclang_pop();
+    DCLANG_INT node_slot = (DCLANG_INT)dclang_pop();
+    DCLANG_PTR list_ptr = (DCLANG_PTR)dclang_pop();
 
     // Convert pointers to the actual node structure
     struct Node *list = (struct Node *)list_ptr;
@@ -159,10 +159,10 @@ void listinsertfunc() {
 
     // Find the node before which to insert the new node
     struct Node *node_before = list;
-    for (int i = 0; i < slot; i++) {
+    for (int i = 0; i < node_slot; i++) {
         if (node_before->next == list) {
             // Reached the end of the list
-            printf("lins -- slot out of bounds! ");
+            printf("lins -- node_slot out of bounds! ");
             free(new_node);
             return;
         }
@@ -176,23 +176,23 @@ void listinsertfunc() {
 // Function to remove a node from a linked list at a specified node slot
 void listremovefunc() {
     if (data_stack_ptr < 2) {
-        printf("lrem -- stack underflow; need <slot> <list> on the stack! ");
+        printf("lrem -- stack underflow; need <list> <node_slot> on the stack! ");
         return;
     }
 
-    // Pop args
+    // Pop the node slot and list pointer and node slot from the stack
+    DCLANG_INT node_slot = (DCLANG_INT)dclang_pop();
     DCLANG_PTR list_ptr = (DCLANG_PTR)dclang_pop();
-    DCLANG_INT slot = (DCLANG_INT)dclang_pop();
 
     // Convert pointers to the actual node structure
     struct Node *list = (struct Node *)list_ptr;
 
     // Find the node to remove
     struct Node *node_to_remove = list;
-    for (int i = 0; i < slot + 1; i++) {
+    for (int i = 0; i < node_slot + 1; i++) {
         if (node_to_remove->next == list) {
             // Reached the end of the list
-            printf("lrem -- slot out of bounds! ");
+            printf("lrem -- node_slot out of bounds! ");
             return;
         }
         node_to_remove = node_to_remove->next;

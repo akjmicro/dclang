@@ -4,51 +4,51 @@ lmake mylist !
 mylist @ 0 <> assert
 
 "Testing lpush and l@" print cr
-10 mylist @ lpush           # Push 10 to the list
- 0 mylist @ l@     10 = assert
+mylist @ 10 lpush           # Push 10 to the list
+mylist @ 0 l@       10 = assert
 
 "Testing l!" print cr
-11 0 mylist @ l!            # Set the value of the first node to 11
-   0 mylist @ l@   11 = assert
+mylist @ 0 11 l!            # Set the value of the first node to 11
+mylist @ 0 l@       11 = assert
 
 "Testing lpop" print cr
-mylist @ lpop      11 = assert
+mylist @ lpop       11 = assert
 
 "Testing multiple lpush, lsize, and lpop" print cr
- 5 mylist @ lpush
- 7 mylist @ lpush
-11 mylist @ lpush
-   mylist @ lsize   3 = assert
- 0 mylist @ l@      5 = assert
- 1 mylist @ l@      7 = assert
- 2 mylist @ l@     11 = assert
-   mylist @ lpop   11 = assert
-   mylist @ lpop    7 = assert
-   mylist @ lpop    5 = assert
-   mylist @ lsize   0 = assert
+mylist @ 5 lpush
+mylist @ 7 lpush
+mylist @ 11 lpush
+mylist @ lsize       3 = assert
+mylist @ 0 l@        5 = assert
+mylist @ 1 l@        7 = assert
+mylist @ 2 l@       11 = assert
+mylist @ lpop       11 = assert
+mylist @ lpop        7 = assert
+mylist @ lpop        5 = assert
+mylist @ lsize       0 = assert
 
 "Testing lins" print cr
- 5   mylist @ lpush
- 7   mylist @ lpush
-11   mylist @ lpush
- 2   mylist @ l@   11 = assert
-10 2 mylist @ lins
-   0 mylist @ l@    5 = assert
-   1 mylist @ l@    7 = assert
-   2 mylist @ l@   10 = assert
-   3 mylist @ l@   11 = assert
+mylist @ 5 lpush
+mylist @ 7 lpush
+mylist @ 11 lpush
+mylist @ 2 l@       11 = assert
+mylist @ 2 10 lins
+mylist @ 0 l@        5 = assert
+mylist @ 1 l@        7 = assert
+mylist @ 2 l@       10 = assert
+mylist @ 3 l@       11 = assert
 
 "Testing ldel" print cr
 mylist @ ldel
-mylist @ lsize      0 = assert
+mylist @ lsize       0 = assert
 
 "Testing lrem" print cr
- 5  mylist @ lpush
- 7  mylist @ lpush
-11  mylist @ lpush
- 1  mylist @ lrem
-    mylist @ lpop  11 = assert
-    mylist @ lpop   5 = assert
+mylist @ 5 lpush
+mylist @ 7 lpush
+mylist @ 11 lpush
+mylist @ 1 lrem
+mylist @ lpop       11 = assert
+mylist @ lpop        5 = assert
 
-"Freeing the base list node." print cr
+"Freeing the root list node." print cr
 mylist @ free

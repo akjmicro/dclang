@@ -295,24 +295,25 @@ Implemented thus far:
   * Private tree-based key/value stores, similar to the hash above, but access is a slightly slower
     (won't be very noticeable in most use-cases) `O(log n)` access time. Based on the `tsearch` `glibc` functions:
     ```
-    var :mytree                  # sets up a variable to store our tree data
-    tmake :mytree !              # make a tree, put it on the variable :mytree that we made
-    "bar" "foo" :mytree @ t!     # Usage: <value> <key> <which-tree> t! (tree! sets a value on <key>, on <which-tree>)
-    "foo" :mytree @ t@           # Usage: <key> <which-tree> t@         (tree@ gets a value from <key>, on <which-tree>)
-    cr print cr                     # Let's print the output!
+    tmake const :mytree            # make a tree, put it in the constant :mytree
+    :mytree "foo" "bar" t!         # Usage: <tree> <key> <val> t! (tree! sets a value on <key>, on <tree>)
+    :mytree "foo" t@               # Usage: <tree> <key> t@       (tree@ gets a value from <key>, on <tree>)
+    cr print cr                    # Let's print the output!
+    bar                            # <-- t@ output
 
-    bar                          # <-- t@ output
+    cr :mytree twalk               # walk the tree with treewalk
 
-    cr :mytree @ twalk           # walk the tree with treewalk
+    key=foo, value=bar             # <-- twalk output, note the line break via `cr`
 
-    key=foo, value=bar           # <-- twalk output, note the line break via `cr`
+    :mytree "favorite ice cream flavor" "Pralines & Cream" t!
+    :mytree twalk                  # walk the tree again; see new values
 
-    "Pralines & Cream" "favorite ice cream flavor" :mytree @ t!
-    :mytree @ twalk              # walk the tree again; see new values
     key=foo, value=bar
     key=favorite ice cream flavor, value=Pralines & Cream
-    "foo" :mytree @ tdelete      # delete a key
-    :mytree @ twalk
+
+    :mytree "foo" tdel             # delete a key
+    :mytree twalk
+
     key=favorite ice cream flavor, value=Pralines & Cream
     ```
   * Linked lists: `lmake`, `lpush`, `lpop`, `l!`, `l@`, `lins`, `lrem`, `lsize`, `ldel`
@@ -346,6 +347,74 @@ Implemented thus far:
 
   * `tcplisten`, `tcpaccept` for server primitives, `tcpconnect` for clients. See the examples directory.
 
+
+### A note on "composibility"
+After wrestling a bit back-n-forth with the stack API for trees and lists, I opted for what
+what some might consider a non-standard approach to stack order for both. On the face of it,
+the approach for these structures is inconsistent with the other variable types, "normal array slots"
+and "hashes". Consider:
+
+```
+var thing
+5 thing !         # normal 'FORTHish setter': <value> <slot> <action>
+  thing @         # normal 'FORTHish getter':         <slot> <action>
+
+# and for hashes:
+
+"bar" "foo" h!
+      "foo" h@
+```
+
+So, why have I not preserved this "standard stack-order way" for trees and lists? Well for starters, I did.
+However, since these structures can sometimes be nested, and one can do neat things with nesting, keeping
+this strictly FORTH-like way can be a nuisance, and unwieldy. Take for instance, a nested list:
+
+```
+# make 3 lists
+var outer_list
+lmake outer_list !
+var inner_list1
+lmake inner_list1 !
+var inner_list2
+lmake inner_list2 !
+
+# If we use a FORTH-ish stack order:
+inner_list1 outer_list lpush
+inner_list2 outer_list lpush
+2 inner_list1 lpush
+3 inner_list1 lpush
+5 inner_list2 lpush
+7 inner_list2 lpush
+0 0 outer_list l@ l@     # 2
+1 0 outer_list l@ l@     # 3
+0 1 outer_list l@ l@     # 5
+1 1 outer_list l@ l@     # 7
+
+# If we use a "un FORTH-ish" composeable stack order:
+outer_list inner_list1 lpush
+outer_list inner_list2 lpush
+inner_list1 2 lpush
+inner_list1 3 lpush
+inner_list2 5 lpush
+inner_list2 7 lpush
+outer_list 0 l@ 0 l@    # 2
+outer_list 0 l@ 1 l@    # 3
+outer_list 1 l@ 0 l@    # 5
+outer_list 1 l@ 1 l@    # 7
+```
+
+Now, isn't the 2nd way much nicer, and easier to parse? For starters, we preserve the "odometer" feeling
+of digging into a nested structure that most folks are used to. Also, notice how, related to that,
+the idea of "outer" and "inner" is actually preserved in a left-to-right reading. Finally, when you
+de-reference the `outer_list` with `l@`, you get the inner list, and can further deference _that_ in
+a "chaining" fashion with yet another index and `l@` operator. I find this much clearer, cleaner, and
+more intuitive.
+
+Since trees can be nested in a similar way, I changed their stack-order expectations in a similar way.
+There may come a time where I consider doing this to normal variables and hashes -- however, I've written
+so much code, and a chain of dereferences making for strange stack-order (i.e. nesting) is less common
+in those cases, and might be more upsetting the apple cart at this point. More thought and consideration
+of the matter is required at this point to convince me that changing that is worth it.
 
 ### Contact
 
