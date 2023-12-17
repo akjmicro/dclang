@@ -42,6 +42,7 @@ Born on 2018-05-05 */
 #include "tree_ops.c"
 #include "list_ops.c"
 #include "portmidi_ops.c"
+#include "sqlite_ops.c"
 #include "primitives.c"
 #include "input_ops.c"
 

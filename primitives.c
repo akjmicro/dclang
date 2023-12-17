@@ -199,6 +199,14 @@ void add_all_primitives()
     add_primitive("read", "Files", readfunc);
     add_primitive("write", "Files", writefunc);
     add_primitive("close", "Files", closefunc);
+    // SQLite3 interface
+    add_primitive("_sqlite_open", "SQLite", _sqliteopenfunc);
+    add_primitive("_sqlite_prepare", "SQLite", _sqlitepreparefunc);
+    add_primitive("_sqlite_step", "SQLite", _sqlitestepfunc);
+    add_primitive("_sqlite_column", "SQLite", _sqlitecolumnfunc);
+    add_primitive("_sqlite_finalize", "SQLite", _sqlitefinalizefunc);
+    add_primitive("_sqlite_exec", "SQLite", _sqliteexecfunc);
+    add_primitive("_sqlite_close", "SQLite", _sqliteclosefunc);
     // tcp networking using sockets
     add_primitive("tcplisten", "Sockets", tcplistenfunc);
     add_primitive("tcpaccept", "Sockets", tcpacceptfunc);

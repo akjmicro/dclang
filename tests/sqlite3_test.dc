@@ -1,0 +1,11 @@
+"sqlite3.dc" import
+
+var db
+var stmt
+":memory:" sqlite3_open db !
+db @ "CREATE TABLE test (id INTEGER);" sqlite3_prepare stmt !
+stmt @ sqlite3_step
+drop
+stmt @ sqlite3_finalize
+db @ "SELECT * from sqlite_master WHERE type='table';" sqlite3_prepare stmt !
+stmt @ sqlite3_step

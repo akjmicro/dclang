@@ -1,0 +1,63 @@
+: sqlite3_open
+  depth 1 <
+  if
+    "`sqlite3_open` -- You need a <db_file> on the stack" print cr
+    return
+  endif
+  _sqlite_open
+;
+
+: sqlite3_prepare
+  depth 2 <
+  if
+    "`sqlite3_prepare` -- You need <sqlite3_db> <sql_text> on the stack" print cr
+    return
+  endif
+  _sqlite_prepare
+;
+
+: sqlite3_step
+  depth 1 <
+  if
+    "`sqlite3_step` -- You need a <sqlite3_stmt> on the stack" print cr
+    return
+  endif
+  _sqlite_step
+;
+
+: sqlite3_column
+  depth 2 <
+  if
+    "`sqlite3_column` -- You need <sqlite3_stmt> <col_index> on the stack" print cr
+    return
+  endif
+  _sqlite_column
+;
+
+: sqlite3_finalize
+  depth 1 <
+  if
+    "`sqlite3_finalize` -- You need a <sqlite3_stmt> on the stack" print cr
+    return
+  endif
+  _sqlite_finalize
+;
+
+: sqlite3_exec
+  depth 2 <
+  if
+    "`sqlite3_exec` -- You need an <sqlite3_db> <sql_text> on the stack" print cr
+    return
+  endif
+  _sqlite_exec
+
+: sqlite3_close
+  depth 1 <
+  if
+    "`sqlite3_close` -- You need an <sqlite3_db> on the stack" print cr
+    return
+  endif
+  _sqlite_close
+;
+
+"SQLite3 interface loaded." print cr
