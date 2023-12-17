@@ -2,7 +2,7 @@ FROM debian:bullseye-slim
 WORKDIR /dclang
 COPY . ./
 RUN apt update && \
-    apt install -y git libc6-dev gcc make libasound2-dev rlwrap && \
+    apt install -y git libc6-dev gcc make libasound2-dev libsqlite3-dev rlwrap && \
     cd / && \
     git clone http://github.com/akjmicro/portmidi-linux.git && \
     cd portmidi-linux && \
@@ -27,6 +27,7 @@ COPY --from=0 /lib/x86_64-linux-gnu/libtinfo* /lib/
 COPY --from=0 /lib/x86_64-linux-gnu/libutil.so.1 /lib/
 COPY --from=0 /lib/x86_64-linux-gnu/libdl* /lib/
 COPY --from=0 /usr/lib/x86_64-linux-gnu/libasound* /usr/lib/
+COPY --from=0 /usr/lib/x86_64-linux-gnu/libsqlite3* /usr/lib/
 # terminfo DB for rlwrap
 COPY --from=0 /lib/terminfo/ /lib/terminfo/
 # immediate lib deps
