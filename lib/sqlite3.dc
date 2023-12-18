@@ -50,6 +50,7 @@
     return
   endif
   _sqlite_exec
+;
 
 : sqlite3_close
   depth 1 <

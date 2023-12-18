@@ -2,10 +2,42 @@
 
 var db
 var stmt
+# make memory database
 ":memory:" sqlite3_open db !
-db @ "CREATE TABLE test (id INTEGER);" sqlite3_prepare stmt !
-stmt @ sqlite3_step
-drop
+# create a table
+db @ "CREATE TABLE doubles_test (
+  wds_num text,
+  update_year text,
+  pos_angle numeric,
+  sep numeric,
+  mag1 numeric,
+  mag2 numeric,
+  spectrum text,
+  ra_dec text,
+  con text,
+  catalog text,
+  name1 text,
+  name2 text,
+  name3 text,
+  name4 text
+);
+" sqlite3_exec
+# import data
+var sqlfile
+"orion_double_stars.sql" "r" fopen sqlfile !
+var sqltext
+sqlfile @ freadall drop sqltext !
+# run the INSERT statements to add data
+db @ sqltext @ sqlite3_exec
+
+"Now selecting doubles" print cr
+db @ "SELECT * from doubles_test limit 5;" sqlite3_exec
+
+# Test an individual query:
+db @ "SELECT * FROM doubles_test WHERE wds_num='05145-0812';" sqlite3_prepare  stmt !
+stmt @ sqlite3_step drop
+stmt @ 12 sqlite3_column "Rigel" str= assert
+
+# cleanup
 stmt @ sqlite3_finalize
-db @ "SELECT * from sqlite_master WHERE type='table';" sqlite3_prepare stmt !
-stmt @ sqlite3_step
+db @ sqlite3_close
