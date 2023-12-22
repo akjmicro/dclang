@@ -12,37 +12,53 @@ var climate_html
 # Now, let's set up vars for grabbing our SQL data
 var db
 var stmt
-
 var query_to_run
-var basic_sql_query
-  "SELECT year, avg(CAST({{which}} AS INT))
-   FROM tucson
-   GROUP BY year;"
-basic_sql_query !
 var which_var
-var running_avg_query
-  "SELECT inner.year,
-          avg(inner.{{which}}_avg)
-            OVER (ORDER BY year ASC ROWS 5 PRECEDING) AS moving_avg
-   FROM (
-     SELECT YEAR, avg(CAST({{which}} AS INT)) AS {{which}}_avg
-     FROM tucson GROUP BY YEAR
-   ) AS inner;"
-running_avg_query !
 
+# some string constants -- will help stop memory leaking
+"climate_change_graph.html" const :climate_change_graph_html
+"r"                         const :r
+"tucson_airport.db"         const :tucson_airport_db
+"{{which}}"                 const :which
+"["                         const :open_bracket
+"]"                         const :close_bracket
+"{x: '"                     const :x_element
+"', y: "                    const :y_element
+"}, "                       const :close_element
+"tmin"                      const :tmin
+"tmax"                      const :tmax
+"{{DATA_MIN}}"              const :data_min
+"{{DATA_MAX}}"              const :data_max
+"{{DATA_MIN_AVG}}"          const :data_min_avg
+"{{DATA_MAX_AVG}}"          const :data_max_avg
+
+# query string constants
+"SELECT year, avg(CAST({{which}} AS INT))
+ FROM tucson
+ GROUP BY year;" const BASIC_SQL_QUERY
+
+"SELECT inner.year,
+        avg(inner.{{which}}_avg)
+          OVER (ORDER BY year ASC ROWS 5 PRECEDING) AS moving_avg
+ FROM (
+   SELECT YEAR, avg(CAST({{which}} AS INT)) AS {{which}}_avg
+   FROM tucson GROUP BY YEAR
+ ) AS inner;" const RUNNING_AVG_QUERY
+
+# helper function for looping through rows and cols
 : _query_loop
     stmt @ sqlite3_step
     100 = if
-      "{x: '" str+
+      :x_element str+
       stmt @ 0 sqlite3_column str+
-      "', y: " str+
+      :y_element str+
       stmt @ 1 sqlite3_column str+
-      "}, " str+
+      :close_element str+
       _query_loop
     else
-      2 -                # rewind two characters to overwrite ", " from last iteration
-      "]" str+           # put closing bracket on string buffer
-        0 1 memset drop  # close off string with a \0 null character
+      2 -                       # rewind two characters to overwrite ", " from last iteration
+      :close_bracket str+       # put closing bracket on string buffer
+        0 1 memset drop         # close off string with a \0 null character
       stmt @ sqlite3_finalize
       db @ sqlite3_close
       return
@@ -53,49 +69,52 @@ running_avg_query !
 # that gets fed to our chart.js template eventually
 : make_data
   databuf @ 0 65536 memset drop   # clear the data buffer
-  "tucson_airport.db" sqlite3_open db !
+  :tucson_airport_db sqlite3_open db !
     db @
-      query_to_run @ "{{which}}" which_var @ strreplace
+      query_to_run @ :which which_var @ strreplace
+      dup svpush
     sqlite3_prepare
   stmt !
+  svpop free
   databuf @
-  "[" str+
+  :open_bracket str+
   _query_loop
 ;
 
 : load_template
   # read in the HTML template
-  "climate_change_graph.html" "r" fopen dup
+  :climate_change_graph_html :r fopen dup
   freadall drop swap fclose
   # load minimum temp avgs
-  basic_sql_query @ query_to_run !
-  "tmin" which_var ! make_data
-    "{{DATA_MIN}}" databuf @ strreplace
+  BASIC_SQL_QUERY query_to_run !
+  :tmin which_var ! make_data
+    :data_min databuf @ strreplace
   climate_html !
   # load maximum temp avgs
-  "tmax" which_var ! make_data
-  climate_html @ "{{DATA_MAX}}" databuf @ strreplace
-  climate_html !
+  :tmax which_var ! make_data
+  climate_html @ dup :data_max databuf @ strreplace
+  climate_html ! free
   # load 5-year running avg minimum
-  running_avg_query @ query_to_run !
-  "tmin" which_var ! make_data
-  climate_html @ "{{DATA_MIN_AVG}}" databuf @ strreplace
-  climate_html !
+  RUNNING_AVG_QUERY query_to_run !
+  :tmin which_var ! make_data
+  climate_html @ dup :data_min_avg databuf @ strreplace
+  climate_html ! free
   # load 5-year running avg maximum
-  "tmax" which_var ! make_data
-  climate_html @ "{{DATA_MAX_AVG}}" databuf @ strreplace
-  climate_html !
+  :tmax which_var ! make_data
+  climate_html @ dup :data_max_avg databuf @ strreplace
+  climate_html ! free
 ;
 
 : custom_response
   # test of a basic chart.js response
   load_template
   zerobuf HTTP_HTML_HEADER str+
-  climate_html @ str+
+  climate_html @ dup svpush str+
   drop          # we drop the pointer to the end of the buffer
                 # b/c it's only useful as a place to dump more
                 # new substrings onto the main growing string buffer.
                 # The framework already has the 'head pointer' at `zerobuf`
+  svpop free    # free the accumulated string
 ;
 
 : write_response

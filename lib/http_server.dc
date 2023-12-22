@@ -15,8 +15,6 @@ var path_and_query
 var httpversion
 var path
 var query
-"?" const :QMARK
-": " const :COLON
 # strtok string-splitting token storage
 var _split1
 var _split2
@@ -24,7 +22,16 @@ var _split_hash
 var _split_q
 # response headers
 "HTTP/1.1 200 OK\nContent-Type: text/plain\n\n" const HTTP_TEXT_HEADER
-"HTTP/1.1 200 OK\nContent-Type: text/html\n\n" const HTTP_HTML_HEADER
+"HTTP/1.1 200 OK\nContent-Type: text/html\n\n"  const HTTP_HTML_HEADER
+# other string constants
+"?"                  const :QMARK
+": "                 const :COLON
+" "                  const :SPACE
+"="                  const :EQUALS
+"&"                  const :AMPERSAND
+"<br>\n"             const :HTML_BR
+"<html>\n<body>\n"   const :HTML_BODY_OPEN
+"</body>\n</html>\n" const :HTML_BODY_CLOSE
 
 # getters and setters
 : get_accepted_conn accepted_conn @ ;
@@ -48,9 +55,9 @@ var _split_q
 ;
 
 : split_request_topline
-  get_received " " _split1 strtok method !
-  0 " " _split1 strtok path_and_query !
-  0 " " _split1 strtok httpversion !
+  get_received :SPACE _split1 strtok method !
+  0 :SPACE _split1 strtok path_and_query !
+  0 :SPACE _split1 strtok httpversion !
 ;
 
 : split_path_and_query
@@ -59,10 +66,10 @@ var _split_q
 ;
 
 : hash_assign
-  dup "=" strfind
+  dup :EQUALS strfind
   if
-    "=" _split_hash strtok
-    0 "=" _split_hash strtok
+    :EQUALS _split_hash strtok
+    0 :EQUALS _split_hash strtok
     swap h!
   else
     drop
@@ -71,7 +78,7 @@ var _split_q
 ;
 
 : _split_query_string_helper
-  0 "&" _split_q strtok dup
+  0 :AMPERSAND _split_q strtok dup
   if
     strdup hash_assign
     _split_query_string_helper
@@ -84,7 +91,7 @@ var _split_q
   get_query
   if
     get_query
-    strdup "&" _split_q strtok dup
+    strdup :AMPERSAND _split_q strtok dup
     if
       strdup hash_assign
       _split_query_string_helper
@@ -108,7 +115,7 @@ var _split_q
     get_query swap strfind
     if
       svpop swap dup svpush
-      str+ :COLON str+ svpop h@ str+ "<br>\n" str+
+      str+ :COLON str+ svpop h@ str+ :HTML_BR str+
       svpush
     else
       drop
@@ -129,9 +136,18 @@ var _split_q
 : copy_header_to_buffer
   # ( zeroed_buf )
   HTTP_HTML_HEADER str+
-  "<html>\n<body>\n" str+
+  :HTML_BODY_OPEN str+
 ;
 
 : copy_footer_to_buffer
-  "</body>\n</html>\n" str+
+  :HTML_BODY_CLOSE str+
+;
+
+: post_response_cleanup
+  get_received free
+  get_method free
+  get_path_and_query free
+  get_httpversion free
+  get_path free
+  get_query free
 ;
