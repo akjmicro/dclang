@@ -1,0 +1,123 @@
+"http_server.dc" import
+"sqlite3.dc" import
+"string.dc" import
+
+# place to hold our randomized values string
+var databuf
+65536 mkbuf databuf !
+
+# place we'll load the response string
+var climate_html
+
+# Now, let's set up vars for grabbing our SQL data
+var db
+var stmt
+
+var query_to_run
+var basic_sql_query
+  "SELECT year, avg(CAST({{which}} AS INT))
+   FROM tucson
+   GROUP BY year;"
+basic_sql_query !
+var which_var
+var running_avg_query
+  "SELECT inner.year,
+          avg(inner.{{which}}_avg)
+            OVER (ORDER BY year ASC ROWS 5 PRECEDING) AS moving_avg
+   FROM (
+     SELECT YEAR, avg(CAST({{which}} AS INT)) AS {{which}}_avg
+     FROM tucson GROUP BY YEAR
+   ) AS inner;"
+running_avg_query !
+
+: _query_loop
+    stmt @ sqlite3_step
+    100 = if
+      "{x: '" str+
+      stmt @ 0 sqlite3_column str+
+      "', y: " str+
+      stmt @ 1 sqlite3_column str+
+      "}, " str+
+      _query_loop
+    else
+      2 -                # rewind two characters to overwrite ", " from last iteration
+      "]" str+           # put closing bracket on string buffer
+        0 1 memset drop  # close off string with a \0 null character
+      stmt @ sqlite3_finalize
+      db @ sqlite3_close
+      return
+    endif
+;
+
+# This is where we hit the backend SQL and create a data string
+# that gets fed to our chart.js template eventually
+: make_data
+  databuf @ 0 65536 memset drop   # clear the data buffer
+  "tucson_airport.db" sqlite3_open db !
+    db @
+      query_to_run @ "{{which}}" which_var @ strreplace
+    sqlite3_prepare
+  stmt !
+  databuf @
+  "[" str+
+  _query_loop
+;
+
+: load_template
+  # read in the HTML template
+  "climate_change_graph.html" "r" fopen dup
+  freadall drop swap fclose
+  # load minimum temp avgs
+  basic_sql_query @ query_to_run !
+  "tmin" which_var ! make_data
+    "{{DATA_MIN}}" databuf @ strreplace
+  climate_html !
+  # load maximum temp avgs
+  "tmax" which_var ! make_data
+  climate_html @ "{{DATA_MAX}}" databuf @ strreplace
+  climate_html !
+  # load 5-year running avg minimum
+  running_avg_query @ query_to_run !
+  "tmin" which_var ! make_data
+  climate_html @ "{{DATA_MIN_AVG}}" databuf @ strreplace
+  climate_html !
+  # load 5-year running avg maximum
+  "tmax" which_var ! make_data
+  climate_html @ "{{DATA_MAX_AVG}}" databuf @ strreplace
+  climate_html !
+;
+
+: custom_response
+  # test of a basic chart.js response
+  load_template
+  zerobuf HTTP_HTML_HEADER str+
+  climate_html @ str+
+  drop          # we drop the pointer to the end of the buffer
+                # b/c it's only useful as a place to dump more
+                # new substrings onto the main growing string buffer.
+                # The framework already has the 'head pointer' at `zerobuf`
+;
+
+: write_response
+  custom_response   # To customize the response, one can change
+                    # the body of this word (see above)
+  get_accepted_conn get_connbuf HTTP_BUFSIZE write drop
+  get_accepted_conn close drop
+;
+
+######################
+# MAIN LISTENER LOOP #
+######################
+: acceptloop
+  srv_queue @ tcpaccept accepted_conn !
+  read_incoming    # reads in the request
+  process_request  # does the basic necessities like splitting the page and query
+  write_response   # send the response
+  acceptloop       # infinite "wait for request" loop
+;
+
+"running acceptloop; serving on port " print HTTP_PORT . cr
+acceptloop
+
+# close down connection
+srv_queue @ close drop

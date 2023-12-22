@@ -1,0 +1,80 @@
+<html>
+  <head>
+    <title>Tucson Airport Temperatures, 1948-2023</title>
+      <meta name="viewport" content = "width=device-width, initial-scale=1.0">
+    <style>
+      .chart-container {
+        width: 1400px;
+        height: 800px;
+        padding-left: 10px;
+        padding-right: 10px;
+        margin-left: auto;
+        margin-right: auto;
+        display: block;
+        -webkit-user-select: none;
+        -moz-user-select: none;
+        -ms-user-select: none;
+        user-select: none;
+      }
+    </style>      
+  </head>
+  <body>
+    <div style="margin: 40px 0px">
+      <center><h2>Tucson Airport Temperatures, 1948-2023</h2>
+      </center>
+    </div>
+    <div class="chart-container" align="center">
+      <canvas id="myChart"></canvas>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <script>
+      const ctx = document.getElementById('myChart');
+
+      new Chart(ctx, {
+        type: 'line',
+        options: {
+          responsive: true,
+          // maintainAspectRatio: false
+        },
+        data: {
+          datasets: [
+            {
+              label: 'Avg minimum temp per year',
+              data: {{DATA_MIN}},
+              borderWidth: 1,
+              fill: false,
+              borderColor: 'rgb(0, 0, 192)',
+              tension: 0.3
+            },
+            {
+              label: 'Avg maximum temp per year',
+              data: {{DATA_MAX}},
+              borderWidth: 1,
+              fill: false,
+              borderColor: 'rgb(192, 0, 0)',
+              tension: 0.3
+            },
+            {
+              label: '5-yr running avg min temp per year',
+              data: {{DATA_MIN_AVG}},
+              borderWidth: 1,
+              fill: false,
+              borderColor: 'rgb(0, 192, 192)',
+              tension: 0.3
+            },
+            {
+              label: '5-yr running avg max temp per year',
+              data: {{DATA_MAX_AVG}},
+              borderWidth: 1,
+              fill: false,
+              borderColor: 'rgb(192, 192, 0)',
+              tension: 0.3
+            }
+          ]
+        }
+      });
+    </script>
+  </body>
+</html>
