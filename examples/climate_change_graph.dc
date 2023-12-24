@@ -120,7 +120,7 @@ var which_var
 : write_response
   custom_response   # To customize the response, one can change
                     # the body of this word (see above)
-  get_accepted_conn get_connbuf HTTP_BUFSIZE write drop
+  get_accepted_conn get_connbuf dup strlen write drop
   get_accepted_conn close drop
 ;
 

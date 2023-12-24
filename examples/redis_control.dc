@@ -60,7 +60,7 @@ dummy keys_to_check - const LEN_KEYS
 
 : write_response
   custom_response                                        # To customize the response,
-  get_accepted_conn get_connbuf HTTP_BUFSIZE write drop  # should always be here
+  get_accepted_conn get_connbuf dup strlen write drop    # should always be here
   get_accepted_conn close drop                           # should always be here
 ;
 
