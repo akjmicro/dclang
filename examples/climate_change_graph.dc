@@ -117,26 +117,4 @@ var which_var
   svpop free    # free the accumulated string
 ;
 
-: write_response
-  custom_response   # To customize the response, one can change
-                    # the body of this word (see above)
-  get_accepted_conn get_connbuf dup strlen write drop
-  get_accepted_conn close drop
-;
-
-######################
-# MAIN LISTENER LOOP #
-######################
-: acceptloop
-  srv_queue @ tcpaccept accepted_conn !
-  read_incoming    # reads in the request
-  process_request  # does the basic necessities like splitting the page and query
-  write_response   # send the response
-  acceptloop       # infinite "wait for request" loop
-;
-
-"running acceptloop; serving on port " print HTTP_PORT . cr
 acceptloop
-
-# close down connection
-srv_queue @ close drop

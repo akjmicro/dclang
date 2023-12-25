@@ -1,11 +1,11 @@
 "string.dc" import
 
 # some important constants
-7651 const HTTP_PORT
+7651  const HTTP_PORT
 65536 const HTTP_BUFSIZE
 # create a listening server and its buffer
-var srv_queue HTTP_PORT tcplisten srv_queue !
-var connbuf HTTP_BUFSIZE mkbuf connbuf !
+var srv_queue   HTTP_PORT tcplisten   srv_queue !
+var connbuf     HTTP_BUFSIZE mkbuf    connbuf !
 var received
 # connection handle lives in this net variable
 var accepted_conn
@@ -34,26 +34,29 @@ var _split_q
 "</body>\n</html>\n" const :HTML_BODY_CLOSE
 
 # getters and setters
-: get_accepted_conn accepted_conn @ ;
-: get_connbuf connbuf @ ;
-: get_received received @ ;
-: zerobuf get_connbuf 0 HTTP_BUFSIZE memset ;
-: get_method method @ ;
-: get_path_and_query path_and_query @ ;
-: get_httpversion httpversion @ ;
-: get_path path @ ;
-: get_query query @ ;
+: get_accepted_conn   accepted_conn @ ;
+: get_connbuf         connbuf @ ;
+: get_received        received @ ;
+: zerobuf             get_connbuf 0 HTTP_BUFSIZE memset ;
+: get_method          method @ ;
+: get_path_and_query  path_and_query @ ;
+: get_httpversion     httpversion @ ;
+: get_path            path @ ;
+: get_query           query @ ;
 
 ##################
 # relevant words #
 ##################
 
-: read_incoming
-  zerobuf
-  get_accepted_conn swap HTTP_BUFSIZE read drop
+: read_request
+  srv_queue @ tcpaccept accepted_conn !
+  get_accepted_conn zerobuf HTTP_BUFSIZE read drop
   get_connbuf strdup received !
 ;
 
+#############################
+# `process_request` helpers #
+#############################
 : split_request_topline
   get_received :SPACE _split1 strtok method !
   0 :SPACE _split1 strtok path_and_query !
@@ -100,7 +103,13 @@ var _split_q
     endif
   endif
 ;
+#################################
+# End `process_request` helpers #
+#################################
 
+#####################
+# `process_request` #
+#####################
 : process_request
   split_request_topline
   split_path_and_query
@@ -143,11 +152,28 @@ var _split_q
   :HTML_BODY_CLOSE str+
 ;
 
-: post_response_cleanup
+: write_response
+  "custom_response" exec   # Each bit of server code using this framework
+                           # needs an implementation of `custom_response`
+  get_accepted_conn get_connbuf dup strlen write drop
+  get_accepted_conn close drop
   get_received free
-  get_method free
-  get_path_and_query free
-  get_httpversion free
-  get_path free
-  get_query free
+;
+
+######################
+# MAIN LISTENER LOOP #
+######################
+: _acceptloop
+  read_request     # reads in the request
+  process_request  # does the basic necessities like splitting the page and query
+  write_response   # send the response
+  _acceptloop      # infinite "wait for request" loop
+;
+
+: acceptloop
+  "running acceptloop; serving on port " print HTTP_PORT . cr
+  _acceptloop
+  # close down connection
+  srv_queue @ close drop
+  "Connection closed." print cr
 ;

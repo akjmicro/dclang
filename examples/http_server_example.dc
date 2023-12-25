@@ -1,9 +1,5 @@
 "http_server.dc" import
 
-# make sure to have the environment variable DCLANG_HTTP_PORT
-# set somewhere in your shell variables for this to work
-"DCLANG_HTTP_PORT" envget tonum const HTTP_PORT
-
 : copy_response_to_buffer
   # This reponse code is a simple demo that enumerates the input GET request
   # It can/should be customized to suit whatever your response needs are.
@@ -28,6 +24,7 @@
 
 : custom_response
   # an example typical response body is defined here...there are other possibilities
+  zerobuf
   copy_header_to_buffer    # <-- a standard HTTP header and HTML header
                            # (can be changed as needed, but exists as a helper in the http_server lib)
   copy_response_to_buffer  # <-- this can be customized to suit your response needs
@@ -36,28 +33,4 @@
                            # (exists as a helper in the http_server lib
 ;
 
-: write_response
-  zerobuf                                                # should always be here
-  custom_response                                        # To customize the response,
-                                                         # one can change the body of this word,
-                                                         # (see above)
-  get_accepted_conn get_connbuf dup strlen write drop    # should always be here
-  get_accepted_conn close drop                           # should always be here
-;
-
-: acceptloop
-  srv_queue @ tcpaccept accepted_conn !
-  read_incoming    # reads in the request
-  process_request  # does the basic necessities like splitting the page and query
-  # One could put an extra step or two here to do stuff on the backend
-  # with the incoming request data.
-  # ...
-  # END of extra request processing.
-  write_response   # send the response
-  acceptloop       # infinite "wait for request" loop
-;
-
 acceptloop
-
-# close down connection
-srv_queue @ close drop
