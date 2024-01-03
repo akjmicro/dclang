@@ -54,6 +54,11 @@ var _split_q
   get_connbuf strdup received !
 ;
 
+: read_request_cgi
+  0 zerobuf HTTP_BUFSIZE read drop
+  get_connbuf strdup received !
+;
+
 #############################
 # `process_request` helpers #
 #############################
@@ -103,6 +108,7 @@ var _split_q
     endif
   endif
 ;
+
 #################################
 # End `process_request` helpers #
 #################################
@@ -160,6 +166,12 @@ var _split_q
   get_received free
 ;
 
+: write_response_cgi
+  "custom_response" exec
+  1 get_connbuf dup strlen write drop
+  get_received free
+;
+
 ######################
 # MAIN LISTENER LOOP #
 ######################
@@ -176,4 +188,12 @@ var _split_q
   # close down connection
   srv_queue @ close drop
   "Connection closed." print cr
+;
+
+: cgi_main
+  # variation of `acceptloop`: doesn't loop, and designed
+  # to use for a single request/response cycle via stdin/stdout
+  read_request_cgi
+  process_request
+  write_response_cgi
 ;

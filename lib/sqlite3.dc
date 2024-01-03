@@ -60,5 +60,3 @@
   endif
   _sqlite_close
 ;
-
-"SQLite3 interface loaded." print cr

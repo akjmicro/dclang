@@ -41,8 +41,9 @@ var which_var
         avg(inner.{{which}}_avg)
           OVER (ORDER BY year ASC ROWS 5 PRECEDING) AS moving_avg
  FROM (
-   SELECT YEAR, avg(CAST({{which}} AS INT)) AS {{which}}_avg
-   FROM tucson GROUP BY YEAR
+   SELECT year, avg(CAST({{which}} AS INT)) AS {{which}}_avg
+   FROM tucson
+   GROUP BY year
  ) AS inner;" const RUNNING_AVG_QUERY
 
 # helper function for looping through rows and cols
