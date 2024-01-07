@@ -31,7 +31,7 @@ void fileclosefunc()
     if (data_stack_ptr < 1)
     {
         printf("Stack underflow!\n");
-        printf("'fclose' needs <fpointer> on the stack\n");
+        printf("'fclose' needs <file_pointer> on the stack\n");
         return;
     }
     FILE *file_to_close = (FILE *)(DCLANG_PTR) dclang_pop();
@@ -43,11 +43,11 @@ void filereadfunc()
     if (data_stack_ptr < 3)
     {
         printf("Stack underflow!\n");
-        printf("'fread' needs <buf_pointer> <fpointer> <number-of-bytes> on the stack\n");
+        printf("'fread' needs <buf_pointer> <number-of-bytes> <file_pointer> on the stack\n");
         return;
     }
-    DCLANG_INT num_bytes = (DCLANG_PTR) dclang_pop();
     FILE *file_to_read = (FILE *)(DCLANG_PTR) dclang_pop();
+    DCLANG_INT num_bytes = (DCLANG_PTR) dclang_pop();
     char *buf = (char *)(DCLANG_PTR) dclang_pop();
     DCLANG_PTR num_bytes_read = fread(buf, 1, num_bytes + 1, file_to_read);
     // update print safety:
@@ -70,7 +70,7 @@ void filereadlinefunc()
     if (data_stack_ptr < 1)
     {
         printf("Stack underflow!\n");
-        printf("'freadline' needs <fpointer> on the stack\n");
+        printf("'freadline' needs <file_pointer> on the stack\n");
         return;
     }
     FILE *file_to_read = (FILE *)(DCLANG_PTR) dclang_pop();
@@ -95,7 +95,7 @@ void filereadallfunc()
     if (data_stack_ptr < 1)
     {
         printf("Stack underflow!\n");
-        printf("'freadall' needs <fpointer> on the stack\n");
+        printf("'freadall' needs <file_pointer> on the stack\n");
         return;
     }
     DCLANG_PTR chr_cnt = 0;
@@ -135,7 +135,7 @@ void fileseekfunc()
     if (data_stack_ptr < 3)
     {
         printf("Stack underflow!\n");
-        printf("'fseek' needs <offset> <whence> <fpointer> on the stack\n");
+        printf("'fseek' needs <offset> <whence> <file_pointer> on the stack\n");
         printf("'Whence' must be 0 (SEEK_SET), 1 (SEEK_CUR), or 2 (SEEK_END).\n");
         return;
     }
@@ -155,7 +155,7 @@ void filetellfunc()
     if (data_stack_ptr < 1)
     {
         printf("Stack underflow!\n");
-        printf("'ftell' needs a <fpointer> on the stack\n");
+        printf("'ftell' needs a <file_pointer> on the stack\n");
         return;
     }
     FILE *file_to_tell = (FILE *)(DCLANG_PTR) dclang_pop();
@@ -167,7 +167,7 @@ void filewritefunc()
 {
     if (data_stack_ptr < 3)
     {
-        printf("'fwrite' -- needs <string-address> <num_of_bytes> <fpointer> on the stack\n");
+        printf("'fwrite' -- needs <string-address> <num_of_bytes> <file_pointer> on the stack\n");
         return;
     }
     FILE *file_to_write = (FILE *)(DCLANG_PTR) dclang_pop();
@@ -181,7 +181,7 @@ void fileflushfunc()
 {
     if (data_stack_ptr < 1)
     {
-        printf("'fflush' -- needs <fpointer> on the stack\n");
+        printf("'fflush' -- needs <file_pointer> on the stack\n");
         return;
     }
     FILE *file_to_flush = (FILE *)(DCLANG_PTR) dclang_pop();
@@ -209,7 +209,7 @@ void readfunc()
     if (data_stack_ptr < 1)
     {
         printf("Stack_underflow!\n");
-        printf("'read' needs <fpointer> <buffer-pointer> <numbytes> on the stack\n");
+        printf("'read' needs <file_pointer> <buffer-pointer> <numbytes> on the stack\n");
         return;
     }
     DCLANG_PTR numbytes = (DCLANG_PTR) dclang_pop();
@@ -224,7 +224,7 @@ void writefunc()
     if (data_stack_ptr < 3)
     {
         printf("Stack_underflow!\n");
-        printf("'write' needs <fpointer> <buffer-pointer> <numbytes> on the stack\n");
+        printf("'write' needs <file_pointer> <buffer-pointer> <numbytes> on the stack\n");
         return;
     }
     DCLANG_PTR numbytes = (DCLANG_PTR) dclang_pop();
@@ -239,7 +239,7 @@ void closefunc()
     if (data_stack_ptr < 1)
     {
         printf("Stack_underflow!\n");
-        printf("'close' needs <fpointer> on the stack\n");
+        printf("'close' needs <file_pointer> on the stack\n");
         return;
     }
     int fp = (int) dclang_pop();
