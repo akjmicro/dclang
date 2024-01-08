@@ -49,7 +49,7 @@ void filereadfunc()
     FILE *file_to_read = (FILE *)(DCLANG_PTR) dclang_pop();
     DCLANG_INT num_bytes = (DCLANG_PTR) dclang_pop();
     char *buf = (char *)(DCLANG_PTR) dclang_pop();
-    DCLANG_PTR num_bytes_read = fread(buf, 1, num_bytes + 1, file_to_read);
+    DCLANG_PTR num_bytes_read = fread(buf, 1, num_bytes, file_to_read);
     // update print safety:
     if ((DCLANG_PTR)buf < MIN_STR || MIN_STR == 0)
     {
@@ -59,8 +59,6 @@ void filereadfunc()
     {
         MAX_STR = (DCLANG_PTR)buf + num_bytes_read + 1;
     }
-    // push the address of the END of our new string
-    push((DCLANG_PTR) buf + num_bytes_read);
     // push the number of bytes read
     push((DCLANG_INT) num_bytes_read);
 }

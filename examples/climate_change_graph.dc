@@ -93,16 +93,19 @@ var which_var
   climate_html !
   # load maximum temp avgs
   :tmax which_var ! make_data
-  climate_html @ dup :data_max databuf @ strreplace
+  climate_html @ dup
+    :data_max databuf @ strreplace
   climate_html ! free
   # load 5-year running avg minimum
   RUNNING_AVG_QUERY query_to_run !
   :tmin which_var ! make_data
-  climate_html @ dup :data_min_avg databuf @ strreplace
+  climate_html @ dup
+    :data_min_avg databuf @ strreplace
   climate_html ! free
   # load 5-year running avg maximum
   :tmax which_var ! make_data
-  climate_html @ dup :data_max_avg databuf @ strreplace
+  climate_html @ dup
+    :data_max_avg databuf @ strreplace
   climate_html ! free
 ;
 

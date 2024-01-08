@@ -339,7 +339,8 @@ Implemented thus far:
     myfile @ fclose                       # close the file
     "test-file.txt" "r" fopen myfile !    # re-open for reading
     var buf 1024 mkbuf buf !              # create a memory buffer
-    buf @ myfile @ 30 fread               # read 30 bytes from file, put in 'buf'
+    buf @ 30 myfile @ fread               # read 30 bytes from file, put in 'buf'
+    .                                     # print num bytes read
     # will print: Some text in my file! Woo-hoo!
     buf @ print cr
     myfile @ fclose                       # close the file

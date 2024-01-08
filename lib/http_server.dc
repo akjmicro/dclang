@@ -23,6 +23,9 @@ var _split_q
 # response headers
 "HTTP/1.1 200 OK\nContent-Type: text/plain\n\n" const HTTP_TEXT_HEADER
 "HTTP/1.1 200 OK\nContent-Type: text/html\n\n"  const HTTP_HTML_HEADER
+# (for CGI-only apps)
+"Content-Type: text/plain\n"                    const :CONTENT_TEXT
+"Content-Type: text/html\n"                     const :CONTENT_HTML
 # other string constants
 "?"                  const :QMARK
 ": "                 const :COLON
@@ -51,11 +54,6 @@ var _split_q
 : read_request
   srv_queue @ tcpaccept accepted_conn !
   get_accepted_conn zerobuf HTTP_BUFSIZE read drop
-  get_connbuf strdup received !
-;
-
-: read_request_cgi
-  0 zerobuf HTTP_BUFSIZE read drop
   get_connbuf strdup received !
 ;
 
@@ -166,12 +164,6 @@ var _split_q
   get_received free
 ;
 
-: write_response_cgi
-  "custom_response" exec
-  1 get_connbuf dup strlen write drop
-  get_received free
-;
-
 ######################
 # MAIN LISTENER LOOP #
 ######################
@@ -188,12 +180,4 @@ var _split_q
   # close down connection
   srv_queue @ close drop
   "Connection closed." print cr
-;
-
-: cgi_main
-  # variation of `acceptloop`: doesn't loop, and designed
-  # to use for a single request/response cycle via stdin/stdout
-  read_request_cgi
-  process_request
-  write_response_cgi
 ;

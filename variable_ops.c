@@ -252,7 +252,7 @@ void envgetfunc()
     {
         MAX_STR = val_addr;
     }
-    if (val_addr < MIN_STR || MIN_STR == 0)
+    if ((val_addr != 0) && (val_addr < MIN_STR || MIN_STR == 0))
     {
         MIN_STR = val_addr;
     }

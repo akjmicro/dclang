@@ -217,7 +217,7 @@ void mkbuffunc()
     DCLANG_PTR size = (DCLANG_PTR) dclang_pop();
     char *buf = (char *) calloc(size, 1);
     memset(buf, 0, size);
-    int advance = strlen(buf);
+    DCLANG_PTR advance = (DCLANG_PTR) strlen(buf);
     DCLANG_PTR bufaddr = (DCLANG_PTR) buf;
     bufaddr += advance;
     // update print safety:
@@ -554,7 +554,10 @@ void mempcpyfunc()
         perror("mempcpy -- <source> string address out-of-range.");
         return;
     }
-    push((DCLANG_PTR) memcpy((char *)dest, (char *)source, (DCLANG_PTR) size) + size);
+    push(
+        (DCLANG_PTR) memcpy(
+        (char *)dest, (char *)source, (DCLANG_PTR) size) + size
+    );
 }
 
 void memsetfunc()
@@ -572,7 +575,7 @@ void memsetfunc()
         perror("memset -- <dest> string address out-of-range.");
         return;
     }
-    push((DCLANG_INT) memset((char *)dest, (int)chr, (int)times));
+    push((DCLANG_PTR)memset((char *)dest, (int)chr, (int)times));
 }
 
 void bytes32func()

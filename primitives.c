@@ -1,4 +1,3 @@
-
 void add_primitive(char *name, char *category, void *func_ptr)
 {
     primitives_idx += 1;
