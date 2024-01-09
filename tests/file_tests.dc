@@ -1,0 +1,14 @@
+var fp
+"Hello, world!" const :hello
+
+: test_fmemopen
+  0 64 "w+" fmemopen fp !
+  :hello dup strlen fp @ fwrite drop
+  fp @ fflush
+  0 0 fp @ fseek
+  fp @ freadall drop
+  :hello
+  str= assert
+;
+
+test_fmemopen

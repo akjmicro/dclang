@@ -26,6 +26,21 @@ void fileopenfunc()
     push((DCLANG_PTR)openfptr);
 }
 
+void filememopenfunc()
+{
+    if (data_stack_ptr < 3)
+    {
+        printf("Stack underflow!\n");
+        printf("'fmemopen' needs <buf (can be 0)> <size> <open-mode> on the stack\n");
+        return;
+    }
+    char *mode = (char *)(DCLANG_PTR) dclang_pop();
+    DCLANG_PTR size = (DCLANG_PTR) dclang_pop();
+    DCLANG_PTR buf = (DCLANG_PTR) dclang_pop();
+    FILE *openfptr = fmemopen(buf, size, mode);
+    push((DCLANG_PTR)openfptr);
+}
+
 void fileclosefunc()
 {
     if (data_stack_ptr < 1)

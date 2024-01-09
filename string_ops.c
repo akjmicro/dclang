@@ -468,6 +468,7 @@ void strspnfunc()
     if (data_stack_ptr < 2)
     {
         printf("strspn -- needs <str> <test_chars_str> pointers on the stack!\n");
+        return;
     }
     DCLANG_PTR delim = (DCLANG_PTR) dclang_pop();
     DCLANG_PTR str = (DCLANG_PTR) dclang_pop();
@@ -489,6 +490,7 @@ void strcspnfunc()
     if (data_stack_ptr < 2)
     {
         printf("strcspn -- needs <str> <test_chars_str> pointers on the stack!\n");
+        return;
     }
     DCLANG_PTR delim = (DCLANG_PTR) dclang_pop();
     DCLANG_PTR str = (DCLANG_PTR) dclang_pop();

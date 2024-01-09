@@ -182,6 +182,7 @@ void add_all_primitives()
     add_primitive("toupper", "Character Types", toupperfunc);
     // file
     add_primitive("fopen", "Files", fileopenfunc);
+    add_primitive("fmemopen", "Files", filememopenfunc);
     add_primitive("fread", "Files", filereadfunc);
     add_primitive("freadline", "Files", filereadlinefunc);
     add_primitive("freadall", "Files", filereadallfunc);
