@@ -170,9 +170,8 @@ var gen_struct 3 allot
     gen_struct gen_digit_expansion
       redis_midi.get_mode
     +
-      scale_size @ @ dup "Scale size is:" print . cr
+      scale_size @ @
     absmod
-    dup "Index into scale is:" print . cr
       scale @
     +
     @
