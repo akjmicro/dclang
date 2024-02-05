@@ -75,32 +75,32 @@ create otonal 0 O- O- ,
               0 O- ,                              3_2 O- ,
               0    ,          5_4    ,            3_2    , 7_4 ,
               0 O+ , 9_8 O+ , 5_4 O+ , 11_8 O+ , 3_2 O+ ,
-var otonal_size here otonal - otonal_size !
+var otonal_size here 1 - otonal - otonal_size !
 
 create pentatonic 0 O- , 9_8 O- , 4_3 O- , 3_2 O- , 16_9 O- ,
                   0    , 9_8    , 4_3    , 3_2    , 16_9    ,
                   0 O+ ,
-var pentatonic_size here pentatonic - pentatonic_size !
+var pentatonic_size here 1 - pentatonic - pentatonic_size !
 
 create s4679 0 O- , 3_2 O- , 7_4 O- , 0 , 9_8 ,
-var s4679_size here s4679 - s4679_size !
+var s4679_size here 1 - s4679 - s4679_size !
 
 create archytas 0 0- ,                      4_3 O- , 3_2 O- ,
                 0    , 28_27     , 7_6    , 4_3    , 3_2    , 14_9 , 7_4 ,
                 0 O+ , 28_27 O+  , 7_6 O+ , 4_3 O+ , 3_2 O+ ,
-var archytas_size here archytas - archytas_size !
+var archytas_size here 1 - archytas - archytas_size !
 
 create dorian17 0 O- ,                7 O- , 10 O- ,
                 0    ,  3    , 4    , 7    , 10    , 13    , 14    ,
                 0 O+ ,  3 O+ , 4 O+ , 7 O+ , 10 O+ , 13 O+ , 14 O+ ,
                 0 O+ O+ ,
-var dorian17_size here dorian17 - dorian17_size !
+var dorian17_size here 1 - dorian17 - dorian17_size !
 
 create equable 0 O-    ,                     4_3 O- , 3_2 O- ,
                0       , 10_9    , 11_9    , 4_3    , 3_2    , 5_3    , 11_6    ,
                0 O+    , 10_9 O+ , 11_9 O+ , 4_3 O+ , 3_2 O+ , 5_3 O+ , 11_6 O+ ,
                0 O+ O+ ,
-var equable_size here equable - equable_size !
+var equable_size here 1 - equable - equable_size !
 
 var scale
 var scale_size
@@ -130,10 +130,10 @@ _setup_scale
 ########################
 
 create primes 3 , 5 , 7 , 11 ,
-var primes_size here primes - primes_size !
+var primes_size here 1 - primes - primes_size !
 
 create simple 1 , 1 ,
-var simple_size here simple - simple_size !
+var simple_size here 1 - simple - simple_size !
 
 var lengths
 var lengths_size
@@ -170,8 +170,9 @@ var gen_struct 3 allot
     gen_struct gen_digit_expansion
       redis_midi.get_mode
     +
-      scale_size @ @
+      scale_size @ @ dup "Scale size is:" print . cr
     absmod
+    dup "Index into scale is:" print . cr
       scale @
     +
     @
