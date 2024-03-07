@@ -46,7 +46,7 @@
 ;
 
 : _return_current_cell   # (pobj_addr -- answer pobj_addr)
-  dup 1 + @ 4 + over + @ swap
+  dup 1 + @ 4 + over + @ abs swap
 ;
 
 : _advance_output_index  # (pobj_addr -- pobj_addr)
