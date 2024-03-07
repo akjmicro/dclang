@@ -1,11 +1,13 @@
 # run this in an 80x24 terminal
 #
-# use:   nice -19 dclang kaleidoscope
+# usage:   nice -19 dclang kaleidoscope.dc
 
+# buffer size is 1921 (1920, but 1 extra slot for null character)
 var mybuf
-80 24 * 1 + mkbuf
+1921 mkbuf
 mybuf !
 
+# characters to choose from, right now, set to ' ' and '*'
 32 1 !
 42 2 !
 32 3 !
@@ -16,20 +18,22 @@ mybuf !
 
 : kaleidoscope
   4096 times
-    0
+    0                           # buffer offset, local on the stack
     24 times
       80 times
         i  160 / 0.25 - dup *   # This is all distance formula stuff:
         j  48 / 0.25 - dup *    # sqrt(a^2 + b^2)...distance from origin
-        + sqrt sin             # (sine of the distance from origin)
+        + sqrt sin              # (sine of the distance from origin)
         k 0.5 * * cos 0.5 * 0.51 + 2.9 * floor
         1 + @ bufadd
-        1 +
+        1 +                     # increment the buffer offset
       again
     again
-    mybuf @ 80 24 * +   0   1   memset drop
+    # add null char on buffer end
+    mybuf @ 1920 + 0 1 memset drop
+    # print the buffer
     mybuf @ print
-    0.045 sleep
+    0.04 sleep
     drop
   again
 ;

@@ -1,0 +1,39 @@
+"midi.dc" import
+"redis_midi.dc" import
+"permutations.dc" import
+
+var perm_obj
+6 setup_permutation
+perm_obj !
+
+create scale 60 , 62 , 65 , 67 , 70 , 72 ,
+-7 const TRANSPOSITION
+
+: _midi_change_ring
+  block_sigint
+  ###
+    100
+      scale
+        perm_obj @ next_permutation_item
+      +
+      @
+      TRANSPOSITION +
+      dup svpush
+    0x90
+  send_midi_reverse
+  ###
+  redis_midi.get_on_gate sleep
+  0 svpop 0x90 send_midi_reverse
+  redis_midi.get_off_gate sleep
+  unblock_sigint
+  _midi_change_ring
+;
+
+: midi_change_ring
+  "You are now entering an endless loop, hit CTRL-C to stop..." print cr
+  "Notice that you won't be able to stop until a note off event hits." print cr
+  "In this way, the notes end cleanly!" print cr
+  _midi_change_ring
+;
+
+midi_change_ring

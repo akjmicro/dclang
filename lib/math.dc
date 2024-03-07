@@ -1,5 +1,7 @@
 "digit_sum: need <number> and <base> on the stack!" const :DIGIT_SUM_ERROR
 
+: isneg 1 swap / 0 < ;
+
 : absmod
   dup svpush
   %

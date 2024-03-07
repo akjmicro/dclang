@@ -1,159 +1,169 @@
-# An implementation of a generic "change-ringing" type permutation
-# algorithm that has a "generator-like" behavior, i.e. the list
-# of unfolding changes doesn't sit in memory all at once, but
-# is called via a word `next_permutation` to deliver the "next"
-# permuted item.
-#
-# A "permutation object" will be a space in memory that the user creates manually via `create`
-# or via a convenience word, "setup_permutation_space" that, given a single item representing a
-# number of items to permute, will return the appropriate structure for the user, with
-# sensible defaults
-#
-# The layout of memory cells:
-#
-# | num_values | read_index | x | y | direction | val0 | val1 | val2 | ...
-#
-# So, the 1st 4 slots manage all the algorithm would need to produce generating output.
-#
-# "num_values" represents the number of values starting with "val0" that are actually being
-# put through permutation. So, permuting [ 0, 1, 2, 3 ] would mean this would be set to 4.
-#
-# The "read_index" is actually the thing that will be used to iterate through the values
-# here represented by "val0", "val1" and so on.
-#
-# The "x" and "y" are also pointers to a pair of memory addresses that will be subject
-# to cell swapping, which actually performs the active. "direction" is needed for the zig-zag
-# of the swapped value pair across the collection.
+################################################################################
+# The https://en.wikipedia.org/wiki/Steinhaus-Johnson-Trotter_algorithm        #
+# (AKA "SJT")                                                                  #
+#                                                                              #
+# An implementation of a generic "change-ringing" type permutation             #
+# algorithm that has a "generator-like" behavior, i.e. the list of             #
+# unfolding changes doesn't sit in memory all at once, but is called via       #
+# a word `next_permutation` to deliver the "next" permuted item.               #
+#                                                                              #
+# A "permutation object" will be a space in memory that the user creates       #
+# manually via `create` or via a convenience word, "setup_permutation"         #
+# that, given a single item representing a number of items to permute,         #
+# will return the appropriate structure for the user, with sensible            #
+# defaults.                                                                    #
+#                                                                              #
+# The layout of memory cells:                                                  #
+#                                                                              #
+# num_values | output_index | highest_val | highest_val_slot |                 #
+# val0 | val1 | val2 | ...                                                     #
+#                                                                              #
+# "num_values" represents the number of values starting with "val0"            #
+# that are actually being put through permutation. So, permuting               #
+# [ 0, 1, 2, 3 ] would mean this would be set to 4.                            #
+################################################################################
 
-: setup_permutation_space
+"math.dc" import   # grab `isneg` definition
+
+: setup_permutation
   here svpush
-  dup ,
-  0 ,
-  dup 2 - ,
-  dup 1 - ,
-  -1 ,
-  times i , again
+  dup , 0 , 0 , 0 ,       # size, output_idx, highest_val, highest_val_slot
+  times -1 i * , again    # values and sign for direction
   svpop
 ;
 
-: _pmswap
-  2dup @ svpush @ swap ! svpop swap !
+: show_permutation_data
+  dup @ 4 +
+  times dup i + @ . again
+  drop
 ;
 
-: _get_num_items
-  0 svpick @
+: show_permutation
+  dup @ times
+    dup 4 + i + @ abs .
+  again
+  cr drop
 ;
 
-: _get_read_index
-  0 svpick 1 + @
+: _return_current_cell   # (pobj_addr -- answer pobj_addr)
+  dup 1 + @ 4 + over + @ swap
 ;
 
-: _get_x
-  0 svpick 2 + @
+: _advance_output_index  # (pobj_addr -- pobj_addr)
+  dup 1 + dup @ 1 + 2 pick @ % swap !
 ;
 
-: _get_y
-  0 svpick 3 + @
-;
+: _needs_permuting?    dup 1 + @ 0 = ;  # (pobj_addr    --  pobj_addr bool)
+: _get_perm_val_i      over 4 + + @ ;   # (pobj_addr i  --  pobj_addr perm_value)
+: _set_perm_val_i      svpush over 4 + svpop + ! ; # (pobj_addr val i -- pobj_addr)
+: _get_curr_high_val   dup 2 + @ ;      # (pobj_addr    --  pobj_addr high_value)
+: _set_curr_high_val   over 2 + ! ;     # (pobj_addr v  --  pobj_addr)
+: _get_curr_high_slot  dup 3 + @ ;      # (pobj_addr    --  pobj_addr high_slot)
+: _set_curr_high_slot  over 3 + ! ;     # (pobj_addr    --  pobj_addr high_slot)
 
-: _get_direction
-  0 svpick 4 + @
-;
-
-: _get_values_start
-  0 svpick 5 +
-;
-
-: _reset_read_index_to_0
-  0 0 svpick 1 + !
-;
-
-: _show_value
-  _get_values_start _get_read_index + @
-;
-
-: _increment_read_index
-    _get_read_index 1 +
-      0 svpick 1 +
-  !
-;
-
-: _swap_last_two
-    _get_values_start _get_num_items + 1 -
-      dup 1 -
-  _pmswap
-;
-
-: _swap_first_two
-  _get_values_start dup 1 + _pmswap
-;
-
-: _swap_x_y_vals
-    _get_values_start _get_x +
-      _get_values_start _get_y +
-  _pmswap
-;
-
-: _positive_direction
-    1
-      0 svpick 4 +
-  !
-;
-
-: _negative_direction
-    -1
-      0 svpick 4 +
-  !
-;
-
-: _x_addr
-  0 svpick 2 +
-;
-
-: _y_addr
-  0 svpick 3 +
-;
-
-: _update_x_and_y
-  _get_x _get_direction + _x_addr !
-  _get_y _get_direction + _y_addr !
-;
-
-: _next_permutation_helper
-  # check bounds
-  # if x = -1, swap PSIZE - 1 and PSIZE -2 indices
-  # then change direction to +1
-    _get_x -1 =    # 'x' index has dipped below the
-                                      # starting point of values.
-  if
-    _swap_last_two
-    _positive_direction
-  # on the other hand, if y = PSIZE, swap slots 0 and 1
-  # and change direction to -1
+: _common_compare
+    # (previous arg to `and` here from caller)
+    0 svpick
+      2 pick _get_curr_high_val swap drop
+    >
+  and
+  if  # update the current high val _and_ its slot number
+    svpop _set_curr_high_val
+    i _set_curr_high_slot
   else
-    _get_y _get_num_items >=
-  if
-    _swap_first_two
-    _negative_direction
-  else
-    _swap_x_y_vals
-  endif endif
-  # update the slots for next round
-  _update_x_and_y
-;
-
-: next_permutation
-  # A word that does a different algorithm for permutation, one that
-  # requires less 'state' (simpler) and does not have a recursive-based
-  # basic description.
-  svpush
-    _get_read_index _get_num_items >=
-  if
-    _reset_read_index_to_0
-    _next_permutation_helper
+    svdrop
   endif
-  _show_value
-  # update the data pointer for grabbing the permutation
-  _increment_read_index
+;
+
+: _set_largest_mobile_cell   # (pobj_addr -- pobj_addr)
+  # Set the highest mobile cell on the `pobj` memory "object".
+  # We'll use the `sv` stack to track the highest absolute value encountered.
+  # If a higher value is encountered, update. If not, do nothing.
+  0 _set_curr_high_val   # (start out with a minimal value)
+  dup @ times
+    # Test the extremes: if `i` is cell `0` and `isneg` is `true`, this cell
+    # cannot be considered. Ditto the uppermost cell being positive.
+    i _get_perm_val_i isneg
+    if      # cell value is negative
+      i 0 =
+      if    # first cell and negative, skip
+        again
+      else  # normal case for negative
+        i _get_perm_val_i abs dup svpush
+          over i 1 - _get_perm_val_i abs swap drop
+        >
+        _common_compare
+      endif
+    else    # cell value is positive
+      i over @ 1 - <>
+      if    # normal case for positive
+        i _get_perm_val_i abs dup svpush
+          over i 1 + _get_perm_val_i abs swap drop
+        >
+        _common_compare
+      endif
+    endif
+  again
+;
+
+: _setup_swap
+  _get_curr_high_slot dup svpush _get_perm_val_i
+  isneg
+  if
+    svpop dup 1 -
+  else
+    svpop dup 1 +
+  endif
+  swap 4 +
+  swap 4 +
+  2 pick + swap
+  2 pick + swap
+;
+
+: _pmswap 2dup @ svpush @ swap ! svpop swap ! ;
+
+: _swap_neighbor_cells
+  _setup_swap
+  _pmswap
+;
+
+: _reverse_direction_of_greater_values
+  _get_curr_high_val abs svpush
+  dup @ times
+      i _get_perm_val_i abs
+      0 svpick
+    >
+    if
+      i _get_perm_val_i -1 *
+      i _set_perm_val_i
+    endif
+  again
   svdrop
+;
+
+######################
+# The main API words #
+######################
+
+: next_permutation_item
+  # After setting up a `pobj`, call this with `<varname> @ next_permutation_item
+  # This is a generator that feeds one value at a time
+  _return_current_cell
+  _advance_output_index
+  _needs_permuting?
+  if
+    _set_largest_mobile_cell
+    _swap_neighbor_cells
+    _reverse_direction_of_greater_values
+  endif
+  drop
+;
+
+: print_next_permutation
+  # Only displays all X values in a row
+  dup show_permutation
+  _set_largest_mobile_cell
+  _swap_neighbor_cells
+  _reverse_direction_of_greater_values
+  drop
 ;
