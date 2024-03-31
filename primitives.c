@@ -207,10 +207,12 @@ void add_all_primitives()
     add_primitive("_sqlite_finalize", "SQLite", _sqlitefinalizefunc);
     add_primitive("_sqlite_exec", "SQLite", _sqliteexecfunc);
     add_primitive("_sqlite_close", "SQLite", _sqliteclosefunc);
-    // tcp networking using sockets
+    // tcp/udp networking using sockets
     add_primitive("tcplisten", "Sockets", tcplistenfunc);
     add_primitive("tcpaccept", "Sockets", tcpacceptfunc);
     add_primitive("tcpconnect", "Sockets", tcpconnectfunc);
+    add_primitive("udprecv", "Sockets", udprecvfunc);
+    add_primitive("udpsend", "Sockets", udpsendfunc);
     // time
     add_primitive("clock", "Time", clockfunc);
     add_primitive("sleep", "Time", sleepfunc);

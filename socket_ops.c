@@ -4,6 +4,7 @@
 
 
 struct sockaddr_in serv_addr, cli_addr;
+struct sockaddr_in udp_serv_addr, udp_cli_addr, dest_addr;
 
 
 void tcplistenfunc()
@@ -63,8 +64,8 @@ void tcpconnectfunc()
     if (sockfd < 0) perror("tcpconnect -- ERROR opening socket");
     DCLANG_INT32 portno = (DCLANG_INT32) dclang_pop();
     struct sockaddr_in host_addr;
-    char *servername = (char *) (DCLANG_PTR) dclang_pop();
-    struct hostent *server = gethostbyname(servername);
+    char *host = (char *) (DCLANG_PTR) dclang_pop();
+    struct hostent *server = gethostbyname(host);
     if (server == NULL) {
         fprintf(stderr, "tcpconnect -- ERROR, no such host\n");
         exit(0);
@@ -76,4 +77,90 @@ void tcpconnectfunc()
     if (connect(sockfd, (struct sockaddr *)&host_addr, sizeof(host_addr)) < 0)
         perror("tcpconnect -- ERROR connecting");
     push((DCLANG_INT32) sockfd);
+}
+
+
+/////////
+// UDP //
+/////////
+
+// Possible TODO: make these more 'modular' and configurable w/re: socket opts.
+
+void udprecvfunc() {
+    // Receive data over UDP
+    if (data_stack_ptr < 3) {
+        printf("udprecv -- need <port_number> <max_bytes> <buffer> on the stack\n");
+        return;
+    }
+    // stack values
+    char *buffer = (char *) (DCLANG_PTR) dclang_pop();
+    DCLANG_INT32 max_bytes = (DCLANG_INT32) dclang_pop();
+    DCLANG_INT32 portno = (DCLANG_INT32) dclang_pop();
+    // make a socket
+    DCLANG_INT32 sockfd = socket(AF_INET, SOCK_DGRAM, 0);
+    if (sockfd < 0) {
+        perror("udprecv -- ERROR opening socket");
+        return;
+    }
+    socklen_t udp_clilen = sizeof(udp_cli_addr);
+    bzero((char *) &udp_serv_addr, sizeof(udp_serv_addr));
+    udp_serv_addr.sin_family = AF_INET;
+    udp_serv_addr.sin_addr.s_addr = INADDR_ANY;
+    udp_serv_addr.sin_port = htons(portno);
+    // bind the socket
+    if (bind(sockfd, (struct sockaddr *) &udp_serv_addr,
+             sizeof(udp_serv_addr)) < 0) {
+        perror("udprecv -- ERROR on binding");
+    }
+    ssize_t num_bytes = recvfrom(
+        sockfd, buffer, max_bytes, 0,
+        (struct sockaddr *)&udp_cli_addr, &udp_clilen
+    );
+    if (num_bytes < 0) {
+        perror("udprecv -- ERROR receiving data");
+    }
+    buffer[num_bytes] = '\0'; // Null terminate the received data
+    close(sockfd);
+    push((DCLANG_INT32) num_bytes);
+}
+
+
+void udpsendfunc() {
+    // Send data over UDP to a specified host and port
+    if (data_stack_ptr < 3) {
+        printf("udpsend -- need <host> <port> <buffer> on the stack\n");
+        return;
+    }
+    // stack values
+    char *buffer = (char *) (DCLANG_PTR) dclang_pop();
+    DCLANG_INT32 portno = (DCLANG_INT32) dclang_pop();
+    char *host = (char *) (DCLANG_PTR) dclang_pop();
+    // make a socket
+    DCLANG_INT32 sockfd = socket(AF_INET, SOCK_DGRAM, 0);
+    if (sockfd < 0) {
+        perror("udpsend -- ERROR opening socket");
+        return;
+    }
+    struct hostent *server = gethostbyname(host);
+    if (server == NULL) {
+        fprintf(stderr, "udpsend -- ERROR, no such host\n");
+        return;
+    }
+    bzero((char *) &dest_addr, sizeof(dest_addr));
+    dest_addr.sin_family = AF_INET;
+    bcopy(
+        (char *)server->h_addr,
+        (char *)&dest_addr.sin_addr.s_addr,
+        server->h_length
+    );
+    dest_addr.sin_port = htons(portno);
+    ssize_t num_bytes = sendto(
+        sockfd, buffer, strlen(buffer) + 1, 0,
+        (struct sockaddr *)&dest_addr, sizeof(dest_addr)
+    );
+    if (num_bytes < 0) {
+        perror("udpsend -- ERROR sending data");
+    }
+    close(sockfd);
+    push((DCLANG_INT32) num_bytes);
 }
