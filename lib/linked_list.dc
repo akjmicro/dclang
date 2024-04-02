@@ -2,70 +2,14 @@ var __private_ll_token_holder__
 
 " " const :blank
 
-: _ll_is_empty  # ( list_struct ) -- ( list_struct is_empty  )
-  dup dup 1 + @ 0 = swap @ 0 = and
-;
-
-: _ll_seed      # ( val list_struct ) -- ( )
-  here 2dup swap 1 + ! swap !
-  , 0 , 0 ,
-;
-
-: _ll_get_tail # ( val list_struct ) -- ( val list_struct tail_addr )
-  dup 1 + @
-;
-
-: _ll_update_tail  # ( list_struct tail_addr ) -- ( val list_struct tail_addr )
-  dup 2 + here swap !
-;
-
-: _ll_set_tail # ( val list_struct taddr ) -- ( )
-  svpush here swap 1 + !
-  , svpop , 0 ,
-;
-
-: _ll_get_head # ( list_struct ) -- ( list_struct head_addr )
-  dup @
-;
-
-: _ll_get_next  # ( node ) -- ( next_addr )
-  2 + @
-;
-
-: _ll_append
-  _ll_is_empty
-  if
-    _ll_seed
-  else
-    _ll_get_tail
-    _ll_update_tail
-    _ll_set_tail
-  endif
-;
-
-: _ll_init_nums_helper  # ( ls ) -- ( ls tok )
+: _list_init_nums_helper  # ( list ) -- ( list tok )
   null :blank __private_ll_token_holder__ strtok
   dup null =
   if
     2drop
   else
-    tonum over _ll_append
-    _ll_init_nums_helper
-  endif
-;
-
-: _ll_execute  # ( exec_str addr ) -- ( exec_str addr )
-  dup @ 2 pick exec
-;
-
-: _ll_map_helper  # ( exec_str next_addr  )
-  _ll_get_next
-  dup 0 =
-  if
-    2drop
-  else
-    _ll_execute
-    _ll_map_helper
+    tonum over swap lpush
+    _list_init_nums_helper
   endif
 ;
 
@@ -73,35 +17,19 @@ var __private_ll_token_holder__
 # Public API #
 ##############
 
-: ll_setup
-  var 2 allot   # [ head tail ]
-;
-
-: ll_append  # ( val list_struct )
-  _ll_append
-;
-
-: ll_init_nums  # ( all_nums_str list_struct ) -- ( ls  )
+: list_init_nums  # ( all_nums_str list ) -- ( list )
+  depth 2 <
+  if
+    "list_int_nums: need <all_nums_str> <list> on the stack." print cr
+    return
+  endif
   swap
   :blank __private_ll_token_holder__ strtok
   dup null =
   if
     2drop
   else
-    tonum over _ll_append
-    _ll_init_nums_helper
-  endif
-;
-
-: ll_map  # ( exec_str list_struct ) -- ( exec_str head_addr )
-  _ll_is_empty
-  if
-    2drop
-    "empty" print cr
-  else
-    _ll_get_head
-    swap drop
-    _ll_execute
-    _ll_map_helper
+    tonum over swap lpush
+    _list_init_nums_helper
   endif
 ;

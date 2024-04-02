@@ -91,7 +91,7 @@ void execfunc() {
     printf("If you call 'exec' repeatedly without using a string constant, "
            "it will result in the string memory getting into a bad state.\n"
            "HINT: try using a constant like: \n"
-           "      \".\" const :. \n"
+           "      \"foo\" const :foo \n"
            " and then calling 'exec' with the constant on the stack.\n");
 }
 
