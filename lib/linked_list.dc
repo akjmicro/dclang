@@ -23,7 +23,7 @@ var __private_ll_token_holder__
     _lmap_helper
   else
     2drop svdrop           # get rid of most of the working data
-    svpop                  # leave new list on stack,
+    svpop                  # leave new list on stack
   endif
 ;
 
