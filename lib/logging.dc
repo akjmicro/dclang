@@ -1,0 +1,33 @@
+"string.dc" import
+
+var logfile_name
+var logfile
+
+128 const :LOGLINE_SIZE
+:LOGLINE_SIZE mkbuf const :LOGLINE
+"%FT%T " const :TIMESTAMP_FORMAT
+"\n" const :NL
+
+: open_log
+  logfile_name !
+  logfile_name @ "a" fopen
+  logfile !
+;
+
+: to_log
+  # reset line buf to zeroes
+  :LOGLINE 0 :LOGLINE_SIZE memset drop
+  # add timestamp
+  :LOGLINE epoch :TIMESTAMP_FORMAT epoch->dt dup strlen mempcpy
+  # add message
+  swap dup strlen mempcpy
+  # add newline
+  :NL dup strlen mempcpy
+  # write out and flush to the logfile
+  :LOGLINE dup strlen logfile @ fwrite
+  logfile @ fflush
+;
+
+: close_log
+  logfile @ fclose
+;

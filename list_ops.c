@@ -20,6 +20,18 @@ void listmakefunc() {
     push((DCLANG_PTR)list);
 }
 
+void listnextfunc() {
+    if (data_stack_ptr < 1) {
+        printf("_lnext -- stack underflow; need <existing_list_node> on the stack! ");
+        return;
+    }
+    DCLANG_PTR list_ptr = (DCLANG_PTR)dclang_pop();
+    // Convert pointers to the actual node structure
+    struct Node *list = (struct Node *)list_ptr;
+    struct Node *next = list->next;
+    push((DCLANG_PTR) next);
+}
+
 // Function to append a node to the tail of the linked list
 void listpushfunc() {
     if (data_stack_ptr < 2) {

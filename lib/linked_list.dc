@@ -2,14 +2,39 @@ var __private_ll_token_holder__
 
 " " const :blank
 
-: _list_init_nums_helper  # ( list ) -- ( list tok )
+: _list_init_nums_helper  # ( list ) -- ( list )
   null :blank __private_ll_token_holder__ strtok
   dup null =
   if
-    2drop
+    drop
   else
     tonum over swap lpush
     _list_init_nums_helper
+  endif
+;
+
+: _lmap_helper
+  over 0 svpick _lnext <>
+  if
+    0 svpick 0 l@          # grab next cell data
+    over exec              # execute the word
+    1 svpick swap lpush    # push the result to the new list
+    svpop _lnext svpush    # advance the list cell
+    _lmap_helper
+  else
+    2drop svdrop           # get rid of most of the working data
+    svpop                  # leave new list on stack,
+  endif
+;
+
+: _lshow_helper
+  2dup _lnext <>
+  if
+    dup 0 l@ .
+    _lnext
+    _lshow_helper
+  else
+    2drop cr
   endif
 ;
 
@@ -17,19 +42,48 @@ var __private_ll_token_holder__
 # Public API #
 ##############
 
-: list_init_nums  # ( all_nums_str list ) -- ( list )
-  depth 2 <
+: linit_nums  # ( all_nums_str ) -- ( list )
+  ############################################################
+  # Produce a list of nums based on a space-delimited string #
+  # of numbers                                               #
+  ############################################################
+  depth 1 <
   if
-    "list_int_nums: need <all_nums_str> <list> on the stack." print cr
+    "linit_nums: need <all_nums_str> on the stack." print cr
     return
   endif
-  swap
+  lmake swap
   :blank __private_ll_token_holder__ strtok
   dup null =
   if
-    2drop
+    drop
   else
     tonum over swap lpush
     _list_init_nums_helper
   endif
+;
+
+: lmap  # ( list word_str_for_eval ) -- ( new_list )
+  # Takes an existing list and a dclang word (as a string)
+  # and returns a new list where the data from the existing list
+  # gets evaluated by the word. The word should take a single
+  # argument.
+  depth 2 <
+  if
+    "lmap: need <list> <word_as_string> on the stack." print cr
+    return
+  endif
+  lmake svpush
+  over svpush
+  _lmap_helper             # enter the helper loop
+;
+
+: lshow  # ( list ) -- ()
+  depth 1 <
+  if
+    "lshow: need <list> on the stack." print cr
+    return
+  endif
+  dup
+  _lshow_helper
 ;

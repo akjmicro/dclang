@@ -118,6 +118,7 @@ void add_all_primitives()
 #endif
     // linked lists
     add_primitive("lmake", "Lists", listmakefunc);
+    add_primitive("_lnext", "Lists", listnextfunc);
     add_primitive("l!", "Lists", listsetfunc);
     add_primitive("l@", "Lists", listgetfunc);
     add_primitive("lpush", "Lists", listpushfunc);
