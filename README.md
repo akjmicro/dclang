@@ -54,30 +54,8 @@ ____________
   alias dclang='rlwrap dclang`
   ```
 
-* For MIDI, you'll also want to use `portmidi_list` in the `dclang` interpreter
-  to determine the number code for the device you want to write to
-  (will be an "output" device). So, for example, if one runs `dclang`, you can do this:
-  ```
-  portmidi_list
-  ```
-  ...and you'll see output similar to this:
-
-  ```
-  0: ALSA, Midi Through Port-0 (default output)
-  1: ALSA, Midi Through Port-0 (default input)
-  2: ALSA, VirMIDI 1-0 (output)
-  3: ALSA, VirMIDI 1-0 (input)
-  4: ALSA, VirMIDI 1-1 (output)
-  5: ALSA, VirMIDI 1-1 (input)
-  6: ALSA, VirMIDI 1-2 (output)
-  7: ALSA, VirMIDI 1-2 (input)
-  8: ALSA, VirMIDI 1-3 (output)
-  9: ALSA, VirMIDI 1-3 (input)
-  ```
-  ...so, if I want to use `VirMIDI 1-0 (output)`, I'd tell the shell environment:
-  ```
-  export PORTMIDI_DEVNUM=2
-  ```
+* Interested in using an RPN language for MIDI coding? For MIDI instructions,
+  check out the details in `examples/midi/README.md`
 
 ### ABOUT:
 
