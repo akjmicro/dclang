@@ -1,27 +1,16 @@
 # This illustrates using decimal expansions of a fraction division in any base
 # being used to make music via MIDI
 #
-# First, make sure you have a running redis server on your machine
+# First, follow the more general MIDI/Redis setup instructions in this directory's README.md
 #
-# Then, to run, do `redis-cli` in a shell, making sure you set the following vars:
-#     tempo, gate, base, div, mode, transp
-# (they should all be integers)
-#
-# Find which midi device you want to write to by running the midi module
-# from the commandline:
-#   dclang lib/midi.dc
-#
-# You'll see the integer of the device at the front. Use it for
-# DCLANG_MIDI_DEVNUM in the next command.
-#
-# Then, in another shell, open this script, your command should be:
-#   DCLANG_MIDI_DEVNUM=<some#> EDO=<some#> scale=<scale_choice> rhythm=<rhythm_choice> dclang midi_fractions.dc
+# Shell command should be:
+#   PORTMIDI_DEVNUM=<some#> EDO=<some#> scale=<scale_choice> rhythm=<rhythm_choice> dclang midi_fractions.dc
 #
 # The various values for these environment variables:
 #
 # EDO can be 16384 for a 'virtual Just Intonation' sound. Otherwise, choose a lower-valued EDO of interest.
 # scale can be one of the scales defined below after each 'create' statement.
-# rhythm can be one of 'primes', 'simple', or 'euclidean' (euclidean rhtyhm would be controlled via redis varaiables)
+# rhythm can be one of 'primes', 'simple', or 'euclidean' (euclidean rhythm would be controlled via redis varaiables)
 #                                                         (The variables are 'euclid_numerator' and 'euclid_denominator')
 
 "math.dc" import

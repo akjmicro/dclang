@@ -1,14 +1,4 @@
 # Makes MIDI music via `digit_sum`
-#
-# First, make sure you have a running redis server on your machine
-#
-# Then, to run, do `redis-cli` in a shell, making sure you set the following
-# vars:
-#     tempo, base, mul, mode, transp
-# (they should all be integers)
-#
-# Then, in another shell, open this script, your command should be:
-# dclang midi_digit_sum.dc
 
 "math.dc" import
 "midi.dc" import
@@ -33,7 +23,7 @@
 7 4 generate_interval const H7TH
 
 create scale 0 O- ,                           5TH O- ,      H7TH O- ,
-             0     , 2ND    , 3RD    , 4TH^ , 5TH    , 6TH, H7TH ,
+             0     , 2ND    , 3RD    , ^4TH , 5TH    , 6TH, H7TH ,
              0 O+ ,  2ND O+ , 3RD O+ ,
 var dummy
 var scale_size

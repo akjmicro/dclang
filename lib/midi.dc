@@ -1,4 +1,4 @@
-"DCLANG_MIDI_DEVNUM" const :DCLANG_MIDI_DEVNUM
+"PORTMIDI_DEVNUM" const :PORTMIDI_DEVNUM
 
 # These will be used again (unused ATM) once MIDI read functionality
 # is re-implemented via `portmidi`
@@ -12,10 +12,10 @@ var midi_edo
 : check_mididev
   cr "Here are your available MIDI devices:" print cr
   _pm_list cr
-  :DCLANG_MIDI_DEVNUM envget dup
+  :PORTMIDI_DEVNUM envget dup
   0 =
   if
-    :DCLANG_MIDI_DEVNUM print " is not set in your environment!" print cr
+    :PORTMIDI_DEVNUM print " is not set in your environment!" print cr
     "MIDI functionality will not work. Please exit from dclang, set that value, and try again!" print cr
     drop
     return

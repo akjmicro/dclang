@@ -1,14 +1,4 @@
 # Makes MIDI music via `digit_sum`
-#
-# First, make sure you have a running redis server on your machine
-#
-# Then, to run, do `redis-cli` in a shell, making sure you set the following
-# vars:
-#     tempo, base, mul, mode, transp
-# (they should all be integers)
-#
-# Then, in another shell, open this script, your command should be:
-# dclang midi_digit_sum_enharmonic.dc
 
 "math.dc" import
 "midi.dc" import

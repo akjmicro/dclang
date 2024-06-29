@@ -76,7 +76,7 @@ ____________
   ```
   ...so, if I want to use `VirMIDI 1-0 (output)`, I'd tell the shell environment:
   ```
-  export DCLANG_PORTMIDI_DEVNUM=2
+  export PORTMIDI_DEVNUM=2
   ```
 
 ### ABOUT:
