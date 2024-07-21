@@ -30,17 +30,16 @@ dummy keys_to_check - const LEN_KEYS
   for
     get_query
       keys_to_check i + @
-      dup svpush
+      2dup
     strfind
     if
-      svpop dup h@ swap redis_set
+      dup h@ swap redis_set
+      drop
       exitfor
+    else
+      2drop
+      next
     endif
-    svdepth 1 >=
-    if
-      svdrop
-    endif
-  next
 ;
 
 : custom_response
