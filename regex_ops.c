@@ -73,7 +73,13 @@ void regreadfunc()
 {
     if (data_stack_ptr < 2)
     {
-        printf("regread -- stack underflow; need <regex_exec_result> <index> on the stack! ");
+        printf("regread -- stack underflow; need <regexec_result> <match_index> on the stack! \n");
+        printf("regread will return a start and end index relative to the original searched string. \n");
+        printf("If the user actually wants that substring, it makes sense to have saved the original \n");
+        printf("string, and put the results of regread at the top of stack, then call `strslice`,\n");
+        printf("which needs to be imported from the 'string' module.");
+        printf("");
+        printf("A full workflow is documented by calling the `regex_help` word.\n");
         return;
     }
 

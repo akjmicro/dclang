@@ -45,7 +45,7 @@ void showstackfunc()
     fprintf(ofp, "save_stack: <%lu>%s", save_data_stack_ptr, sv_joiner);
     fflush(ofp);
     for (y=0; y < save_data_stack_ptr; y++) {
-        fprintf(ofp, "%0.19g ", save_data_stack[y]);
+        fprintf(ofp, "%0.19g ", data_stack[y + DATA_STACK_SIZE]);
         fflush(ofp);
     }
     fprintf(ofp, "\n");

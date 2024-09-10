@@ -127,18 +127,23 @@ void svpushfunc()
         save_data_stack_ptr = 0;
     }
     DCLANG_FLT val = dclang_pop();
-    save_data_stack[save_data_stack_ptr++] = val;
+    data_stack[save_data_stack_ptr++ + DATA_STACK_SIZE] = val;
 }
 
 void svpopfunc()
 {
-    DCLANG_FLT val = save_data_stack[--save_data_stack_ptr];
+    if (save_data_stack_ptr <= 0) {
+        printf("svdrop -- stack underflow!\n");
+        save_data_stack_ptr = 0;
+        return;
+    }
+    DCLANG_FLT val = data_stack[--save_data_stack_ptr + DATA_STACK_SIZE];
     push_no_check(val);
 }
 
 void svdropfunc()
 {
-    if (save_data_stack_ptr < 1) {
+    if (save_data_stack_ptr <= 0) {
         printf("svdrop -- stack underflow!\n");
         return;
     }
@@ -147,7 +152,7 @@ void svdropfunc()
 
 void svpickfunc()
 {
-    if (save_data_stack_ptr < 1) {
+    if (save_data_stack_ptr <= 0) {
          printf("svpick -- stack underflow!\n");
          return;
     }
@@ -156,7 +161,7 @@ void svpickfunc()
         printf("svpick -- stack not deep enough!\n");
         return;
     }
-    push(save_data_stack[save_data_stack_ptr - (svpick_idx + 1)]);
+    push(data_stack[(save_data_stack_ptr - (svpick_idx + 1)) + DATA_STACK_SIZE]);
 }
 
 void svdepthfunc()

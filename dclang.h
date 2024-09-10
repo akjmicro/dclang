@@ -18,7 +18,7 @@
 #define DCLANG_UINT32  unsigned int
 // end of data type macros
 
-#define DATA_STACK_SIZE 128
+#define DATA_STACK_SIZE 16
 #define RETURN_STACK_SIZE 128
 #define MAXWORD 1048576
 #define IBUFSIZE 128
@@ -45,6 +45,7 @@ DCLANG_PTR   max_iptr;
 // data stack
 DCLANG_FLT data_stack[DATA_STACK_SIZE * 2];
 DCLANG_PTR data_stack_ptr;
+DCLANG_PTR save_data_stack_ptr;
 // return stack
 DCLANG_INT return_stack[RETURN_STACK_SIZE];
 DCLANG_PTR return_stack_ptr;
@@ -52,10 +53,6 @@ DCLANG_PTR return_stack_ptr;
 DCLANG_INT loop_counter[3];
 DCLANG_PTR loop_counter_ptr;
 
-// save data stack
-DCLANG_FLT save_data_stack[DATA_STACK_SIZE];
-DCLANG_PTR save_data_stack_ptr;
-// variables space
 DCLANG_FLT vars[NUMVARS];
 DCLANG_PTR varsidx;
 // hashwords
