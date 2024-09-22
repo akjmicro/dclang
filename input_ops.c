@@ -142,7 +142,7 @@ DCLANG_INT dclang_import(char *infilestr) {
         repl();
         return 0;
     }
-    char *full_path = malloc(512);
+    char *full_path = dclang_malloc(512);
     memset(full_path, 0, 512);
     char *slash = "/";
     strcat(full_path, prefix);
@@ -208,7 +208,7 @@ void grabinput() {
     }
     DCLANG_PTR string_addr = (DCLANG_PTR) string_start;
     DCLANG_PTR string_size = (DCLANG_PTR)(string_here - string_start);
-    char *string_dest = malloc(string_size + 1);
+    char *string_dest = dclang_malloc(string_size + 1);
     char nullstr[] = "\0";
     memcpy(string_dest, (char *)((DCLANG_PTR)&string_pad[0] + string_addr), string_size);
     DCLANG_PTR string_dest_PTR = (DCLANG_PTR) string_dest;

@@ -15,9 +15,9 @@ struct tree_entry *
 make_tree_entry(char *key, DCLANG_FLT value)
 {
     struct tree_entry *new_tree =
-        (struct tree_entry *)calloc(sizeof(struct tree_entry), 1);
+        (struct tree_entry *) dclang_malloc(sizeof(struct tree_entry));
     if(!new_tree) {
-        printf("make_tree_entry calloc fail\n");
+        printf("make_tree_entry malloc fail\n");
         exit(1);
     }
     new_tree->key = strdup(key);
@@ -61,9 +61,10 @@ void treegetfunc()
     // Pop args
     char *search_key = (char *)(DCLANG_PTR) dclang_pop();
     DCLANG_PTR tree_idx = (DCLANG_PTR) dclang_pop();
-
-    struct tree_entry *te = make_tree_entry(strdup(search_key), 0);
-    struct tree_entry *retval = tfind(te, &tree_roots[tree_idx], tree_compare_func);
+    struct tree_entry dummy_tree;
+    dummy_tree.key = search_key;
+    dummy_tree.value = 0;
+    struct tree_entry *retval = tfind(&dummy_tree, &tree_roots[tree_idx], tree_compare_func);
     if (retval == NULL)
     {
         push((DCLANG_PTR) 0);
@@ -129,7 +130,7 @@ void treedeletefunc()
 
     struct tree_entry *te_del = make_tree_entry(strdup(key), 0);
     tdelete(te_del, &tree_roots[tree_idx], tree_compare_func);
-    free(te_del);
+    dclang_free(te_del);
 }
 
 #ifdef HAS_TREEDESTROY
@@ -140,7 +141,7 @@ void treedestroyfunc()
         return;
     }
     DCLANG_PTR tree_idx = (DCLANG_PTR) dclang_pop();
-    tdestroy(tree_roots[tree_idx], free);
+    tdestroy(tree_roots[tree_idx], dclang_free);
     tree_roots[tree_idx] = NULL;
 }
 #endif

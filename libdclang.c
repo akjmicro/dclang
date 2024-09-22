@@ -9,6 +9,15 @@ Born on 2018-05-05 */
 
 #include <ctype.h>
 #include <stdio.h>
+#include "noheap/malloc.c"
+#include "noheap/search.h"
+#include "noheap/hsearch.c"
+#include "noheap/insque.c"
+#include "noheap/tsearch.h"
+#include "noheap/tsearch.c"
+#include "noheap/tfind.c"
+#include "noheap/tdelete.c"
+#include "noheap/tdestroy.c"
 #include <stdlib.h>
 #include <inttypes.h>
 #include <string.h>
@@ -17,7 +26,6 @@ Born on 2018-05-05 */
 #include <math.h>
 #include <time.h>
 #include <fcntl.h>
-#include <search.h>
 #include <signal.h>
 
 // our main types, etc.
@@ -116,5 +124,5 @@ void dclang_initialize()
     srand(time(NULL));
     // create the global hash table
     hcreate(1048576);
-    hashwords = (char**)malloc(hashwords_size * sizeof(*hashwords));
+    hashwords = (char**)dclang_malloc(hashwords_size * sizeof(*hashwords));
 }

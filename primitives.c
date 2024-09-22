@@ -1,10 +1,6 @@
 void add_primitive(char *name, char *category, void *func_ptr)
 {
     primitives_idx += 1;
-    if (primitives_idx > 0)
-    {
-        primitives = realloc(primitives, (primitives_idx + 2) * sizeof(primitive));
-    }
     (primitives + primitives_idx)->name = name;
     (primitives + primitives_idx)->function = func_ptr;
     (primitives + primitives_idx)->category = category;
@@ -12,7 +8,7 @@ void add_primitive(char *name, char *category, void *func_ptr)
 
 void add_all_primitives()
 {
-    primitives = malloc(sizeof(primitive));
+    primitives = dclang_malloc(208*sizeof(primitive));
     // boolean logic
     add_primitive("null", "Boolean", nullfunc);
     add_primitive("false", "Boolean", falsefunc);

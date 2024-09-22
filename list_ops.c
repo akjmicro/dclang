@@ -10,7 +10,7 @@ struct Node {
 // Function to create a linked list with a single node containing user-chosen data
 void listmakefunc() {
     // Allocate memory for the head node
-    struct Node *list = (struct Node *)malloc(sizeof(struct Node));
+    struct Node *list = (struct Node *)dclang_malloc(sizeof(struct Node));
 
     // Set the head node to point to itself in both directions
     list->next = list;
@@ -47,7 +47,7 @@ void listpushfunc() {
     struct Node *list = (struct Node *)list_ptr;
 
     // Allocate memory for the new node
-    struct Node *new_node = (struct Node *)malloc(sizeof(struct Node));
+    struct Node *new_node = (struct Node *)dclang_malloc(sizeof(struct Node));
 
     // Initialize the new node
     new_node->data = value;
@@ -85,7 +85,7 @@ void listpopfunc() {
     push((DCLANG_FLT)tail_node->data);
 
     // Free the memory of the popped node
-    free(tail_node);
+    dclang_free(tail_node);
 }
 
 // Function to set the data of a node in the linked list
@@ -164,7 +164,7 @@ void listinsertfunc() {
     struct Node *list = (struct Node *)list_ptr;
 
     // Allocate memory for the new node
-    struct Node *new_node = (struct Node *)malloc(sizeof(struct Node));
+    struct Node *new_node = (struct Node *)dclang_malloc(sizeof(struct Node));
 
     // Initialize the new node
     new_node->data = value;
@@ -175,7 +175,7 @@ void listinsertfunc() {
         if (node_before->next == list) {
             // Reached the end of the list
             printf("lins -- node_slot out of bounds! ");
-            free(new_node);
+            dclang_free(new_node);
             return;
         }
         node_before = node_before->next;
@@ -214,7 +214,7 @@ void listremovefunc() {
     remque(node_to_remove);
 
     // Free the memory of the removed node
-    free(node_to_remove);
+    dclang_free(node_to_remove);
 }
 
 // Function to get the size (number of nodes) in a linked list
@@ -245,7 +245,7 @@ void listsizefunc() {
 }
 
 
-// Function to delete (free) all nodes in a linked list
+// Function to delete (dclang_free) all nodes in a linked list
 void listdeletefunc() {
     if (data_stack_ptr < 1) {
         printf("ldel -- stack underflow; need <list> on the stack! ");
@@ -262,7 +262,7 @@ void listdeletefunc() {
     struct Node *current_next = list->next;
     while (current_next != list) {
         struct Node *next_node = current_next->next;
-        free(current_next);
+        dclang_free(current_next);
         current_next = next_node;
     }
 

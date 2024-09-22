@@ -20,11 +20,11 @@ void regcompfunc()
     char *pattern = (char *)pattern_PTR_addr;
 
     // Compile the regex pattern
-    regex_t *regex = (regex_t *)malloc(sizeof(regex_t));
+    regex_t *regex = (regex_t *)dclang_malloc(sizeof(regex_t));
     if (regcomp(regex, pattern, (int)flags) != 0)
     {
         perror("regcomp -- Error compiling regex pattern");
-        free(regex);
+        dclang_free(regex);
         return;
     }
 
@@ -56,7 +56,7 @@ void regexecfunc()
     char *input_str = (char *)input_str_PTR_addr;
 
     // Execute the regex matching
-    regmatch_t *match = (regmatch_t *)malloc(10 * sizeof(regmatch_t));
+    regmatch_t *match = (regmatch_t *)dclang_malloc(10 * sizeof(regmatch_t));
     if (regexec(regex, input_str, 10, match, (int)flags) == 0)
     {
         // If a match is found, push the match object onto the stack

@@ -18,7 +18,7 @@
 #define DCLANG_UINT32  unsigned int
 // end of data type macros
 
-#define DATA_STACK_SIZE 16
+#define DATA_STACK_SIZE 32
 #define RETURN_STACK_SIZE 128
 #define MAXWORD 1048576
 #define IBUFSIZE 128
@@ -42,6 +42,9 @@ inst_struct  prog[MAXWORD];
 DCLANG_PTR   iptr;
 DCLANG_PTR   max_iptr;
 
+DCLANG_FLT vars[NUMVARS];
+DCLANG_PTR varsidx;
+
 // data stack
 DCLANG_FLT data_stack[DATA_STACK_SIZE * 2];
 DCLANG_PTR data_stack_ptr;
@@ -53,8 +56,6 @@ DCLANG_PTR return_stack_ptr;
 DCLANG_INT loop_counter[3];
 DCLANG_PTR loop_counter_ptr;
 
-DCLANG_FLT vars[NUMVARS];
-DCLANG_PTR varsidx;
 // hashwords
 char **hashwords;
 DCLANG_UINT hashwords_size = 32;
@@ -68,7 +69,7 @@ struct primitive {
   const char *name;
   char *category;
   void (*function) (void);
-} primitive;
+} primitive __attribute__((aligned(16)));
 
 struct primitive *primitives;
 int primitives_idx = -1;

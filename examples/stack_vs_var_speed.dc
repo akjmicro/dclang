@@ -50,17 +50,30 @@ var myvar
 
 time_var
 
-: time_hash
-  "Timing hash lookup:                " print
+#: time_hash
+#  "Timing hash lookup:                " print
+#  clock
+#  1 "mykey" h!
+#  25000000 times
+#    "mykey" h@ drop
+#  again
+#  clock swap - 2 6 .rj cr
+#;
+
+#time_hash
+
+: time_tree
+  "Timing tree lookup:                " print
+  tmake 0 !
   clock
-  1 "mykey" h!
+  0 "mykey" 23 t! drop
   25000000 times
-    "mykey" h@ drop
+    0 "mykey" t@ drop
   again
   clock swap - 2 6 .rj cr
 ;
 
-time_hash
+time_tree
 
 : do_math_swap
   "Timing math with swap:             " print

@@ -1,4 +1,3 @@
-
 void pokefunc()
 {
     if (data_stack_ptr < 2)
@@ -112,9 +111,9 @@ void _add_key(char *key){
     if (hashwords_cnt > hashwords_size)
     {
         hashwords_size *= 2;
-        hashwords = realloc(hashwords, hashwords_size * sizeof(*hashwords));
+        hashwords = dclang_realloc(hashwords, hashwords_size * sizeof(*hashwords));
     }
-    //hashwords[hashwords_cnt] = (char*)malloc(1+strlen(key));
+    //hashwords[hashwords_cnt] = (char*)dclang_malloc(1+strlen(key));
     hashwords[hashwords_cnt] = key;
     ++hashwords_cnt;
 }
