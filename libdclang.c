@@ -10,14 +10,6 @@ Born on 2018-05-05 */
 #include <ctype.h>
 #include <stdio.h>
 #include "noheap/malloc.c"
-#include "noheap/search.h"
-#include "noheap/hsearch.c"
-#include "noheap/insque.c"
-#include "noheap/tsearch.h"
-#include "noheap/tsearch.c"
-#include "noheap/tfind.c"
-#include "noheap/tdelete.c"
-#include "noheap/tdestroy.c"
 #include <stdlib.h>
 #include <inttypes.h>
 #include <string.h>
@@ -123,6 +115,6 @@ void dclang_initialize()
     load_extra_primitives();
     srand(time(NULL));
     // create the global hash table
-    hcreate(1048576);
+    global_hash_table = hcreate(1024*256);
     hashwords = (char**)dclang_malloc(hashwords_size * sizeof(*hashwords));
 }

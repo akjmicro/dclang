@@ -1,3 +1,7 @@
+#include "noheap/ht.c"
+
+ht *global_hash_table;
+
 void pokefunc()
 {
     if (data_stack_ptr < 2)
@@ -113,7 +117,6 @@ void _add_key(char *key){
         hashwords_size *= 2;
         hashwords = dclang_realloc(hashwords, hashwords_size * sizeof(*hashwords));
     }
-    //hashwords[hashwords_cnt] = (char*)dclang_malloc(1+strlen(key));
     hashwords[hashwords_cnt] = key;
     ++hashwords_cnt;
 }
@@ -126,7 +129,7 @@ void hashsetfunc()
         return;
     }
     /* grab the key */
-    char *key = (char *)(DCLANG_PTR) dclang_pop();
+    char *key = (const char *)(DCLANG_PTR) dclang_pop();
     DCLANG_PTR key_addr = (DCLANG_PTR) key;
     if (key_addr < MIN_STR || key_addr > MAX_STR)
     {
@@ -134,17 +137,11 @@ void hashsetfunc()
         return;
     }
     /* grab the value */
-    char *data = (char *)(DCLANG_PTR) dclang_pop();
-    ENTRY item = {key, data};
-    /* see if we have an entry for the given key first */
-    ENTRY *entry = hsearch(item, FIND);
-    if (entry == NULL)
+    void *value = (void *)(DCLANG_PTR) dclang_pop();
+    void *confirm = hset(global_hash_table, key, value);
+    if (confirm != NULL)
     {
-        hsearch(item, ENTER);
         _add_key(key);
-    } else {
-        //free(entry->data);
-        entry->data = data;
     }
 }
 
@@ -164,15 +161,12 @@ void hashgetfunc()
         return;
     }
     /* grab the value */
-    char *data = "\0";
-    ENTRY item = {key, data};
-    /* see if we have an entry for the given key first */
-    ENTRY *entry = hsearch(item, FIND);
-    if (entry == NULL)
+    void *value = hget(global_hash_table, key);
+    if (value == NULL)
     {
         push(0);
     } else {
-        push((DCLANG_PTR)(char *) entry->data);
+        push((DCLANG_PTR)(char *)value);
     }
 }
 

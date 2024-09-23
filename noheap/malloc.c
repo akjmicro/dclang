@@ -1,14 +1,14 @@
 #include <stddef.h>
 #include <string.h>
 
-//reserve 16 MB for malloc
-#define MEMSIZE 1024*1024*16
+//reserve 32 MB for malloc
+#define MEMSIZE 1024*1024*32
 static char memory_pool[MEMSIZE];
 static size_t unused_mem_idx = 0;
 
 char *dclang_malloc(size_t size)
 {
-    void *mem;
+    char *mem;
     if(size > (MEMSIZE - unused_mem_idx)) {
         return NULL;
     }

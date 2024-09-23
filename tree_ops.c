@@ -1,3 +1,5 @@
+#include "noheap/trees.c"
+
 /* main stuct used for a dictionary-style tree entry.
    'key' is a string, 'value' is a double, which can represent
    either a number or a string pointer.

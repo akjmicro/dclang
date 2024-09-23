@@ -1,5 +1,3 @@
-#include <search.h>
-
 struct node {
     struct node *next;
     struct node *prev;
