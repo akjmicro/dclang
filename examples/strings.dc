@@ -1,3 +1,5 @@
+"string.dc" import
+
 : teststr
   1 if
     "This is true" print
@@ -17,24 +19,6 @@ cr
 ;
 teststr2
 cr
-
-# since a string is a location and length, we drop the length and keep the
-# location as a reference
-: uuidset "0123456789abcdef" ;
-
-: hexrand uuidset rand 16 * floor + ord emit ;
-
-: uuid
-  8 times hexrand again
-  45 emit
-  4 times hexrand again
-  45 emit
-  4 times hexrand again
-  45 emit
-  4 times hexrand again
-  45 emit
-  12 times hexrand again
-;
 
 : manyuuids 16 times uuid cr again ;
 

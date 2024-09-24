@@ -1,84 +1,93 @@
+"string.dc" import
+
+1024 1024 16 * * const TESTCOUNT
+"mykey" const :mykey
+
+var myvar
+1 myvar !
+
+1 4 !  # 'raw' integer variable
+
+######################
+# The test functions #
+######################
+
 : time_stack
   "Timing the stack:                  " print
   clock
   1
-  25000000 times
+  TESTCOUNT times
     dup drop
   again
   drop
   clock swap - 2 6 .rj cr
 ;
 
-time_stack
-
 : time_svstack
   "Timing the save stack:             " print
   clock
   1 svpush
-  25000000 times
+  TESTCOUNT times
     0 svpick drop
   again
   clock swap - 2 6 .rj cr
 ;
 
-time_svstack
-
-1 4 !
-
 : time_var_raw_int
   "Timing variables using integers:   " print
   clock
-  25000000 times
+  TESTCOUNT times
     4 @ drop
   again
   clock swap - 2 6 .rj cr
 ;
 
-time_var_raw_int
-
-var myvar
-1 myvar !
-
 : time_var
   "Timing normal named variables:     " print
   clock
-  25000000 times
+  TESTCOUNT times
     myvar @ drop
   again
   clock swap - 2 6 .rj cr
 ;
 
-time_var
-
 : time_hash
   "Timing hash lookup:                " print
+  ####################
+  # fill with values #
+  ####################
+  1024 times
+    hex8token hex8token h!
+  again
+  1 :mykey h!
+  ########################
+  # end fill with values #
+  ########################
   clock
-  1 "mykey" h!
-  25000000 times
-    "mykey" h@ drop
+  TESTCOUNT times
+    :mykey h@ drop
   again
   clock swap - 2 6 .rj cr
 ;
-
-time_hash
 
 : time_tree
   "Timing tree lookup:                " print
-  tmake 0 !
+  tmake drop
+  1024 times
+    0 hex8token hex8token t! drop
+  again
+  0 :mykey 23 t! drop
   clock
-  0 "mykey" 23 t! drop
-  25000000 times
-    0 "mykey" t@ drop
+  TESTCOUNT times
+    0 :mykey t@ drop
   again
   clock swap - 2 6 .rj cr
 ;
-
-time_tree
 
 : do_math_swap
   "Timing math with swap:             " print
   clock
-    25000000 times
+    TESTCOUNT times
         1 2 +
           3 4 +
           swap
@@ -88,12 +97,10 @@ time_tree
   clock swap - 2 6 .rj cr
 ;
 
-do_math_swap
-
 : do_math_save
   "Timing math with svpush and svpop: " print
   clock
-    25000000 times
+    TESTCOUNT times
         1 2 + svpush
         3 4 +
           svpop
@@ -103,12 +110,10 @@ do_math_swap
   clock swap - 2 6 .rj cr
 ;
 
-do_math_save
-
 : do_math_var
   "Timing math with ! and @:          " print
   clock
-    25000000 times
+    TESTCOUNT times
         1 2 + 0 !
         3 4 +
           0 @
@@ -118,4 +123,20 @@ do_math_save
   clock swap - 2 6 .rj cr
 ;
 
+#################
+# Run the tests #
+#################
+
+time_stack
+time_svstack
+
+time_var_raw_int
+
+time_var
+
+time_hash
+time_tree
+
+do_math_swap
+do_math_save
 do_math_var

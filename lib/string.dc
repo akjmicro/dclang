@@ -233,3 +233,62 @@ const :STRREPLACE_UNDERFLOW_ERROR
     return
   endif
 ;
+
+create hexchars 48 , 49 , 50 , 51 , 52 , 53 , 54 , 55 , 56 , 57 ,
+                97 , 98 , 99 , 100 , 101 , 102 ,
+
+: uuid
+  37 mkbuf dup svpush
+  8 times
+      rand 16 * floor hexchars + @
+        1
+    memset
+    1 +
+  again
+  45 1 memset
+  1 +
+  4 times
+      rand 16 * floor hexchars + @
+        1
+    memset
+    1 +
+  again
+  45 1 memset
+  1 +
+  4 times
+      rand 16 * floor hexchars + @
+        1
+    memset
+    1 +
+  again
+  45 1 memset
+  1 +
+  4 times
+      rand 16 * floor hexchars + @
+        1
+    memset
+    1 +
+  again
+  45 1 memset
+  1 +
+  12 times
+      rand 16 * floor hexchars + @
+        1
+    memset
+    1 +
+  again
+  0 1 memset drop
+  svpop
+;
+
+: hex8token
+  9 mkbuf dup svpush
+  8 times
+      rand 16 * floor hexchars + @
+        1
+    memset
+    1 +
+  again
+  0 1 memset drop
+  svpop
+;

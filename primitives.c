@@ -73,18 +73,19 @@ void add_all_primitives()
     add_primitive("2over", "Stack Ops", over2func);
     add_primitive("depth", "Stack Ops", depthfunc);
     add_primitive("clear", "Stack Ops", clearfunc);
-    add_primitive(".", "Stack Ops", showfunc);
-    add_primitive("..", "Stack Ops", shownospacefunc);
-    add_primitive(".rj", "Stack Ops", showrjfunc);
-    add_primitive(".pz", "Stack Ops", showpzfunc);
-    add_primitive(".s", "Stack Ops", showstackfunc);
     // the extra "save" stack
-    add_primitive("svpush", "2nd Stack Ops", svpushfunc);
-    add_primitive("svpop", "2nd Stack Ops", svpopfunc);
-    add_primitive("svdrop", "2nd Stack Ops", svdropfunc);
-    add_primitive("svpick", "2nd Stack Ops", svpickfunc);
-    add_primitive("svdepth", "2nd Stack Ops", svdepthfunc);
-    add_primitive("svclear", "2nd Stack Ops", svclearfunc);
+    add_primitive("svpush", "Save Stack Ops", svpushfunc);
+    add_primitive("svpop", "Save Stack Ops", svpopfunc);
+    add_primitive("svdrop", "Save Stack Ops", svdropfunc);
+    add_primitive("svpick", "Save Stack Ops", svpickfunc);
+    add_primitive("svdepth", "Save Stack Ops", svdepthfunc);
+    add_primitive("svclear", "Save Stack Ops", svclearfunc);
+    // stack output
+    add_primitive(".", "Stack Output", showfunc);
+    add_primitive("..", "Stack Output", shownospacefunc);
+    add_primitive(".rj", "Stack Output", showrjfunc);
+    add_primitive(".pz", "Stack Output", showpzfunc);
+    add_primitive(".s", "Stack Output", showstackfunc);
     // variables and arrays
     add_primitive("var", "Variables & Arrays", variablefunc);
     add_primitive("!", "Variables & Arrays", pokefunc);
@@ -137,32 +138,10 @@ void add_all_primitives()
     add_primitive("else", "Branching", elsefunc);
     add_primitive("endif", "Branching", endiffunc);
     add_primitive("return", "Branching", returnfunc);
-    // output and string ops
-    add_primitive("cr", "Strings", crfunc);
-    add_primitive("print", "Strings", printfunc);
-    add_primitive("emit", "Strings", emitfunc);
-    add_primitive("uemit", "Strings", uemitfunc);
-    add_primitive("ord", "Strings", ordfunc);
-    add_primitive("tohex", "Strings", tohexfunc);
-    add_primitive("tonum", "Strings", tonumfunc);
-    add_primitive("tostr", "Strings", tostrfunc);
-    add_primitive("bytes32", "Strings", bytes32func);
-    add_primitive("strlen", "Strings", strlenfunc);
-    add_primitive("str=", "Strings", streqfunc);
-    add_primitive("str<", "Strings", strltfunc);
-    add_primitive("str>", "Strings", strgtfunc);
-    add_primitive("strfind", "Strings", strfindfunc);
-    add_primitive("strspn", "Strings", strspnfunc);
-    add_primitive("strcspn", "Strings", strcspnfunc);
-    add_primitive("strtok", "Strings", strtokfunc);
-    add_primitive("mkbuf", "Strings", mkbuffunc);
-    add_primitive("free", "Strings", freefunc);
-    add_primitive("mempcpy", "Strings", mempcpyfunc);
-    add_primitive("memset", "Strings", memsetfunc);
-    // regex
-    add_primitive("regcomp", "Regex", regcompfunc);
-    add_primitive("regexec", "Regex", regexecfunc);
-    add_primitive("regread", "Regex", regreadfunc);
+    // character emitters
+    add_primitive("emit", "Character Emitters", emitfunc);
+    add_primitive("uemit", "Character Emitters", uemitfunc);
+    add_primitive("bytes32", "Character Emitters", bytes32func);
     // character types
     add_primitive("isalnum", "Character Types", isalnumfunc);
     add_primitive("isalpha", "Character Types", isalphafunc);
@@ -175,8 +154,35 @@ void add_all_primitives()
     add_primitive("isspace", "Character Types", isspacefunc);
     add_primitive("isupper", "Character Types", isupperfunc);
     add_primitive("isxdigit", "Character Types", isxdigitfunc);
-    add_primitive("tolower", "Character Types", tolowerfunc);
-    add_primitive("toupper", "Character Types", toupperfunc);
+    // output and string ops
+    add_primitive("cr", "String Output", crfunc);
+    add_primitive("print", "String Output", printfunc);
+    // string conversion
+    add_primitive("tohex", "String Conversion", tohexfunc);
+    add_primitive("tostr", "String Conversion", tostrfunc);
+    add_primitive("tonum", "String Conversion", tonumfunc);
+    add_primitive("ord", "String Conversion", ordfunc);
+    add_primitive("tolower", "String Conversion", tolowerfunc);
+    add_primitive("toupper", "String Conversion", toupperfunc);
+    // general string ops from C
+    add_primitive("strlen", "String Ops", strlenfunc);
+    add_primitive("str=", "String Ops", streqfunc);
+    add_primitive("str<", "String Ops", strltfunc);
+    add_primitive("str>", "String Ops", strgtfunc);
+    add_primitive("strfind", "String Ops", strfindfunc);
+    add_primitive("strspn", "String Ops", strspnfunc);
+    add_primitive("strcspn", "String Ops", strcspnfunc);
+    add_primitive("strtok", "String Ops", strtokfunc);
+    add_primitive("mempcpy", "String Ops", mempcpyfunc);
+    add_primitive("memset", "String Ops", memsetfunc);
+    // memory buffers
+    add_primitive("mkbuf", "Memory", mkbuffunc);
+    add_primitive("free", "Memory", freefunc);
+    add_primitive("memused", "Memory", memusedfunc);
+    // regex
+    add_primitive("regcomp", "Regex", regcompfunc);
+    add_primitive("regexec", "Regex", regexecfunc);
+    add_primitive("regread", "Regex", regreadfunc);
     // file
     add_primitive("fopen", "Files", fileopenfunc);
     add_primitive("fmemopen", "Files", filememopenfunc);
@@ -192,10 +198,10 @@ void add_all_primitives()
     add_primitive("resetout", "Files", resetoutfunc);
     add_primitive("flush", "Files", flushoutfunc);
     // low-level (OS) file ops:
-    add_primitive("open", "Files", openfunc);
-    add_primitive("read", "Files", readfunc);
-    add_primitive("write", "Files", writefunc);
-    add_primitive("close", "Files", closefunc);
+    add_primitive("open", "Files (no buffer)", openfunc);
+    add_primitive("read", "Files (no buffer)", readfunc);
+    add_primitive("write", "Files (no buffer)", writefunc);
+    add_primitive("close", "Files (no buffer)", closefunc);
     // SQLite3 interface
     add_primitive("_sqlite_open", "SQLite", _sqliteopenfunc);
     add_primitive("_sqlite_prepare", "SQLite", _sqlitepreparefunc);

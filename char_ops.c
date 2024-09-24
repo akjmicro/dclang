@@ -1,3 +1,119 @@
+/* utf-8 char buffer */
+char utf8_buf[5];
+
+long utf8_encode(char *out, uint64_t utf)
+{
+    if (utf <= 0x7F)
+    {
+        // Plain ASCII
+        out[0] = (char) utf;
+        out[1] = 0;
+        return 1;
+    }
+    else if (utf <= 0x07FF)
+    {
+        // 2-byte unicode
+        out[0] = (char) (((utf >> 6) & 0x1F) | 0xC0);
+        out[1] = (char) (((utf >> 0) & 0x3F) | 0x80);
+        out[2] = 0;
+        return 2;
+    }
+    else if (utf <= 0xFFFF)
+    {
+        // 3-byte unicode
+        out[0] = (char) (((utf >> 12) & 0x0F) | 0xE0);
+        out[1] = (char) (((utf >>  6) & 0x3F) | 0x80);
+        out[2] = (char) (((utf >>  0) & 0x3F) | 0x80);
+        out[3] = 0;
+        return 3;
+    }
+    else if (utf <= 0x10FFFF)
+    {
+        // 4-byte unicode
+        out[0] = (char) (((utf >> 18) & 0x07) | 0xF0);
+        out[1] = (char) (((utf >> 12) & 0x3F) | 0x80);
+        out[2] = (char) (((utf >>  6) & 0x3F) | 0x80);
+        out[3] = (char) (((utf >>  0) & 0x3F) | 0x80);
+        out[4] = 0;
+        return 4;
+    }
+    else {
+        // error - use replacement character
+        out[0] = (char) 0xEF;
+        out[1] = (char) 0xBF;
+        out[2] = (char) 0xBD;
+        out[3] = 0;
+        return 3;
+    }
+}
+
+int get_unicode_by_hex(char *chbuf, int usize)
+{
+    char numstr[usize];
+    long int status = (long int) fgets(numstr, usize, ifp);
+    int ucode = strtol(numstr, NULL, 16);
+    int num_bytes_ret = utf8_encode(chbuf, ucode);
+    return status;
+}
+
+int get_ascii(char *chbuf, int usize)
+{
+    char numstr[usize];
+    long int status = (long int) fgets(numstr, usize, ifp);
+    int acode = strtol(numstr, NULL, 16);
+    chbuf[0] = (char) acode;
+    chbuf[1] = 0;
+    return status;
+}
+
+//////////////////////////////////////////////////////////////////////////
+// Character emitters. No value goes to the stack; output is immediate. //
+//////////////////////////////////////////////////////////////////////////
+
+void emitfunc()
+{
+    if (data_stack_ptr < 1)
+    {
+        printf("emit -- stack underflow! ");
+        return;
+    }
+    char char_code = (char) dclang_pop();
+    fprintf(ofp, "%c", char_code);
+    fflush(ofp);
+}
+
+void uemitfunc()
+{
+    if (data_stack_ptr < 1)
+    {
+        printf("uemit -- stack underflow! ");
+        return;
+    }
+    long unsigned long char_code = (long unsigned long) dclang_pop();
+    long ulen = utf8_encode(utf8_buf, char_code);
+    fprintf(ofp, "%s", utf8_buf);
+    fflush(ofp);
+}
+
+void bytes32func()
+{
+    DCLANG_INT32 val = (DCLANG_INT32) dclang_pop();
+    char low = (char) val & 0xff;
+    val >>= 8;
+    char lowmid = (char) val & 0xff;
+    val >>= 8;
+    char highmid = (char) val & 0xff;
+    val >>= 8;
+    char high = (char) val & 0xff;
+    fputc(low, ofp);
+    fputc(lowmid, ofp);
+    fputc(highmid, ofp);
+    fputc(high, ofp);
+}
+
+///////////////////////
+// character testers //
+///////////////////////
 
 void isalnumfunc()
 {
