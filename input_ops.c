@@ -42,7 +42,7 @@ DCLANG_INT is_special_form(const char *token)
 void compile_or_interpret(const char *token)
 {
     char *endPointer = 0;
-    double d;
+    DCLANG_INT num;
     const struct primitive *pr = primitives;
 
     if (token == 0) {
@@ -87,13 +87,13 @@ void compile_or_interpret(const char *token)
 
     // Neither user word nor primitive word was found.
     // OK, so next, try to convert to a number
-    d = strtod(token, &endPointer);
+    num = strtol(token, &endPointer, 0);
     if (endPointer != token) {
         if (def_mode) {
             prog[iptr].function.with_param = push;
-            prog[iptr++].param = d;
+            prog[iptr++].param = num;
         } else {
-            push(d);
+            push(num);
         }
         return;
     }

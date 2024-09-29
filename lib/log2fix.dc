@@ -1,0 +1,43 @@
+: _scale_ans_down # (y, x)
+  dup 1 16 << <
+  if
+    1 <<
+    swap           # (x, y)
+    1 16 << -
+    swap           # (y, x)
+    _scale_ans_down
+  endif
+;
+
+: _scale_ans_up
+  dup 2 16 << >=
+  if
+    1 >>
+    swap          # (x, y)
+    1 16 << +
+    swap          # (y, x)
+    _scale_ans_up
+  endif
+;
+
+: log2fix  # (x --> log2(x))
+  # init tracked vars
+  1 15 << svpush       # scale = (1 << 15)
+  0
+  swap   # operate _mostly_ on x variable at TOS
+  _scale_ans_down
+  _scale_ans_up
+  16 times
+    dup * 16 >>        # x = ((x * x) >> 16 )
+    dup 2 16 << >=     # x >= (2 << 16) ?
+    if
+      1 >>
+      swap             # (x, y)
+      0 svpick +       # add the scale
+      swap             # (y, x)
+    endif
+    svpop 1 >> svpush  # scale /= 2
+  again
+  svpop drop
+  drop
+;

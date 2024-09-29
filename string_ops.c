@@ -158,7 +158,7 @@ void tostrfunc()
         printf("tostr -- needs a number on stack!\n");
         return;
     }
-    DCLANG_FLT var = dclang_pop();
+    DCLANG_INT var = dclang_pop();
     int bufsize = snprintf(NULL, 0, "%g", var);
     char *str = dclang_malloc(bufsize + 1);
     snprintf(str, bufsize + 1, "%g", var);
@@ -189,7 +189,7 @@ void tonumfunc()
         return;
     }
     char *mystr = (char *) string_PTR_addr;
-    DCLANG_FLT num = strtod(mystr, NULL);
+    DCLANG_INT num = strtol(mystr, NULL, 0);
     push(num);
 }
 
@@ -558,6 +558,6 @@ void freefunc()
 
 void memusedfunc()
 {
-    DCLANG_FLT memused = (DCLANG_FLT) (((float) unused_mem_idx) / ((float) MEMSIZE));
+    DCLANG_INT memused = (DCLANG_INT) (((float) unused_mem_idx) / ((float) MEMSIZE));
     push(memused);
 }

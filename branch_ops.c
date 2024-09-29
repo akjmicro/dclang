@@ -101,7 +101,7 @@ void kfunc()
 
 
 // jump if zero (false)
-void jumpzfunc(DCLANG_FLT where)
+void jumpzfunc(DCLANG_INT where)
 {
     DCLANG_INT truth = (DCLANG_INT) dclang_pop();
     if (!truth) {
@@ -110,7 +110,7 @@ void jumpzfunc(DCLANG_FLT where)
 }
 
 // unconditional jump
-void jumpufunc(DCLANG_FLT where)
+void jumpufunc(DCLANG_INT where)
 {
     iptr = (uintptr_t) where;
 }

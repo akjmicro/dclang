@@ -35,7 +35,7 @@ DCLANG_INT dclang_findword(const char *word)
     return -1;
 }
 
-void callword(DCLANG_FLT where)
+void callword(DCLANG_INT where)
 {
     /* Don't consume more of the return stack if we are going nowhere.
        This will allow better recursion */
@@ -47,7 +47,7 @@ void callword(DCLANG_FLT where)
 
 void dclang_callword(DCLANG_PTR where)
 {
-    callword((DCLANG_FLT) where);
+    callword((DCLANG_INT) where);
     // execute all until we reach the end of the iptr queue
     while (iptr < max_iptr) {
         (*(prog[iptr].function.with_param)) (prog[iptr++].param);

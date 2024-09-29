@@ -7,26 +7,26 @@ struct timeval tval;
 void clockfunc()
 {
     gettimeofday(&tval, NULL);
-    DCLANG_FLT now = ((DCLANG_FLT) tval.tv_sec) + (((DCLANG_FLT) tval.tv_usec) / 1000000);
+    DCLANG_INT now = ((DCLANG_INT) tval.tv_sec * 1000000) + ((DCLANG_INT) tval.tv_usec);
     push(now);
 }
 
 void epochfunc()
 {
     gettimeofday(&tval, NULL);
-    DCLANG_FLT now = (tval.tv_sec);
+    DCLANG_INT now = (tval.tv_sec);
     push(now);
 }
 
 void sleepfunc() {
     if (data_stack_ptr < 1) {
-        printf("sleep -- need a time amount in seconds on the stack!\n");
+        printf("sleep -- need a time amount in nanoseconds on the stack!\n");
         return;
     }
-    DCLANG_FLT sleeptime = dclang_pop();
+    DCLANG_INT sleeptime = dclang_pop();
     struct timespec t1, t2;
-    t1.tv_sec = floor(sleeptime);
-    t1.tv_nsec = round(fmod(sleeptime, 1) * 1000000000);
+    t1.tv_sec = floor(sleeptime / 1000000000);
+    t1.tv_nsec = sleeptime % 1000000000;
     nanosleep(&t1, &t2);
 }
 

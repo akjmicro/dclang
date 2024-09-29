@@ -16,7 +16,7 @@ void subfunc()
         printf("'-' needs two numbers on the stack!\n");
         return;
     }
-    DCLANG_FLT subtrahend = dclang_pop();
+    DCLANG_INT subtrahend = dclang_pop();
     push(dclang_pop() - subtrahend);
 }
 
@@ -37,7 +37,7 @@ void divfunc()
         printf("'/' needs two numbers on the stack!\n");
         return;
     }
-    DCLANG_FLT divisor = dclang_pop();
+    DCLANG_INT divisor = dclang_pop();
     push(dclang_pop() / divisor);
 }
 
@@ -48,7 +48,7 @@ void modfunc()
         printf("'%%' needs two numbers on the stack!\n");
         return;
     }
-    DCLANG_FLT modulus = dclang_pop();
+    DCLANG_INT modulus = dclang_pop();
     push(fmod(dclang_pop(), modulus));
 }
 
@@ -93,9 +93,9 @@ void minfunc()
         printf("'min' needs two numbers on the stack!\n");
         return;
     }
-    DCLANG_FLT a = dclang_pop();
-    DCLANG_FLT b = dclang_pop();
-    DCLANG_FLT c = (a < b) ? a : b;
+    DCLANG_INT a = dclang_pop();
+    DCLANG_INT b = dclang_pop();
+    DCLANG_INT c = (a < b) ? a : b;
     push(c);
 }
 
@@ -106,220 +106,19 @@ void maxfunc()
         printf("'max' needs two numbers on the stack!\n");
         return;
     }
-    DCLANG_FLT a = dclang_pop();
-    DCLANG_FLT b = dclang_pop();
-    DCLANG_FLT c = (a > b) ? a : b;
+    DCLANG_INT a = dclang_pop();
+    DCLANG_INT b = dclang_pop();
+    DCLANG_INT c = (a > b) ? a : b;
     push(c);
 }
 
-void roundfunc()
-{
-    if (data_stack_ptr < 1)
-    {
-        printf("'round' needs a number on the stack!\n");
-        return;
-    }
-    push((DCLANG_INT) round(dclang_pop()));
-}
-
-void floorfunc()
-{
-    if (data_stack_ptr < 1)
-    {
-        printf("'floor' needs a number on the stack!\n");
-        return;
-    }
-    push((DCLANG_INT) floor(dclang_pop()));
-}
-
-void ceilfunc()
-{
-    if (data_stack_ptr < 1)
-    {
-        printf("'ceil' needs a number on the stack!\n");
-        return;
-    }
-    push((DCLANG_INT) ceil(dclang_pop()));
-}
-
-/* scientific math words */
-
-void powerfunc()
-{
-    if (data_stack_ptr < 2)
-    {
-        printf("'pow' needs two numbers on the stack!\n");
-        return;
-    }
-    DCLANG_FLT raise = dclang_pop();
-    push(pow(dclang_pop(), raise));
-}
-
-void sqrtfunc()
-{
-    if (data_stack_ptr < 1)
-    {
-        printf("'sqrt' needs a number on the stack!\n");
-        return;
-    }
-    push(sqrt(dclang_pop()));
-}
-
-void expfunc()
-{
-    if (data_stack_ptr < 1)
-    {
-        printf("'exp' need a number on the stack!\n");
-        return;
-    }
-    push(exp(dclang_pop()));
-}
-
-void logfunc()
-{
-    if (data_stack_ptr < 1)
-    {
-        printf("'log' needs a number on the stack!\n");
-        return;
-    }
-    push(log(dclang_pop()));
-}
-
-void log2func()
-{
-    if (data_stack_ptr < 1)
-    {
-        printf("'log2' needs a number on the stack!\n");
-        return;
-    }
-    push(log2(dclang_pop()));
-}
-
-void log10func()
-{
-    if (data_stack_ptr < 1)
-    {
-        printf("'log10' needs a number on the stack!\n");
-        return;
-    }
-    push(log10(dclang_pop()));
-}
-
-void efunc()
-{
-    push(M_E);
-}
-
-/* Trig, pi, etc. */
-void pifunc()
-{
-    push(M_PI);
-}
-
-void sinefunc()
-{
-    if (data_stack_ptr < 1)
-    {
-        printf("'sin' needs a number on the stack!\n");
-        return;
-    }
-    push(sin(dclang_pop()));
-}
-
-void cosfunc()
-{
-    if (data_stack_ptr < 1)
-    {
-        printf("'cos' needs a number on the stack!\n");
-        return;
-    }
-    push(cos(dclang_pop()));
-}
-
-void tanfunc()
-{
-    if (data_stack_ptr < 1)
-    {
-        printf("'tan' needs a number on the stack!\n");
-        return;
-    }
-    push(tan(dclang_pop()));
-}
-
-void asinefunc()
-{
-    if (data_stack_ptr < 1)
-    {
-        printf("'asin' needs a number on the stack!\n");
-        return;
-    }
-    push(asin(dclang_pop()));
-}
-
-void acosfunc()
-{
-    if (data_stack_ptr < 1)
-    {
-        printf("'acos' needs a numbera on the stack!\n");
-        return;
-    }
-    push(acos(dclang_pop()));
-}
-
-void atanfunc()
-{
-    if (data_stack_ptr < 1)
-    {
-        printf("'atan' needs a number on the stack!\n");
-        return;
-    }
-    push(atan(dclang_pop()));
-}
-
-void atan2func()
-{
-    if (data_stack_ptr < 2)
-    {
-        printf("'atan2' needs two numbers on the stack!\n");
-        return;
-    }
-    DCLANG_FLT x = dclang_pop();
-    DCLANG_FLT y = dclang_pop();
-    push(atan2(y, x));
-}
-
-void sinhfunc()
-{
-    if (data_stack_ptr < 1)
-    {
-        printf("'sinh' needs a number on the stack!\n");
-        return;
-    }
-    push(sinh(dclang_pop()));
-}
-
-void coshfunc()
-{
-    if (data_stack_ptr < 1)
-    {
-        printf("'cosh' needs a number on the stack!\n");
-        return;
-    }
-    push(cosh(dclang_pop()));
-}
-
-void tanhfunc()
-{
-    if (data_stack_ptr < 1)
-    {
-        printf("'tanh' needs a number on the stack!\n");
-        return;
-    }
-    push(tanh(dclang_pop()));
-}
-
 /* randomness */
-void randfunc()
-{
-    push((double)rand()/(double)RAND_MAX);
+/* xorshift64s, variant A_1(12,25,27) with multiplier M_32 from line 3 of table 5 */
+void randfunc() {
+    /* initial seed must be nonzero, don't use a static variable for the state if multithreaded */
+    static uint64_t x = 1;
+    x ^= x >> 12;
+    x ^= x << 25;
+    x ^= x >> 27;
+    push(x * 0x2545F4914F6CDD1D);
 }

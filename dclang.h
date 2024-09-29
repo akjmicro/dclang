@@ -10,7 +10,6 @@
 #include <inttypes.h>
 
 // data type macros
-#define DCLANG_FLT     double
 #define DCLANG_INT     long
 #define DCLANG_INT32   int
 #define DCLANG_PTR     uintptr_t
@@ -27,13 +26,13 @@
 
 // compiled tokens get saved and put into an array of type 'inst_struct'
 typedef union {
-    void (*with_param) (DCLANG_FLT);
+    void (*with_param) (DCLANG_INT);
     void (*without_param) (void);
 } func_union;
 
 typedef struct {
     func_union function;
-    DCLANG_FLT param;
+    DCLANG_INT param;
 } inst_struct;
 
 // an array of inst_struct instructions. This is where the user's commands,
@@ -42,11 +41,11 @@ inst_struct  prog[MAXWORD];
 DCLANG_PTR   iptr;
 DCLANG_PTR   max_iptr;
 
-DCLANG_FLT vars[NUMVARS];
+DCLANG_INT vars[NUMVARS];
 DCLANG_PTR varsidx;
 
 // data stack
-DCLANG_FLT data_stack[DATA_STACK_SIZE * 2];
+DCLANG_INT data_stack[DATA_STACK_SIZE * 2];
 DCLANG_PTR data_stack_ptr;
 DCLANG_PTR save_data_stack_ptr;
 // return stack
@@ -108,4 +107,4 @@ extern DCLANG_INT dclang_findword(const char *word);
 
 extern void dclang_callword(DCLANG_PTR where);
 
-extern DCLANG_FLT dclang_pop();
+extern DCLANG_INT dclang_pop();

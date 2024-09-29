@@ -47,7 +47,7 @@ void eqfunc()
         printf("'=' needs two elements on the stack!\n");
         return;
     }
-    push(((DCLANG_FLT) dclang_pop() == (DCLANG_FLT) dclang_pop()) * -1);
+    push(((DCLANG_INT) dclang_pop() == (DCLANG_INT) dclang_pop()) * -1);
 }
 
 void noteqfunc()
@@ -57,7 +57,7 @@ void noteqfunc()
         printf("'!=' needs two elements on the stack!\n");
         return;
     }
-    push(((DCLANG_FLT) dclang_pop() != (DCLANG_FLT) dclang_pop()) * -1);
+    push(((DCLANG_INT) dclang_pop() != (DCLANG_INT) dclang_pop()) * -1);
 }
 
 void gtfunc()
@@ -67,7 +67,7 @@ void gtfunc()
         printf("'>' needs two elements on the stack!\n");
         return;
     }
-    push(((DCLANG_FLT) dclang_pop() < (DCLANG_FLT) dclang_pop()) * -1);
+    push(((DCLANG_INT) dclang_pop() < (DCLANG_INT) dclang_pop()) * -1);
 }
 
 void ltfunc()
@@ -77,7 +77,7 @@ void ltfunc()
         printf("'<' needs two elements on the stack!\n");
         return;
     }
-    push(((DCLANG_FLT) dclang_pop() > (DCLANG_FLT) dclang_pop()) * -1);
+    push(((DCLANG_INT) dclang_pop() > (DCLANG_INT) dclang_pop()) * -1);
 }
 
 void gtefunc()
@@ -87,7 +87,7 @@ void gtefunc()
         printf("'>=' needs two elements on the stack!\n");
         return;
     }
-    push(((DCLANG_FLT) dclang_pop() <= (DCLANG_FLT) dclang_pop()) * -1);
+    push(((DCLANG_INT) dclang_pop() <= (DCLANG_INT) dclang_pop()) * -1);
 }
 
 void ltefunc()
@@ -97,7 +97,7 @@ void ltefunc()
         printf("'<=' needs two elements on the stack!\n");
         return;
     }
-    push(((DCLANG_FLT) dclang_pop() >= (DCLANG_FLT) dclang_pop()) * -1);
+    push(((DCLANG_INT) dclang_pop() >= (DCLANG_INT) dclang_pop()) * -1);
 }
 
 // assertions

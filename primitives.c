@@ -36,30 +36,6 @@ void add_all_primitives()
     add_primitive("abs", "Arithmetic", absfunc);
     add_primitive("min", "Arithmetic", minfunc);
     add_primitive("max", "Arithmetic", maxfunc);
-    // float -> int
-    add_primitive("round", "Float -> Integer", roundfunc);
-    add_primitive("ceil", "Float -> Integer", ceilfunc);
-    add_primitive("floor", "Float -> Integer", floorfunc);
-    // higher math
-    add_primitive("pow", "Higher Math", powerfunc);
-    add_primitive("sqrt", "Higher Math", sqrtfunc);
-    add_primitive("exp", "Higher Math", expfunc);
-    add_primitive("log", "Higher Math", logfunc);
-    add_primitive("log2", "Higher Math", log2func);
-    add_primitive("log10", "Higher Math", log10func);
-    add_primitive("e", "Higher Math", efunc);
-    // trig
-    add_primitive("pi", "Trigonometry", pifunc);
-    add_primitive("sin", "Trigonometry", sinefunc);
-    add_primitive("cos", "Trigonometry", cosfunc);
-    add_primitive("tan", "Trigonometry", tanfunc);
-    add_primitive("asin", "Trigonometry", asinefunc);
-    add_primitive("acos", "Trigonometry", acosfunc);
-    add_primitive("atan", "Trigonometry", atanfunc);
-    add_primitive("atan2", "Trigonometry", atan2func);
-    add_primitive("sinh", "Trigonometry", atanfunc);
-    add_primitive("cosh", "Trigonometry", atanfunc);
-    add_primitive("tanh", "Trigonometry", atanfunc);
     // randomness
     add_primitive("rand", "Randomness", randfunc);
     // stack manipulation
@@ -82,6 +58,7 @@ void add_all_primitives()
     add_primitive("svclear", "Save Stack Ops", svclearfunc);
     // stack output
     add_primitive(".", "Stack Output", showfunc);
+    add_primitive(".h", "Stack Output", showhexfunc);
     add_primitive("..", "Stack Output", shownospacefunc);
     add_primitive(".rj", "Stack Output", showrjfunc);
     add_primitive(".pz", "Stack Output", showpzfunc);

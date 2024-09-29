@@ -5,7 +5,7 @@
 struct Node {
     struct Node *next;
     struct Node *prev;
-    DCLANG_FLT data;  // New member for data
+    DCLANG_INT data;  // New member for data
 };
 
 // Function to create a linked list with a single node containing user-chosen data
@@ -41,7 +41,7 @@ void listpushfunc() {
     }
 
     // Pop args
-    DCLANG_FLT value = dclang_pop();
+    DCLANG_INT value = dclang_pop();
     DCLANG_PTR list_ptr = (DCLANG_PTR)dclang_pop();
 
     // Convert pointers to the actual node structure
@@ -83,7 +83,7 @@ void listpopfunc() {
     remque(tail_node);
 
     // Push the data of the tail node onto the stack
-    push((DCLANG_FLT)tail_node->data);
+    push((DCLANG_INT)tail_node->data);
 
     // Free the memory of the popped node
     dclang_free(tail_node);
@@ -97,7 +97,7 @@ void listsetfunc() {
     }
 
     // Pop args
-    DCLANG_FLT value = dclang_pop();
+    DCLANG_INT value = dclang_pop();
     DCLANG_INT slot = (DCLANG_INT)dclang_pop();
     DCLANG_PTR list_ptr = (DCLANG_PTR)dclang_pop();
 
@@ -145,7 +145,7 @@ void listgetfunc() {
     }
 
     // Push the data of the node onto the stack
-    push((DCLANG_FLT)node->data);
+    push((DCLANG_INT)node->data);
 }
 
 
@@ -157,7 +157,7 @@ void listinsertfunc() {
     }
 
     // Pop args
-    DCLANG_FLT value = dclang_pop();
+    DCLANG_INT value = dclang_pop();
     DCLANG_INT node_slot = (DCLANG_INT)dclang_pop();
     DCLANG_PTR list_ptr = (DCLANG_PTR)dclang_pop();
 

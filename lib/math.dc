@@ -15,7 +15,7 @@
 
 : divmod
   2dup % svpush
-  / floor svpop
+  / svpop
 ;
 
 : _digit_sum_helper
@@ -24,7 +24,7 @@
     dup svpush
     2dup %
     svpush
-    / floor
+    /
     swap svpop
     +
     swap svpop

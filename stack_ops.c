@@ -1,5 +1,5 @@
 /* stack operations */
-void push(DCLANG_FLT a)
+void push(DCLANG_INT a)
 {
     if (data_stack_ptr >= DATA_STACK_SIZE) {
         printf("push -- stack overflow!\n");
@@ -8,12 +8,12 @@ void push(DCLANG_FLT a)
     data_stack[data_stack_ptr++] = a;
 }
 
-void push_no_check(DCLANG_FLT a)
+void push_no_check(DCLANG_INT a)
 {
     data_stack[data_stack_ptr++] = a;
 }
 
-DCLANG_FLT dclang_pop()
+DCLANG_INT dclang_pop()
 // special case -- has a return value b/c it can
 // be used in other calls to give a value, which
 // also means it can be an API call.
@@ -68,8 +68,8 @@ void swapfunc()
         printf("swap -- stack underflow!\n");
         return;
     }
-    DCLANG_FLT val1 = dclang_pop();
-    DCLANG_FLT val2 = dclang_pop();
+    DCLANG_INT val1 = dclang_pop();
+    DCLANG_INT val2 = dclang_pop();
     push_no_check(val1);
     push_no_check(val2);
 }
@@ -90,7 +90,7 @@ void dup2func()
         printf("2dup -- stack underflow!\n");
         return;
     }
-    DCLANG_FLT val2 = data_stack[data_stack_ptr - 1];
+    DCLANG_INT val2 = data_stack[data_stack_ptr - 1];
     push(data_stack[data_stack_ptr - 2]);
     push(data_stack[data_stack_ptr - 2]);
 }
@@ -108,7 +108,7 @@ void over2func()
 void depthfunc()
 {
     DCLANG_PTR size = data_stack_ptr;
-    push((DCLANG_FLT)size);
+    push((DCLANG_INT)size);
 }
 
 void clearfunc()
@@ -126,7 +126,7 @@ void svpushfunc()
         printf("svpush -- stack overflow!\n");
         save_data_stack_ptr = 0;
     }
-    DCLANG_FLT val = dclang_pop();
+    DCLANG_INT val = dclang_pop();
     data_stack[save_data_stack_ptr++ + DATA_STACK_SIZE] = val;
 }
 
@@ -137,7 +137,7 @@ void svpopfunc()
         save_data_stack_ptr = 0;
         return;
     }
-    DCLANG_FLT val = data_stack[--save_data_stack_ptr + DATA_STACK_SIZE];
+    DCLANG_INT val = data_stack[--save_data_stack_ptr + DATA_STACK_SIZE];
     push_no_check(val);
 }
 
@@ -167,7 +167,7 @@ void svpickfunc()
 void svdepthfunc()
 {
     DCLANG_PTR size = save_data_stack_ptr;
-    push((DCLANG_FLT)size);
+    push((DCLANG_INT)size);
 }
 
 void svclearfunc()
@@ -182,48 +182,31 @@ void svclearfunc()
 void showfunc()
 {
     if (data_stack_ptr < 1) {
-        printf(". (pop) -- stack underflow! ");
+        printf(". (pop) -- stack underflow!\n");
         return;
     }
-    fprintf(ofp, "%0.19g ", dclang_pop());
+    fprintf(ofp, "%1.1ld ", dclang_pop());
+    fflush(ofp);
+}
+
+void showhexfunc()
+{
+    if (data_stack_ptr < 1) {
+        printf(".h (pop-hex) -- stack underflow!\n");
+        return;
+    }
+    fprintf(ofp, "0x%1.2lx ", (long long) dclang_pop());
     fflush(ofp);
 }
 
 void shownospacefunc()
 {
     if (data_stack_ptr < 1) {
-        printf("stack underflow! ");
+        printf(".. (pop w/o space) -- stack underflow!\n");
         return;
     }
-    fprintf(ofp, "%0.19g", dclang_pop());
+    fprintf(ofp, "%1.1ld", dclang_pop());
     fflush(ofp);
-}
-
-void showstackfunc()
-{
-    DCLANG_INT x;
-    char *joiner;
-    x = data_stack_ptr > 16 ? data_stack_ptr - 16 : 0;
-    joiner = x == 0 ? " " : " ... ";
-    fprintf(ofp, "data_stack: <%lu>%s", data_stack_ptr, joiner);
-    fflush(ofp);
-    for (x=0; x < data_stack_ptr; x++) {
-        fprintf(ofp, "%0.19g ", data_stack[x]);
-        fflush(ofp);
-    }
-    fprintf(ofp, "\n");
-    // do the save data stack as well:
-    DCLANG_INT y;
-    char *sv_joiner;
-    y = save_data_stack_ptr > 16 ? save_data_stack_ptr - 16 : 0;
-    sv_joiner = y == 0 ? " " : " ... ";
-    fprintf(ofp, "save_stack: <%lu>%s", save_data_stack_ptr, sv_joiner);
-    fflush(ofp);
-    for (y=0; y < save_data_stack_ptr; y++) {
-        fprintf(ofp, "%0.19g ", data_stack[y + DATA_STACK_SIZE]);
-        fflush(ofp);
-    }
-    fprintf(ofp, "\n");
 }
 
 void showrjfunc()
@@ -235,7 +218,7 @@ void showrjfunc()
     // right-justified for pretty printing!
     int precision = (DCLANG_INT) dclang_pop();
     int width = (DCLANG_INT) dclang_pop();
-    fprintf(ofp, "%*.*f ", width, precision, dclang_pop());
+    fprintf(ofp, "%*.*ld ", width, precision, dclang_pop());
     fflush(ofp);
 }
 
@@ -248,6 +231,33 @@ void showpzfunc()
     }
     int precision = (DCLANG_INT) dclang_pop();
     int width = (DCLANG_INT) dclang_pop();
-    fprintf(ofp, "%0*.*f ", width, precision, dclang_pop());
+    fprintf(ofp, "%0*.*l ", width, precision, dclang_pop());
     fflush(ofp);
+}
+
+void showstackfunc()
+{
+    DCLANG_INT x;
+    char *joiner;
+    x = data_stack_ptr > 16 ? data_stack_ptr - 16 : 0;
+    joiner = x == 0 ? " " : " ... ";
+    fprintf(ofp, "data_stack: <%lu>%s", data_stack_ptr, joiner);
+    fflush(ofp);
+    for (x=0; x < data_stack_ptr; x++) {
+        fprintf(ofp, "%1.1ld ", data_stack[x]);
+        fflush(ofp);
+    }
+    fprintf(ofp, "\n");
+    // do the save data stack as well:
+    DCLANG_INT y;
+    char *sv_joiner;
+    y = save_data_stack_ptr > 16 ? save_data_stack_ptr - 16 : 0;
+    sv_joiner = y == 0 ? " " : " ... ";
+    fprintf(ofp, "save_stack: <%lu>%s", save_data_stack_ptr, sv_joiner);
+    fflush(ofp);
+    for (y=0; y < save_data_stack_ptr; y++) {
+        fprintf(ofp, "%1.1ld ", data_stack[y + DATA_STACK_SIZE]);
+        fflush(ofp);
+    }
+    fprintf(ofp, "\n");
 }
