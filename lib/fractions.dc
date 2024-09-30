@@ -1,13 +1,73 @@
-"deprecated_stack.dc" import
+################################################################################
+# This is here for historical purposes and interest, as some example code uses #
+# it. In the `integer-only` branch in particular, this is deprecated due to    #
+# new built-ins that are more performant, and pack N/D into a single machine   #
+# word.                                                                        #
+################################################################################
 
-: gcd swap over % dup 0 <> if gcd else drop endif ;
+: gcd
+  swap over %
+  dup 0 <>
+  if
+    gcd
+  else
+    drop
+  endif
+;
 
-: simplify 2dup gcd dup rot swap / -rot / swap ;
+: simplify
+  2dup svpush svpush
+  gcd
+  dup  svpop swap /
+  swap svpop swap /
+;
 
-: fracadd rot 2dup * dup -2rot rot * -rot * + -rot drop simplify ;
+: fracadd
+  svpush svpush svpush svpush
+  1 svpick 3 svpick *
+  0 svpick 3 svpick *
+    1 svpick 2 svpick *
+  +
+  swap
+  svdrop svdrop svdrop svdrop
+  simplify
+;
 
 : fracsub swap -1 * swap fracadd ;
 
-: fracmul rot * -rot * swap simplify ;
+: fracmul
+  svpush
+  swap svpop *
+  svpush
+  *
+  svpop
+  simplify
+;
 
 : fracdiv swap fracmul ;
+
+: frsim+   # the so-called "freshman sum"
+  svpush
+  swap svpop +
+  svpush
+  +
+  svpop
+  simplify
+;
+
+###################################################
+# TODO -- rational sqrt stuff is work in progress #
+###################################################
+var high_numer
+var high_denom
+var low_numer   1 low_numer !
+var low_denom   1 low_denom !
+
+: sqrt_search  # ( numer denom -- sqrt_numer sqrt_denom)
+  2dup svpush svpush  # save the target
+  2dup swap 2 / high_numer !
+                high_denom !
+  # start calculations
+  2dup fracmul # ( numer^2 denom^2 )
+  2 1 fr/
+;

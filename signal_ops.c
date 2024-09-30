@@ -22,7 +22,7 @@ void forkfunc()
     // TODO: a future enhancement might be to have a counting system in place for
     // avoiding fork-bomb DoS attacks. So, the introspection of a connection limit
     // before granting a new `fork`.
-    push((DCLANG_INT32) fork());
+    push((DCLANG_INT) fork());
 }
 
 
@@ -32,6 +32,6 @@ void exitfunc()
         printf("exit -- need an integer exit code on the stack");
         return;
     }
-    DCLANG_INT32 code = (DCLANG_INT32) dclang_pop();
+    DCLANG_INT code = (DCLANG_INT) dclang_pop();
     exit(code);
 }

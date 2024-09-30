@@ -27,7 +27,7 @@ void add_all_primitives()
     add_primitive("not", "Bit manipulation", notfunc);
     add_primitive("<<", "Bit manipulation", lshiftfunc);
     add_primitive(">>", "Bit manipulation", rshiftfunc);
-    // basic arithmetic
+    // basic math (arithmetic, fractions)
     add_primitive("+", "Arithmetic", addfunc);
     add_primitive("-", "Arithmetic", subfunc);
     add_primitive("*", "Arithmetic", mulfunc);
@@ -36,6 +36,11 @@ void add_all_primitives()
     add_primitive("abs", "Arithmetic", absfunc);
     add_primitive("min", "Arithmetic", minfunc);
     add_primitive("max", "Arithmetic", maxfunc);
+    add_primitive("frac", "Fractions", fracfunc);
+    add_primitive("fr*", "Fractions", fracmulfunc);
+    add_primitive("fr/", "Fractions", fracdivfunc);
+    add_primitive("fr+", "Fractions", fracaddfunc);
+    add_primitive("fr-", "Fractions", fracsubfunc);
     // randomness
     add_primitive("rand", "Randomness", randfunc);
     // stack manipulation
@@ -59,6 +64,7 @@ void add_all_primitives()
     // stack output
     add_primitive(".", "Stack Output", showfunc);
     add_primitive(".h", "Stack Output", showhexfunc);
+    add_primitive(".fr", "Stack Output", showfracfunc);
     add_primitive("..", "Stack Output", shownospacefunc);
     add_primitive(".rj", "Stack Output", showrjfunc);
     add_primitive(".pz", "Stack Output", showpzfunc);

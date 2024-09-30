@@ -97,7 +97,7 @@ void uemitfunc()
 
 void bytes32func()
 {
-    DCLANG_INT32 val = (DCLANG_INT32) dclang_pop();
+    DCLANG_INT val = (DCLANG_INT) dclang_pop();
     char low = (char) val & 0xff;
     val >>= 8;
     char lowmid = (char) val & 0xff;
@@ -130,9 +130,9 @@ void isalnumfunc()
     }
     char *char_ptr = (char *) string_PTR_addr;
     if (isalnum(char_ptr[0])) {
-        push((DCLANG_INT) -1);
+        push((DCLANG_LONG) -1);
     } else {
-        push((DCLANG_INT) 0);
+        push((DCLANG_LONG) 0);
     }
 }
 
@@ -151,9 +151,9 @@ void isalphafunc()
     }
     char *char_ptr = (char *) string_PTR_addr;
     if (isalpha(char_ptr[0])) {
-        push((DCLANG_INT) -1);
+        push((DCLANG_LONG) -1);
     } else {
-        push((DCLANG_INT) 0);
+        push((DCLANG_LONG) 0);
     }
 }
 
@@ -172,9 +172,9 @@ void iscntrlfunc()
     }
     char *char_ptr = (char *) string_PTR_addr;
     if (iscntrl(char_ptr[0])) {
-        push((DCLANG_INT) -1);
+        push((DCLANG_LONG) -1);
     } else {
-        push((DCLANG_INT) 0);
+        push((DCLANG_LONG) 0);
     }
 }
 
@@ -193,9 +193,9 @@ void isdigitfunc()
     }
     char *char_ptr = (char *) string_PTR_addr;
     if (isdigit(char_ptr[0])) {
-        push((DCLANG_INT) -1);
+        push((DCLANG_LONG) -1);
     } else {
-        push((DCLANG_INT) 0);
+        push((DCLANG_LONG) 0);
     }
 }
 
@@ -214,9 +214,9 @@ void isgraphfunc()
     }
     char *char_ptr = (char *) string_PTR_addr;
     if (isgraph(char_ptr[0])) {
-        push((DCLANG_INT) -1);
+        push((DCLANG_LONG) -1);
     } else {
-        push((DCLANG_INT) 0);
+        push((DCLANG_LONG) 0);
     }
 }
 
@@ -235,9 +235,9 @@ void islowerfunc()
     }
     char *char_ptr = (char *) string_PTR_addr;
     if (islower(char_ptr[0])) {
-        push((DCLANG_INT) -1);
+        push((DCLANG_LONG) -1);
     } else {
-        push((DCLANG_INT) 0);
+        push((DCLANG_LONG) 0);
     }
 }
 
@@ -256,9 +256,9 @@ void isprintfunc()
     }
     char *char_ptr = (char *) string_PTR_addr;
     if (isprint(char_ptr[0])) {
-        push((DCLANG_INT) -1);
+        push((DCLANG_LONG) -1);
     } else {
-        push((DCLANG_INT) 0);
+        push((DCLANG_LONG) 0);
     }
 }
 
@@ -277,9 +277,9 @@ void ispunctfunc()
     }
     char *char_ptr = (char *) string_PTR_addr;
     if (ispunct(char_ptr[0])) {
-        push((DCLANG_INT) -1);
+        push((DCLANG_LONG) -1);
     } else {
-        push((DCLANG_INT) 0);
+        push((DCLANG_LONG) 0);
     }
 }
 
@@ -298,9 +298,9 @@ void isspacefunc()
     }
     char *char_ptr = (char *) string_PTR_addr;
     if (isspace(char_ptr[0])) {
-        push((DCLANG_INT) -1);
+        push((DCLANG_LONG) -1);
     } else {
-        push((DCLANG_INT) 0);
+        push((DCLANG_LONG) 0);
     }
 }
 
@@ -319,9 +319,9 @@ void isupperfunc()
     }
     char *char_ptr = (char *) string_PTR_addr;
     if (isupper(char_ptr[0])) {
-        push((DCLANG_INT) -1);
+        push((DCLANG_LONG) -1);
     } else {
-        push((DCLANG_INT) 0);
+        push((DCLANG_LONG) 0);
     }
 }
 
@@ -340,8 +340,8 @@ void isxdigitfunc()
     }
     char *char_ptr = (char *) string_PTR_addr;
     if (isxdigit(char_ptr[0])) {
-        push((DCLANG_INT) -1);
+        push((DCLANG_LONG) -1);
     } else {
-        push((DCLANG_INT) 0);
+        push((DCLANG_LONG) 0);
     }
 }

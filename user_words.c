@@ -25,9 +25,9 @@ void showdefined()
     }
 }
 
-DCLANG_INT dclang_findword(const char *word)
+DCLANG_LONG dclang_findword(const char *word)
 {
-    for (DCLANG_INT x = num_user_words - 1; x > -1 ; x--) {
+    for (DCLANG_LONG x = num_user_words - 1; x > -1 ; x--) {
         if (strcmp(user_words[x].name, word) == 0) {
             return user_words[x].word_start;
         }
@@ -35,7 +35,7 @@ DCLANG_INT dclang_findword(const char *word)
     return -1;
 }
 
-void callword(DCLANG_INT where)
+void callword(DCLANG_LONG where)
 {
     /* Don't consume more of the return stack if we are going nowhere.
        This will allow better recursion */
@@ -47,7 +47,7 @@ void callword(DCLANG_INT where)
 
 void dclang_callword(DCLANG_PTR where)
 {
-    callword((DCLANG_INT) where);
+    callword((DCLANG_LONG) where);
     // execute all until we reach the end of the iptr queue
     while (iptr < max_iptr) {
         (*(prog[iptr].function.with_param)) (prog[iptr++].param);

@@ -10,11 +10,11 @@
 struct tree_entry
 {
     char *key;
-    DCLANG_INT value;
+    DCLANG_LONG value;
 };
 
 struct tree_entry *
-make_tree_entry(char *key, DCLANG_INT value)
+make_tree_entry(char *key, DCLANG_LONG value)
 {
     struct tree_entry *new_tree =
         (struct tree_entry *) dclang_malloc(sizeof(struct tree_entry));
@@ -72,7 +72,7 @@ void treegetfunc()
         push((DCLANG_PTR) 0);
         return;
     }
-    push((DCLANG_INT)((*(struct tree_entry **)retval)->value));
+    push((DCLANG_LONG)((*(struct tree_entry **)retval)->value));
 }
 
 void treesetfunc()
@@ -86,7 +86,7 @@ void treesetfunc()
     }
 
     // Pop args
-    DCLANG_INT value = dclang_pop();
+    DCLANG_LONG value = dclang_pop();
     char *search_key = (char *)(DCLANG_PTR) dclang_pop();
     DCLANG_PTR tree_idx = (DCLANG_PTR) dclang_pop();
 
@@ -94,7 +94,7 @@ void treesetfunc()
     tdelete(te_del, &tree_roots[tree_idx], tree_compare_func);
     struct tree_entry *te = make_tree_entry(strdup(search_key), value);
     struct tree_entry *retval = tsearch(te, &tree_roots[tree_idx], tree_compare_func);
-    push((DCLANG_INT)((*(struct tree_entry **)retval)->value));
+    push((DCLANG_LONG)((*(struct tree_entry **)retval)->value));
 }
 
 // helper used by `treewalk`

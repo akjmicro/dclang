@@ -15,7 +15,7 @@ void pokefunc()
         printf("! -- variable slot number out-of-range!\n");
         return;
     }
-    DCLANG_INT val = dclang_pop();
+    DCLANG_LONG val = dclang_pop();
     vars[idx] = val;
 }
 
@@ -100,7 +100,7 @@ void commafunc()
         printf(", -- stack underflow! ");
         return;
     }
-    DCLANG_INT val = dclang_pop();
+    DCLANG_LONG val = dclang_pop();
     vars[varsidx++] = val;
 }
 
@@ -193,8 +193,8 @@ int compare_doubles (const void *a, const void *b)
 
 int compare_strings (const void *a, const void *b)
 {
-    const char *sa = (const char *) (DCLANG_PTR) * (DCLANG_INT *) a;
-    const char *sb = (const char *) (DCLANG_PTR) * (DCLANG_INT *) b;
+    const char *sa = (const char *) (DCLANG_PTR) * (DCLANG_LONG *) a;
+    const char *sb = (const char *) (DCLANG_PTR) * (DCLANG_LONG *) b;
     return strcmp(sa, sb);
 }
 
@@ -209,7 +209,7 @@ void sortnumsfunc()
     }
     int size = (DCLANG_PTR) dclang_pop();
     int arrstart = (DCLANG_PTR) dclang_pop();
-    qsort (vars+arrstart, size, sizeof(DCLANG_INT), compare_doubles);
+    qsort (vars+arrstart, size, sizeof(DCLANG_LONG), compare_doubles);
 }
 
 void sortstrsfunc()
@@ -220,7 +220,7 @@ void sortstrsfunc()
     }
     int size = (DCLANG_PTR) dclang_pop();
     int arrstart = (DCLANG_PTR) dclang_pop();
-    qsort (vars+arrstart, size, sizeof(DCLANG_INT), compare_strings);
+    qsort (vars+arrstart, size, sizeof(DCLANG_LONG), compare_strings);
 }
 
 // environment variables:

@@ -62,7 +62,7 @@ void filereadfunc()
         return;
     }
     FILE *file_to_read = (FILE *)(DCLANG_PTR) dclang_pop();
-    DCLANG_INT num_bytes = (DCLANG_PTR) dclang_pop();
+    DCLANG_LONG num_bytes = (DCLANG_PTR) dclang_pop();
     char *buf = (char *)(DCLANG_PTR) dclang_pop();
     DCLANG_PTR num_bytes_read = fread(buf, 1, num_bytes, file_to_read);
     // update print safety:
@@ -75,7 +75,7 @@ void filereadfunc()
         MAX_STR = (DCLANG_PTR)buf + num_bytes_read + 1;
     }
     // push the number of bytes read
-    push((DCLANG_INT) num_bytes_read);
+    push((DCLANG_LONG) num_bytes_read);
 }
 
 void filereadlinefunc()
@@ -100,7 +100,7 @@ void filereadlinefunc()
     // push the address of our new string and length
     push((DCLANG_PTR) linebuf);
     // push the number of bytes read
-    push((DCLANG_INT) num_bytes_read);
+    push((DCLANG_LONG) num_bytes_read);
 }
 
 void filereadallfunc()
@@ -113,7 +113,7 @@ void filereadallfunc()
     }
     DCLANG_PTR chr_cnt = 0;
     DCLANG_PTR bufsize = 64;
-    DCLANG_INT ch;
+    DCLANG_LONG ch;
     char *allbuf = (char *) dclang_malloc(bufsize);
     memset(allbuf, 0, bufsize);
     FILE *file_to_read = (FILE *)(DCLANG_PTR) dclang_pop();
@@ -140,7 +140,7 @@ void filereadallfunc()
     // push the address of our new string and length
     push((DCLANG_PTR) allbuf);
     // push the number of bytes read
-    push((DCLANG_INT) chr_cnt);
+    push((DCLANG_LONG) chr_cnt);
 }
 
 void fileseekfunc()
@@ -159,7 +159,7 @@ void fileseekfunc()
         printf("Whence parameter must be between 0 and 2 inclusive!\n");
         return;
     }
-    DCLANG_INT offset = (DCLANG_INT) dclang_pop();
+    DCLANG_LONG offset = (DCLANG_LONG) dclang_pop();
     fseek(file_to_seek, offset, whence);
 }
 
@@ -186,7 +186,7 @@ void filewritefunc()
     FILE *file_to_write = (FILE *)(DCLANG_PTR) dclang_pop();
     DCLANG_PTR num_bytes = (DCLANG_PTR) dclang_pop();
     char *str = (char *)(DCLANG_PTR) dclang_pop();
-    DCLANG_INT result = fwrite(str, 1, num_bytes, file_to_write);
+    DCLANG_LONG result = fwrite(str, 1, num_bytes, file_to_write);
     push(result);
 }
 
