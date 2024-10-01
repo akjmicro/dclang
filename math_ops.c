@@ -52,6 +52,20 @@ void modfunc()
     push(fmod(dclang_pop(), modulus));
 }
 
+void divmodfunc()
+{
+    if (data_stack_ptr < 2)
+    {
+        printf("'/%% (divmod)' needs two numbers on the stack!\n");
+        return;
+    }
+    DCLANG_LONG divisor = dclang_pop();
+    DCLANG_LONG dividend = dclang_pop();
+    ldiv_t result = ldiv(dividend, divisor);
+    push(result.rem);
+    push(result.quot);
+}
+
 void lshiftfunc()
 {
     if (data_stack_ptr < 2)
@@ -129,7 +143,7 @@ void randfunc()
 //////////////////////////////
 
 // Euclidean GCD algorithm
-DCLANG_LONG gcd(DCLANG_LONG a, DCLANG_LONG b)
+DCLANG_INT gcd(DCLANG_INT a, DCLANG_INT b)
 {
     if (abs(b - a) == 1) return 1;
     int result = a % b;
@@ -148,8 +162,8 @@ void fracfunc()
         printf("'frac' needs two integers on the stack!\n");
         return;
     }
-    DCLANG_UINT  denom    = (DCLANG_UINT)  dclang_pop();
-    DCLANG_ULONG numer    = (DCLANG_ULONG) dclang_pop();
+    DCLANG_UINT  denom = (DCLANG_UINT)  dclang_pop();
+    DCLANG_ULONG numer = (DCLANG_ULONG) dclang_pop();
     DCLANG_ULONG fraction = (numer << 32) | denom;
     push(fraction);
 }
@@ -165,17 +179,21 @@ void fracmulfunc()
     DCLANG_ULONG fraction2 = dclang_pop();
     DCLANG_ULONG fraction1 = dclang_pop();
     // split numerator and denominator
-    DCLANG_LONG numer1 = fraction1 >> 32;
-    DCLANG_LONG numer2 = fraction2 >> 32;
-    DCLANG_INT  denom1 = (DCLANG_INT) fraction1 & 0xffffffff;
-    DCLANG_INT  denom2 = (DCLANG_INT) fraction2 & 0xffffffff;
+    DCLANG_INT numer1 = (DCLANG_INT) (fraction1 >> 32);
+    DCLANG_INT numer2 = (DCLANG_INT) (fraction2 >> 32);
+    DCLANG_INT denom1 = (DCLANG_INT) fraction1 & 0xffffffff;
+    DCLANG_INT denom2 = (DCLANG_INT) fraction2 & 0xffffffff;
     // calculate
-    DCLANG_LONG result_numer = numer1 * numer2;
-    DCLANG_LONG result_denom = denom1 * denom2;
-    DCLANG_LONG common = gcd(result_numer, result_denom);
-    result_numer = (result_numer / common) << 32;
+    DCLANG_INT result_numer = numer1 * numer2;
+    DCLANG_INT result_denom = denom1 * denom2;
+    // scale
+    DCLANG_INT common = gcd(abs(result_numer), abs(result_denom));
+    result_numer = result_numer / common;
     result_denom = result_denom / common;
-    push(result_numer | result_denom);
+    // output
+    DCLANG_ULONG result_n = (DCLANG_ULONG) result_numer << 32;
+    DCLANG_ULONG result_d = (DCLANG_ULONG) result_denom & 0xffffffff;
+    push(result_n | result_d);
 }
 
 void fracdivfunc()
@@ -189,17 +207,21 @@ void fracdivfunc()
     DCLANG_ULONG fraction2 = dclang_pop();
     DCLANG_ULONG fraction1 = dclang_pop();
     // split numerator and denominator
-    DCLANG_LONG numer1 = fraction1 >> 32;
-    DCLANG_LONG numer2 = fraction2 >> 32;
-    DCLANG_INT  denom1 = (DCLANG_INT) fraction1 & 0xffffffff;
-    DCLANG_INT  denom2 = (DCLANG_INT) fraction2 & 0xffffffff;
+    DCLANG_INT numer1 = (DCLANG_INT) (fraction1 >> 32);
+    DCLANG_INT numer2 = (DCLANG_INT) (fraction2 >> 32);
+    DCLANG_INT denom1 = (DCLANG_INT) fraction1 & 0xffffffff;
+    DCLANG_INT denom2 = (DCLANG_INT) fraction2 & 0xffffffff;
     // calculate
-    DCLANG_LONG result_numer = numer1 * denom2;
-    DCLANG_LONG result_denom = denom1 * numer2;
-    DCLANG_LONG common = gcd(result_numer, result_denom);
-    result_numer = (result_numer / common) << 32;
+    DCLANG_INT result_numer = numer1 * denom2;
+    DCLANG_INT result_denom = denom1 * numer2;
+    // scale
+    DCLANG_INT common = gcd(abs(result_numer), abs(result_denom));
+    result_numer = result_numer / common;
     result_denom = result_denom / common;
-    push(result_numer | result_denom);
+    // output
+    DCLANG_ULONG result_n = (DCLANG_ULONG) result_numer << 32;
+    DCLANG_ULONG result_d = (DCLANG_ULONG) result_denom & 0xffffffff;
+    push(result_n | result_d);
 }
 
 void fracaddfunc()
@@ -213,19 +235,23 @@ void fracaddfunc()
     DCLANG_ULONG fraction2 = dclang_pop();
     DCLANG_ULONG fraction1 = dclang_pop();
     // split numerator and denominator
-    DCLANG_LONG numer1 = fraction1 >> 32;
-    DCLANG_LONG numer2 = fraction2 >> 32;
-    DCLANG_INT  denom1 = (DCLANG_INT) fraction1 & 0xffffffff;
-    DCLANG_INT  denom2 = (DCLANG_INT) fraction2 & 0xffffffff;
+    DCLANG_INT numer1 = (DCLANG_INT) (fraction1 >> 32);
+    DCLANG_INT numer2 = (DCLANG_INT) (fraction2 >> 32);
+    DCLANG_INT denom1 = (DCLANG_INT) fraction1 & 0xffffffff;
+    DCLANG_INT denom2 = (DCLANG_INT) fraction2 & 0xffffffff;
     // calculate
     numer1 = numer1 * denom2;
     numer2 = numer2 * denom1;
-    DCLANG_LONG result_numer = numer1 + numer2;
-    DCLANG_LONG result_denom = denom1 * denom2;
-    DCLANG_LONG common = gcd(result_numer, result_denom);
-    result_numer = (result_numer / common) << 32;
+    DCLANG_INT result_numer = numer1 + numer2;
+    DCLANG_INT result_denom = denom1 * denom2;
+    // scale
+    DCLANG_INT common = gcd(abs(result_numer), abs(result_denom));
+    result_numer = result_numer / common;
     result_denom = result_denom / common;
-    push(result_numer | result_denom);
+    // output
+    DCLANG_ULONG result_n = (DCLANG_ULONG) result_numer << 32;
+    DCLANG_ULONG result_d = (DCLANG_ULONG) result_denom & 0xffffffff;
+    push(result_n | result_d);
 }
 
 void fracsubfunc()
@@ -239,19 +265,37 @@ void fracsubfunc()
     DCLANG_ULONG fraction2 = dclang_pop();
     DCLANG_ULONG fraction1 = dclang_pop();
     // split numerator and denominator
-    DCLANG_LONG numer1 = fraction1 >> 32;
-    DCLANG_LONG numer2 = fraction2 >> 32;
-    DCLANG_INT  denom1 = (DCLANG_INT) fraction1 & 0xffffffff;
-    DCLANG_INT  denom2 = (DCLANG_INT) fraction2 & 0xffffffff;
+    DCLANG_INT numer1 = (DCLANG_INT) (fraction1 >> 32);
+    DCLANG_INT numer2 = (DCLANG_INT) (fraction2 >> 32);
+    DCLANG_INT denom1 = (DCLANG_INT) fraction1 & 0xffffffff;
+    DCLANG_INT denom2 = (DCLANG_INT) fraction2 & 0xffffffff;
     // calculate
     numer1 = numer1 * denom2;
     numer2 = numer2 * denom1;
-    DCLANG_LONG result_numer = numer1 - numer2;
-    DCLANG_LONG result_denom = denom1 * denom2;
-    DCLANG_LONG common = gcd(result_numer, result_denom);
-    result_numer = (result_numer / common) << 32;
+    DCLANG_INT result_numer = numer1 - numer2;
+    DCLANG_INT result_denom = denom1 * denom2;
+    // scale
+    DCLANG_INT common = gcd(abs(result_numer), abs(result_denom));
+    result_numer = result_numer / common;
     result_denom = result_denom / common;
-    push(result_numer | result_denom);
+    // output
+    DCLANG_ULONG result_n = (DCLANG_ULONG) result_numer << 32;
+    DCLANG_ULONG result_d = (DCLANG_ULONG) result_denom & 0xffffffff;
+    push(result_n | result_d);
+}
+
+void fracsplitfunc()
+{
+    if (data_stack_ptr < 1)
+    {
+        printf("'frsplit' needs an integer (representing a fraction) on the stack!\n");
+        return;
+    }
+    DCLANG_ULONG fraction = dclang_pop();
+    DCLANG_INT numer = (DCLANG_INT) (fraction >> 32);
+    DCLANG_INT denom = (DCLANG_INT) (fraction & 0xffffffff);
+    push((DCLANG_LONG) numer);
+    push((DCLANG_LONG) denom);
 }
 
 void showfracfunc()
@@ -262,7 +306,8 @@ void showfracfunc()
         return;
     }
     DCLANG_ULONG fraction = dclang_pop();
-    DCLANG_LONG  numer    = fraction >> 32;
-    DCLANG_INT   denom    = (DCLANG_INT) fraction & 0xffffffff;
-    printf("%0.0i/%0.0i ", numer, denom);
+    DCLANG_ULONG numer_l  = fraction >> 32;
+    DCLANG_INT numer = (DCLANG_INT) numer_l;
+    DCLANG_INT denom = (DCLANG_INT) fraction & 0xffffffff;
+    printf("%i/%i ", numer, denom);
 }

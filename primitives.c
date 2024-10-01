@@ -8,7 +8,7 @@ void add_primitive(char *name, char *category, void *func_ptr)
 
 void add_all_primitives()
 {
-    primitives = dclang_malloc(208*sizeof(primitive));
+    primitives = dclang_malloc(208 * sizeof(primitive));
     // boolean logic
     add_primitive("null", "Boolean", nullfunc);
     add_primitive("false", "Boolean", falsefunc);
@@ -33,6 +33,7 @@ void add_all_primitives()
     add_primitive("*", "Arithmetic", mulfunc);
     add_primitive("/", "Arithmetic", divfunc);
     add_primitive("%", "Arithmetic", modfunc);
+    add_primitive("/%", "Arithmetic", divmodfunc);
     add_primitive("abs", "Arithmetic", absfunc);
     add_primitive("min", "Arithmetic", minfunc);
     add_primitive("max", "Arithmetic", maxfunc);
@@ -41,6 +42,7 @@ void add_all_primitives()
     add_primitive("fr/", "Fractions", fracdivfunc);
     add_primitive("fr+", "Fractions", fracaddfunc);
     add_primitive("fr-", "Fractions", fracsubfunc);
+    add_primitive("frsplit", "Fractions", fracsplitfunc);
     // randomness
     add_primitive("rand", "Randomness", randfunc);
     // stack manipulation

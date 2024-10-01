@@ -558,6 +558,6 @@ void freefunc()
 
 void memusedfunc()
 {
-    DCLANG_LONG memused = (DCLANG_LONG) (((float) unused_mem_idx) / ((float) MEMSIZE));
+    DCLANG_ULONG memused = (DCLANG_ULONG) ((unused_mem_idx << 32) |  (MEMSIZE & 0xffffffff));
     push(memused);
 }
