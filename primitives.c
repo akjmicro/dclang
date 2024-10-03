@@ -42,8 +42,10 @@ void add_all_primitives()
     add_primitive("fr/", "Fractions", fracdivfunc);
     add_primitive("fr+", "Fractions", fracaddfunc);
     add_primitive("fr-", "Fractions", fracsubfunc);
+    add_primitive("frmed", "Fractions", fracmediantfunc);
     add_primitive("frsplit", "Fractions", fracsplitfunc);
     // randomness
+    add_primitive("seed", "Randomness", seedfunc);
     add_primitive("rand", "Randomness", randfunc);
     // stack manipulation
     add_primitive("drop", "Stack Ops", dropfunc);

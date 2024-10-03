@@ -126,16 +126,29 @@ void maxfunc()
     push(c);
 }
 
+////////////////
 /* randomness */
-/* xorshift64s, variant A_1(12,25,27) with multiplier M_32 from line 3 of table 5 */
+////////////////
+static uint64_t seed = 1;
+
+void seedfunc()
+{
+    if (data_stack_ptr < 1)
+    {
+        printf("'seed' needs a seed integer on the stack.\n");
+        printf("(A good choice is `clock` or `epoch`).\n");
+        return;
+    }
+    seed = dclang_pop();
+}
+
 void randfunc()
 {
-    /* initial seed must be nonzero, don't use a static variable for the state if multithreaded */
-    static uint64_t x = 1;
-    x ^= x >> 12;
-    x ^= x << 25;
-    x ^= x >> 27;
-    push(x * 0x2545F4914F6CDD1D);
+    /* xorshift64s, variant A_1(12,25,27) with multiplier M_32 from line 3 of table 5 */
+    seed ^= seed >> 12;
+    seed ^= seed << 25;
+    seed ^= seed >> 27;
+    push(seed * 0x2545F4914F6CDD1D);
 }
 
 //////////////////////////////
@@ -274,6 +287,34 @@ void fracsubfunc()
     numer2 = numer2 * denom1;
     DCLANG_INT result_numer = numer1 - numer2;
     DCLANG_INT result_denom = denom1 * denom2;
+    // scale
+    DCLANG_INT common = gcd(abs(result_numer), abs(result_denom));
+    result_numer = result_numer / common;
+    result_denom = result_denom / common;
+    // output
+    DCLANG_ULONG result_n = (DCLANG_ULONG) result_numer << 32;
+    DCLANG_ULONG result_d = (DCLANG_ULONG) result_denom & 0xffffffff;
+    push(result_n | result_d);
+}
+
+void fracmediantfunc()
+{
+    if (data_stack_ptr < 2)
+    {
+        printf("'frmed' (mediant AKA freshman_sum) needs two numbers representing fractions on the stack.\n");
+        return;
+    }
+    // pop fractions
+    DCLANG_ULONG fraction2 = dclang_pop();
+    DCLANG_ULONG fraction1 = dclang_pop();
+    // split numerator and denominator
+    DCLANG_INT numer1 = (DCLANG_INT) (fraction1 >> 32);
+    DCLANG_INT numer2 = (DCLANG_INT) (fraction2 >> 32);
+    DCLANG_INT denom1 = (DCLANG_INT) fraction1 & 0xffffffff;
+    DCLANG_INT denom2 = (DCLANG_INT) fraction2 & 0xffffffff;
+    // calculate
+    DCLANG_INT result_numer = numer1 + numer2;
+    DCLANG_INT result_denom = denom1 + denom2;
     // scale
     DCLANG_INT common = gcd(abs(result_numer), abs(result_denom));
     result_numer = result_numer / common;
