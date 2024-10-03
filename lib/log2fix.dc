@@ -23,8 +23,8 @@
 : log2fix  # (x --> log2(x))
   # init tracked vars
   1 15 << svpush       # scale = (1 << 15)
-  0
-  swap   # operate _mostly_ on x variable at TOS
+  0                    # (x, y)
+  swap                 # (y, x) -- operate _mostly_ on x variable at TOS
   _scale_ans_down
   _scale_ans_up
   16 times
