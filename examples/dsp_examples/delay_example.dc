@@ -51,7 +51,7 @@ var rntrg
   mylp 2750 0.3 hc-lowpass
   mydelay 0.95 delay-read
   2dup
-  # delay ampilcation
+  # delay amplification
   0.65 *
   # osc/filter amplification
   1.8 *

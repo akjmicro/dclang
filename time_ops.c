@@ -40,8 +40,8 @@ void dt_to_epochfunc()
         return;
     }
     // input string setup
-    DCLANG_UINT fmt = (DCLANG_UINT) dclang_pop();
-    DCLANG_UINT to_conv = (DCLANG_UINT) dclang_pop();
+    DCLANG_ULONG fmt = (DCLANG_ULONG) dclang_pop();
+    DCLANG_ULONG to_conv = (DCLANG_ULONG) dclang_pop();
     if (fmt < MIN_STR || fmt > MAX_STR)
     {
         printf("dt->epoch -- <input_format> string address out-of-range.\n");
@@ -63,7 +63,7 @@ void dt_to_epochfunc()
     }
     // do the conversion to seconds since epoch
     time_t res_time = mktime(&dt_epoch_tm);
-    push((DCLANG_UINT) res_time);
+    push((DCLANG_ULONG) res_time);
 }
 
 void epoch_to_dtfunc()
@@ -74,13 +74,13 @@ void epoch_to_dtfunc()
         return;
     }
     // input string setup
-    DCLANG_UINT fmt = (DCLANG_UINT) dclang_pop();
+    DCLANG_ULONG fmt = (DCLANG_ULONG) dclang_pop();
     if (fmt < MIN_STR || fmt > MAX_STR)
     {
         printf("epoch->dt -- <output_format> string address out-of-range.\n");
         return;
     }
-    DCLANG_UINT in_epoch_uint = (DCLANG_UINT) dclang_pop();
+    DCLANG_ULONG in_epoch_uint = (DCLANG_ULONG) dclang_pop();
     time_t in_epoch = (time_t) in_epoch_uint;
     char tmbuf[256];
     memset(&tmbuf[0], 0, 256);

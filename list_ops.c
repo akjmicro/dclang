@@ -98,7 +98,7 @@ void listsetfunc() {
 
     // Pop args
     DCLANG_FLT value = dclang_pop();
-    DCLANG_INT slot = (DCLANG_INT)dclang_pop();
+    DCLANG_LONG slot = (DCLANG_LONG)dclang_pop();
     DCLANG_PTR list_ptr = (DCLANG_PTR)dclang_pop();
 
     // Convert pointers to the actual node structure
@@ -127,7 +127,7 @@ void listgetfunc() {
     }
 
     // Pop args
-    DCLANG_INT slot = (DCLANG_INT)dclang_pop();
+    DCLANG_LONG slot = (DCLANG_LONG)dclang_pop();
     DCLANG_PTR list_ptr = (DCLANG_PTR)dclang_pop();
 
     // Convert pointers to the actual node structure
@@ -158,7 +158,7 @@ void listinsertfunc() {
 
     // Pop args
     DCLANG_FLT value = dclang_pop();
-    DCLANG_INT node_slot = (DCLANG_INT)dclang_pop();
+    DCLANG_LONG node_slot = (DCLANG_LONG)dclang_pop();
     DCLANG_PTR list_ptr = (DCLANG_PTR)dclang_pop();
 
     // Convert pointers to the actual node structure
@@ -194,7 +194,7 @@ void listremovefunc() {
     }
 
     // Pop the node slot and list pointer and node slot from the stack
-    DCLANG_INT node_slot = (DCLANG_INT)dclang_pop();
+    DCLANG_LONG node_slot = (DCLANG_LONG)dclang_pop();
     DCLANG_PTR list_ptr = (DCLANG_PTR)dclang_pop();
 
     // Convert pointers to the actual node structure
@@ -242,7 +242,7 @@ void listsizefunc() {
     }
 
     // Push the size onto the stack
-    push((DCLANG_INT)size);
+    push((DCLANG_LONG)size);
 }
 
 

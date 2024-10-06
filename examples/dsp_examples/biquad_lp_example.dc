@@ -24,7 +24,7 @@ make-biquad myflt4
               1.2
       biquad-bp
   # scale down, it's louder
-      0.002 *
+      0.008 *
   # mix into center
         0.05
     panmix

@@ -82,7 +82,7 @@ var _phasor_array 64 allot
 
 # a simple metronome trigger:
 # ( freq -- sig )
-: metro phasor 0.001 <= ;
+: metro phasor 0.001 <= abs ;
 
 # a gate signal:
 # ( width freq -- sig )
@@ -137,7 +137,7 @@ var cmp
   cmp !
   t 0xff and 0 =
   if
-    rand cmp @ < dup smp !
+    rand cmp @ < abs dup smp !
   else
     t 0xff and 30 <
     if
@@ -236,13 +236,20 @@ var cmp
 : port
   # ( sig pa -- out-sig )
   tuck @ - dup
+  # ( pa sig-pa sig-pa )
   0 >
+  # ( pa sig-pa boolup )
   if
+    # ( pa sig-pa )
     2dup swap _get-rising-factor *
+    # ( pa sig-pa portsig )
   else
+    # ( pa sig-pa )
     2dup swap _get-falling-factor *
+    # ( pa sig-pa portsig )
   endif
   swap drop over @ + tuck swap !
+  # ( posrtsig+pa pa portsig+pa  )
 ;
 
 ##################

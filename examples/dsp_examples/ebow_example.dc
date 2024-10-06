@@ -22,12 +22,12 @@ make-hc-filter mylp
       mydelay
         1 256 /
       delay-read
-      0.99999 *           # ( dry wet )
+      0.9999999 *         # ( dry wet )
     +                     # ( dry+wet )
       dup                 # ( dry+wet dry+wet )
       0.5 panmix          # ( dry+wet )
   # mix for delay-write
-    0.95 *                # ((dry+wet)*0.95)
+    0.99 *                # ((dry+wet)*0.95)
       mydelay
   delay-write             # ( )
   # final output

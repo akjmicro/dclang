@@ -2,7 +2,7 @@
 
 if [[ $# -lt 1 ]]
 then
-  echo "You didn't give an exmaple .dc file to run"
+  echo "You didn't give an example .dc file to run"
   exit 0
 fi
 

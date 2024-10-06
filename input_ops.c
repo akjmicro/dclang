@@ -1,17 +1,17 @@
 const char *illegal[] = {"times", "again", "exittimes",
                          "for", "next", "exitfor"};
-DCLANG_INT num_illegal = sizeof(illegal) / sizeof(illegal[0]);
+DCLANG_LONG num_illegal = sizeof(illegal) / sizeof(illegal[0]);
 
 const char *special[] = {"if", "else", "endif"};
-DCLANG_INT num_special = sizeof(special) / sizeof(special[0]);
+DCLANG_LONG num_special = sizeof(special) / sizeof(special[0]);
 
 
 /* function to validate and return an error message if we are using control
  * structures outside of a definition */
-DCLANG_INT validate(const char *token)
+DCLANG_LONG validate(const char *token)
 {
-    DCLANG_INT checkval = 1;
-    for (DCLANG_INT i=0; i < num_illegal; i++) {
+    DCLANG_LONG checkval = 1;
+    for (DCLANG_LONG i=0; i < num_illegal; i++) {
         if (strcmp(token, illegal[i]) == 0) {
             printf("Error: '%s' -- illegal outside of function def.\n",
                    illegal[i]);
@@ -25,10 +25,10 @@ DCLANG_INT validate(const char *token)
 
 /* conditionals are 'special forms' that need to be handled in a certain
    way by the compilation process: */
-DCLANG_INT is_special_form(const char *token)
+DCLANG_LONG is_special_form(const char *token)
 {
-    DCLANG_INT checkval = 0;
-    for (DCLANG_INT i=0; i < num_special; i++) {
+    DCLANG_LONG checkval = 0;
+    for (DCLANG_LONG i=0; i < num_special; i++) {
         if (strcmp(token, special[i]) == 0) {
             checkval = 1;
             return checkval;
@@ -50,7 +50,7 @@ void compile_or_interpret(const char *token)
     }
 
     // Search user-defined functions (words)
-    DCLANG_INT found = dclang_findword(token);
+    DCLANG_LONG found = dclang_findword(token);
     if (found > -1) {
         if (def_mode) {
             if (strcmp(user_words[num_user_words - 1].name, token) == 0) {
@@ -128,7 +128,7 @@ void repl() {
 }
 
 
-DCLANG_INT dclang_import(char *infilestr) {
+DCLANG_LONG dclang_import(char *infilestr) {
     char *prefix = getenv("DCLANG_LIBS");
     if (prefix == NULL) {
         printf("DCLANG_LIBS env variable is unset!\n");

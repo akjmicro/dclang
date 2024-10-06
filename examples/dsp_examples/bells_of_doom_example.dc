@@ -22,7 +22,7 @@
   myport-two port
 ;
 
-: bells_of_doom
+: bells_of_doom_example
   # FM oscillator:
   230 mod-ratio-wobble 0.9 fm
   # amplitude envelope:

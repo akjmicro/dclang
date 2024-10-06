@@ -59,9 +59,9 @@ void lshiftfunc()
         printf("'<<' needs two numbers on the stack!\n");
         return;
     }
-    DCLANG_UINT shift_amt = (DCLANG_UINT) dclang_pop();
-    DCLANG_UINT base = (DCLANG_UINT) dclang_pop();
-    push((DCLANG_UINT) base << shift_amt);
+    DCLANG_ULONG shift_amt = (DCLANG_ULONG) dclang_pop();
+    DCLANG_ULONG base = (DCLANG_ULONG) dclang_pop();
+    push((DCLANG_ULONG) base << shift_amt);
 }
 
 void rshiftfunc()
@@ -71,9 +71,9 @@ void rshiftfunc()
         printf("'>>' needs two numbers on the stack!\n");
         return;
     }
-    DCLANG_UINT shift_amt = (DCLANG_UINT) dclang_pop();
-    DCLANG_UINT base = (DCLANG_UINT) dclang_pop();
-    push((DCLANG_UINT) base >> shift_amt);
+    DCLANG_ULONG shift_amt = (DCLANG_ULONG) dclang_pop();
+    DCLANG_ULONG base = (DCLANG_ULONG) dclang_pop();
+    push((DCLANG_ULONG) base >> shift_amt);
 }
 
 void absfunc()
@@ -119,7 +119,7 @@ void roundfunc()
         printf("'round' needs a number on the stack!\n");
         return;
     }
-    push((DCLANG_INT) round(dclang_pop()));
+    push((DCLANG_LONG) round(dclang_pop()));
 }
 
 void floorfunc()
@@ -129,7 +129,7 @@ void floorfunc()
         printf("'floor' needs a number on the stack!\n");
         return;
     }
-    push((DCLANG_INT) floor(dclang_pop()));
+    push((DCLANG_LONG) floor(dclang_pop()));
 }
 
 void ceilfunc()
@@ -139,7 +139,7 @@ void ceilfunc()
         printf("'ceil' needs a number on the stack!\n");
         return;
     }
-    push((DCLANG_INT) ceil(dclang_pop()));
+    push((DCLANG_LONG) ceil(dclang_pop()));
 }
 
 /* scientific math words */

@@ -25,9 +25,9 @@ void showdefined()
     }
 }
 
-DCLANG_INT dclang_findword(const char *word)
+DCLANG_LONG dclang_findword(const char *word)
 {
-    for (DCLANG_INT x = num_user_words - 1; x > -1 ; x--) {
+    for (DCLANG_LONG x = num_user_words - 1; x > -1 ; x--) {
         if (strcmp(user_words[x].name, word) == 0) {
             return user_words[x].word_start;
         }

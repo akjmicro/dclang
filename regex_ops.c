@@ -8,7 +8,7 @@ void regcompfunc()
     }
 
     // Pop the regex pattern from the stack
-    DCLANG_UINT flags = (DCLANG_UINT)dclang_pop();
+    DCLANG_ULONG flags = (DCLANG_ULONG)dclang_pop();
     DCLANG_PTR pattern_PTR_addr = (DCLANG_PTR)dclang_pop();
 
     if (pattern_PTR_addr < MIN_STR || pattern_PTR_addr > MAX_STR)
@@ -42,7 +42,7 @@ void regexecfunc()
     }
 
     // Pop the input string and the compiled regex object from the stack
-    DCLANG_INT flags = (DCLANG_INT)dclang_pop();
+    DCLANG_LONG flags = (DCLANG_LONG)dclang_pop();
     DCLANG_PTR input_str_PTR_addr = (DCLANG_PTR)dclang_pop();
     DCLANG_PTR regex_obj_PTR = (DCLANG_PTR)dclang_pop();
 
@@ -65,7 +65,7 @@ void regexecfunc()
     else
     {
         // No match found, push -1 to indicate failure
-        push((DCLANG_INT)-1);
+        push((DCLANG_LONG)-1);
     }
 }
 
@@ -83,15 +83,15 @@ void regreadfunc()
         return;
     }
 
-    DCLANG_INT index = (DCLANG_INT)dclang_pop();
+    DCLANG_LONG index = (DCLANG_LONG)dclang_pop();
     DCLANG_PTR regmatch_pnt = (DCLANG_PTR)dclang_pop();
 
-    if ((DCLANG_INT)regmatch_pnt > 0) {
+    if ((DCLANG_LONG)regmatch_pnt > 0) {
         regmatch_t *match = (regmatch_t *)regmatch_pnt;
-        push((DCLANG_INT)(match[index].rm_so));
-        push((DCLANG_INT)(match[index].rm_eo));
+        push((DCLANG_LONG)(match[index].rm_so));
+        push((DCLANG_LONG)(match[index].rm_eo));
     } else {
-        push((DCLANG_INT)-1);
-        push((DCLANG_INT)-1);
+        push((DCLANG_LONG)-1);
+        push((DCLANG_LONG)-1);
     }
 }

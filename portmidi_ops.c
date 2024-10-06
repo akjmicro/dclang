@@ -34,7 +34,7 @@ void _pm_openoutfunc()
         printf("'_pm_open_out' needs a device number on the stack!\n");
         return;
     }
-    DCLANG_INT device = (DCLANG_INT) dclang_pop();
+    DCLANG_LONG device = (DCLANG_LONG) dclang_pop();
     Pm_OpenOutput(&midi_stream, device, NULL, 0, NULL, NULL , 0);
 }
 
@@ -46,9 +46,9 @@ void _pm_wsfunc()
         printf("    <status> <data1> <data2>\n");
         return;
     }
-    DCLANG_INT data2 = (DCLANG_INT) dclang_pop();
-    DCLANG_INT data1 = (DCLANG_INT) dclang_pop();
-    DCLANG_INT status = (DCLANG_INT) dclang_pop();
+    DCLANG_LONG data2 = (DCLANG_LONG) dclang_pop();
+    DCLANG_LONG data1 = (DCLANG_LONG) dclang_pop();
+    DCLANG_LONG status = (DCLANG_LONG) dclang_pop();
     Pm_WriteShort(
         midi_stream,
         TIME_PROC(TIME_INFO),
@@ -64,9 +64,9 @@ void _pm_wsrfunc()
         printf("    <data2> <data1> <status>\n");
         return;
     }
-    DCLANG_INT status = (DCLANG_INT) dclang_pop();
-    DCLANG_INT data1 = (DCLANG_INT) dclang_pop();
-    DCLANG_INT data2 = (DCLANG_INT) dclang_pop();
+    DCLANG_LONG status = (DCLANG_LONG) dclang_pop();
+    DCLANG_LONG data1 = (DCLANG_LONG) dclang_pop();
+    DCLANG_LONG data2 = (DCLANG_LONG) dclang_pop();
     Pm_WriteShort(
         midi_stream,
         0,

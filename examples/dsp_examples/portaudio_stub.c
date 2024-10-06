@@ -40,10 +40,10 @@
 #include <dclang.h>
 #include "portaudio.h"
 
-#define DEVICE_NUM             2
-#define NUM_SECONDS           10
+#define DEVICE_NUM             0
+#define NUM_SECONDS           60
 #define SAMPLE_RATE        44100
-#define FRAMES_PER_BUFFER   4096
+#define FRAMES_PER_BUFFER    256
 
 typedef struct
 {

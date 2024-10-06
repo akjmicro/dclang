@@ -201,7 +201,7 @@ void shownospacefunc()
 
 void showstackfunc()
 {
-    DCLANG_INT x;
+    DCLANG_LONG x;
     char *joiner;
     x = data_stack_ptr > 16 ? data_stack_ptr - 16 : 0;
     joiner = x == 0 ? " " : " ... ";
@@ -213,7 +213,7 @@ void showstackfunc()
     }
     fprintf(ofp, "\n");
     // do the save data stack as well:
-    DCLANG_INT y;
+    DCLANG_LONG y;
     char *sv_joiner;
     y = save_data_stack_ptr > 16 ? save_data_stack_ptr - 16 : 0;
     sv_joiner = y == 0 ? " " : " ... ";
@@ -233,8 +233,8 @@ void showrjfunc()
         return;
     }
     // right-justified for pretty printing!
-    int precision = (DCLANG_INT) dclang_pop();
-    int width = (DCLANG_INT) dclang_pop();
+    int precision = (DCLANG_LONG) dclang_pop();
+    int width = (DCLANG_LONG) dclang_pop();
     fprintf(ofp, "%*.*f ", width, precision, dclang_pop());
     fflush(ofp);
 }
@@ -246,8 +246,8 @@ void showpzfunc()
         printf("Stack underflow! '.pz' needs: value, width, precision on the stack\n");
         return;
     }
-    int precision = (DCLANG_INT) dclang_pop();
-    int width = (DCLANG_INT) dclang_pop();
+    int precision = (DCLANG_LONG) dclang_pop();
+    int width = (DCLANG_LONG) dclang_pop();
     fprintf(ofp, "%0*.*f ", width, precision, dclang_pop());
     fflush(ofp);
 }

@@ -1,21 +1,21 @@
 // struct for 'for' loops:
 typedef struct {
-    DCLANG_INT limit;
-    DCLANG_INT step;
+    DCLANG_LONG limit;
+    DCLANG_LONG step;
 } forloop_info;
 
 forloop_info fl_stack[3];
-DCLANG_INT fl_ptr;
+DCLANG_LONG fl_ptr;
 
 // array for 'times' loop max amounts:
-DCLANG_INT times_info[3];
-DCLANG_INT times_ptr;
+DCLANG_LONG times_info[3];
+DCLANG_LONG times_ptr;
 
 // looping
 void timesfunc()
 {
     return_stack[return_stack_ptr++] = iptr;
-    times_info[times_ptr++] = (DCLANG_INT) dclang_pop();
+    times_info[times_ptr++] = (DCLANG_LONG) dclang_pop();
     loop_counter[loop_counter_ptr++] = 0;
 }
 
@@ -45,9 +45,9 @@ void againfunc()
 void forfunc()
 {
     return_stack[return_stack_ptr++] = iptr;
-    fl_stack[fl_ptr].step = (DCLANG_INT) dclang_pop();
-    loop_counter[loop_counter_ptr++] = (DCLANG_INT) dclang_pop();
-    fl_stack[fl_ptr++].limit = (DCLANG_INT) dclang_pop();
+    fl_stack[fl_ptr].step = (DCLANG_LONG) dclang_pop();
+    loop_counter[loop_counter_ptr++] = (DCLANG_LONG) dclang_pop();
+    fl_stack[fl_ptr++].limit = (DCLANG_LONG) dclang_pop();
 }
 
 void _contfor()
@@ -103,7 +103,7 @@ void kfunc()
 // jump if zero (false)
 void jumpzfunc(DCLANG_FLT where)
 {
-    DCLANG_INT truth = (DCLANG_INT) dclang_pop();
+    DCLANG_LONG truth = (DCLANG_LONG) dclang_pop();
     if (!truth) {
         iptr = (uintptr_t) where;
     }
@@ -129,7 +129,7 @@ void iffunc()
 void elsefunc()
 {
     // get the last starting point of the 'if' clause
-    DCLANG_INT if_val = return_stack[--return_stack_ptr];
+    DCLANG_LONG if_val = return_stack[--return_stack_ptr];
     // mark out current location on the return stack
     return_stack[return_stack_ptr++] = iptr;
     // set the unconditional jump, but no 'where' yet
@@ -143,6 +143,6 @@ void elsefunc()
 
 void endiffunc()
 {
-    DCLANG_INT last_val = return_stack[--return_stack_ptr];
+    DCLANG_LONG last_val = return_stack[--return_stack_ptr];
     prog[last_val].param = iptr;
 }

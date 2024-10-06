@@ -134,7 +134,7 @@ void tohexfunc()
         printf("tohex -- stack underflow! Needs a number on the stack\n");
         return;
     }
-    DCLANG_INT val = (DCLANG_INT) dclang_pop();
+    DCLANG_LONG val = (DCLANG_LONG) dclang_pop();
     int bufsize = snprintf(NULL, 0, "0x%.2lx", val);
     char *str = dclang_malloc(bufsize + 1);
     snprintf(str, bufsize + 1, "0x%.2lx", val);
@@ -323,7 +323,7 @@ void streqfunc()
     }
     char *str1 = (char *) string_PTR_addr1;
     char *str2 = (char *) string_PTR_addr2;
-    push(((DCLANG_INT) strcmp(str1, str2) == 0) * -1);
+    push(((DCLANG_LONG) strcmp(str1, str2) == 0) * -1);
 }
 
 void strltfunc()
@@ -347,7 +347,7 @@ void strltfunc()
     }
     char *str1 = (char *) string_PTR_addr1;
     char *str2 = (char *) string_PTR_addr2;
-    push(((DCLANG_INT) strcmp(str1, str2) < 0) * -1);
+    push(((DCLANG_LONG) strcmp(str1, str2) < 0) * -1);
 }
 
 void strgtfunc()
@@ -371,7 +371,7 @@ void strgtfunc()
     }
     char *str1 = (char *) string_PTR_addr1;
     char *str2 = (char *) string_PTR_addr2;
-    push(((DCLANG_INT) strcmp(str1, str2) > 0) * -1);
+    push(((DCLANG_LONG) strcmp(str1, str2) > 0) * -1);
 }
 
 void strfindfunc()
@@ -395,7 +395,7 @@ void strfindfunc()
     }
     char *str1 = (char *) string_PTR_addr1;
     char *str2 = (char *) string_PTR_addr2;
-    push((DCLANG_INT) strstr(str1, str2));
+    push((DCLANG_LONG) strstr(str1, str2));
 }
 
 void strspnfunc()
@@ -417,7 +417,7 @@ void strspnfunc()
         perror("strspn -- <str> string address out-of-range.\n");
         return;
     }
-    push((DCLANG_INT) strspn((char *)str, (char *)delim));
+    push((DCLANG_LONG) strspn((char *)str, (char *)delim));
 }
 
 void strcspnfunc()
@@ -439,7 +439,7 @@ void strcspnfunc()
         perror("strcspn -- <str> string address out-of-range.");
         return;
     }
-    push((DCLANG_INT) strcspn((char *)str, (char *)delim));
+    push((DCLANG_LONG) strcspn((char *)str, (char *)delim));
 }
 
 void strtokfunc()
@@ -468,7 +468,7 @@ void strtokfunc()
         perror("strtok -- <delim> (second) string address out-of-range.\n");
         return;
     }
-    push((DCLANG_INT) strtok_r((char *)str, (char *)delim, savepoint_ptr));
+    push((DCLANG_LONG) strtok_r((char *)str, (char *)delim, savepoint_ptr));
 }
 
 void mempcpyfunc()
