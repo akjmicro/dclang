@@ -55,14 +55,33 @@
 
 : gen_digit_expansion
   # ( data_struct )
-  dup svpush      # ( ds )      ( ds )
-  _get_remainder  # ( rem )     ( ds )
-  0 svpick        # ( rem ds )  ( ds )
-  _get_base       # ( rem base ) ( ds )
-  *               # ( rem*base ) ( ds )
-  0 svpick        # ( rem*base ds )  ( ds )
-  _get_div        # ( rem*base div )  ( ds )
-  divmod          # ( quot new_rem )  ( ds )
-  svpop           # ( quot new_rem ds ) ( )
-  _set_remainder  # ( quot )
+  dup svpush        # ( ds )      ( ds )
+  _get_remainder    # ( rem )     ( ds )
+  0 svpick          # ( rem ds )  ( ds )
+  _get_base         # ( rem base ) ( ds )
+  *                 # ( rem*base ) ( ds )
+  0 svpick          # ( rem*base ds )  ( ds )
+  _get_div          # ( rem*base div )  ( ds )
+  divmod            # ( quot new_rem )  ( ds )
+  svpop             # ( quot new_rem ds ) ( )
+  _set_remainder    # ( quot )
+;
+
+: _isqrt_helper
+  2dup /
+  2dup
+  - abs 1 <= if
+    2dup > if
+      swap
+    endif
+    drop swap drop
+  else
+    + 2 /
+    _isqrt_helper
+  endif
+;
+
+: isqrt
+  1
+  _isqrt_helper
 ;

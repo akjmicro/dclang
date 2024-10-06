@@ -1,3 +1,10 @@
+"math.dc" import
+
+"-" const :dash
+"." const :dot
+"mediant: " const :mediant_str
+"; diff from target: " const :diff_str
+
 ################################################################################
 # This is here for historical purposes and interest, as some example code uses #
 # it. In the `integer-only` branch in particular, this is deprecated due to    #
@@ -55,19 +62,70 @@
   simplify
 ;
 
+###################################
+# helper for decimal (FP) display #
+###################################
+
+: decimal_expansion         # (input_frac num_digits -> <digit_str>)
+  svpush                    # (input_frac)       (num_digits)
+  frsplit                   # (num den)          (num_digits)
+  # check sign
+  2dup                      # (num den num den)  (num_digits)
+  dup abs / svpush          # (num den num)      (num_digits den_sign)
+  dup abs / svpop           # (num den numsign densign) (num_digits)
+  *                         # (num den fracsign) (num_digits)
+  0 < if
+    :dash print
+  endif
+  # end check sign
+  abs swap abs swap         # (num den)          (num_digits)
+  2dup                      # (num den num den)  (num_digits)
+  /% .. :dot print          # (num den rem)      (num_digits)
+  svpush swap drop          # (den)              (rem num_digits)
+  svpop                     # (den rem)          (num_digits)
+  svpop times               # (den rem)          ()
+    10 * over               # (den rem*10 den)   ()
+    /% ..                   # (den rem)
+  again
+  2drop
+;
+
 ###################################################
 # TODO -- rational sqrt stuff is work in progress #
 ###################################################
-var high_numer
-var high_denom
-var low_numer   1 low_numer !
-var low_denom   1 low_denom !
 
-: sqrt_search  # ( numer denom -- sqrt_numer sqrt_denom)
-  2dup svpush svpush  # save the target
-  2dup swap 2 / high_numer !
-                high_denom !
-  # start calculations
-  2dup fracmul # ( numer^2 denom^2 )
-  2 1 fr/
+var too_low
+var too_high
+
+: sqrt_mediant              # (input_frac iterations low_est high_est -- sqrt_frac)
+  too_high !
+  too_low  !
+  times                     # (input_frac)
+    too_low @
+      too_high @
+    frmed
+    2dup                    # (input_frac mediant input_frac mediant)
+    dup fr* swap            # (input_frac mediant mediant^2 input_frac)
+    fr-                     # (input_frac mediant diff)
+    # log calculations
+    2dup swap
+    :mediant_str print .fr
+    :diff_str print
+    6 decimal_expansion cr
+    # end log calculations
+    # check =, <, or >
+    dup 0 = if              # (input_frac mediant diff)
+      drop swap drop
+      return
+    else
+    dup 0 < if              # (input_frac mediant diff)
+      # mediant too low - put it into too_low
+      drop too_low !
+    else
+      # mediant too high - put it into too_high
+      drop too_high !
+    endif endif
+  again
 ;
+
+var estimate
