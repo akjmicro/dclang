@@ -102,7 +102,7 @@ static const char* hset_entry(
     }
     // Didn't find key, allocate+copy if needed, then insert it.
     if (plength != NULL) {
-        key = strdup(key);
+        key = dclang_strdup(key);
         if (key == NULL) {
             return NULL;
         }

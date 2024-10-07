@@ -33,3 +33,11 @@ void dclang_free(void *mem)
 {
    //do nothing
 }
+
+char *dclang_strdup(char *tocopy)
+{
+    size_t str_size = strlen(tocopy) + 1;
+    char *outbuf = dclang_malloc(str_size);
+    memcpy(outbuf, tocopy, str_size);
+    return outbuf;
+}

@@ -81,3 +81,22 @@ void endword()
     prog[iptr++].function.without_param = returnfunc;
     max_iptr = iptr;
 }
+
+// deal with setting up local variables
+
+/*
+void startlocals()
+{
+    locals_idx = 0;
+    char *new_token = get_token();
+    while (strcmp(new_token, "}") != 0) {
+        locals_names[locals_idx] = new_token;
+        locals_idx += 1;
+    }
+}
+
+void endlocals()
+{
+
+}
+*/

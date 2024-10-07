@@ -8,7 +8,7 @@ void add_to_buf(char ch) {
 
 char *buf2str() {
     buf[bufused++] = '\0';
-    return strdup(buf);
+    return dclang_strdup(buf);
 }
 
 void setinput(FILE *fp)  {
