@@ -45,7 +45,7 @@ var rntrg
   # sineloop oscillator:
   mysl
   current_pitch @ octfac 256 *
-  ampenv @ 0.09 * 0.2 + sineloop ampenv @ *
+  ampenv @ 0.89 * 0.4 + sineloop ampenv @ *
   # boost amplitude
   2.3 *
   # cut the highs a bit:
