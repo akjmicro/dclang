@@ -44,6 +44,7 @@ void compile_or_interpret(const char *token)
     char *endPointer = 0;
     double d;
     const struct primitive *pr = primitives;
+    DCLANG_LONG locals_idx = 0;
 
     if (token == 0) {
         return;
@@ -85,6 +86,28 @@ void compile_or_interpret(const char *token)
         pr++;
     }
 
+    // Search for a local variable
+    if (def_mode) {
+        while ((locals_idx < 8) && (locals_keys[locals_idx] != 0)) {
+            if (strcmp(locals_keys[locals_idx], token) == 0) {
+                prog[iptr].function.with_param = _get_locals_var;
+                prog[iptr++].param = locals_idx;
+                return;
+            }
+            // If there's an apostrophe after the variable name, assume it's
+            // a directive to set a variable value
+            if (
+                (strncmp(locals_keys[locals_idx], token, strlen(token)-1) == 0)
+                && (strchr(token, '!') != NULL)
+            ) {
+                prog[iptr].function.with_param = _set_locals_var;
+                prog[iptr++].param = locals_idx;
+                return;
+            }
+            locals_idx++;
+        }
+    }
+
     // Neither user word nor primitive word was found.
     // OK, so next, try to convert to a number
     d = strtod(token, &endPointer);
@@ -113,6 +136,14 @@ void repl() {
         if (strcmp(token, ":") == 0) {
             startword();
             def_mode = 1;
+            continue; // goto top of loop
+        }
+        if (strcmp(token, "{") == 0) {
+            if (def_mode) {
+                _processlocals();
+            } else {
+                printf("Illegal use of '{' (locals definition) outside of word definition\n");
+            }
             continue; // goto top of loop
         }
         if (strcmp(token, ";") == 0) {

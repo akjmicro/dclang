@@ -24,7 +24,7 @@ mybuf !
     mybuf @ 80 24 * +   0   1   memset drop
     mybuf @ print
     drop
-    0.05 sleep
+    0.0384 sleep
   again
 ;
 

@@ -1,9 +1,9 @@
 "dsp.dc" import
 
-make-hc-filter mylp1
-make-hc-filter mylp2
-make-hc-filter mylp3
-make-hc-filter mylp4
+make_hc_filter mylp1
+make_hc_filter mylp2
+make_hc_filter mylp3
+make_hc_filter mylp4
 
 var modwave
 var res
@@ -18,18 +18,18 @@ var slmem
   ### LEFT ###
   #47 phasor 2 * 1 - 0.5 *
   slmem 47 0.14 sineloop 0.8 *
-  mylp1 modwave @ res @ hc-lowpass
-  mylp2 modwave @ res @ hc-lowpass 0.1 *
+  mylp1 modwave @ res @ hc_lowpass
+  mylp2 modwave @ res @ hc_lowpass 0.1 *
   # panning
   0.1 panmix
   ### RIGHT ###
   47.31252 phasor 2 * 1 - 0.5 *
-  mylp3 modwave @ res @ hc-lowpass
-  mylp4 modwave @ res @ hc-lowpass 0.4 *
+  mylp3 modwave @ res @ hc_lowpass
+  mylp4 modwave @ res @ hc_lowpass 0.4 *
   # panning
   0.9 panmix
   # output
-  stereo-stack
+  stereo_stack
   # advance time
   t+
 ;

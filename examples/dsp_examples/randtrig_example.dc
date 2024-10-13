@@ -1,12 +1,12 @@
 "dsp.dc" import
 
-0.01 1.6 make-port myport
+0.01 1.6 make_port myport
 
 : randtrig_example
   440 sine
-  0.03 randtrig 0.5 *
+  0.03 0.0 randtrig 0.5 *
   myport port *
   0.5 panmix
-  stereo-stack
+  stereo_stack
   t+
 ;
