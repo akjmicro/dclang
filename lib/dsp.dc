@@ -117,18 +117,6 @@ var _phasor_array 64 allot
   dup mem !
 ;
 
-# sineloop, a feedback sine wave
-: sineloop                      # ( mem freq fb )
-  2 pick @ *                    # ( mem freq fb*mem@  )
-  INV_2PI *                     # ( mem freq fb*mem@*INV_2PI )
-  swap phasor +                 # ( mem fbsig+phssig )
-                                # ( mem newsig )
-  2PI * sin                     # ( mem sin(newsig*2PI) )
-  tuck                          # ( sinsig mem sinsig )
-  swap !                        # ( sinsig )
-;
-
-
 #########
 # NOISE #
 #########
