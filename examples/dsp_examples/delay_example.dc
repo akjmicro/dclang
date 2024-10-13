@@ -21,6 +21,7 @@ make_hc_filter mylp
 # A Wilson CPS hexany (2, 3, 5, 9)
 create pitch_choices 0 , 5 , 13 , 18 , 23 , 31 , 36 , 41 ,
 var current_pitch    0 current_pitch !
+var trigval
 var lasttrig
 var curtrig
 var rntrg
@@ -29,7 +30,7 @@ var rntrg
 
 : delay_example
   # random trigger
-  0.01 0.0 randtrig dup curtrig !
+  0.01 trigval randtrig dup curtrig !
   # reference array for port and portamento call
   env_port port
   # route to 'ampenv' variable:
@@ -44,7 +45,7 @@ var rntrg
   # sineloop oscillator:
   mysl
   current_pitch @ octfac 256 *
-  ampenv @ 0.89 * 0.4 + sineloop ampenv @ *
+  ampenv @ 0.09 * 0.2 + sineloop ampenv @ *
   # boost amplitude
   2.3 *
   # cut the highs a bit:

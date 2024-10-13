@@ -140,14 +140,14 @@ var _phasor_array 64 allot
   floor
 ;
 
-: randtrig { compare_val hold_val }
+: randtrig { compare_val hold_var }
   t 0xff and 0 =
   if
-    rand compare_val < abs dup hold_val!
+    rand compare_val < abs dup hold_var !
   else
     t 0xff and 30 <
     if
-      hold_val
+      hold_var @
     else
       0
     endif
@@ -266,15 +266,14 @@ var _phasor_array 64 allot
   0 >                           # ( sig-ps boolup )
   if                            # ( sig-ps )
       port_struct 1 + @         # ( sig-ps rising_factor )
-    *                           # ( result )
+    *                           # ( portsig )
   else                          # ( sig-ps )
       port_struct 2 + @         # ( sig-ps falling_factor )
-    *                           # ( result )
+    *                           # ( portsig )
   endif
-  dup                           # ( result result )
-  port_struct @                 # ( result result oldsig )
-  +                             # ( result result+oldsig )
-  port_struct !                 # ( result )
+  port_struct @                 # ( portsig oldsig )
+  + dup                         # ( portsig+oldsig portsig+oldsig )
+  port_struct !                 # ( portsig+oldsig )
 ;
 
 ##################
