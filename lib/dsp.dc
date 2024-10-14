@@ -61,23 +61,19 @@ var _phasor_array 64 allot
 
 : _reset_phasor_count  0 _phasor_count ! ;
 
-: _advance_phasor_count _phasor_count @ 1 + _phasor_count ! ;
-
-: phasor_pointer
-  _phasor_array _phasor_count @ +
-;
+: phasor_pointer _phasor_array _phasor_count @ + ;
 
 : phasor
   # get current phase; wrap around 0-1:
-  freq2sample_phase
+  freq2sample_phase               # (smp_phase)
   # grab the accumulator value:
-  phasor_pointer @ tuck
+  phasor_pointer @ swap over      # (old_val smp_phase old_val)
   # add, wrap-around from 0.0-1.0
-  + 1.0 %
+  + 1.0 %                         # (old_val mod1sum)
   # write back current value:
-  phasor_pointer !
+  phasor_pointer !                # (old_val)
   # update count reference (this will be reset by the clock advance) :
-  _advance_phasor_count
+  _phasor_count dup @ 1 + swap !  # (old_val)
 ;
 
 # a simple metronome trigger:
@@ -90,28 +86,35 @@ var _phasor_array 64 allot
 
 # like a gate, but over -1 to 1 range
 # ( width freq -- sig )
-: pulse
-  phasor > if 1 else -1 endif
-;
+: pulse phasor > if 1 else -1 endif ;
 
-# phase --> sine
+# ( freq --> sine )
 : sine phasor 2PI * sin ;
 
 # FM osc; basic carrier/modulator pair
-: fm
-  # ( carrier_freq mod_ratio index -- sig )
-  swap 2 pick * sine *
-  swap phasor + 1.0 %
-  2PI * sin
+: fm { carrier_freq mod_ratio index }
+  carrier_freq
+    mod_ratio
+  *
+  sine
+    index
+  *
+    carrier_freq
+    phasor
+  +
+  1.0 %
+  2PI *
+  sin
 ;
 
 # sineloop, a feedback sine wave
-: sineloop
-  # ( mem freq fb )
-  2 pick @ * INV_2PI * swap phasor + 2PI * sin
-  # ( mem sin((fb*memv+phs)*2PI) )
-  tuck swap !
-  # ( out )
+: sineloop { mem freq fb }
+  mem @ fb * INV_2PI *
+    freq phasor
+  +
+  2PI *
+  sin
+  dup mem !
 ;
 
 #########
@@ -123,25 +126,28 @@ var _phasor_array 64 allot
 
 : noise
   # ( -- sig )
-  rand 2 * 1.0 -
+  rand
+    2
+  *
+    1.0
+  -
 ;
 
-: randint
-  # ( range -- int )
-  rand * floor
+: randint { range }             # ( range -- int )
+  rand
+    range
+  *
+  floor
 ;
 
-var smp
-var cmp
-: randtrig
-  cmp !
+: randtrig { compare_val hold_var }
   t 0xff and 0 =
   if
-    rand cmp @ < abs dup smp !
+    rand compare_val < abs dup hold_var !
   else
     t 0xff and 30 <
     if
-      smp @
+      hold_var @
     else
       0
     endif
@@ -154,55 +160,79 @@ var cmp
 
 2 const DELAY_HEADER_SIZE
 
-: make-delay-line
+: make_delay_line { seconds }   # ( seconds <make_delay_line> <name> )
   # Create a delay line. 'seconds' represents the maximum
   # time the delay can reach, not the actual read delay time,
   # which is controlled by `delay-read`
-  # ( seconds <make-delay-line> name )
-    var                   # ( seconds )
-    seconds2samples       # ( samples )
-      dup                 # ( samples samples )
-        here              # ( samples samples var_addr+1 )
-        1 -               # ( samples samples var_addr )
-    !                     # ( samples )    # put the delay sample size in first slot
-    DELAY_HEADER_SIZE +   # ( samples+hdrsz )
-  allot                   # (  )        # reserve the memory
+    var                         # ( seconds ) # <name> is consumed by the 'var' word
+    seconds seconds2samples     # ( samples )
+      dup                       # ( samples samples )
+        here                    # ( samples samples var_addr+1 )
+        1 -                     # ( samples samples var_addr )
+    !                           # ( samples )  # put the delay sample size in first (0th) slot
+    DELAY_HEADER_SIZE +         # ( samples+hdrsz )
+  allot                         # (  )  # reserve the memory
 ;
 
-: %abs 2dup % over + swap % swap drop ;
+: %abs { n d } n d % d + d % ;
 
-: _get-delay-position      1 + @ ;
-: _set-delay-position      1 + ! ;
-: _set-delay-value         dup _get-delay-position DELAY_HEADER_SIZE + + ! ;
-: _read-delay-pos-wrapped  over @ %abs DELAY_HEADER_SIZE + + @ ;
-: _get-floor-val           2dup floor _read-delay-pos-wrapped ;
-: _get-ceil-val            2 pick 2 pick ceil _read-delay-pos-wrapped ;
-
-: _interpolate
-  # ( real-val floor-val ceil-val -- interpolated_val )
-  over - rot 1.0 % * +
+: _set_delay_value              # ( sig delay_struct )
+   dup                          # ( sig delay_struct delay_struct )
+   1 + @                        # ( sig delay_struct dpos )
+   DELAY_HEADER_SIZE +          # ( sig delay_struct dpos+hdr )
+   + !                          # ( )
 ;
 
-: delay-read
-  # ( delay-struct time -- delsig )
-  # convert time offset to samples:
-      SAMPLE_RATE *                  # ( dstr tsmp )
-  # add distance from write offset:
-        over _get-delay-position     # ( dstr tsmp dpos )
-        swap                         # ( dstr dspo tsmp )
-      -                              # ( dstr dpos-tsmp )
-        _get-floor-val               # ( dstr val fl_val )
-          _get-ceil-val              # ( dstr val fl_val ceil_val )
-      _interpolate                   # ( dstr interp_val )
-  swap drop                          # ( interp_val )
+: _get_floor_val                # ( ds val )
+    floor                       # ( ds flr_val )
+      over                      # ( ds flr_val ds )
+      @                         # ( ds flr_val dssize )
+    %abs                        # ( ds flr_wrap )
+    DELAY_HEADER_SIZE +         # ( ds flr_wrap+dhsize )
+  +                             # ( ds+flr_wrap+dhsize )
+  @                             # ( flr_val )
 ;
 
-: delay-write
-  # ( sig delay-struct -- )
+: _get_ceil_val                 # ( ds val )
+    ceil                        # ( ds ceil_val )
+      over                      # ( ds ceil_val ds )
+      @                         # ( ds ceil_val dssize )
+    %abs                        # ( ds ceil_wrap )
+    DELAY_HEADER_SIZE +         # ( ds ceil_wrap+dhsize )
+  +                             # ( ds+ceil_wrap+dhsize )
+  @                             # ( ceil_val )
+;
+
+
+: _interpolate { real_val floor_val ceil_val }
+  ceil_val floor_val -
+    real_val 1.0 %
+  *
+    floor_val
+  +
+;
+
+: delay_read { delay_struct time }      # ( delay_struct time -- delsig )
+  # calc distance in delay-line:
+  delay_struct 1 + @                    # ( dpos )
+    time SAMPLE_RATE *                  # ( dpos tsmp )
+  -                                     # ( dpos-tsmp )
+                                        # ( val )
+      delay_struct over                 # ( val ds val )
+    _get_floor_val                      # ( val fl_val )
+      over                              # ( val fl_val val )
+        delay_struct swap               # ( val fl_val ds val )
+      _get_ceil_val                     # ( val fl_val ceil_val )
+  _interpolate                          # ( interp_val )
+;
+
+: delay_write { sig delay_struct }      # ( sig delay_struct -- )
   # put it into the current write position
-  tuck _set-delay-value
+  sig delay_struct _set_delay_value
   # increment the write position
-  t over @ % swap _set-delay-position
+  t delay_struct @ %
+    delay_struct 1 +
+  !
 ;
 
 ##############
@@ -223,33 +253,27 @@ var cmp
 # Neat bonus: this 'port' ugen can be used to make envelopes!
 # See the example file 'bell_of_doom.fs' for an example.
 
-: _port-factor         1 swap 0.5 * SAMPLE_RATE * / ;
-: _get-rising-factor   1 + @ ;
-: _get-falling-factor  2 + @ ;
+: _port_factor  1 swap 0.5 * SAMPLE_RATE * / ;
 
-: make-port
-  # ( rise-sec fall-sec -- struct )
-  create swap
-  0.0 , _port-factor , _port-factor ,
+: make_port     # ( rise-sec fall-sec -- struct )
+  create swap   # ( fall-sec rise-sec )
+  0.0 , _port_factor , _port_factor ,
 ;
 
-: port
-  # ( sig pa -- out-sig )
-  tuck @ - dup
-  # ( pa sig-pa sig-pa )
-  0 >
-  # ( pa sig-pa boolup )
-  if
-    # ( pa sig-pa )
-    2dup swap _get-rising-factor *
-    # ( pa sig-pa portsig )
-  else
-    # ( pa sig-pa )
-    2dup swap _get-falling-factor *
-    # ( pa sig-pa portsig )
+: port { sig port_struct }      # ( sig port_struct -- out_sig )
+  sig port_struct @ -
+    dup                         # ( sig-ps sig-ps )
+  0 >                           # ( sig-ps boolup )
+  if                            # ( sig-ps )
+      port_struct 1 + @         # ( sig-ps rising_factor )
+    *                           # ( portsig )
+  else                          # ( sig-ps )
+      port_struct 2 + @         # ( sig-ps falling_factor )
+    *                           # ( portsig )
   endif
-  swap drop over @ + tuck swap !
-  # ( posrtsig+pa pa portsig+pa  )
+  port_struct @                 # ( portsig oldsig )
+  + dup                         # ( portsig+oldsig portsig+oldsig )
+  port_struct !                 # ( portsig+oldsig )
 ;
 
 ##################
@@ -260,55 +284,45 @@ var cmp
 # coefficient `coef` that works in opposing signs on the
 # feedback and feedfoward signals
 
-: make_allpass
-  # ( dlt_max <make_allpass> name )
-    var
-    seconds2samples
-      here 1 -
-        over
-        2 + 2 *
-      allot
-          2dup
-      !
-      over + 2 +
-  !
+: make_allpass                  # ( dltm_max <make_allpass> <name> )
+  var                           # ( dltm_max ) # consumes <name>
+  seconds2samples               # ( dltm_smps )
+    here 1 -                    # ( dltm_smps name_var )
+      over                      # ( dltm_smps name_var dltm_smps )
+      2 + 2 *                   # ( dltm_smps name_var 2*(dltm_smps+2) )
+    allot                       # ( dltm_smps name_var )
+        2dup                    # ( dltm_smps name_var dltm_smps name_var )
+    !                           # ( dltm_smps name_var )
+    over + 2 +                  # ( dltm_smps (name_var+dltm_smps+2) )
+  !                             # ( )
 ;
 
-: allpass
+: allpass { sig del dltm coef } # ( sig del dltm coef -- sig_out )
   # Based on the equation:
   # y = coef*x + x_del - coef*y_del
-  # ( sig del dlt coef -- sig_out )
   # same as:
-  # ( x del dlt c -- y )
-	          2 pick
-	            dup
-	            @ 2 +
-	          +
-	            2 pick
-            delay-read
-	          over *
-	        svpush
-	          2 pick 2 pick
-	        delay-read
-	      svpush
-	# save stack is ( c*y_del x_del ) now
-	        3 pick
-	      *
-	        svpop
-	      +
-	        svpop
-	      -
-	    svpush
-	# save_stack is ( y ) now
-	      0 svpick
-	        2 pick
-	        dup @
-	        2 +
-	      +
-	    delay-write
-	  drop
-	delay-write
-	  svpop
+  # ( x del dltm c -- y )
+  del dup                       # ( del del )
+  @ 2 +                         # ( del delsize+2 )
+  +                             # ( del+delsize+2 )
+  dltm                          # ( del+delsize+2 dltm )
+  delay_read                    # ( y_del )
+  coef *                        # ( coef*y_del )
+  del dltm                      # ( coef*ydel del dltm )
+  delay_read                    # ( coef*y_del x_del )
+  sig coef *                    # ( coef*y_del x_del coef*sig )
+  +                             # ( coef*y_del  coef*sig+x_del )
+  swap                          # ( coef*sig+x_del  coef*y_del )
+  -                             # ( coef*sig+x_del-coef*y_del )
+                                # ( y )
+  dup                           # ( y y )
+  del                           # ( y y del )
+  dup @                         # ( y y del delsize )
+  2 +                           # ( y y del delsize+2 )
+  +                             # ( y y del+delsize+2 )
+  delay_write                   # ( y )
+  sig del                       # ( y sig del )
+  delay_write                   # ( y )
 ;
 
 ##################
@@ -364,55 +378,41 @@ var cmp
   2drop
 ;
 
-: set_cf_res_reinit
-  # ( struct reinit cutoff res )
+: set_cf_res_reinit             # ( struct reinit cutoff res )
   3 pick res !
   2 pick cutoff !
-  over reinit !
-  # ( struct )
+  over reinit !                 # ( struct )
 ;
 
-: calc_theta
-  # ( struct -- struct )
+: calc_theta                    # ( struct -- struct )
   dup cutoff @ 2PIDSR *
-  over theta !
-  # ( struct )
+  over theta !                  # ( struct )
 ;
 
-: calc_beta
-  # ( struct -- struct )
-  dup theta @ over res @
-  # ( struct theta res )
-  over sin 0.5 *
-  # ( struct theta res sin(theta)*0.5 )
-  over swap - -rot
-  # ( struct res-sin(theta)*0.5 theta res )
-  swap sin 0.5 * +
-  # ( struct res-sin(theta)*0.5 res+sin(theta)*0.5 )
-  /
-  # ( struct res-sin(theta)*0.5 / res+sin(theta)*0.5 )
-  over beta !
-  # struct
+: calc_beta                     # ( struct -- struct )
+  dup theta @ over res @        # ( struct theta res )
+  over sin 0.5 *                # ( struct theta res sin(theta)*0.5 )
+  over swap - -rot              # ( struct res-sin(theta)*0.5 theta res )
+  swap sin 0.5 * +              # ( struct res-sin(theta)*0.5 res+sin(theta)*0.5 )
+  /                             # ( (struct res-sin(theta)*0.5 / res+sin(theta)*0.5) )
+  over beta !                   # struct
 ;
 
-: calc_gamma
-  # ( struct -- struct )
-  dup beta @ 1 + over theta @ cos *
-  # ( struct (beta+1)*cos(theta) )
-  over gamma !
-  # ( struct )
+: calc_gamma                    # ( struct -- struct )
+  dup beta @ 1 +                # ( struct beta+1)
+  over theta @ cos *            # ( struct (beta+1)*cos(theta) )
+  over gamma !                  # ( struct )
 ;
 
-: calc_alpha
-  # ( struct -- struct )
-  dup beta @ 1 + over gamma @ 2 pick chi @ * + 0.5 *
-  # ( struct beta+1+gamma_v*chi_v*0.5 )
-  over alpha !
-  # ( struct )
+: calc_alpha                    # ( struct -- struct )
+  dup beta @ 1 +                # ( struct beta+1 )
+  over gamma @                  # ( struct beta+1 gamma )
+  2 pick chi @                  # ( struct beta+1 gamma chi )
+  * + 0.5 *                     # ( struct (beta+1+(gamma*chi) * 0.5) )
+  over alpha !                  # ( struct )
 ;
 
-: init_biquad
-  # ( struct reinit cutoff res type -- struct )
+: init_biquad                   # ( struct reinit cutoff res type -- struct )
   set_bq_type set_cf_res_reinit calc_theta
   calc_beta calc_gamma calc_alpha
   # check if we should reinit!
@@ -422,58 +422,54 @@ var cmp
 : biquad_compute
   # ( sig struct -- sig_out )
   # the actual transformative equation:
-          2dup                 # ( sig struct sig struct )
-            dup mu @           # ( sig struct sig struct mu )
-            swap xt1 @         # ( sig struct sig mu xt1 )
-          *                    # ( sig struct sig mu*xt1 )
-            2 pick             # ( sig struct sig mu*xt1 struct )
-              dup sigma @      # ( sig struct sig mu*xt1 struct sigma )
-              swap xt2 @       # ( sig struct sig mu*xt1 sigma xt2 )
-            *                  # ( sig struct sig mu*xt1 xt2*sigma)
-          +                    # ( sig struct sig mu*xt1+xt2*sigma)
-        +                      # ( sig struct sig+mu*xt1+sigma*xt2 )
-        over alpha @ *         # ( sig struct alpha*(sig+mu*xt1+sigma*xt2) )
-          over gamma @         # ( sig struct alpha*(sig+mu*xt1+sigma*xt2) gamma )
-          2 pick yt1 @ *       # ( sig struct alpha*(sig+mu*xt1+sigma*xt2) gamma*yt1 )
-            2 pick beta @      # ( sig struct alpha*(sig+mu*xt1+sigma*xt2) gamma*yt1 beta )
-              3 pick yt2 @     # ( sig struct alpha*(sig+mu*xt1+sigma*xt2) gamma*yt1 beta yt2 )
+          2dup                  # ( sig struct sig struct )
+            dup mu @            # ( sig struct sig struct mu )
+            swap xt1 @          # ( sig struct sig mu xt1 )
+          *                     # ( sig struct sig mu*xt1 )
+            2 pick              # ( sig struct sig mu*xt1 struct )
+              dup sigma @       # ( sig struct sig mu*xt1 struct sigma )
+              swap xt2 @        # ( sig struct sig mu*xt1 sigma xt2 )
+            *                   # ( sig struct sig mu*xt1 xt2*sigma)
+          +                     # ( sig struct sig mu*xt1+xt2*sigma)
+        +                       # ( sig struct sig+mu*xt1+sigma*xt2 )
+        over alpha @ *          # ( sig struct alpha*(sig+mu*xt1+sigma*xt2) )
+          over gamma @          # ( sig struct alpha*(sig+mu*xt1+sigma*xt2) gamma )
+          2 pick yt1 @ *        # ( sig struct alpha*(sig+mu*xt1+sigma*xt2) gamma*yt1 )
+            2 pick beta @       # ( sig struct alpha*(sig+mu*xt1+sigma*xt2) gamma*yt1 beta )
+              3 pick yt2 @      # ( sig struct alpha*(sig+mu*xt1+sigma*xt2) gamma*yt1 beta yt2 )
             *
           -
-        +                      # ( sig struct alpha*(sig+mu*xt1+sigma*xt2)+gamma*yt1-beta*yt2 )
-                               # simplification:
-                               # ( sig struct sig_out )
-      svpush                   # ( sig struct )                        ( sig_out )
+        +                       # ( sig struct alpha*(sig+mu*xt1+sigma*xt2)+gamma*yt1-beta*yt2 )
+                                # simplification:
+                                # ( sig struct sig_out )
+      svpush                    # ( sig struct )                        ( sig_out )
   ##################################
   # UPDATE xt2, yt2, xt1, and yt1: #
   ##################################
-        dup xt1 @              # ( sig struct xt1 )                    ( sig_out )
-          over xt2             # ( sig struct xt1 xt2_addr )           ( sig_out )
-      !                        # ( sig struct )                        ( sig_out )
-        dup yt1 @              # ( sig struct yt1 )                    ( sig_out )
-          over yt2             # ( sig struct yt1 yt2_addr )           ( sig_out )
-      !                        # ( sig struct )                        ( sig_out )
-          2dup xt1             # ( sig struct sig xt1_addr )           ( sig_out )
-      !                        # ( sig struct )                        ( sig_out )
-    swap drop                  # ( struct )                            ( sig_out )
-          svpop 2dup           # ( struct sig_out struct sig_out )     ( )
-          swap yt1             # ( struct sig_out sig_out yt1_addr )   ( )
-      !                        # ( struct sig_out )                    ( )
-    nip                        # ( sig_out )                           ( )
+        dup xt1 @               # ( sig struct xt1 )                    ( sig_out )
+          over xt2              # ( sig struct xt1 xt2_addr )           ( sig_out )
+      !                         # ( sig struct )                        ( sig_out )
+        dup yt1 @               # ( sig struct yt1 )                    ( sig_out )
+          over yt2              # ( sig struct yt1 yt2_addr )           ( sig_out )
+      !                         # ( sig struct )                        ( sig_out )
+          2dup xt1              # ( sig struct sig xt1_addr )           ( sig_out )
+      !                         # ( sig struct )                        ( sig_out )
+    swap drop                   # ( struct )                            ( sig_out )
+          svpop 2dup            # ( struct sig_out struct sig_out )     ( )
+          swap yt1              # ( struct sig_out sig_out yt1_addr )   ( )
+      !                         # ( struct sig_out )                    ( )
+    swap drop                   # ( sig_out )                           ( )
 ;
 
-: make-biquad
+: make_biquad
   create
   0 , 0 , 0 , 0 , 0 , 0 , 0 , 0 , 0 , 0 , 0 , 0 , 0 , 0 ,
 ;
 
-: biquad-lp
-  # ( sig struct reinit cutoff res -- sig_out )
-  3 pick cutoff @ 2 pick <>
-  # ( sig struct reinit cutoff res bool_cfdiff  )
-  4 pick res @ 2 pick <>
-  # ( sig struct reinit cutoff res bool_cfdiff bool_resdiff )
-  or if
-  # ( sig struct reinit cutoff res )
+: biquad_lp                     # ( sig struct reinit cutoff res -- sig_out )
+  3 pick cutoff @ 2 pick <>     # ( sig struct reinit cutoff res bool_cfdiff  )
+  4 pick res @ 2 pick <>        # ( sig struct reinit cutoff res bool_cfdiff bool_resdiff )
+  or if                         # ( sig struct reinit cutoff res )
     0 init_biquad
   else
     2drop drop
@@ -481,14 +477,10 @@ var cmp
   biquad_compute
 ;
 
-: biquad-hp
-  # ( sig struct reinit cutoff res -- sig_out )
-  3 pick cutoff @ 2 pick <>
-  # ( sig struct reinit cutoff res bool_cfdiff  )
-  4 pick res @ 2 pick <>
-  # ( sig struct reinit cutoff res bool_cfdiff bool_resdiff )
-  or if
-  # ( sig struct reinit cutoff res )
+: biquad_hp                     # ( sig struct reinit cutoff res -- sig_out )
+  3 pick cutoff @ 2 pick <>     # ( sig struct reinit cutoff res bool_cfdiff  )
+  4 pick res @ 2 pick <>        # ( sig struct reinit cutoff res bool_cfdiff bool_resdiff )
+  or if                         # ( sig struct reinit cutoff res )
     1 init_biquad
   else
     2drop drop
@@ -496,14 +488,10 @@ var cmp
   biquad_compute
 ;
 
-: biquad-bp
-  # ( sig struct reinit cutoff res -- sig_out )
-  3 pick cutoff @ 2 pick <>
-  # ( sig struct reinit cutoff res bool_cfdiff  )
-  4 pick res @ 2 pick <>
-  # ( sig struct reinit cutoff res bool_cfdiff bool_resdiff )
-  or if
-  # ( sig struct reinit cutoff res )
+: biquad_bp                     # ( sig struct reinit cutoff res -- sig_out )
+  3 pick cutoff @ 2 pick <>     # ( sig struct reinit cutoff res bool_cfdiff  )
+  4 pick res @ 2 pick <>        # ( sig struct reinit cutoff res bool_cfdiff bool_resdiff )
+  or if                         # ( sig struct reinit cutoff res )
     2 init_biquad
   else
     2drop drop
@@ -522,42 +510,37 @@ var cmp
 : hc_del2 1 + ;
 : hc_hp 2 + ;
 
-: make-hc-filter create 0 , 0 , 0 , ;
+: make_hc_filter create 0 , 0 , 0 , ;
 
-: _hc_common
-  # ( sig struct fc res -- out )
-  1.995 * 2 swap -
-  # ( sig struct fc qres )
-  swap 2PIDSR * swap
-  # ( sig struct fcf qres )
-  2 pick hc_del1 @ 2 pick * 3 pick hc_del2 @ +
-  # ( sig struct fcf qres hc_del1v*fc+hc_del2v )
-  # ( sig struct fcf qres lpsig )
-  dup 5 pick swap - rot 4 pick hc_del1 @ * - 0.997 *
-  # ( sig struct fcf lpsig sig-lpsig-qres*hc_del1v )
-  # ( sig struct fcf lpsig hpsig )
-  dup 4 pick hc_hp !
-  # ( sig struct fcf lpsig hpsig )
-  rot * 2 pick hc_del1 @ +
-  # ( sig struct lpsig hpsig*fc+hc_del1v )
-  # ( sig struct lpsig bpsig )
-  1.0002 * 2 pick hc_del1 !
-  # ( sig struct lpsig )
-  1.0002 * dup 2 pick hc_del2 !
-  # ( sig struct lpsig )
+: _hc_common                    # ( sig struct fc res -- out )
+  1.995 * 2 swap -              # ( sig struct fc qres )
+  swap 2PIDSR * swap            # ( sig struct fcf qres )
+  2 pick hc_del1 @ 2 pick *
+  3 pick hc_del2 @ +            # ( sig struct fcf qres hc_del1v*fc+hc_del2v )
+                                # ( sig struct fcf qres lpsig )
+  dup 5 pick swap - rot
+  4 pick hc_del1 @ * - 0.997 *  # ( sig struct fcf lpsig sig-lpsig-qres*hc_del1v )
+                                # ( sig struct fcf lpsig hpsig )
+  dup 4 pick hc_hp !            # ( sig struct fcf lpsig hpsig )
+  rot * 2 pick hc_del1 @ +      # ( sig struct lpsig hpsig*fc+hc_del1v )
+                                # ( sig struct lpsig bpsig )
+  1.0002 * 2 pick
+  hc_del1 !                     # ( sig struct lpsig )
+  1.0002 * dup 2 pick
+  hc_del2 !                     # ( sig struct lpsig )
 ;
 
-: hc-lowpass
+: hc_lowpass
   # ( sig struct lpsig )
   _hc_common nip nip
 ;
 
-: hc-highpass
+: hc_highpass
   # ( sig struct lpsig )
   _hc_common drop nip hc_hp @
 ;
 
-: hc-bandpass
+: hc_bandpass
   # ( sig struct lpsig )
   _hc_common drop nip hc_del1 @
 ;
@@ -582,13 +565,13 @@ var cmp
 ;
 
 # stereo version of output
-: stereo-out
+: stereo_out
   lcget sendout
   rcget sendout
 ;
 
 # stereo signals to stack for pick-up by external API calls
-: stereo-stack
+: stereo_stack
   rcget lcget
 ;
 

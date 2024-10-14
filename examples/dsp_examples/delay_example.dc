@@ -1,26 +1,27 @@
 "dsp.dc" import
 
-# a local constant for 'change-frequency'
+# a local constant for 'change_frequency'
 0.7575 1.333333 * const CHANGE_FREQ
 
 # amp envelope stuff:
-0.04 0.9 make-port env-port
+0.04 0.9 make_port env_port
 var ampenv 0 ampenv !
-0.02 0.03 make-port pitch-port
+0.02 0.03 make_port pitch_port
 
 # a sineloop variable
 var mysl
 
 # filter setup:
-make-hc-filter mylp
+make_hc_filter mylp
 
 # delay setup:
-1 make-delay-line mydelay
+1 make_delay_line mydelay
 
 # random pitch setup:
 # A Wilson CPS hexany (2, 3, 5, 9)
-create pitch-choices 0 , 5 , 13 , 18 , 23 , 31 , 36 , 41 ,
-var current-pitch    0 current-pitch !
+create pitch_choices 0 , 5 , 13 , 18 , 23 , 31 , 36 , 41 ,
+var current_pitch    0 current_pitch !
+var trigval
 var lasttrig
 var curtrig
 var rntrg
@@ -29,27 +30,27 @@ var rntrg
 
 : delay_example
   # random trigger
-  0.01 randtrig dup curtrig !
+  0.01 trigval randtrig dup curtrig !
   # reference array for port and portamento call
-  env-port port
+  env_port port
   # route to 'ampenv' variable:
   ampenv !
 
   # change the pitch variable randomly, in sync with the trigger:
   curtrig @ lasttrig @ >
   if
-    pitch-choices 8 randint + @ current-pitch !
+    pitch_choices 8 randint + @ current_pitch !
   else
   endif
   # sineloop oscillator:
   mysl
-  current-pitch @ octfac 256 *
+  current_pitch @ octfac 256 *
   ampenv @ 0.89 * 0.4 + sineloop ampenv @ *
   # boost amplitude
   2.3 *
   # cut the highs a bit:
-  mylp 2750 0.3 hc-lowpass
-  mydelay 0.95 delay-read
+  mylp 2750 0.3 hc_lowpass
+  mydelay 0.95 delay_read
   2dup
   # delay amplification
   0.65 *
@@ -58,9 +59,9 @@ var rntrg
   0.35 panmix
   0.65 panmix
   # output
-  stereo-stack
+  stereo_stack
   # 89% feedback
-  + 0.5 * mydelay delay-write
+  + 0.5 * mydelay delay_write
   # update trigger state
   curtrig @ lasttrig !
   # update clock

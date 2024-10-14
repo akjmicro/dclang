@@ -1,16 +1,16 @@
 "dsp.dc" import
 
-make-hc-filter myhcfilter
-make-hc-filter myhcfilter2
-0.001 0.05 make-port myport
+make_hc_filter myhcfilter
+make_hc_filter myhcfilter2
+0.001 0.05 make_port myport
 0.15 make_allpass myallpass1
 0.15 make_allpass myallpass2
 0.15 make_allpass myallpass3
 0.15 make_allpass myallpass4
-0.15 make-delay-line mydelay1
-0.15 make-delay-line mydelay2
-0.15 make-delay-line mydelay3
-0.15 make-delay-line mydelay4
+0.15 make_delay_line mydelay1
+0.15 make_delay_line mydelay2
+0.15 make_delay_line mydelay3
+0.15 make_delay_line mydelay4
 create allpass_lengths
   1889 INV_SAMPLE_RATE * ,
   1597 INV_SAMPLE_RATE * ,
@@ -37,7 +37,7 @@ var feedback
 
 : allpass_reverb_example
     noise 0.87 *
-    myhcfilter 1500 0.1 hc-lowpass
+    myhcfilter 1500 0.1 hc_lowpass
       0.01 0.34 rand 0.14 * 0.14 + - gate
         myport
       port
@@ -49,32 +49,32 @@ var feedback
       myallpass3 allpass_lengths 2 + @ coef @ allpass
       myallpass4 allpass_lengths 3 + @ coef @ allpass
         dup
-          mydelay1 delay_lengths 0 + @ delay-read
+          mydelay1 delay_lengths 0 + @ delay_read
         +
           dup
           feedback @ *
-        mydelay1 delay-write
+        mydelay1 delay_write
       svpush
         dup
-          mydelay2 delay_lengths 1 + @ delay-read
+          mydelay2 delay_lengths 1 + @ delay_read
         +
           dup
           feedback @ *
-        mydelay2 delay-write
+        mydelay2 delay_write
       svpush
         dup
-          mydelay3 delay_lengths 2 + @ delay-read
+          mydelay3 delay_lengths 2 + @ delay_read
         +
           dup
           feedback @ *
-        mydelay3 delay-write
+        mydelay3 delay_write
       svpush
         dup
-          mydelay4 delay_lengths 3 + @ delay-read
+          mydelay4 delay_lengths 3 + @ delay_read
         +
           dup
           feedback @ *
-        mydelay4 delay-write
+        mydelay4 delay_write
       svpush
     drop
       svpop
@@ -88,10 +88,10 @@ var feedback
         myhcfilter2
           1500
             0.0
-      hc-lowpass
+      hc_lowpass
     +
     1.7 *
   0.5 panmix
-  stereo-stack
+  stereo_stack
   t+
 ;

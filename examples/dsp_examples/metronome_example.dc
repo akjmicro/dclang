@@ -1,6 +1,6 @@
 "dsp.dc" import
 
-0.09 1.00 make-port myport
+0.09 1.00 make_port myport
 
 : metronome_example
     400 sine
@@ -29,6 +29,6 @@
     *
       0.6
   panmix
-  stereo-stack
+  stereo_stack
   t+
 ;

@@ -35,7 +35,7 @@ mybuf !
     next
     mybuf @ AREA  +   0   1   memset drop
     mybuf @ print
-    0.065 sleep
+    0.0384 sleep
     drop
   again
 ;

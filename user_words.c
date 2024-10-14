@@ -37,12 +37,13 @@ DCLANG_LONG dclang_findword(const char *word)
 
 void callword(DCLANG_FLT where)
 {
-    /* Don't consume more of the return stack if we are going nowhere.
-       This will allow better recursion */
+    locals_base_idx += 8;
+    // mark where we are for restoration later
     return_stack[return_stack_ptr++] = iptr;
     // set word target; execute word target
     iptr = (DCLANG_PTR) where;
     (*(prog[iptr].function.with_param)) (prog[iptr++].param);
+    // adjust the locals base pointer
 }
 
 void dclang_callword(DCLANG_PTR where)
@@ -54,12 +55,13 @@ void dclang_callword(DCLANG_PTR where)
     }
 }
 
-/* This word will restore 'iptr' to what it was before going on its
-fancy journey into a word.  It won't "Make America Great Again", but it's
-a start. */
 void returnfunc()
 {
+    // restore locals_base_idx
+    locals_base_idx -= 8;
+    // restore the old iptr
     iptr = return_stack[--return_stack_ptr];
+    // adjust the locals pointers
 }
 
 /* respond to ':' token: */

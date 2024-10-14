@@ -1,6 +1,6 @@
 "dsp.dc" import
 
-make-hc-filter mylp
+make_hc_filter mylp
 
 : pw_mod_example
   #############
@@ -11,7 +11,7 @@ make-hc-filter mylp
   0.8 * 0.1 +  # squash
     120        # pitch of pulse
   pulse 0.8 *
-  mylp 800 0.1 hc-lowpass 0.17 *
+  mylp 800 0.1 hc_lowpass 0.17 *
   # mix and output
   0.15 panmix
   ################
@@ -22,12 +22,12 @@ make-hc-filter mylp
   0.8 * 0.1 +  # squash
     80.1       # pitch of pulse
   pulse 0.8 *
-  mylp 800 0.1 hc-lowpass 0.17 *
+  mylp 800 0.1 hc_lowpass 0.17 *
   # mix and output
   0.85 panmix
   ##########
   # output #
   ##########
-  stereo-stack
+  stereo_stack
   t+
 ;

@@ -261,6 +261,6 @@ void show_primitivesfunc()
         }
         old_category = new_category;
     }
-    printf(": ;\n\n");
+    printf(": ; { }\n\n");
     printf("Strings are written by simply typing a string literal in double-quotes, e.g. \"Hello there!\".\n\n");
 }

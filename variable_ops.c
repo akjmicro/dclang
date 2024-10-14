@@ -2,6 +2,67 @@
 
 ht *global_hash_table;
 
+////////////
+// Locals //
+////////////
+
+// Function to swap two cells
+void swap(DCLANG_PTR *a, DCLANG_PTR *b) {
+    DCLANG_PTR temp = *a;
+    *a = *b;
+    *b = temp;
+}
+
+// function to reverse an array
+void reverse_array(DCLANG_PTR arr[], int n) {
+    // Initialize left to the beginning and right to the end
+    int left = 0, right = n;
+    // Iterate till left is less than right
+    while (left < right) {
+        // Swap the elements at left and right position
+        swap(&arr[left], &arr[right]);
+        // Increment the left pointer
+        left++;
+        // Decrement the right pointer
+        right--;
+    }
+}
+
+void _set_locals_var(DCLANG_FLT flt_idx)
+{
+    int idx = (int) flt_idx;
+    locals_vals[locals_base_idx + idx] = dclang_pop();
+}
+
+void _processlocals()
+{
+    char *token;
+    int locals_idx;
+    while (strcmp(token = get_token(), "}")) {
+        // Add key to ongoing array of keys
+        //printf("Token is: %s\n", token);
+        locals_keys[locals_base_idx + locals_idx] = token;
+        locals_idx += 1;
+    }
+    reverse_array(locals_keys + locals_base_idx, locals_idx - 1);
+    // For each key up to the count, pop the stack
+    // onto the locals_vals array:
+    for (int i=0; i<locals_idx; i++) {
+        prog[iptr].function.with_param = _set_locals_var;
+        prog[iptr++].param = (DCLANG_FLT) i;
+    }
+}
+
+void _get_locals_var(DCLANG_FLT flt_idx)
+{
+    int idx = (int) flt_idx;
+    push(locals_vals[locals_base_idx + idx]);
+}
+
+/////////////
+// Globals //
+/////////////
+
 void pokefunc()
 {
     if (data_stack_ptr < 2)
@@ -49,7 +110,7 @@ void _variable_common()
     // In reality, a variable is a named word that simply pushes
     // an address to its associated memory
     prog[iptr].function.with_param = push;
-    prog[iptr++].param = varsidx++;
+    prog[iptr++].param = vars_idx++;
 }
 
 void variablefunc()
@@ -84,13 +145,13 @@ void allotfunc()
         printf("allot -- stack underflow! ");
         return;
     }
-    varsidx += (DCLANG_PTR) dclang_pop() - 1;
+    vars_idx += (DCLANG_PTR) dclang_pop() - 1;
 }
 
 void createfunc()
 {
     variablefunc();
-    --varsidx;
+    --vars_idx;
 }
 
 void commafunc()
@@ -101,12 +162,12 @@ void commafunc()
         return;
     }
     DCLANG_FLT val = dclang_pop();
-    vars[varsidx++] = val;
+    vars[vars_idx++] = val;
 }
 
 void herefunc()
 {
-    push((DCLANG_PTR) varsidx);
+    push((DCLANG_PTR) vars_idx);
 }
 
 /* global hash space, a la 'redis', but in local memory */

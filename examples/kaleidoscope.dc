@@ -33,7 +33,7 @@ mybuf !
     mybuf @ 1920 + 0 1 memset drop
     # print the buffer
     mybuf @ print
-    0.04 sleep
+    0.0384 sleep
     drop
   again
 ;

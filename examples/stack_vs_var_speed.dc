@@ -33,6 +33,15 @@ var myvar
   clock swap - 2 6 .rj cr
 ;
 
+: time_locals { somevar }
+  "Timing local variables:            " print
+  clock
+  TESTCOUNT times
+    somevar drop
+  again
+  clock swap - 2 6 .rj cr
+;
+
 : time_var_raw_int
   "Timing variables using integers:   " print
   clock
@@ -129,6 +138,8 @@ var myvar
 
 time_stack
 time_svstack
+
+5 time_locals
 
 time_var_raw_int
 

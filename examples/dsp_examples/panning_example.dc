@@ -5,6 +5,6 @@
   400.0 sine 0.4 *
   +
   0.1 sine 0.4 * 0.5 + panmix
-  stereo-stack
+  stereo_stack
   t+
 ;
