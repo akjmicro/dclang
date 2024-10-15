@@ -45,6 +45,8 @@ void compile_or_interpret(const char *token)
     double d;
     const struct primitive *pr = primitives;
     DCLANG_LONG locals_idx = 0;
+    DCLANG_LONG const_search_idx = const_idx - 1;
+    DCLANG_LONG var_search_idx = var_map_idx - 1;
 
     if (token == 0) {
         return;
@@ -106,6 +108,34 @@ void compile_or_interpret(const char *token)
             }
             locals_idx++;
         }
+    }
+
+    // Search for a constant
+    while ((const_search_idx >= 0) && (const_keys[const_search_idx] != 0)) {
+        if (strcmp(const_keys[const_search_idx], token) == 0) {
+            if (def_mode) {
+                prog[iptr].function.with_param = push;
+                prog[iptr++].param = (DCLANG_FLT) const_vals[const_search_idx];
+            } else {
+                push((DCLANG_FLT) const_vals[const_search_idx]);
+            }
+            return;
+        }
+        const_search_idx--;
+    }
+
+    // Search for a variable
+    while ((var_search_idx >= 0) && (var_keys[var_search_idx] != 0)) {
+        if (strcmp(var_keys[var_search_idx], token) == 0) {
+            if (def_mode) {
+                prog[iptr].function.with_param = push;
+                prog[iptr++].param = (DCLANG_FLT) var_vals[var_search_idx];
+            } else {
+                push((DCLANG_FLT) var_vals[var_search_idx]);
+            }
+            return;
+        }
+        var_search_idx--;
     }
 
     // Neither user word nor primitive word was found.

@@ -99,43 +99,15 @@ void peekfunc()
 /* implement constants */
 void constantfunc()
 {
-    startword();
-    prog[iptr].function.with_param = push;
-    prog[iptr++].param = dclang_pop();
-    endword();
-}
-
-void _variable_common()
-{
-    // In reality, a variable is a named word that simply pushes
-    // an address to its associated memory
-    prog[iptr].function.with_param = push;
-    prog[iptr++].param = vars_idx++;
+    const_keys[const_idx] = get_token();
+    const_vals[const_idx++] = dclang_pop();
 }
 
 void variablefunc()
 {
-    if (iptr < max_iptr)
-    {
-        // mark current position
-        DCLANG_PTR ret_iptr = iptr;
-        // jump to end (when this is called in the future)
-        iptr = return_stack[--return_stack_ptr];
-        return_stack[return_stack_ptr++] = ret_iptr;
-        startword();
-        _variable_common();
-        // part of endword here:
-        prog[iptr++].function.without_param = returnfunc;
-        max_iptr = iptr;
-        // restore function position
-        iptr = return_stack[--return_stack_ptr];
-        // restore return stack to new highest position
-        return_stack[return_stack_ptr++] = max_iptr;
-    } else {
-        startword();
-        _variable_common();
-        endword();
-    }
+    DCLANG_PTR next_var = vars_idx++;
+    var_keys[var_map_idx] = get_token();
+    var_vals[var_map_idx++] = next_var;
 }
 
 void allotfunc()
@@ -170,7 +142,25 @@ void herefunc()
     push((DCLANG_PTR) vars_idx);
 }
 
-/* global hash space, a la 'redis', but in local memory */
+// some helpers to show stuff
+
+void showvars()
+{
+    for (int x=0; x < var_map_idx; x++) {
+        printf("Variable %i: %s @ %li\n", x, var_keys[x], var_vals[x]);
+    }
+}
+
+void showconsts()
+{
+    for (int x=0; x < const_idx; x++) {
+        printf("Constant %i: %s ==> %.19g\n", x, const_keys[x], const_vals[x]);
+    }
+}
+
+//////////////////////////////////////////////////////////
+// global hash space, a la 'redis', but in local memory //
+//////////////////////////////////////////////////////////
 
 void _add_key(char *key){
     if (hashwords_cnt > hashwords_size)

@@ -58,8 +58,18 @@ DCLANG_PTR   locals_keys[NUMLOCALS];
 DCLANG_FLT   locals_vals[NUMLOCALS * RETURN_STACK_SIZE];
 DCLANG_PTR   locals_base_idx;
 // global variables
+// track variables - mapping from name to index
+char        *var_keys[NUMVARS];
+DCLANG_PTR   var_vals[NUMVARS];
+DCLANG_PTR   var_map_idx;
+// variable actual data stored here
 DCLANG_FLT   vars[NUMVARS];
 DCLANG_PTR   vars_idx;
+// global constants
+// track constants - mapping from name to index
+char        *const_keys[64];
+DCLANG_FLT   const_vals[64];
+DCLANG_PTR   const_idx;
 
 // hashwords
 char **hashwords;

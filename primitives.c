@@ -237,6 +237,8 @@ void add_all_primitives()
     add_primitive("exit", "Operating System", exitfunc);
     // show defined words!
     add_primitive("words", "Other", showdefined);
+    add_primitive("constants", "Other", showconsts);
+    add_primitive("variables", "Other", showvars);
 };
 
 void show_primitivesfunc()
