@@ -203,7 +203,6 @@ var _phasor_array 64 allot
   @                             # ( ceil_val )
 ;
 
-
 : _interpolate { real_val floor_val ceil_val }
   ceil_val floor_val -
     real_val 1.0 %
@@ -329,174 +328,185 @@ var _phasor_array 64 allot
 # BIQUAD FILTERS #
 ##################
 
-: cutoff 0 + ;
-: res 1 + ;
-: theta 2 + ;
-: alpha 3 + ;
-: beta 4 + ;
-: gamma 5 + ;
-: chi 6 + ;
-: mu 7 + ;
-: sigma 8 + ;
-: xt1 9 + ;
-: yt1 10 + ;
-: xt2 11 + ;
-: yt2 12 + ;
-: reinit 13 + ;
+0 const :cutoff
+1 const :res
+2 const :theta
+3 const :alpha
+4 const :beta
+5 const :gamma
+6 const :chi
+7 const :mu
+8 const :sigma
+9 const :xt1
+10 const :yt1
+11 const :xt2
+12 const :yt2
+13 const :reinit
 
-: reinit_biquad
-  # ( struct )
-  0.0 over xt1 !
-  0.0 over xt2 !
-  0.0 over yt1 !
-  0.0 over yt2 !
-  # ( struct )
-;
+#################################
+# biquad initialization helpers #
+#################################
 
-: set_bq_type
-  # ( struct reinit cutoff res type -- struct reinit cutoff res )
-  4 pick
-  # ( *  type struct )
-  over 0 =
+: _set_bq_type { struct type }   # ( struct type --  )
+  type 0 =
   if
-     -1.0 over chi !
-      2.0 over mu !
-      1.0 over sigma !
+     -1.0 struct :chi + !
+      2.0 struct :mu + !
+      1.0 struct :sigma + !
   else
-  over 1 =
+  type 1 =
   if
-     1.0 over chi !
-    -2.0 over mu !
-     1.0 over sigma !
+     1.0 struct :chi + !
+    -2.0 struct :mu + !
+     1.0 struct :sigma + !
   else
-  over 2 =
+  type 2 =
   if
-     1.0 over chi !
-     0.0 over mu !
-    -1.0 over sigma !
+     1.0 struct :chi + !
+     0.0 struct :mu + !
+    -1.0 struct :sigma + !
   endif endif endif
-  2drop
 ;
 
-: set_cf_res_reinit             # ( struct reinit cutoff res )
-  3 pick res !
-  2 pick cutoff !
-  over reinit !                 # ( struct )
+: _set_cf_res_reinit { struct reinit cutoff res }
+  res struct :res + !
+  cutoff struct :cutoff + !
+  reinit struct :reinit + !
 ;
 
-: calc_theta                    # ( struct -- struct )
-  dup cutoff @ 2PIDSR *
-  over theta !                  # ( struct )
+: _calc_theta  { struct }        # ( struct -- )
+  struct :cutoff + @             # ( cutoff_val )
+  2PIDSR *                       # ( cutoff_val*2PIDSR )
+  struct :theta +                # ( cutoff_val*2PIDSR theta_addr )
+  !                              # poked into theta
 ;
 
-: calc_beta                     # ( struct -- struct )
-  dup theta @ over res @        # ( struct theta res )
-  over sin 0.5 *                # ( struct theta res sin(theta)*0.5 )
-  over swap - -rot              # ( struct res-sin(theta)*0.5 theta res )
-  swap sin 0.5 * +              # ( struct res-sin(theta)*0.5 res+sin(theta)*0.5 )
-  /                             # ( (struct res-sin(theta)*0.5 / res+sin(theta)*0.5) )
-  over beta !                   # struct
+: _calc_beta  { struct tmp }    # ( struct tmp -- )
+  struct :res + @               # ( res )
+  struct :theta + @             # ( res theta )
+  sin 0.5 *                     # ( res sin(theta)*0.5 )
+  2dup                          # ( res sin(theta)*0.5 res sin(theta)*0.5 )
+  +                             # ( res sin(theta)*0.5 res+sin(theta)*0.5 )
+  tmp!                          # ( res sin(theta)*0.5  <in_tmp> )
+  -                             # ( res-sin(theta)*0.5  <in_tmp> )
+  tmp                           # ( res-sin(theta)*0.5 res+sin(theta)*0.5 )
+  /                             # ( (res-sin(theta)*0.5)/(res+sin(theta)*0.5) ) # answer
+  struct :beta + !              # poked into beta
 ;
 
-: calc_gamma                    # ( struct -- struct )
-  dup beta @ 1 +                # ( struct beta+1)
-  over theta @ cos *            # ( struct (beta+1)*cos(theta) )
-  over gamma !                  # ( struct )
+: _calc_gamma  { struct }       # ( struct -- )
+  struct :beta + @ 1 +          # ( beta+1 )
+  struct :theta + @ cos *       # ( (beta+1)*cos(theta) )
+  struct :gamma +               # ( (beta+1)*cos(theta) gamma_addr )
+  !                             # poked into gamma
 ;
 
-: calc_alpha                    # ( struct -- struct )
-  dup beta @ 1 +                # ( struct beta+1 )
-  over gamma @                  # ( struct beta+1 gamma )
-  2 pick chi @                  # ( struct beta+1 gamma chi )
-  * + 0.5 *                     # ( struct (beta+1+(gamma*chi) * 0.5) )
-  over alpha !                  # ( struct )
+: _calc_alpha { struct }        # ( struct -- )
+  struct :beta + @ 1 +          # ( beta+1 )
+  struct :gamma + @             # ( beta+1 gamma )
+  struct :chi + @               # ( struct beta+1 gamma chi )
+  * + 0.5 *                     # ( (beta+1+(gamma*chi))*0.5 )
+  struct :alpha +               # ( (beta+1+(gamma*chi))*0.5 alpha_addr )
+  !                             # poked into alpha
 ;
 
-: init_biquad                   # ( struct reinit cutoff res type -- struct )
-  set_bq_type set_cf_res_reinit calc_theta
-  calc_beta calc_gamma calc_alpha
+: _reinit_biquad { struct }     # ( struct -- )
+  0.0 struct :xt1 + !
+  0.0 struct :xt2 + !
+  0.0 struct :yt1 + !
+  0.0 struct :yt2 + !
+;
+
+#######################################################################
+# entry-point for all biquad initialization, which uses above helpers #
+#######################################################################
+: _init_biquad  { struct reinit cutoff res type }    # ( struct reinit cutoff res type -- )
+  struct type               _set_bq_type
+  struct reinit cutoff res  _set_cf_res_reinit
+  struct                    _calc_theta
+  struct 0                  _calc_beta
+  struct                    _calc_gamma
+  struct                    _calc_alpha
   # check if we should reinit!
-  dup reinit @ if reinit_biquad else endif
+  struct :reinit + @ if
+    struct _reinit_biquad
+  endif
 ;
 
-: biquad_compute
+: biquad_compute { sig struct }
   # ( sig struct -- sig_out )
   # the actual transformative equation:
-          2dup                  # ( sig struct sig struct )
-            dup mu @            # ( sig struct sig struct mu )
-            swap xt1 @          # ( sig struct sig mu xt1 )
-          *                     # ( sig struct sig mu*xt1 )
-            2 pick              # ( sig struct sig mu*xt1 struct )
-              dup sigma @       # ( sig struct sig mu*xt1 struct sigma )
-              swap xt2 @        # ( sig struct sig mu*xt1 sigma xt2 )
-            *                   # ( sig struct sig mu*xt1 xt2*sigma)
-          +                     # ( sig struct sig mu*xt1+xt2*sigma)
-        +                       # ( sig struct sig+mu*xt1+sigma*xt2 )
-        over alpha @ *          # ( sig struct alpha*(sig+mu*xt1+sigma*xt2) )
-          over gamma @          # ( sig struct alpha*(sig+mu*xt1+sigma*xt2) gamma )
-          2 pick yt1 @ *        # ( sig struct alpha*(sig+mu*xt1+sigma*xt2) gamma*yt1 )
-            2 pick beta @       # ( sig struct alpha*(sig+mu*xt1+sigma*xt2) gamma*yt1 beta )
-              3 pick yt2 @      # ( sig struct alpha*(sig+mu*xt1+sigma*xt2) gamma*yt1 beta yt2 )
-            *
-          -
-        +                       # ( sig struct alpha*(sig+mu*xt1+sigma*xt2)+gamma*yt1-beta*yt2 )
+  struct :mu + @                # ( mu )
+  struct :xt1 + @               # ( mu xt1 )
+  *                             # ( mu*xt1 )
+  struct :sigma + @             # ( mu*xt1 sigma )
+  struct :xt2 + @               # ( mu*xt1 asigma xt2 )
+  *                             # ( mu*xt1 xt2*sigma)
+  +                             # ( mu*xt1+xt2*sigma)
+  sig +                         # ( sig+mu*xt1+sigma*xt2 )
+  struct :alpha + @             # ( sig+mu*xt1+sigma*xt2 alpha )
+  *                             # ( alpha*(sig+mu*xt1+sigma*xt2 alpha) )
+  struct :gamma + @             # ( alpha*(sig+mu*xt1+sigma*xt2) gamma )
+  struct :yt1 + @               # ( alpha*(sig+mu*xt1+sigma*xt2) gamma yt1 )
+  *                             # ( alpha*(sig+mu*xt1+sigma*xt2) gamma*yt1 )
+  struct :beta + @              # ( alpha*(sig+mu*xt1+sigma*xt2) gamma*yt1 beta )
+  struct :yt2 + @               # ( alpha*(sig+mu*xt1+sigma*xt2) gamma*yt1 beta yt2 )
+  *                             # ( alpha*(sig+mu*xt1+sigma*xt2) gamma*yt1 beta*yt2 )
+  -                             # ( alpha*(sig+mu*xt1+sigma*xt2) gamma*yt1-beta*yt2 )
+  +                             # ( alpha*(sig+mu*xt1+sigma*xt2)+gamma*yt1-beta*yt2 )
                                 # simplification:
-                                # ( sig struct sig_out )
-      svpush                    # ( sig struct )                        ( sig_out )
+                                # ( sig_out )
   ##################################
   # UPDATE xt2, yt2, xt1, and yt1: #
   ##################################
-        dup xt1 @               # ( sig struct xt1 )                    ( sig_out )
-          over xt2              # ( sig struct xt1 xt2_addr )           ( sig_out )
-      !                         # ( sig struct )                        ( sig_out )
-        dup yt1 @               # ( sig struct yt1 )                    ( sig_out )
-          over yt2              # ( sig struct yt1 yt2_addr )           ( sig_out )
-      !                         # ( sig struct )                        ( sig_out )
-          2dup xt1              # ( sig struct sig xt1_addr )           ( sig_out )
-      !                         # ( sig struct )                        ( sig_out )
-    swap drop                   # ( struct )                            ( sig_out )
-          svpop 2dup            # ( struct sig_out struct sig_out )     ( )
-          swap yt1              # ( struct sig_out sig_out yt1_addr )   ( )
-      !                         # ( struct sig_out )                    ( )
-    swap drop                   # ( sig_out )                           ( )
+  struct :xt1 + @               # ( sig_out xt1_val )
+  struct :xt2 +                 # ( sig_out xt1_val xt2_addr )
+  !                             # ( sig_out )
+  struct :yt1 + @               # ( sig_out yt1_val )
+  struct :yt2 +                 # ( sig_out yt1_val yt2_addr )
+  !                             # ( sig_out )
+  sig                           # ( sig_out sig )
+  struct :xt1 +                 # ( sig_out sig xt1_addr )
+  !                             # ( sig_out )
+  dup                           # ( sig_out sig_out )
+  struct :yt1 +                 # ( sig_out sig_out yt1_addr )
+  !                             # ( sig_out )
 ;
+
+#############################################
+# The 'public' API words for biquad filters #
+#############################################
 
 : make_biquad
   create
   0 , 0 , 0 , 0 , 0 , 0 , 0 , 0 , 0 , 0 , 0 , 0 , 0 , 0 ,
 ;
 
-: biquad_lp                     # ( sig struct reinit cutoff res -- sig_out )
-  3 pick cutoff @ 2 pick <>     # ( sig struct reinit cutoff res bool_cfdiff  )
-  4 pick res @ 2 pick <>        # ( sig struct reinit cutoff res bool_cfdiff bool_resdiff )
-  or if                         # ( sig struct reinit cutoff res )
-    0 init_biquad
-  else
-    2drop drop
+: biquad_lp  { sig struct reinit cutoff res }   # ( sig struct reinit cutoff res -- sig_out )
+  struct :cutoff + @ cutoff <>                  # ( bool_cfdiff  )
+  struct :res + @ res <>                        # ( bool_cfdiff bool_resdiff )
+  or if
+    struct reinit cutoff res 0    _init_biquad
   endif
-  biquad_compute
+  sig struct    biquad_compute
 ;
 
-: biquad_hp                     # ( sig struct reinit cutoff res -- sig_out )
-  3 pick cutoff @ 2 pick <>     # ( sig struct reinit cutoff res bool_cfdiff  )
-  4 pick res @ 2 pick <>        # ( sig struct reinit cutoff res bool_cfdiff bool_resdiff )
-  or if                         # ( sig struct reinit cutoff res )
-    1 init_biquad
-  else
-    2drop drop
+: biquad_hp  { sig struct reinit cutoff res }   # ( sig struct reinit cutoff res -- sig_out )
+  struct :cutoff + @ cutoff <>                  # ( bool_cfdiff  )
+  struct :res + @ res <>                        # ( bool_cfdiff bool_resdiff )
+  or if
+    struct reinit cutoff res 1    _init_biquad
   endif
-  biquad_compute
+  sig struct    biquad_compute
 ;
 
-: biquad_bp                     # ( sig struct reinit cutoff res -- sig_out )
-  3 pick cutoff @ 2 pick <>     # ( sig struct reinit cutoff res bool_cfdiff  )
-  4 pick res @ 2 pick <>        # ( sig struct reinit cutoff res bool_cfdiff bool_resdiff )
-  or if                         # ( sig struct reinit cutoff res )
-    2 init_biquad
-  else
-    2drop drop
+: biquad_bp  { sig struct reinit cutoff res }   # ( sig struct reinit cutoff res -- sig_out )
+  struct :cutoff + @ cutoff <>                  # ( bool_cfdiff  )
+  struct :res + @ res <>                        # ( bool_cfdiff bool_resdiff )
+  or if
+    struct reinit cutoff res 1    _init_biquad
   endif
-  biquad_compute
+  sig struct    biquad_compute
 ;
 
 #####################
