@@ -43,5 +43,3 @@ true = assert
 false = assert
 "lingonberry" "apple" "cranberry" str_between
 false = assert
-
-"If you are only seeing this msg, all tests have passed!" print cr

@@ -44,5 +44,3 @@ test_csv_next_input_line
 test_csv_find_col_x
 test_csv_iteration
 csv_cleanup
-
-"If you are only seeing this msg, all tests have passed!" print cr

@@ -40,5 +40,3 @@ test_fracsub
 test_fracmul
 test_fracdiv
 test_fracmediant
-
-"If you are only seeing this message and nothing else, all tested have passed." print cr

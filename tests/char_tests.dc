@@ -109,5 +109,3 @@ test_ispunct
 test_isspace
 test_isupper
 test_isxdigit
-
-"If you are only seeing this msg, all tests have passed!" print cr

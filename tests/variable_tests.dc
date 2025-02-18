@@ -41,5 +41,3 @@ arr_to_sort 5 sortnums
 # prove sorting worked:
 arr_to_sort @ -19 = assert
 arr_to_sort 4 + @ 20053 = assert
-
-"If you are only seeing this msg, all tests have passed!" print cr

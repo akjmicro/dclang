@@ -56,5 +56,3 @@
 15 16 <= assert
 16 16 <= assert
 15 14 <= not true = assert
-
-"If you are only seeing this msg, all tests have passed!" print cr
