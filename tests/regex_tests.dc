@@ -72,4 +72,4 @@ assert
   str=
 assert
 
-"If you are only seeing this message, all regex tests have passed!"
+"If you are only seeing this message, all regex tests have passed!" print cr

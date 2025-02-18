@@ -1,13 +1,27 @@
-"deprecated_stack.dc" import
+###########################################################################
+# Fraction words                                                          #
+#                                                                         #
+# Numerators and denominators are laid out on the stack in `n d` "pairs". #
+###########################################################################
 
 : gcd swap over % dup 0 <> if gcd else drop endif ;
 
-: simplify 2dup gcd dup rot swap / -rot / swap ;
+: simplify { n d }  # ( n d - n d )
+  n d gcd n over / swap d swap /
+;
 
-: fracadd rot 2dup * dup -2rot rot * -rot * + -rot drop simplify ;
+: fracadd { n1 d1 n2 d2 }  # ( n1 d1 n2 d2 - n d )
+  n1 d2 * n2 d1 * + d1 d2 * simplify
+;
 
 : fracsub swap -1 * swap fracadd ;
 
-: fracmul rot * -rot * swap simplify ;
+: fracmul { n1 d1 n2 d2 }  # ( n1 d1 n2 d2 - n d )
+  n1 n2 * d1 d2 * simplify
+;
 
 : fracdiv swap fracmul ;
+
+: fracmediant { n1 d1 n2 d2 }  # ( n1 d1 n2 d2 - n d )
+  n1 n2 + d1 d2 +
+;

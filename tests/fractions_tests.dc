@@ -1,0 +1,44 @@
+"fractions.dc" import
+
+: test_fracadd
+  1 2 1 3 fracadd
+  swap
+  5 = assert
+  6 = assert
+;
+
+: test_fracsub
+  1 2 1 3 fracsub
+  swap
+  1 = assert
+  6 = assert
+;
+
+: test_fracmul
+  2 3 4 5 fracmul
+  swap
+  8 = assert
+  15 = assert
+;
+
+: test_fracdiv
+  3 2 7 5 fracdiv
+  swap
+  15 = assert
+  14 = assert
+;
+
+: test_fracmediant
+  4 3 3 2 fracmediant
+  swap
+  7 = assert
+  5 = assert
+;
+
+test_fracadd
+test_fracsub
+test_fracmul
+test_fracdiv
+test_fracmediant
+
+"If you are only seeing this message and nothing else, all tested have passed." print cr

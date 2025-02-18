@@ -12,3 +12,5 @@ var fp
 ;
 
 test_fmemopen
+
+"If you are only seeing this message, all file tests have passed!" print cr
