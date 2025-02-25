@@ -3,7 +3,7 @@ void regcompfunc()
 {
     if (data_stack_ptr < 2)
     {
-        printf("regcomp -- stack underflow: need <pattern> and <flags> on the stack! ");
+        printf("regcomp -- stack underflow: need <pattern> and <flags> on the stack!\n");
         return;
     }
 
@@ -13,7 +13,7 @@ void regcompfunc()
 
     if (pattern_PTR_addr < MIN_STR || pattern_PTR_addr > MAX_STR)
     {
-        perror("regcomp -- Pattern address out-of-range.");
+        perror("regcomp -- Pattern address out-of-range.\n");
         return;
     }
 
@@ -23,7 +23,7 @@ void regcompfunc()
     regex_t *regex = (regex_t *)dclang_malloc(sizeof(regex_t));
     if (regcomp(regex, pattern, (int)flags) != 0)
     {
-        perror("regcomp -- Error compiling regex pattern");
+        perror("regcomp -- Error compiling regex pattern\n");
         dclang_free(regex);
         return;
     }
@@ -37,7 +37,7 @@ void regexecfunc()
 {
     if (data_stack_ptr < 3)
     {
-        printf("regexec -- stack underflow; need <regexobj> <string_to_search> <flags> on the stack! ");
+        printf("regexec -- stack underflow; need <regexobj> <string_to_search> <flags> on the stack!\n");
         return;
     }
 
@@ -48,7 +48,7 @@ void regexecfunc()
 
     if (regex_obj_PTR < 0 || input_str_PTR_addr < MIN_STR || input_str_PTR_addr > MAX_STR)
     {
-        perror("regexec -- Invalid regex object or string address.");
+        perror("regexec -- Invalid regex object or string address.\n");
         return;
     }
 
@@ -77,9 +77,7 @@ void regreadfunc()
         printf("regread will return a start and end index relative to the original searched string. \n");
         printf("If the user actually wants that substring, it makes sense to have saved the original \n");
         printf("string, and put the results of regread at the top of stack, then call `strslice`,\n");
-        printf("which needs to be imported from the 'string' module.");
-        printf("");
-        printf("A full workflow is documented by calling the `regex_help` word.\n");
+        printf("which needs to be imported from the 'string' module.\n");
         return;
     }
 
