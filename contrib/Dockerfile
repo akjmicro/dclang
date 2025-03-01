@@ -19,7 +19,7 @@ RUN apt update && \
     echo 'alias dclang="rlwrap dclang"' >> /root/.profile
 CMD /bin/bash
 
-FROM busybox:glibc
+FROM busybox:1.36-glibc
 WORKDIR /
 # sytem needs
 COPY --from=0 /lib/x86_64-linux-gnu/libreadline* /lib/
