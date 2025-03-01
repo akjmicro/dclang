@@ -1,3 +1,6 @@
+// loop 'stack'
+DCLANG_LONG  loop_counter[3];
+DCLANG_PTR   loop_counter_ptr;
 // struct for 'for' loops:
 typedef struct {
     DCLANG_LONG limit;

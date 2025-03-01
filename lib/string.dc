@@ -292,3 +292,34 @@ create hexchars 48 , 49 , 50 , 51 , 52 , 53 , 54 , 55 , 56 , 57 ,
   0 1 memset drop
   svpop
 ;
+
+#######################################################
+# New word: `str_split`                               #
+# Will return a linked list with all found substrings #
+# within `in_str` that are separated by `split_token` #
+#######################################################
+
+var _split_list
+var _strtok_state
+
+: str_split { in_str split_token }
+  lmake _split_list !
+  in_str split_token _strtok_state strtok dup
+  0 = if
+    _split_list @
+    return
+  else
+    _split_list @ swap lpush
+    inf times
+      null split_token _strtok_state strtok dup
+      0 =
+    if
+      drop
+      _split_list @
+      exittimes
+    else
+      _split_list @ swap lpush
+      again
+    endif
+  endif
+;

@@ -50,9 +50,6 @@ DCLANG_PTR   save_data_stack_ptr;
 // return stack
 DCLANG_LONG  return_stack[RETURN_STACK_SIZE];
 DCLANG_PTR   return_stack_ptr;
-// loop 'stack'
-DCLANG_LONG  loop_counter[3];
-DCLANG_PTR   loop_counter_ptr;
 // local variables
 DCLANG_PTR   locals_keys[NUMLOCALS];
 DCLANG_FLT   locals_vals[NUMLOCALS * RETURN_STACK_SIZE];

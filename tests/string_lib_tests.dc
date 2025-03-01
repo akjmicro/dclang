@@ -43,3 +43,13 @@ true = assert
 false = assert
 "lingonberry" "apple" "cranberry" str_between
 false = assert
+
+# test the str_split word:
+var split_list
+"this/is/a/line/to/split" "/" str_split split_list !
+split_list @ 0 l@ "this"  str= assert
+split_list @ 1 l@ "is"    str= assert
+split_list @ 2 l@ "a"     str= assert
+split_list @ 3 l@ "line"  str= assert
+split_list @ 4 l@ "to"    str= assert
+split_list @ 5 l@ "split" str= assert
