@@ -7,7 +7,31 @@
    I've found it crawls to a halt on the benchmarks if you use 'float'!
 */
 
+#define _GNU_SOURCE
+#define __USE_GNU 1
+
+#include <ctype.h>
+#include <stdio.h>
+#include "noheap/malloc.c"
+#include <stdlib.h>
 #include <inttypes.h>
+#include <string.h>
+#include <regex.h>
+#include <unistd.h>
+#include <math.h>
+#include <time.h>
+#include <fcntl.h>
+#include <signal.h>
+#include <inttypes.h>
+#include <stdlib.h>
+#include <sys/socket.h>
+#include <netinet/in.h>
+#include <netdb.h>
+#include <sys/time.h>
+#include <time.h>
+#include <portmidi.h>
+#include <porttime.h>
+#include <sqlite3.h>
 
 // data type macros
 #define DCLANG_FLT   double
@@ -107,6 +131,8 @@ FILE *ofp;
 // file stack for imports
 FILE *file_stack[32];
 DCLANG_PTR fsp;
+
+struct timeval tval;
 
 ///////////////
 // API calls //
