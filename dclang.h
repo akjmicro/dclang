@@ -134,10 +134,7 @@ enum dclang_opcodes {
     OP_SHOWNOSPACE,
     OP_SHOWRJ,
     OP_SHOWPZ,
-    OP_SHOWSTACK
-};
-
-    /*
+    OP_SHOWSTACK,
     // booleans
     OP_NULL,
     OP_FALSE,
@@ -186,9 +183,9 @@ enum dclang_opcodes {
     OP_ACOS,
     OP_ATAN,
     OP_ATAN2,
-    OP_ATAN,
-    OP_ATAN,
-    OP_ATAN,
+    OP_SINH,
+    OP_COSH,
+    OP_TANH,
     // randomness
     OP_RAND,
     // variables and arrays
@@ -201,7 +198,10 @@ enum dclang_opcodes {
     OP_HERE,
     OP_CONSTANT,
     OP_ENVGET,
-    OP_ENVSET,
+    OP_ENVSET
+};
+
+    /*
     // sorting
     OP_SORTNUMS,
     OP_SORTSTRS,
@@ -228,7 +228,7 @@ enum dclang_opcodes {
     OP_LISTINSERT,
     OP_LISTREMOVE,
     OP_LISTSIZE,
-    OP_LISTDELETE,
+    OP_LISTDELETE
     // branching/control
     OP_TIMES,
     OP_AGAIN,
