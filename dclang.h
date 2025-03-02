@@ -45,19 +45,15 @@
 #define DATA_STACK_SIZE   32
 #define RETURN_STACK_SIZE 128
 #define MAXWORD           1048576
+#define MAX_OPCODES       208
 #define IBUFSIZE          128
 #define NUMLOCALS         8
 #define NUMVARS           16777216
 #define NUM_TREE_ROOTS    32
 
 // compiled tokens get saved and put into an array of type 'inst_struct'
-typedef union {
-    void (*with_param) (DCLANG_FLT);
-    void (*without_param) (void);
-} func_union;
-
 typedef struct {
-    func_union function;
+    int opcode;
     DCLANG_FLT param;
 } inst_struct;
 
@@ -104,11 +100,251 @@ DCLANG_PTR MAX_STR = 0;
 struct primitive {
   const char *name;
   char *category;
-  void (*function) (void);
+  int opcode;
 } primitive __attribute__((aligned(16)));
 
 struct primitive *primitives;
 int primitives_idx = -1;
+
+// The dispatch table for computed gotos
+static void *dispatch_table[MAX_OPCODES];
+
+// opcode enumeration
+enum dclang_opcodes {
+    OP_NOOP,
+    OP_PUSH,
+    OP_PUSH_NO_CHECK,
+    OP_DROP,
+    OP_DUP,
+    OP_OVER,
+    OP_PICK,
+    OP_SWAP,
+    OP_DROP2,
+    OP_DUP2,
+    OP_OVER2,
+    OP_DEPTH,
+    OP_CLEAR,
+    OP_SVPUSH,
+    OP_SVPOP,
+    OP_SVDROP,
+    OP_SVPICK,
+    OP_SVDEPTH,
+    OP_SVCLEAR,
+    OP_SHOW,
+    OP_SHOWNOSPACE,
+    OP_SHOWRJ,
+    OP_SHOWPZ,
+    OP_SHOWSTACK
+};
+
+    /*
+    // booleans
+    OP_NULL,
+    OP_FALSE,
+    OP_TRUE,
+    OP_EQ,
+    OP_NOTEQ,
+    OP_LT,
+    OP_GT,
+    OP_LTE,
+    OP_GTE,
+    OP_ASSERT,
+    // bit manipulation
+    OP_AND,
+    OP_OR,
+    OP_XOR,
+    OP_NOT,
+    OP_LSHIFT,
+    OP_RSHIFT,
+    // basic arithmetic
+    OP_ADD,
+    OP_SUB,
+    OP_MUL,
+    OP_DIV,
+    OP_MOD,
+    OP_ABS,
+    OP_MIN,
+    OP_MAX,
+    // float -> int
+    OP_ROUND,
+    OP_CEIL,
+    OP_FLOOR,
+    // higher math
+    OP_POWER,
+    OP_SQRT,
+    OP_EXP,
+    OP_LOG,
+    OP_LOG2,
+    OP_LOG10,
+    OP_E,
+    // trig
+    OP_PI,
+    OP_SINE,
+    OP_COS,
+    OP_TAN,
+    OP_ASINE,
+    OP_ACOS,
+    OP_ATAN,
+    OP_ATAN2,
+    OP_ATAN,
+    OP_ATAN,
+    OP_ATAN,
+    // randomness
+    OP_RAND,
+    // variables and arrays
+    OP_VARIABLE,
+    OP_POKE,
+    OP_PEEK,
+    OP_ALLOT,
+    OP_CREATE,
+    OP_COMMA,
+    OP_HERE,
+    OP_CONSTANT,
+    OP_ENVGET,
+    OP_ENVSET,
+    // sorting
+    OP_SORTNUMS,
+    OP_SORTSTRS,
+    // hash set & get
+    OP_HASHSET,
+    OP_HASHGET,
+    OP_HASHKEYS,
+    // tree storage
+    OP_TREEMAKE,
+    OP_TREESET,
+    OP_TREEGET,
+    OP_TREEWALK,
+    OP_TREEDELETE,
+#ifdef HAS_TREEDESTROY,
+    OP_TREEDESTROY,
+#endif,
+    // linked lists
+    OP_LISTMAKE,
+    OP_LISTNEXT,
+    OP_LISTSET,
+    OP_LISTGET,
+    OP_LISTPUSH,
+    OP_LISTPOP,
+    OP_LISTINSERT,
+    OP_LISTREMOVE,
+    OP_LISTSIZE,
+    OP_LISTDELETE,
+    // branching/control
+    OP_TIMES,
+    OP_AGAIN,
+    OP_EXITTIMES,
+    OP_FOR,
+    OP_NEXT,
+    OP_EXITFOR,
+    OP_I,
+    OP_J,
+    OP_K,
+    OP_IF,
+    OP_ELSE,
+    OP_ENDIF,
+    OP_RETURN,
+    // character emitters
+    OP_EMIT,
+    OP_UEMIT,
+    OP_BYTES32,
+    // character types
+    OP_ISALNUM,
+    OP_ISALPHA,
+    OP_ISCNTRL,
+    OP_ISDIGIT,
+    OP_ISGRAPH,
+    OP_ISLOWER,
+    OP_ISPRINT,
+    OP_ISPUNCT,
+    OP_ISSPACE,
+    OP_ISUPPER,
+    OP_ISXDIGIT,
+    // output and string ops
+    OP_CR,
+    OP_PRINT,
+    // string conversion
+    OP_TOHEX,
+    OP_TOSTR,
+    OP_TONUM,
+    OP_ORD,
+    OP_TOLOWER,
+    OP_TOUPPER,
+    // general string ops from C
+    OP_STRLEN,
+    OP_STREQ,
+    OP_STRLT,
+    OP_STRGT,
+    OP_STRFIND,
+    OP_STRSPN,
+    OP_STRCSPN,
+    OP_STRTOK,
+    OP_MEMPCPY,
+    OP_MEMSET,
+    // memory buffers
+    OP_MKBUF,
+    OP_FREE,
+    OP_MEMUSED,
+    // regex
+    OP_REGCOMP,
+    OP_REGEXEC,
+    OP_REGREAD,
+    // file
+    OP_FILEOPEN,
+    OP_FILEMEMOPEN,
+    OP_FILEREAD,
+    OP_FILEREADLINE,
+    OP_FILEREADALL,
+    OP_FILESEEK,
+    OP_FILETELL,
+    OP_FILEWRITE,
+    OP_FILEFLUSH,
+    OP_FILECLOSE,
+    OP_REDIRECT,
+    OP_RESETOUT,
+    OP_FLUSHOUT,
+    // low-level (OS) file ops:
+    OP_OPEN,
+    OP_READ,
+    OP_WRITE,
+    OP_CLOSE,
+    // SQLite3 interface
+    OP_SQLITEOPEN,
+    OP_SQLITEPREPARE,
+    OP_SQLITESTEP,
+    OP_SQLITECOLUMN,
+    OP_SQLITEFINALIZE,
+    OP_SQLITEEXEC,
+    OP_SQLITECLOSE,
+    // tcp/udp networking using sockets
+    OP_TCPLISTEN,
+    OP_TCPACCEPT,
+    OP_TCPCONNECT,
+    OP_UDPRECV,
+    OP_UDPSEND,
+    // time
+    OP_CLOCK,
+    OP_SLEEP,
+    OP_EPOCH,
+    OP_EPOCH,
+    OP_DT,
+    // block a SIGINT
+    OP_BLOCKSIGINT,
+    OP_UNBLOCKSIGINT,
+    // portmidi
+    OP_PM_LIST,
+    OP_PM_OPENOUT,
+    OP_PM_WS,
+    OP_PM_WSR,
+    OP_PM_CLOSE,
+    OP_PM_TERMINATE,
+    // os fork and exit
+    OP_FORK,
+    OP_EXIT,
+    // show defined words!
+    OP_SHOWDEFINED,
+    OP_SHOWCONSTS,
+    OP_SHOWVARS
+    */
 
 // user words
 typedef struct {

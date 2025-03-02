@@ -6,7 +6,7 @@ Born on 2018-05-05 */
 
 #include "dclang.h"
 
-/* stack operations */
+
 void push(DCLANG_FLT a)
 {
     if (data_stack_ptr >= DATA_STACK_SIZE) {
@@ -29,6 +29,275 @@ DCLANG_FLT dclang_pop()
     return data_stack[--data_stack_ptr];
 }
 
+
+#define NEXT goto  *dispatch_table[prog[++iptr].opcode]
+
+void dclang_execute() {
+    DCLANG_FLT val, val1, val2;
+    int precision, width;
+    DCLANG_PTR size;
+
+    static void *dispatch_table[] = {
+        &&OP_NOOP,
+        &&OP_PUSH,
+        &&OP_PUSH_NO_CHECK,
+        &&OP_DROP,
+        &&OP_DUP,
+        &&OP_OVER,
+        &&OP_PICK,
+        &&OP_SWAP,
+        &&OP_DROP2,
+        &&OP_DUP2,
+        &&OP_OVER2,
+        &&OP_DEPTH,
+        &&OP_CLEAR,
+        &&OP_SVPUSH,
+        &&OP_SVPOP,
+        &&OP_SVDROP,
+        &&OP_SVPICK,
+        &&OP_SVDEPTH,
+        &&OP_SVCLEAR,
+        &&OP_SHOW,
+        &&OP_SHOWNOSPACE,
+        &&OP_SHOWRJ,
+        &&OP_SHOWPZ,
+        &&OP_SHOWSTACK
+    };
+
+    //printf("Inside dclang_execute. iptr: %d, max_iptr: %d\n", (int)iptr, (int)max_iptr);
+    while ((iptr < max_iptr) || (def_mode == 0)) {
+        goto *dispatch_table[prog[--iptr].opcode];
+
+    OP_NOOP:
+        return;
+
+    OP_DROP:
+        if (data_stack_ptr < 1) {
+            printf("drop -- stack underflow!\n");
+            return;
+        }
+        --data_stack_ptr;
+        NEXT;
+
+    OP_DUP:
+        if (data_stack_ptr < 1) {
+            printf("dup -- stack underflow!\n");
+            return;
+        }
+        push(data_stack[data_stack_ptr - 1]);
+        NEXT;
+
+    OP_OVER:
+        if (data_stack_ptr < 2) {
+            printf("over -- stack underflow!\n");
+            return;
+        }
+        push(data_stack[data_stack_ptr - 2]);
+        NEXT;
+
+    OP_PICK:
+        if (data_stack_ptr < 1) {
+             printf("pick -- stack underflow!\n");
+             return;
+        }
+        DCLANG_PTR pick_idx = (DCLANG_PTR) dclang_pop();
+        if (data_stack_ptr < (pick_idx + 1)) {
+            printf("pick -- stack not deep enough!\n");
+            return;
+        }
+        val = data_stack[data_stack_ptr - (pick_idx + 1)];
+        data_stack[data_stack_ptr++] = val;
+        NEXT;
+
+    OP_SWAP:
+        if (data_stack_ptr < 2) {
+            printf("swap -- stack underflow!\n");
+            return;
+        }
+        val1 = data_stack[--data_stack_ptr];
+        val2 = data_stack[--data_stack_ptr];
+        data_stack[data_stack_ptr++] = val1;
+        data_stack[data_stack_ptr++] = val2;
+        NEXT;
+
+    OP_DROP2:
+        if (data_stack_ptr < 2) {
+            printf("2drop -- stack underflow!\n");
+            return;
+        }
+        --data_stack_ptr;
+        --data_stack_ptr;
+        NEXT;
+
+    OP_DUP2:
+        if (data_stack_ptr < 2) {
+            printf("2dup -- stack underflow!\n");
+            return;
+        }
+        val2 = data_stack[data_stack_ptr - 1];
+        push(data_stack[data_stack_ptr - 2]);
+        push(data_stack[data_stack_ptr - 2]);
+        NEXT;
+
+    OP_OVER2:
+        if (data_stack_ptr < 4) {
+            printf("2over -- stack underflow!\n");
+            return;
+        }
+        push(data_stack[data_stack_ptr - 4]);
+        push(data_stack[data_stack_ptr - 4]);
+        NEXT;
+
+    OP_DEPTH:
+        size = data_stack_ptr;
+        push((DCLANG_FLT)size);
+        NEXT;
+
+    OP_CLEAR:
+        // clears the stack!
+        data_stack_ptr = 0;
+        NEXT;
+
+    OP_SVPUSH:
+        if (save_data_stack_ptr >= DATA_STACK_SIZE) {
+            printf("svpush -- stack overflow!\n");
+            save_data_stack_ptr = 0;
+        }
+        val = dclang_pop();
+        data_stack[save_data_stack_ptr++ + DATA_STACK_SIZE] = val;
+        NEXT;
+
+    OP_SVPOP:
+        if (save_data_stack_ptr <= 0) {
+            printf("svdrop -- stack underflow!\n");
+            save_data_stack_ptr = 0;
+            return;
+        }
+        val = data_stack[--save_data_stack_ptr + DATA_STACK_SIZE];
+        data_stack[data_stack_ptr++] = val;
+        NEXT;
+
+    OP_SVDROP:
+        if (save_data_stack_ptr <= 0) {
+            printf("svdrop -- stack underflow!\n");
+            return;
+        }
+        --save_data_stack_ptr;
+        NEXT;
+
+    OP_SVPICK:
+        if (save_data_stack_ptr <= 0) {
+             printf("svpick -- stack underflow!\n");
+             return;
+        }
+        DCLANG_PTR svpick_idx = (DCLANG_PTR) dclang_pop();
+        if (save_data_stack_ptr < (svpick_idx + 1)) {
+            printf("svpick -- stack not deep enough!\n");
+            return;
+        }
+        val = data_stack[(save_data_stack_ptr - (svpick_idx + 1)) + DATA_STACK_SIZE];
+        data_stack[data_stack_ptr++] = val;
+        NEXT;
+
+    OP_SVDEPTH:
+        size = save_data_stack_ptr;
+        data_stack[data_stack_ptr++] = (DCLANG_FLT)size;
+        NEXT;
+
+    OP_SVCLEAR:
+        // clears the stack!
+        save_data_stack_ptr = 0;
+        NEXT;
+
+    ////////////
+    /* output */
+    ////////////
+    OP_SHOW:
+        if (data_stack_ptr < 1) {
+            printf(". (pop) -- stack underflow! ");
+            return;
+        }
+        val = data_stack[--data_stack_ptr];
+        fprintf(ofp, "%0.19g ", val);
+        fflush(ofp);
+        NEXT;
+
+    OP_SHOWNOSPACE:
+        if (data_stack_ptr < 1) {
+            printf("stack underflow! ");
+            return;
+        }
+        val = data_stack[--data_stack_ptr];
+        fprintf(ofp, "%0.19g", val);
+        fflush(ofp);
+        NEXT;
+
+    OP_SHOWRJ:
+        if (data_stack_ptr < 3) {
+            printf("Stack underflow! '.rj' needs: value, width, precision on the stack\n");
+            return;
+        }
+        // right-justified for pretty printing!
+        precision = (DCLANG_LONG) dclang_pop();
+        width = (DCLANG_LONG) dclang_pop();
+        fprintf(ofp, "%*.*f ", width, precision, dclang_pop());
+        fflush(ofp);
+        NEXT;
+
+    OP_SHOWPZ:
+        // left pad with zeros
+        if (data_stack_ptr < 3) {
+            printf("Stack underflow! '.pz' needs: value, width, precision on the stack\n");
+            return;
+        }
+        precision = (DCLANG_LONG) dclang_pop();
+        width = (DCLANG_LONG) dclang_pop();
+        fprintf(ofp, "%0*.*f ", width, precision, dclang_pop());
+        fflush(ofp);
+        NEXT;
+
+    OP_SHOWSTACK:
+        DCLANG_LONG x;
+        char *joiner;
+        x = data_stack_ptr > 16 ? data_stack_ptr - 16 : 0;
+        joiner = x == 0 ? " " : " ... ";
+        fprintf(ofp, "data_stack: <%lu>%s", data_stack_ptr, joiner);
+        fflush(ofp);
+        for (x=0; x < data_stack_ptr; x++) {
+            fprintf(ofp, "%0.19g ", data_stack[x]);
+            fflush(ofp);
+        }
+        fprintf(ofp, "\n");
+        // do the save data stack as well:
+        DCLANG_LONG y;
+        char *sv_joiner;
+        y = save_data_stack_ptr > 16 ? save_data_stack_ptr - 16 : 0;
+        sv_joiner = y == 0 ? " " : " ... ";
+        fprintf(ofp, "save_stack: <%lu>%s", save_data_stack_ptr, sv_joiner);
+        fflush(ofp);
+        for (y=0; y < save_data_stack_ptr; y++) {
+            fprintf(ofp, "%0.19g ", data_stack[y + DATA_STACK_SIZE]);
+            fflush(ofp);
+        }
+        fprintf(ofp, "\n");
+        NEXT;
+
+    OP_PUSH:
+        if (data_stack_ptr >= DATA_STACK_SIZE) {
+            printf("push -- stack overflow!\n");
+            data_stack_ptr = 0;
+        }
+        data_stack[data_stack_ptr++] = prog[iptr++].param;
+        NEXT;
+
+    OP_PUSH_NO_CHECK:
+        data_stack[data_stack_ptr++] = prog[iptr++].param;
+        NEXT;
+
+    }
+}
+
+/*
 void dropfunc()
 {
     if (data_stack_ptr < 1) {
@@ -185,8 +454,9 @@ void svclearfunc()
 }
 
 ////////////
-/* output */
+// output //
 ////////////
+
 void showfunc()
 {
     if (data_stack_ptr < 1) {
@@ -204,6 +474,32 @@ void shownospacefunc()
         return;
     }
     fprintf(ofp, "%0.19g", dclang_pop());
+    fflush(ofp);
+}
+
+void showrjfunc()
+{
+    if (data_stack_ptr < 3) {
+        printf("Stack underflow! '.rj' needs: value, width, precision on the stack\n");
+        return;
+    }
+    // right-justified for pretty printing!
+    int precision = (DCLANG_LONG) dclang_pop();
+    int width = (DCLANG_LONG) dclang_pop();
+    fprintf(ofp, "%*.*f ", width, precision, dclang_pop());
+    fflush(ofp);
+}
+
+void showpzfunc()
+{
+    // left pad with zeros
+    if (data_stack_ptr < 3) {
+        printf("Stack underflow! '.pz' needs: value, width, precision on the stack\n");
+        return;
+    }
+    int precision = (DCLANG_LONG) dclang_pop();
+    int width = (DCLANG_LONG) dclang_pop();
+    fprintf(ofp, "%0*.*f ", width, precision, dclang_pop());
     fflush(ofp);
 }
 
@@ -234,32 +530,8 @@ void showstackfunc()
     fprintf(ofp, "\n");
 }
 
-void showrjfunc()
-{
-    if (data_stack_ptr < 3) {
-        printf("Stack underflow! '.rj' needs: value, width, precision on the stack\n");
-        return;
-    }
-    // right-justified for pretty printing!
-    int precision = (DCLANG_LONG) dclang_pop();
-    int width = (DCLANG_LONG) dclang_pop();
-    fprintf(ofp, "%*.*f ", width, precision, dclang_pop());
-    fflush(ofp);
-}
+// logical words
 
-void showpzfunc()
-{
-    // left pad with zeros
-    if (data_stack_ptr < 3) {
-        printf("Stack underflow! '.pz' needs: value, width, precision on the stack\n");
-        return;
-    }
-    int precision = (DCLANG_LONG) dclang_pop();
-    int width = (DCLANG_LONG) dclang_pop();
-    fprintf(ofp, "%0*.*f ", width, precision, dclang_pop());
-    fflush(ofp);
-}
-/* logical words */
 void andfunc()
 {
     if (data_stack_ptr < 2)
@@ -300,7 +572,8 @@ void notfunc()
     push(~(DCLANG_LONG) dclang_pop());
 }
 
-/* comparison booleans */
+// comparison booleans
+
 void eqfunc()
 {
     if (data_stack_ptr < 2)
@@ -362,6 +635,7 @@ void ltefunc()
 }
 
 // assertions
+
 void assertfunc()
 {
     if (data_stack_ptr < 1)
@@ -392,7 +666,8 @@ void nullfunc()
     void *ptr = NULL;
     push((DCLANG_LONG)ptr);
 }
-/* math */
+
+// math
 void addfunc()
 {
     if (data_stack_ptr < 2)
@@ -536,7 +811,7 @@ void ceilfunc()
     push((DCLANG_LONG) ceil(dclang_pop()));
 }
 
-/* scientific math words */
+// scientific math words
 
 void powerfunc()
 {
@@ -604,7 +879,7 @@ void efunc()
     push(M_E);
 }
 
-/* Trig, pi, etc. */
+// Trig, pi, etc.
 void pifunc()
 {
     push(M_PI);
@@ -712,7 +987,8 @@ void tanhfunc()
     push(tanh(dclang_pop()));
 }
 
-/* randomness */
+// randomness
+
 void randfunc()
 {
     push((double)rand()/(double)RAND_MAX);
@@ -986,12 +1262,14 @@ void redirectfunc()
     }
     ofp = (FILE *)(DCLANG_PTR) dclang_pop();
 }
+*/
 
 void resetoutfunc()
 {
     ofp = stdout;
 }
 
+/*
 void flushoutfunc()
 {
     fflush(ofp);
@@ -1295,7 +1573,9 @@ void epoch_to_dtfunc()
     }
     push(bufaddr);
 }
-/* utf-8 char buffer */
+*/
+
+// utf-8 char buffer
 char utf8_buf[5];
 
 long utf8_encode(char *out, uint64_t utf)
@@ -1367,6 +1647,7 @@ int get_ascii(char *chbuf, int usize)
 // Character emitters. No value goes to the stack; output is immediate. //
 //////////////////////////////////////////////////////////////////////////
 
+/*
 void emitfunc()
 {
     if (data_stack_ptr < 1)
@@ -1642,106 +1923,7 @@ void isxdigitfunc()
         push((DCLANG_LONG) 0);
     }
 }
-void stringfunc()
-{
-    char ch;
-    char escape_ch;
-    char chbuf[5];
-    int stat;
-    char *scratch = &memory_pool[unused_mem_idx];
-    char *start_scratch = scratch;
-    // get the next character, and start the process for real:
-    if ((ch = fgetc(ifp)) == EOF) exit(0);
-    while (! strchr("\"", ch))
-    {
-        if (strchr("\\", ch))
-        {
-            /* consume an extra char due to backslash */
-            if ((escape_ch = fgetc(ifp)) == EOF) exit(0);
-            switch(escape_ch)
-            {
-                /* backspace */
-                case 'b' :
-                  chbuf[0] = 8;
-                  chbuf[1] = 0;
-                  break;
-                /* tab */
-                case 't' :
-                    chbuf[0] = 9;
-                    chbuf[1] = 0;
-                    break;
-                /* newline
-                (line-feed and carriage return together on unix)
-                */
-                case 'n' :
-                    chbuf[0] = 10;
-                    chbuf[1] = 0;
-                    break;
-                /* carriage return */
-                case 'r' :
-                    chbuf[0] = 13;
-                    chbuf[1] = 0;
-                    break;
-                /* 1-byte ASCII code */
-                case 'x' :
-                    stat = get_ascii(chbuf, 3);
-                    if (stat == 0)
-                    {
-                        printf("Illegal 1-byte ASCII string denoted with \\x.\n");
-                        return;
-                    }
-                    break;
-                /* 2-byte unicode */
-                case 'u' :
-                    stat = get_unicode_by_hex(chbuf, 5);
-                    if (stat == 0)
-                    {
-                        printf("Illegal 2-byte unicode entry in string.\n");
-                        return;
-                    }
-                    break;
-                /* 4-byte unicode */
-                case 'U' :
-                    stat = get_unicode_by_hex(chbuf, 9);
-                    if (stat == 0)
-                    {
-                        printf("Illegal 4-byte unicode entry in string.\n");
-                    }
-                    break;
-                default :
-                    chbuf[0] = escape_ch;
-                    chbuf[1] = 0;
-            }
-        } else {
-            chbuf[0] = ch;
-            chbuf[1] = 0;
-        }
-        scratch = mempcpy(scratch, chbuf, strlen(chbuf));
-        if ((ch = fgetc(ifp)) == EOF) exit(0);
-    }
-    memset(scratch, 0, 1);
-    int chr_cnt = (scratch - start_scratch) + 1;
-    unused_mem_idx = (unused_mem_idx + chr_cnt + 0x0f) & ~0x0f;
-    // register the string with MIN_STR and MAX_STR
-    DCLANG_PTR string_dest_ptr = (DCLANG_PTR) start_scratch;
-    DCLANG_PTR buflen = (DCLANG_PTR) chr_cnt;
-    if (string_dest_ptr < MIN_STR || MIN_STR == 0)
-    {
-        MIN_STR = string_dest_ptr;
-    }
-    if (string_dest_ptr + buflen > MAX_STR || MAX_STR == 0)
-    {
-        MAX_STR = string_dest_ptr + buflen;
-    }
-    // Do the right thing depending on def_mode
-    if (def_mode)
-    {
-        prog[iptr].function.with_param = push;
-        prog[iptr++].param = string_dest_ptr;
-    } else {
-        push(string_dest_ptr);
-    }
-}
+
 
 void printfunc()
 {
@@ -2300,6 +2482,8 @@ void regreadfunc()
         push((DCLANG_LONG)-1);
     }
 }
+*/
+
 // All the logic for reading tokens from stdin and file pointers goes here
 
 void add_to_buf(char ch) {
@@ -2323,6 +2507,106 @@ void revertinput() {
         exit(0);
     }
     ifp = file_stack[--fsp];
+}
+
+void stringfunc()
+{
+    char ch;
+    char escape_ch;
+    char chbuf[5];
+    int stat;
+    char *scratch = &memory_pool[unused_mem_idx];
+    char *start_scratch = scratch;
+    // get the next character, and start the process for real:
+    if ((ch = fgetc(ifp)) == EOF) exit(0);
+    while (! strchr("\"", ch))
+    {
+        if (strchr("\\", ch))
+        {
+            // consume an extra char due to backslash
+            if ((escape_ch = fgetc(ifp)) == EOF) exit(0);
+            switch(escape_ch)
+            {
+                // backspace
+                case 'b' :
+                  chbuf[0] = 8;
+                  chbuf[1] = 0;
+                  break;
+                // tab
+                case 't' :
+                    chbuf[0] = 9;
+                    chbuf[1] = 0;
+                    break;
+                // newline
+                // (line-feed and carriage return together on unix)
+                case 'n' :
+                    chbuf[0] = 10;
+                    chbuf[1] = 0;
+                    break;
+                // carriage return
+                case 'r' :
+                    chbuf[0] = 13;
+                    chbuf[1] = 0;
+                    break;
+                // 1-byte ASCII code
+                case 'x' :
+                    stat = get_ascii(chbuf, 3);
+                    if (stat == 0)
+                    {
+                        printf("Illegal 1-byte ASCII string denoted with \\x.\n");
+                        return;
+                    }
+                    break;
+                // 2-byte unicode
+                case 'u' :
+                    stat = get_unicode_by_hex(chbuf, 5);
+                    if (stat == 0)
+                    {
+                        printf("Illegal 2-byte unicode entry in string.\n");
+                        return;
+                    }
+                    break;
+                // 4-byte unicode
+                case 'U' :
+                    stat = get_unicode_by_hex(chbuf, 9);
+                    if (stat == 0)
+                    {
+                        printf("Illegal 4-byte unicode entry in string.\n");
+                    }
+                    break;
+                default :
+                    chbuf[0] = escape_ch;
+                    chbuf[1] = 0;
+            }
+        } else {
+            chbuf[0] = ch;
+            chbuf[1] = 0;
+        }
+        scratch = mempcpy(scratch, chbuf, strlen(chbuf));
+        if ((ch = fgetc(ifp)) == EOF) exit(0);
+    }
+    memset(scratch, 0, 1);
+    int chr_cnt = (scratch - start_scratch) + 1;
+    unused_mem_idx = (unused_mem_idx + chr_cnt + 0x0f) & ~0x0f;
+    // register the string with MIN_STR and MAX_STR
+    DCLANG_PTR string_dest_ptr = (DCLANG_PTR) start_scratch;
+    DCLANG_PTR buflen = (DCLANG_PTR) chr_cnt;
+    if (string_dest_ptr < MIN_STR || MIN_STR == 0)
+    {
+        MIN_STR = string_dest_ptr;
+    }
+    if (string_dest_ptr + buflen > MAX_STR || MAX_STR == 0)
+    {
+        MAX_STR = string_dest_ptr + buflen;
+    }
+    // Do the right thing depending on def_mode
+    if (def_mode)
+    {
+        prog[iptr].opcode = OP_PUSH;
+        prog[iptr++].param = string_dest_ptr;
+    } else {
+        push(string_dest_ptr);
+    }
 }
 
 char *get_token() {
@@ -2373,6 +2657,7 @@ char *get_token() {
     }
 }
 
+/*
 // loop 'stack'
 DCLANG_LONG  loop_counter[3];
 DCLANG_PTR   loop_counter_ptr;
@@ -2419,7 +2704,7 @@ void againfunc()
     }
 }
 
-/* these 'for' loops are more flexible, allowing from/to/step parameters. */
+// these 'for' loops are more flexible, allowing from/to/step parameters.
 void forfunc()
 {
     return_stack[return_stack_ptr++] = iptr;
@@ -2518,12 +2803,13 @@ void elsefunc()
     prog[if_val].param = iptr;
 }
 
-
 void endiffunc()
 {
     DCLANG_LONG last_val = return_stack[--return_stack_ptr];
     prog[last_val].param = iptr;
 }
+*/
+
 /* Here we add the functionality necessary for the user to define named
  procedures (words). The idea is to have a struct that contains:
  1) a string naming the word.
@@ -2541,8 +2827,8 @@ void endiffunc()
  put into 'prog' is a call to 'callfunc', with the parameter to that call
  being the index in 'prog' where the word resides. */
 
-
-/* for debugging */
+/*
+// for debugging
 void showdefined()
 {
     for (int x=0; x < num_user_words; x++) {
@@ -2590,44 +2876,25 @@ void returnfunc()
     // adjust the locals pointers
 }
 
-/* respond to ':' token: */
+// respond to ':' token:
 void startword()
 {
-    /* grab name */
+    // grab name
     char *this_token;
-    /* TODO: validation */
+    // TODO: validation
     this_token = get_token();
-    /* put name and current location in user_words lookup array */
+    // put name and current location in user_words lookup array
     user_words[num_user_words].name = this_token;
     user_words[num_user_words++].word_start = iptr;
 }
 
-/* respond to ';' token: */
+// respond to ';' token:
 void endword()
 {
-    /* Simply insert a return call into 'prog' where 'iptr' now points. */
+    // Simply insert a return call into 'prog' where 'iptr' now points.
     prog[iptr++].function.without_param = returnfunc;
     max_iptr = iptr;
 }
-
-// deal with setting up local variables
-
-/*
-void startlocals()
-{
-    locals_idx = 0;
-    char *new_token = get_token();
-    while (strcmp(new_token, "}") != 0) {
-        locals_names[locals_idx] = new_token;
-        locals_idx += 1;
-    }
-}
-
-void endlocals()
-{
-
-}
-*/
 
 #include "noheap/ht.c"
 
@@ -2727,7 +2994,7 @@ void peekfunc()
     push(vars[idx]);
 }
 
-/* implement constants */
+/ implement constants
 void constantfunc()
 {
     const_keys[const_idx] = get_token();
@@ -2810,7 +3077,7 @@ void hashsetfunc()
         printf("h! -- stack underflow! ");
         return;
     }
-    /* grab the key */
+    // grab the key
     char *key = (const char *)(DCLANG_PTR) dclang_pop();
     DCLANG_PTR key_addr = (DCLANG_PTR) key;
     if (key_addr < MIN_STR || key_addr > MAX_STR)
@@ -2818,7 +3085,7 @@ void hashsetfunc()
         perror("h! -- String address for hash key out-of-range.");
         return;
     }
-    /* grab the value */
+    // grab the value
     void *value = (void *)(DCLANG_PTR) dclang_pop();
     void *confirm = hset(global_hash_table, key, value);
     if (confirm != NULL)
@@ -2834,7 +3101,7 @@ void hashgetfunc()
         printf("h@ -- stack underflow! ");
         return;
     }
-    /* grab the key */
+    // grab the key
     char *key = (char *)(DCLANG_PTR) dclang_pop();
     DCLANG_PTR key_addr = (DCLANG_PTR) key;
     if (key_addr < MIN_STR || key_addr > MAX_STR)
@@ -2842,7 +3109,7 @@ void hashgetfunc()
         perror("h@ -- String address for hash key out-of-range.");
         return;
     }
-    /* grab the value */
+    // grab the value
     void *value = hget(global_hash_table, key);
     if (value == NULL)
     {
@@ -2859,7 +3126,7 @@ void hashkeysfunc()
         printf("hkeys -- need an integer index on stack. Stack underflow! ");
         return;
     }
-    /* grab the key index */
+    // grab the key index
     DCLANG_PTR keyidx = (DCLANG_PTR) dclang_pop();
     push((DCLANG_PTR) hashwords[keyidx]);
 }
@@ -2913,7 +3180,7 @@ void envgetfunc()
     {
         printf("envget -- need <env_key> string on the stack.\n");
     }
-    /* grab the key */
+    // grab the key
     char *env_key = (char *)(DCLANG_PTR) dclang_pop();
     DCLANG_PTR env_key_addr = (DCLANG_PTR) env_key;
     if (env_key_addr < MIN_STR || env_key_addr > MAX_STR)
@@ -2968,8 +3235,9 @@ void envsetfunc()
    either a number or a string pointer.
 
    It is up to the user to supply checks and use the types
-   safely.
-*/
+   safely. */
+
+/*
 struct tree_entry
 {
     char *key;
@@ -3393,7 +3661,7 @@ PmStream *midi_stream;
 
 void _pm_listfunc()
 {
-    /* list device information */
+    // list device information
     int default_in = Pm_GetDefaultInputDeviceID();
     int default_out = Pm_GetDefaultOutputDeviceID();
     for (int i = 0; i < Pm_CountDevices(); i++) {
@@ -3578,249 +3846,259 @@ void _sqliteclosefunc() {
         return;
     }
 }
-void add_primitive(char *name, char *category, void *func_ptr)
+*/
+
+//////////////////////////////////////////////
+// Registration of primitives (AKA opcodes) //
+//////////////////////////////////////////////
+
+void add_primitive(char *name, char *category, int opcode)
 {
     primitives_idx += 1;
     (primitives + primitives_idx)->name = name;
-    (primitives + primitives_idx)->function = func_ptr;
+    (primitives + primitives_idx)->opcode = opcode;
     (primitives + primitives_idx)->category = category;
 };
 
 void add_all_primitives()
 {
     primitives = dclang_malloc(208*sizeof(primitive));
-    // boolean logic
-    add_primitive("null", "Boolean", nullfunc);
-    add_primitive("false", "Boolean", falsefunc);
-    add_primitive("true", "Boolean", truefunc);
-    add_primitive("=", "Boolean", eqfunc);
-    add_primitive("<>", "Boolean", noteqfunc);
-    add_primitive("<", "Boolean", ltfunc);
-    add_primitive(">", "Boolean", gtfunc);
-    add_primitive("<=", "Boolean", ltefunc);
-    add_primitive(">=", "Boolean", gtefunc);
-    add_primitive("assert", "Boolean", assertfunc);
-    // bit manipulation
-    add_primitive("and", "Bit manipulation", andfunc);
-    add_primitive("or", "Bit manipulation", orfunc);
-    add_primitive("xor", "Bit manipulation", xorfunc);
-    add_primitive("not", "Bit manipulation", notfunc);
-    add_primitive("<<", "Bit manipulation", lshiftfunc);
-    add_primitive(">>", "Bit manipulation", rshiftfunc);
-    // basic arithmetic
-    add_primitive("+", "Arithmetic", addfunc);
-    add_primitive("-", "Arithmetic", subfunc);
-    add_primitive("*", "Arithmetic", mulfunc);
-    add_primitive("/", "Arithmetic", divfunc);
-    add_primitive("%", "Arithmetic", modfunc);
-    add_primitive("abs", "Arithmetic", absfunc);
-    add_primitive("min", "Arithmetic", minfunc);
-    add_primitive("max", "Arithmetic", maxfunc);
-    // float -> int
-    add_primitive("round", "Float -> Integer", roundfunc);
-    add_primitive("ceil", "Float -> Integer", ceilfunc);
-    add_primitive("floor", "Float -> Integer", floorfunc);
-    // higher math
-    add_primitive("pow", "Higher Math", powerfunc);
-    add_primitive("sqrt", "Higher Math", sqrtfunc);
-    add_primitive("exp", "Higher Math", expfunc);
-    add_primitive("log", "Higher Math", logfunc);
-    add_primitive("log2", "Higher Math", log2func);
-    add_primitive("log10", "Higher Math", log10func);
-    add_primitive("e", "Higher Math", efunc);
-    // trig
-    add_primitive("pi", "Trigonometry", pifunc);
-    add_primitive("sin", "Trigonometry", sinefunc);
-    add_primitive("cos", "Trigonometry", cosfunc);
-    add_primitive("tan", "Trigonometry", tanfunc);
-    add_primitive("asin", "Trigonometry", asinefunc);
-    add_primitive("acos", "Trigonometry", acosfunc);
-    add_primitive("atan", "Trigonometry", atanfunc);
-    add_primitive("atan2", "Trigonometry", atan2func);
-    add_primitive("sinh", "Trigonometry", atanfunc);
-    add_primitive("cosh", "Trigonometry", atanfunc);
-    add_primitive("tanh", "Trigonometry", atanfunc);
-    // randomness
-    add_primitive("rand", "Randomness", randfunc);
     // stack manipulation
-    add_primitive("drop", "Stack Ops", dropfunc);
-    add_primitive("dup", "Stack Ops", dupfunc);
-    add_primitive("over", "Stack Ops", overfunc);
-    add_primitive("pick", "Stack Ops", pickfunc);
-    add_primitive("swap", "Stack Ops", swapfunc);
-    add_primitive("2drop", "Stack Ops", drop2func);
-    add_primitive("2dup", "Stack Ops", dup2func);
-    add_primitive("2over", "Stack Ops", over2func);
-    add_primitive("depth", "Stack Ops", depthfunc);
-    add_primitive("clear", "Stack Ops", clearfunc);
+    add_primitive("drop", "Stack Ops", OP_DROP);
+    add_primitive("dup", "Stack Ops", OP_DUP);
+    add_primitive("over", "Stack Ops", OP_OVER);
+    add_primitive("pick", "Stack Ops", OP_PICK);
+    add_primitive("swap", "Stack Ops", OP_SWAP);
+    add_primitive("2drop", "Stack Ops", OP_DROP2);
+    add_primitive("2dup", "Stack Ops", OP_DUP2);
+    add_primitive("2over", "Stack Ops", OP_OVER2);
+    add_primitive("depth", "Stack Ops", OP_DEPTH);
+    add_primitive("clear", "Stack Ops", OP_CLEAR);
     // the extra "save" stack
-    add_primitive("svpush", "Save Stack Ops", svpushfunc);
-    add_primitive("svpop", "Save Stack Ops", svpopfunc);
-    add_primitive("svdrop", "Save Stack Ops", svdropfunc);
-    add_primitive("svpick", "Save Stack Ops", svpickfunc);
-    add_primitive("svdepth", "Save Stack Ops", svdepthfunc);
-    add_primitive("svclear", "Save Stack Ops", svclearfunc);
+    add_primitive("svpush", "Save Stack Ops", OP_SVPUSH);
+    add_primitive("svpop", "Save Stack Ops", OP_SVPOP);
+    add_primitive("svdrop", "Save Stack Ops", OP_SVDROP);
+    add_primitive("svpick", "Save Stack Ops", OP_SVPICK);
+    add_primitive("svdepth", "Save Stack Ops", OP_SVDEPTH);
+    add_primitive("svclear", "Save Stack Ops", OP_SVCLEAR);
     // stack output
-    add_primitive(".", "Stack Output", showfunc);
-    add_primitive("..", "Stack Output", shownospacefunc);
-    add_primitive(".rj", "Stack Output", showrjfunc);
-    add_primitive(".pz", "Stack Output", showpzfunc);
-    add_primitive(".s", "Stack Output", showstackfunc);
+    add_primitive(".", "Stack Output", OP_SHOW);
+    add_primitive("..", "Stack Output", OP_SHOWNOSPACE);
+    add_primitive(".rj", "Stack Output", OP_SHOWRJ);
+    add_primitive(".pz", "Stack Output", OP_SHOWPZ);
+    add_primitive(".s", "Stack Output", OP_SHOWSTACK);
+    /*
+    // boolean logic
+    add_primitive("null", "Boolean", OP_NULL);
+    add_primitive("false", "Boolean", OP_FALSE);
+    add_primitive("true", "Boolean", OP_TRUE);
+    add_primitive("=", "Boolean", OP_EQ);
+    add_primitive("<>", "Boolean", OP_NOTEQ);
+    add_primitive("<", "Boolean", OP_LT);
+    add_primitive(">", "Boolean", OP_GT);
+    add_primitive("<=", "Boolean", OP_LTE);
+    add_primitive(">=", "Boolean", OP_GTE);
+    add_primitive("assert", "Boolean", OP_ASSERT);
+    // bit manipulation
+    add_primitive("and", "Bit manipulation", OP_AND);
+    add_primitive("or", "Bit manipulation", OP_OR);
+    add_primitive("xor", "Bit manipulation", OP_XOR);
+    add_primitive("not", "Bit manipulation", OP_NOT);
+    add_primitive("<<", "Bit manipulation", OP_LSHIFT);
+    add_primitive(">>", "Bit manipulation", OP_RSHIFT);
+    // basic arithmetic
+    add_primitive("+", "Arithmetic", OP_ADD);
+    add_primitive("-", "Arithmetic", OP_SUB);
+    add_primitive("*", "Arithmetic", OP_MUL);
+    add_primitive("/", "Arithmetic", OP_DIV);
+    add_primitive("%", "Arithmetic", OP_MOD);
+    add_primitive("abs", "Arithmetic", OP_ABS);
+    add_primitive("min", "Arithmetic", OP_MIN);
+    add_primitive("max", "Arithmetic", OP_MAX);
+    // float -> int
+    add_primitive("round", "Float -> Integer", OP_ROUND);
+    add_primitive("ceil", "Float -> Integer", OP_CEIL);
+    add_primitive("floor", "Float -> Integer", OP_FLOOR);
+    // higher math
+    add_primitive("pow", "Higher Math", OP_POWER);
+    add_primitive("sqrt", "Higher Math", OP_SQRT);
+    add_primitive("exp", "Higher Math", OP_EXP);
+    add_primitive("log", "Higher Math", OP_LOG);
+    add_primitive("log2", "Higher Math", OP_LOG2);
+    add_primitive("log10", "Higher Math", OP_LOG10);
+    add_primitive("e", "Higher Math", OP_E);
+    // trig
+    add_primitive("pi", "Trigonometry", OP_PI);
+    add_primitive("sin", "Trigonometry", OP_SINE);
+    add_primitive("cos", "Trigonometry", OP_COS);
+    add_primitive("tan", "Trigonometry", OP_TAN);
+    add_primitive("asin", "Trigonometry", OP_ASINE);
+    add_primitive("acos", "Trigonometry", OP_ACOS);
+    add_primitive("atan", "Trigonometry", OP_ATAN);
+    add_primitive("atan2", "Trigonometry", OP_ATAN2);
+    add_primitive("sinh", "Trigonometry", OP_ATAN);
+    add_primitive("cosh", "Trigonometry", OP_ATAN);
+    add_primitive("tanh", "Trigonometry", OP_ATAN);
+    // randomness
+    add_primitive("rand", "Randomness", OP_RAND);
     // variables and arrays
-    add_primitive("var", "Variables & Arrays", variablefunc);
-    add_primitive("!", "Variables & Arrays", pokefunc);
-    add_primitive("@", "Variables & Arrays", peekfunc);
-    add_primitive("allot", "Variables & Arrays", allotfunc);
-    add_primitive("create", "Variables & Arrays", createfunc);
-    add_primitive(",", "Variables & Arrays", commafunc);
-    add_primitive("here", "Variables & Arrays", herefunc);
-    add_primitive("const", "Variables & Arrays", constantfunc);
-    add_primitive("envget", "Variables & Arrays", envgetfunc);
-    add_primitive("envset", "Variables & Arrays", envsetfunc);
+    add_primitive("var", "Variables & Arrays", OP_VARIABLE);
+    add_primitive("!", "Variables & Arrays", OP_POKE);
+    add_primitive("@", "Variables & Arrays", OP_PEEK);
+    add_primitive("allot", "Variables & Arrays", OP_ALLOT);
+    add_primitive("create", "Variables & Arrays", OP_CREATE);
+    add_primitive(",", "Variables & Arrays", OP_COMMA);
+    add_primitive("here", "Variables & Arrays", OP_HERE);
+    add_primitive("const", "Variables & Arrays", OP_CONSTANT);
+    add_primitive("envget", "Variables & Arrays", OP_ENVGET);
+    add_primitive("envset", "Variables & Arrays", OP_ENVSET);
     // sorting
-    add_primitive("sortnums", "Array Sorting", sortnumsfunc);
-    add_primitive("sortstrs", "Array Sorting", sortstrsfunc);
+    add_primitive("sortnums", "Array Sorting", OP_SORTNUMS);
+    add_primitive("sortstrs", "Array Sorting", OP_SORTSTRS);
     // hash set & get
-    add_primitive("h!", "Hashes", hashsetfunc);
-    add_primitive("h@", "Hashes", hashgetfunc);
-    add_primitive("hkeys", "Hashes", hashkeysfunc);
+    add_primitive("h!", "Hashes", OP_HASHSET);
+    add_primitive("h@", "Hashes", OP_HASHGET);
+    add_primitive("hkeys", "Hashes", OP_HASHKEYS);
     // tree storage
-    add_primitive("tmake", "Trees", treemakefunc);
-    add_primitive("t!", "Trees", treesetfunc);
-    add_primitive("t@", "Trees", treegetfunc);
-    add_primitive("twalk", "Trees", treewalkfunc);
-    add_primitive("tdel", "Trees", treedeletefunc);
+    add_primitive("tmake", "Trees", OP_TREEMAKE);
+    add_primitive("t!", "Trees", OP_TREESET);
+    add_primitive("t@", "Trees", OP_TREEGET);
+    add_primitive("twalk", "Trees", OP_TREEWALK);
+    add_primitive("tdel", "Trees", OP_TREEDELETE);
 #ifdef HAS_TREEDESTROY
-    add_primitive("tdestroy", "Trees", treedestroyfunc);
+    add_primitive("tdestroy", "Trees", OP_TREEDESTROY);
 #endif
     // linked lists
-    add_primitive("lmake", "Lists", listmakefunc);
-    add_primitive("_lnext", "Lists", listnextfunc);
-    add_primitive("l!", "Lists", listsetfunc);
-    add_primitive("l@", "Lists", listgetfunc);
-    add_primitive("lpush", "Lists", listpushfunc);
-    add_primitive("lpop", "Lists", listpopfunc);
-    add_primitive("lins", "Lists", listinsertfunc);
-    add_primitive("lrem", "Lists", listremovefunc);
-    add_primitive("lsize", "Lists", listsizefunc);
-    add_primitive("ldel", "Lists", listdeletefunc);
+    add_primitive("lmake", "Lists", OP_LISTMAKE);
+    add_primitive("_lnext", "Lists", OP_LISTNEXT);
+    add_primitive("l!", "Lists", OP_LISTSET);
+    add_primitive("l@", "Lists", OP_LISTGET);
+    add_primitive("lpush", "Lists", OP_LISTPUSH);
+    add_primitive("lpop", "Lists", OP_LISTPOP);
+    add_primitive("lins", "Lists", OP_LISTINSERT);
+    add_primitive("lrem", "Lists", OP_LISTREMOVE);
+    add_primitive("lsize", "Lists", OP_LISTSIZE);
+    add_primitive("ldel", "Lists", OP_LISTDELETE);
     // branching/control
-    add_primitive("times", "Branching", timesfunc);
-    add_primitive("again", "Branching", againfunc);
-    add_primitive("exittimes", "Branching", exittimesfunc);
-    add_primitive("for", "Branching", forfunc);
-    add_primitive("next", "Branching", nextfunc);
-    add_primitive("exitfor", "Branching", exitforfunc);
-    add_primitive("i", "Branching", ifunc);
-    add_primitive("j", "Branching", jfunc);
-    add_primitive("k", "Branching", kfunc);
-    add_primitive("if", "Branching", iffunc);
-    add_primitive("else", "Branching", elsefunc);
-    add_primitive("endif", "Branching", endiffunc);
-    add_primitive("return", "Branching", returnfunc);
+    add_primitive("times", "Branching", OP_TIMES);
+    add_primitive("again", "Branching", OP_AGAIN);
+    add_primitive("exittimes", "Branching", OP_EXITTIMES);
+    add_primitive("for", "Branching", OP_FOR);
+    add_primitive("next", "Branching", OP_NEXT);
+    add_primitive("exitfor", "Branching", OP_EXITFOR);
+    add_primitive("i", "Branching", OP_I);
+    add_primitive("j", "Branching", OP_J);
+    add_primitive("k", "Branching", OP_K);
+    add_primitive("if", "Branching", OP_IF);
+    add_primitive("else", "Branching", OP_ELSE);
+    add_primitive("endif", "Branching", OP_ENDIF);
+    add_primitive("return", "Branching", OP_RETURN);
     // character emitters
-    add_primitive("emit", "Character Emitters", emitfunc);
-    add_primitive("uemit", "Character Emitters", uemitfunc);
-    add_primitive("bytes32", "Character Emitters", bytes32func);
+    add_primitive("emit", "Character Emitters", OP_EMIT);
+    add_primitive("uemit", "Character Emitters", OP_UEMIT);
+    add_primitive("bytes32", "Character Emitters", OP_BYTES32);
     // character types
-    add_primitive("isalnum", "Character Types", isalnumfunc);
-    add_primitive("isalpha", "Character Types", isalphafunc);
-    add_primitive("iscntrl", "Character Types", iscntrlfunc);
-    add_primitive("isdigit", "Character Types", isdigitfunc);
-    add_primitive("isgraph", "Character Types", isgraphfunc);
-    add_primitive("islower", "Character Types", islowerfunc);
-    add_primitive("isprint", "Character Types", isprintfunc);
-    add_primitive("ispunct", "Character Types", ispunctfunc);
-    add_primitive("isspace", "Character Types", isspacefunc);
-    add_primitive("isupper", "Character Types", isupperfunc);
-    add_primitive("isxdigit", "Character Types", isxdigitfunc);
+    add_primitive("isalnum", "Character Types", OP_ISALNUM);
+    add_primitive("isalpha", "Character Types", OP_ISALPHA);
+    add_primitive("iscntrl", "Character Types", OP_ISCNTRL);
+    add_primitive("isdigit", "Character Types", OP_ISDIGIT);
+    add_primitive("isgraph", "Character Types", OP_ISGRAPH);
+    add_primitive("islower", "Character Types", OP_ISLOWER);
+    add_primitive("isprint", "Character Types", OP_ISPRINT);
+    add_primitive("ispunct", "Character Types", OP_ISPUNCT);
+    add_primitive("isspace", "Character Types", OP_ISSPACE);
+    add_primitive("isupper", "Character Types", OP_ISUPPER);
+    add_primitive("isxdigit", "Character Types", OP_ISXDIGIT);
     // output and string ops
-    add_primitive("cr", "String Output", crfunc);
-    add_primitive("print", "String Output", printfunc);
+    add_primitive("cr", "String Output", OP_CR);
+    add_primitive("print", "String Output", OP_PRINT);
     // string conversion
-    add_primitive("tohex", "String Conversion", tohexfunc);
-    add_primitive("tostr", "String Conversion", tostrfunc);
-    add_primitive("tonum", "String Conversion", tonumfunc);
-    add_primitive("ord", "String Conversion", ordfunc);
-    add_primitive("tolower", "String Conversion", tolowerfunc);
-    add_primitive("toupper", "String Conversion", toupperfunc);
+    add_primitive("tohex", "String Conversion", OP_TOHEX);
+    add_primitive("tostr", "String Conversion", OP_TOSTR);
+    add_primitive("tonum", "String Conversion", OP_TONUM);
+    add_primitive("ord", "String Conversion", OP_ORD);
+    add_primitive("tolower", "String Conversion", OP_TOLOWER);
+    add_primitive("toupper", "String Conversion", OP_TOUPPER);
     // general string ops from C
-    add_primitive("strlen", "String Ops", strlenfunc);
-    add_primitive("str=", "String Ops", streqfunc);
-    add_primitive("str<", "String Ops", strltfunc);
-    add_primitive("str>", "String Ops", strgtfunc);
-    add_primitive("strfind", "String Ops", strfindfunc);
-    add_primitive("strspn", "String Ops", strspnfunc);
-    add_primitive("strcspn", "String Ops", strcspnfunc);
-    add_primitive("strtok", "String Ops", strtokfunc);
-    add_primitive("mempcpy", "String Ops", mempcpyfunc);
-    add_primitive("memset", "String Ops", memsetfunc);
+    add_primitive("strlen", "String Ops", OP_STRLEN);
+    add_primitive("str=", "String Ops", OP_STREQ);
+    add_primitive("str<", "String Ops", OP_STRLT);
+    add_primitive("str>", "String Ops", OP_STRGT);
+    add_primitive("strfind", "String Ops", OP_STRFIND);
+    add_primitive("strspn", "String Ops", OP_STRSPN);
+    add_primitive("strcspn", "String Ops", OP_STRCSPN);
+    add_primitive("strtok", "String Ops", OP_STRTOK);
+    add_primitive("mempcpy", "String Ops", OP_MEMPCPY);
+    add_primitive("memset", "String Ops", OP_MEMSET);
     // memory buffers
-    add_primitive("mkbuf", "Memory", mkbuffunc);
-    add_primitive("free", "Memory", freefunc);
-    add_primitive("memused", "Memory", memusedfunc);
+    add_primitive("mkbuf", "Memory", OP_MKBUF);
+    add_primitive("free", "Memory", OP_FREE);
+    add_primitive("memused", "Memory", OP_MEMUSED);
     // regex
-    add_primitive("regcomp", "Regex", regcompfunc);
-    add_primitive("regexec", "Regex", regexecfunc);
-    add_primitive("regread", "Regex", regreadfunc);
+    add_primitive("regcomp", "Regex", OP_REGCOMP);
+    add_primitive("regexec", "Regex", OP_REGEXEC);
+    add_primitive("regread", "Regex", OP_REGREAD);
     // file
-    add_primitive("fopen", "Files", fileopenfunc);
-    add_primitive("fmemopen", "Files", filememopenfunc);
-    add_primitive("fread", "Files", filereadfunc);
-    add_primitive("freadline", "Files", filereadlinefunc);
-    add_primitive("freadall", "Files", filereadallfunc);
-    add_primitive("fseek", "Files", fileseekfunc);
-    add_primitive("ftell", "Files", filetellfunc);
-    add_primitive("fwrite", "Files", filewritefunc);
-    add_primitive("fflush", "Files", fileflushfunc);
-    add_primitive("fclose", "Files", fileclosefunc);
-    add_primitive("redirect", "Files", redirectfunc);
-    add_primitive("resetout", "Files", resetoutfunc);
-    add_primitive("flush", "Files", flushoutfunc);
+    add_primitive("fopen", "Files", OP_FILEOPEN);
+    add_primitive("fmemopen", "Files", OP_FILEMEMOPEN);
+    add_primitive("fread", "Files", OP_FILEREAD);
+    add_primitive("freadline", "Files", OP_FILEREADLINE);
+    add_primitive("freadall", "Files", OP_FILEREADALL);
+    add_primitive("fseek", "Files", OP_FILESEEK);
+    add_primitive("ftell", "Files", OP_FILETELL);
+    add_primitive("fwrite", "Files", OP_FILEWRITE);
+    add_primitive("fflush", "Files", OP_FILEFLUSH);
+    add_primitive("fclose", "Files", OP_FILECLOSE);
+    add_primitive("redirect", "Files", OP_REDIRECT);
+    add_primitive("resetout", "Files", OP_RESETOUT);
+    add_primitive("flush", "Files", OP_FLUSHOUT);
     // low-level (OS) file ops:
-    add_primitive("open", "Files (no buffer)", openfunc);
-    add_primitive("read", "Files (no buffer)", readfunc);
-    add_primitive("write", "Files (no buffer)", writefunc);
-    add_primitive("close", "Files (no buffer)", closefunc);
+    add_primitive("open", "Files (no buffer)", OP_OPEN);
+    add_primitive("read", "Files (no buffer)", OP_READ);
+    add_primitive("write", "Files (no buffer)", OP_WRITE);
+    add_primitive("close", "Files (no buffer)", OP_CLOSE);
     // SQLite3 interface
-    add_primitive("_sqlite_open", "SQLite", _sqliteopenfunc);
-    add_primitive("_sqlite_prepare", "SQLite", _sqlitepreparefunc);
-    add_primitive("_sqlite_step", "SQLite", _sqlitestepfunc);
-    add_primitive("_sqlite_column", "SQLite", _sqlitecolumnfunc);
-    add_primitive("_sqlite_finalize", "SQLite", _sqlitefinalizefunc);
-    add_primitive("_sqlite_exec", "SQLite", _sqliteexecfunc);
-    add_primitive("_sqlite_close", "SQLite", _sqliteclosefunc);
+    add_primitive("_sqlite_open", "SQLite", _OP_SQLITEOPEN);
+    add_primitive("_sqlite_prepare", "SQLite", _OP_SQLITEPREPARE);
+    add_primitive("_sqlite_step", "SQLite", _OP_SQLITESTEP);
+    add_primitive("_sqlite_column", "SQLite", _OP_SQLITECOLUMN);
+    add_primitive("_sqlite_finalize", "SQLite", _OP_SQLITEFINALIZE);
+    add_primitive("_sqlite_exec", "SQLite", _OP_SQLITEEXEC);
+    add_primitive("_sqlite_close", "SQLite", _OP_SQLITECLOSE);
     // tcp/udp networking using sockets
-    add_primitive("tcplisten", "Sockets", tcplistenfunc);
-    add_primitive("tcpaccept", "Sockets", tcpacceptfunc);
-    add_primitive("tcpconnect", "Sockets", tcpconnectfunc);
-    add_primitive("udprecv", "Sockets", udprecvfunc);
-    add_primitive("udpsend", "Sockets", udpsendfunc);
+    add_primitive("tcplisten", "Sockets", OP_TCPLISTEN);
+    add_primitive("tcpaccept", "Sockets", OP_TCPACCEPT);
+    add_primitive("tcpconnect", "Sockets", OP_TCPCONNECT);
+    add_primitive("udprecv", "Sockets", OP_UDPRECV);
+    add_primitive("udpsend", "Sockets", OP_UDPSEND);
     // time
-    add_primitive("clock", "Time", clockfunc);
-    add_primitive("sleep", "Time", sleepfunc);
-    add_primitive("epoch", "Time", epochfunc);
-    add_primitive("dt->epoch", "Time", dt_to_epochfunc);
-    add_primitive("epoch->dt", "Time", epoch_to_dtfunc);
+    add_primitive("clock", "Time", OP_CLOCK);
+    add_primitive("sleep", "Time", OP_SLEEP);
+    add_primitive("epoch", "Time", OP_EPOCH);
+    add_primitive("dt->epoch", "Time", dt_to_OP_EPOCH);
+    add_primitive("epoch->dt", "Time", epoch_to_OP_DT);
     // block a SIGINT
-    add_primitive("block_sigint", "Interrupt Blocking", blocksigintfunc);
-    add_primitive("unblock_sigint", "Interrupt Blocking", unblocksigintfunc);
+    add_primitive("block_sigint", "Interrupt Blocking", OP_BLOCKSIGINT);
+    add_primitive("unblock_sigint", "Interrupt Blocking", OP_UNBLOCKSIGINT);
     // portmidi
-    add_primitive("_pm_list", "MIDI", _pm_listfunc);
-    add_primitive("_pm_open_out", "MIDI", _pm_openoutfunc);
-    add_primitive("_pm_ws", "MIDI", _pm_wsfunc);
-    add_primitive("_pm_wsr", "MIDI", _pm_wsrfunc);
-    add_primitive("_pm_close", "MIDI", _pm_closefunc);
-    add_primitive("_pm_terminate", "MIDI", _pm_terminatefunc);
+    add_primitive("_pm_list", "MIDI", _OP_PM_LIST);
+    add_primitive("_pm_open_out", "MIDI", _OP_PM_OPENOUT);
+    add_primitive("_pm_ws", "MIDI", _OP_PM_WS);
+    add_primitive("_pm_wsr", "MIDI", _OP_PM_WSR);
+    add_primitive("_pm_close", "MIDI", _OP_PM_CLOSE);
+    add_primitive("_pm_terminate", "MIDI", _OP_PM_TERMINATE);
     // os fork and exit
-    add_primitive("fork", "Operating System", forkfunc);
-    add_primitive("exit", "Operating System", exitfunc);
+    add_primitive("fork", "Operating System", OP_FORK);
+    add_primitive("exit", "Operating System", OP_EXIT);
     // show defined words!
-    add_primitive("words", "Other", showdefined);
-    add_primitive("constants", "Other", showconsts);
-    add_primitive("variables", "Other", showvars);
+    add_primitive("words", "Other", OP_SHOWDEFINED);
+    add_primitive("constants", "Other", OP_SHOWCONSTS);
+    add_primitive("variables", "Other", OP_SHOWVARS);
+    */
+    add_primitive(0, 0, 0);
 };
 
+/*
 void show_primitivesfunc()
 {
     printf("\nThere are currently %i primitives implemented.\n", primitives_idx);
@@ -3846,6 +4124,9 @@ void show_primitivesfunc()
     printf(": ; { }\n\n");
     printf("Strings are written by simply typing a string literal in double-quotes, e.g. \"Hello there!\".\n\n");
 }
+*/
+
+
 const char *illegal[] = {"times", "again", "exittimes",
                          "for", "next", "exitfor"};
 DCLANG_LONG num_illegal = sizeof(illegal) / sizeof(illegal[0]);
@@ -3900,19 +4181,16 @@ void compile_or_interpret(const char *token)
         return;
     }
 
+    /*
     // Search user-defined functions (words)
     DCLANG_LONG found = dclang_findword(token);
-    if (found > -1) {
+    if (found != -1) {
         if (def_mode) {
             if (strcmp(user_words[num_user_words - 1].name, token) == 0) {
-                // If the word found is the word immediately being
-                // defined, we can avoid `callword`, because that consumes
-                // the return stack. Instead, unconditionally jump
-                // to the start of the definition.
-                prog[iptr].function.with_param = jumpufunc;
+                prog[iptr].opcode = OP_JUMP;  // don't overflow the return stack
                 prog[iptr++].param = found;
             } else {
-                prog[iptr].function.with_param = callword;
+                prog[iptr].opcode = OP_CALL;  // normal return stack save
                 prog[iptr++].param = found;
             }
         } else {
@@ -3920,15 +4198,19 @@ void compile_or_interpret(const char *token)
         }
         return;
     }
+    */
 
     // Search for a primitive word
     while (pr->name != 0) {
         if (strcmp(pr->name, token) == 0) {
-            if ((def_mode) && (!is_special_form(pr->name))) {
-                prog[iptr++].function.without_param = pr->function;
+            if (def_mode) {
+                if (!is_special_form(pr->name)) {
+                    prog[iptr++].opcode = pr->opcode;
+                }
             } else {
                 if (validate(token)) {
-                    (*(pr->function)) ();
+                    prog[iptr++].opcode = pr->opcode;
+                    dclang_execute();
                 }
             }
             return;
@@ -3936,21 +4218,17 @@ void compile_or_interpret(const char *token)
         pr++;
     }
 
+    /*
     // Search for a local variable
     if (def_mode) {
-        while ((locals_idx < 8) && (locals_keys[locals_idx] != 0)) {
+        while (locals_idx < 8) {
             if (strcmp(locals_keys[locals_idx], token) == 0) {
-                prog[iptr].function.with_param = _get_locals_var;
+                prog[iptr].opcode = OP_GET_LOCAL;
                 prog[iptr++].param = locals_idx;
                 return;
             }
-            // If there's an apostrophe after the variable name, assume it's
-            // a directive to set a variable value
-            if (
-                (strncmp(locals_keys[locals_idx], token, strlen(token)-1) == 0)
-                && (strchr(token, '!') != NULL)
-            ) {
-                prog[iptr].function.with_param = _set_locals_var;
+            if ((strncmp(locals_keys[locals_idx], token, strlen(token)-1) == 0) && (strchr(token, '!') != NULL)) {
+                prog[iptr].opcode = OP_SET_LOCAL;
                 prog[iptr++].param = locals_idx;
                 return;
             }
@@ -3959,10 +4237,10 @@ void compile_or_interpret(const char *token)
     }
 
     // Search for a constant
-    while ((const_search_idx >= 0) && (const_keys[const_search_idx] != 0)) {
+    while (const_search_idx >= 0) {
         if (strcmp(const_keys[const_search_idx], token) == 0) {
             if (def_mode) {
-                prog[iptr].function.with_param = push;
+                prog[iptr].opcode = OP_PUSH;
                 prog[iptr++].param = (DCLANG_FLT) const_vals[const_search_idx];
             } else {
                 push((DCLANG_FLT) const_vals[const_search_idx]);
@@ -3973,10 +4251,10 @@ void compile_or_interpret(const char *token)
     }
 
     // Search for a variable
-    while ((var_search_idx >= 0) && (var_keys[var_search_idx] != 0)) {
+    while (var_search_idx >= 0) {
         if (strcmp(var_keys[var_search_idx], token) == 0) {
             if (def_mode) {
-                prog[iptr].function.with_param = push;
+                prog[iptr].opcode = OP_PUSH;
                 prog[iptr++].param = (DCLANG_FLT) var_vals[var_search_idx];
             } else {
                 push((DCLANG_FLT) var_vals[var_search_idx]);
@@ -3985,22 +4263,23 @@ void compile_or_interpret(const char *token)
         }
         var_search_idx--;
     }
+    */
 
-    // Neither user word nor primitive word was found.
-    // OK, so next, try to convert to a number
+    // Try to convert to a number
     d = strtod(token, &endPointer);
     if (endPointer != token) {
         if (def_mode) {
-            prog[iptr].function.with_param = push;
+            prog[iptr].opcode = OP_PUSH;
             prog[iptr++].param = d;
         } else {
-            push(d);
+            prog[iptr].opcode = OP_PUSH;
+            prog[iptr++].param = d;
+            dclang_execute();
         }
         return;
     }
 
-    // Nothing found, we've reached an error condition.
-    // Report the situation and reset the stack.
+    // Syntax error handling
     data_stack_ptr = 0;
     printf("%s -- syntax error.\n", token);
     return;
@@ -4010,6 +4289,7 @@ void compile_or_interpret(const char *token)
 void repl() {
     char *token;
     while (strcmp(token = get_token(), "EOF")) {
+        /*
         // are we dealing with a function definition?
         if (strcmp(token, ":") == 0) {
             startword();
@@ -4029,14 +4309,18 @@ void repl() {
             def_mode = 0;
             continue; // goto top of loop
         }
+        */
         // 'compile' it, or interpret it on-the-fly
         compile_or_interpret(token);
     }
-    compile_or_interpret(0);
+    //compile_or_interpret(0);
     // return EXIT_SUCCESS;
 }
 
-
+////////////////////////////
+// Dealing with importing //
+////////////////////////////
+/*
 DCLANG_LONG dclang_import(char *infilestr) {
     char *prefix = getenv("DCLANG_LIBS");
     if (prefix == NULL) {
@@ -4081,7 +4365,9 @@ int importfunc() {
     char *importfile = (char *)(unsigned long) dclang_pop();
     return dclang_import(importfile);
 }
+*/
 
+/*
 // a small buffer for use by `grabinput`
 char string_pad[512];
 int string_here;
@@ -4138,7 +4424,9 @@ void inputfunc() {
         grabinput();
     }
 }
+*/
 
+/*
 void execfunc() {
     if (data_stack_ptr < 1)
     {
@@ -4187,7 +4475,9 @@ void execfunc() {
            "      \"foo\" const :foo \n"
            " and then calling 'exec' with the constant on the stack.\n");
 }
+*/
 
+/*
 // needed so we can add 'import' to primitives
 void load_extra_primitives()
 {
@@ -4195,19 +4485,20 @@ void load_extra_primitives()
     add_primitive("import", "Other", importfunc);
     add_primitive("input", "Other", inputfunc);
     add_primitive("exec", "Other", execfunc);
-    /* final endpoint must be zeros,
-       and they won't count in the 'count': */
+    // final endpoint must be zeros,
+    // and they won't count in the 'count':
     add_primitive(0, 0, 0);
 }
+*/
 
 void dclang_initialize()
 {
     setinput(stdin);
     resetoutfunc();
     add_all_primitives();
-    load_extra_primitives();
+    //load_extra_primitives();
     srand(time(NULL));
     // create the global hash table
-    global_hash_table = hcreate(1024*256);
-    hashwords = (char**)dclang_malloc(hashwords_size * sizeof(*hashwords));
+    //global_hash_table = hcreate(1024*256);
+    //hashwords = (char**)dclang_malloc(hashwords_size * sizeof(*hashwords));
 }
