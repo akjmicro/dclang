@@ -5,7 +5,6 @@
 Born on 2018-05-05 */
 
 #include "dclang.h"
-#include "token.c"
 
 #define push(item) { \
     if (data_stack_ptr >= DATA_STACK_SIZE) { \
@@ -18,6 +17,8 @@ Born on 2018-05-05 */
 #define push_no_check(item) { \
     data_stack[data_stack_ptr++] = item; \
 }
+
+#include "token.c"
 
 DCLANG_FLT dclang_pop()
 // special case -- has a return value b/c it can
