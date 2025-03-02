@@ -323,13 +323,14 @@ enum dclang_opcodes {
     OP_ELSE,
     OP_ENDIF,
     OP_CALL,
-    OP_RETURN
-};
-    /*
-    // character emitters
+    OP_RETURN,
+    OP_CR,
+    OP_PRINT,
     OP_EMIT,
     OP_UEMIT,
-    OP_BYTES32,
+    OP_BYTES32
+};
+    /*
     // character types
     OP_ISALNUM,
     OP_ISALPHA,
@@ -342,9 +343,6 @@ enum dclang_opcodes {
     OP_ISSPACE,
     OP_ISUPPER,
     OP_ISXDIGIT,
-    // output and string ops
-    OP_CR,
-    OP_PRINT,
     // string conversion
     OP_TOHEX,
     OP_TOSTR,

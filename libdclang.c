@@ -182,7 +182,12 @@ void dclang_execute() {
         &&OP_ELSE,
         &&OP_ENDIF,
         &&OP_CALL,
-        &&OP_RETURN
+        &&OP_RETURN,
+        &&OP_CR,
+        &&OP_PRINT,
+        &&OP_EMIT,
+        &&OP_UEMIT,
+        &&OP_BYTES32
     };
 
     while (1) {
@@ -1463,12 +1468,12 @@ void dclang_execute() {
         prog[iptr].opcode = OP_JUMPU;
         prog[iptr++].param = 0;
         // update old if val goto:
-        prog[if_val].param = iptr;
+        prog[if_val].param = iptr++;
         return;  // only in def_mode = 1
 
     OP_ENDIF:
         DCLANG_LONG last_val = return_stack[--return_stack_ptr];
-        prog[last_val].param = iptr;
+        prog[last_val].param = iptr++;
         return;  // only in def_mode = 1
 
     OP_CALL:
@@ -1486,6 +1491,69 @@ void dclang_execute() {
         iptr = return_stack[--return_stack_ptr];
         NEXT;
 
+
+    OP_CR:
+        fprintf(ofp, "\n");
+        NEXT;
+
+    OP_PRINT:
+        if (data_stack_ptr < 1)
+        {
+            printf("print -- stack underflow!\n");
+            return;
+        }
+        DCLANG_PTR string_PTR_addr = (DCLANG_PTR) POP;
+        if (string_PTR_addr == 0)
+        {
+            printf("print -- Nothing to print.\n");
+            return;
+        }
+        if (string_PTR_addr < MIN_STR || string_PTR_addr > MAX_STR)
+        {
+            perror("print -- String address out-of-range.\n");
+            return;
+        }
+        fprintf(ofp, "%s", (char *) string_PTR_addr);
+        fflush(ofp);
+        NEXT;
+
+    OP_EMIT:
+        if (data_stack_ptr < 1)
+        {
+            printf("emit -- stack underflow! ");
+            return;
+        }
+        char char_code = (char) POP;
+        fprintf(ofp, "%c", char_code);
+        fflush(ofp);
+        NEXT;
+
+    OP_UEMIT:
+        if (data_stack_ptr < 1)
+        {
+            printf("uemit -- stack underflow! ");
+            return;
+        }
+        long unsigned long uchar_code = (long unsigned long) POP;
+        long ulen = utf8_encode(utf8_buf, uchar_code);
+        fprintf(ofp, "%s", utf8_buf);
+        fflush(ofp);
+        NEXT;
+
+    OP_BYTES32:
+        DCLANG_INT byteval = (DCLANG_INT) POP;
+        char low = (char) byteval & 0xff;
+        byteval >>= 8;
+        char lowmid = (char) byteval & 0xff;
+        byteval >>= 8;
+        char highmid = (char) byteval & 0xff;
+        byteval >>= 8;
+        char high = (char) byteval & 0xff;
+        fputc(low, ofp);
+        fputc(lowmid, ofp);
+        fputc(highmid, ofp);
+        fputc(high, ofp);
+        NEXT;
 
     }
 }
@@ -2075,52 +2143,7 @@ void epoch_to_dtfunc()
 }
 */
 
-
-//////////////////////////////////////////////////////////////////////////
-// Character emitters. No value goes to the stack; output is immediate. //
-//////////////////////////////////////////////////////////////////////////
-
 /*
-void emitfunc()
-{
-    if (data_stack_ptr < 1)
-    {
-        printf("emit -- stack underflow! ");
-        return;
-    }
-    char char_code = (char) POP;
-    fprintf(ofp, "%c", char_code);
-    fflush(ofp);
-}
-
-void uemitfunc()
-{
-    if (data_stack_ptr < 1)
-    {
-        printf("uemit -- stack underflow! ");
-        return;
-    }
-    long unsigned long char_code = (long unsigned long) POP;
-    long ulen = utf8_encode(utf8_buf, char_code);
-    fprintf(ofp, "%s", utf8_buf);
-    fflush(ofp);
-}
-
-void bytes32func()
-{
-    DCLANG_INT val = (DCLANG_INT) POP;
-    char low = (char) val & 0xff;
-    val >>= 8;
-    char lowmid = (char) val & 0xff;
-    val >>= 8;
-    char highmid = (char) val & 0xff;
-    val >>= 8;
-    char high = (char) val & 0xff;
-    fputc(low, ofp);
-    fputc(lowmid, ofp);
-    fputc(highmid, ofp);
-    fputc(high, ofp);
-}
 
 ///////////////////////
 // character testers //
@@ -2357,33 +2380,6 @@ void isxdigitfunc()
     }
 }
 
-
-void printfunc()
-{
-    if (data_stack_ptr < 1)
-    {
-        printf("print -- stack underflow!\n");
-        return;
-    }
-    DCLANG_PTR string_PTR_addr = (DCLANG_PTR) POP;
-    if (string_PTR_addr == 0)
-    {
-        printf("print -- Nothing to print.\n");
-        return;
-    }
-    if (string_PTR_addr < MIN_STR || string_PTR_addr > MAX_STR)
-    {
-        perror("print -- String address out-of-range.\n");
-        return;
-    }
-    fprintf(ofp, "%s", (char *) string_PTR_addr);
-    fflush(ofp);
-}
-
-void crfunc()
-{
-    fprintf(ofp, "\n");
-}
 
 //num to hex string, e.g. 0x73af
 void tohexfunc()
@@ -3380,9 +3376,9 @@ void add_all_primitives()
     add_primitive("i", "Branching", OP_I);
     add_primitive("j", "Branching", OP_J);
     add_primitive("k", "Branching", OP_K);
-    add_primitive("if", "Branching", OP_NOOP);
-    add_primitive("else", "Branching", OP_NOOP);
-    add_primitive("endif", "Branching", OP_NOOP);
+    add_primitive("if", "Branching", OP_IF);
+    add_primitive("else", "Branching", OP_ELSE);
+    add_primitive("endif", "Branching", OP_ENDIF);
     add_primitive("return", "Branching", OP_RETURN);
     // output and string ops
     add_primitive("cr", "String Output", OP_CR);
@@ -3592,10 +3588,8 @@ void compile_or_interpret(const char *token)
     // Search for a primitive word
     while (pr->name != 0) {
         if (strcmp(pr->name, token) == 0) {
-            if (def_mode) {
-                if (!is_special_form(pr->name)) {
+            if ((def_mode) && (!is_special_form(pr->name))) {
                     prog[iptr++].opcode = pr->opcode;
-                }
             } else {
                 if (validate(token)) {
                     prog[iptr].opcode = pr->opcode;
