@@ -70,7 +70,6 @@ typedef struct {
 // i.e. the 'program' will live:
 inst_struct  prog[MAXWORD];
 DCLANG_PTR   iptr;
-DCLANG_PTR   max_iptr;
 
 // data stack
 DCLANG_FLT   data_stack[DATA_STACK_SIZE * 2];
@@ -79,6 +78,19 @@ DCLANG_PTR   save_data_stack_ptr;
 // return stack
 DCLANG_LONG  return_stack[RETURN_STACK_SIZE];
 DCLANG_PTR   return_stack_ptr;
+// loop 'stack'
+DCLANG_LONG  loop_counter[3];
+DCLANG_PTR   loop_counter_ptr;
+// struct for 'for' loops:
+typedef struct {
+    DCLANG_LONG limit;
+    DCLANG_LONG step;
+} forloop_info;
+forloop_info fl_stack[3];
+DCLANG_LONG fl_ptr;
+// array for 'times' loop max amounts:
+DCLANG_LONG times_info[3];
+DCLANG_LONG times_ptr;
 // local variables
 DCLANG_PTR   locals_keys[NUMLOCALS];
 DCLANG_FLT   locals_vals[NUMLOCALS * RETURN_STACK_SIZE];
@@ -282,11 +294,8 @@ enum dclang_opcodes {
     OP_TREEWALK,
     OP_TREEDELETE,
 #ifdef HAS_TREEDESTROY,
-    OP_TREEDESTROY
+    OP_TREEDESTROY,
 #endif
-};
-
-    /*
     // linked lists
     OP_LISTMAKE,
     OP_LISTNEXT,
@@ -297,7 +306,7 @@ enum dclang_opcodes {
     OP_LISTINSERT,
     OP_LISTREMOVE,
     OP_LISTSIZE,
-    OP_LISTDELETE
+    OP_LISTDELETE,
     // branching/control
     OP_TIMES,
     OP_AGAIN,
@@ -308,10 +317,15 @@ enum dclang_opcodes {
     OP_I,
     OP_J,
     OP_K,
+    OP_JUMPZ,
+    OP_JUMPU,
     OP_IF,
     OP_ELSE,
     OP_ENDIF,
-    OP_RETURN,
+    OP_CALL,
+    OP_RETURN
+};
+    /*
     // character emitters
     OP_EMIT,
     OP_UEMIT,

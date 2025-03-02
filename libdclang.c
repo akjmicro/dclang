@@ -55,10 +55,13 @@ void dclang_execute() {
     int precision, width;
     char *env_key, *key, *search_key;
     struct tree_entry *te, *te_del, *retval;
-    void *value, *confirm;
-    DCLANG_FLT val, val1, val2, a, b, c, tree_val;
-    DCLANG_PTR arrstart, arrsize, env_key_addr, key_addr, idx, next_var, size, tree_idx;
+    struct Node *list, *next, *node_to_remove, *tail_node, *node, *new_node, *node_before;
+    void *hvalue, *confirm;
+    DCLANG_FLT value, val, val1, val2, a, b, c, tree_val;
+    DCLANG_PTR arrstart, arrsize, env_key_addr, key_addr, idx, next_var, size, \
+               tree_idx, list_ptr;
     DCLANG_ULONG shift_amt, base;
+    DCLANG_LONG slot, truth;
 
     static void *dispatch_table[] = {
         &&OP_NOOP,
@@ -152,12 +155,38 @@ void dclang_execute() {
         &&OP_TREEWALK,
         &&OP_TREEDELETE,
     #ifdef HAS_TREEDESTROY,
-        &&OP_TREEDESTROY
+        &&OP_TREEDESTROY,
     #endif
+        &&OP_LISTMAKE,
+        &&OP_LISTNEXT,
+        &&OP_LISTSET,
+        &&OP_LISTGET,
+        &&OP_LISTPUSH,
+        &&OP_LISTPOP,
+        &&OP_LISTINSERT,
+        &&OP_LISTREMOVE,
+        &&OP_LISTSIZE,
+        &&OP_LISTDELETE,
+        &&OP_TIMES,
+        &&OP_AGAIN,
+        &&OP_EXITTIMES,
+        &&OP_FOR,
+        &&OP_NEXT,
+        &&OP_EXITFOR,
+        &&OP_I,
+        &&OP_J,
+        &&OP_K,
+        &&OP_JUMPZ,
+        &&OP_JUMPU,
+        &&OP_IF,
+        &&OP_ELSE,
+        &&OP_ENDIF,
+        &&OP_CALL,
+        &&OP_RETURN
     };
 
-    while ((iptr < max_iptr) || (def_mode == 0)) {
-        goto *dispatch_table[prog[--iptr].opcode];
+    while (1) {
+        goto *dispatch_table[prog[iptr].opcode];
 
     OP_NOOP:
         return;
@@ -169,11 +198,11 @@ void dclang_execute() {
             printf("push -- stack overflow!\n");
             data_stack_ptr = 0;
         }
-        data_stack[data_stack_ptr++] = prog[iptr++].param;
+        data_stack[data_stack_ptr++] = prog[iptr].param;
         NEXT;
 
     OP_PUSH_NO_CHECK:
-        data_stack[data_stack_ptr++] = prog[iptr++].param;
+        data_stack[data_stack_ptr++] = prog[iptr].param;
         NEXT;
 
     OP_DROP:
@@ -467,7 +496,7 @@ void dclang_execute() {
             printf("'assert' needs an element on the stack!\n");
             return;
         }
-        DCLANG_LONG truth = POP;
+        truth = POP;
         if (truth == 0) {
             printf("ASSERT FAIL!\n");
         }
@@ -974,8 +1003,8 @@ void dclang_execute() {
             return;
         }
         // grab the value
-        value = (void *)(DCLANG_PTR) POP;
-        confirm = hset(global_hash_table, key, value);
+        hvalue = (void *)(DCLANG_PTR) POP;
+        confirm = hset(global_hash_table, key, hvalue);
         if (confirm != NULL)
         {
             if (hashwords_cnt > hashwords_size)
@@ -1003,12 +1032,12 @@ void dclang_execute() {
             return;
         }
         // grab the value
-        value = hget(global_hash_table, key);
-        if (value == NULL)
+        hvalue = hget(global_hash_table, key);
+        if (hvalue == NULL)
         {
             push(0);
         } else {
-            push((DCLANG_PTR)(char *)value);
+            push((DCLANG_PTR)(char *)hvalue);
         }
         NEXT;
 
@@ -1112,6 +1141,350 @@ void dclang_execute() {
         NEXT;
     #endif
 
+    // linked lists
+
+    OP_LISTMAKE:
+        // Allocate memory for the head node
+        list = (struct Node *)dclang_malloc(sizeof(struct Node));
+        // Set the head node to point to itself in both directions
+        list->next = list;
+        list->prev = list;
+        // Push the pointer to the head node onto the stack
+        push((DCLANG_PTR)list);
+        NEXT;
+
+    OP_LISTNEXT:
+        if (data_stack_ptr < 1) {
+            printf("_lnext -- stack underflow; need <existing_list_node> on the stack! ");
+            return;
+        }
+        list_ptr = (DCLANG_PTR)POP;
+        // Convert pointers to the actual node structure
+        list = (struct Node *)list_ptr;
+        next = list->next;
+        push((DCLANG_PTR) next);
+        NEXT;
+
+    OP_LISTPUSH:
+        if (data_stack_ptr < 2) {
+            printf("lpush -- stack underflow; need <list> <value> on the stack! ");
+            return;
+        }
+        // Pop args
+        value = POP;
+        list_ptr = (DCLANG_PTR)POP;
+        // Convert pointers to the actual node structure
+        list = (struct Node *)list_ptr;
+        // Allocate memory for the new node
+        new_node = (struct Node *)dclang_malloc(sizeof(struct Node));
+        // Initialize the new node
+        new_node->data = value;
+        // Insert the new node before the head node (at the tail)
+        insque(new_node, list->prev);
+        NEXT;
+
+    OP_LISTPOP:
+        if (data_stack_ptr < 1) {
+            printf("lpop -- stack underflow; need <list> on the stack! ");
+            return;
+        }
+        // Pop arg
+        list_ptr = (DCLANG_PTR)POP;
+        // Convert pointers to the actual node structure
+        list = (struct Node *)list_ptr;
+        // Check if the list is empty
+        if (list->next == list) {
+            printf("lpop -- list is empty! ");
+            return;
+        }
+        // Get the tail node
+        tail_node = list->prev;
+        // Remove the tail node from the list
+        remque(tail_node);
+        // Push the data of the tail node onto the stack
+        push((DCLANG_FLT)tail_node->data);
+        // Free the memory of the popped node
+        dclang_free(tail_node);
+        NEXT;
+
+    OP_LISTSET:
+        if (data_stack_ptr < 3) {
+            printf("l! -- stack underflow; need <list> <slot> <value> on the stack! ");
+            return;
+        }
+        // Pop args
+        value = POP;
+        slot = (DCLANG_LONG)POP;
+        list_ptr = (DCLANG_PTR)POP;
+        // Convert pointers to the actual node structure
+        list = (struct Node *)list_ptr;
+        // Find the Nth node in the linked list
+        node = list;
+        for (int i = 0; i < slot + 1; i++) {
+            if (node->next == list) {
+                // Reached the end of the list
+                printf("l! -- slot out of bounds! ");
+                return;
+            }
+            node = node->next;
+        }
+        node->data = value;
+        NEXT;
+
+    OP_LISTGET:
+        if (data_stack_ptr < 2) {
+            printf("l@ -- stack underflow; need <list> <slot> on the stack! ");
+            return;
+        }
+        // Pop args
+        slot = (DCLANG_LONG)POP;
+        list_ptr = (DCLANG_PTR)POP;
+        // Convert pointers to the actual node structure
+        list = (struct Node *)list_ptr;
+        // Find the Nth node in the linked list
+        node = list;
+        for (int i = 0; i < slot + 1; i++) {
+            if (node->next == list) {
+                // Reached the end of the list
+                printf("l@ -- slot out of bounds! ");
+                return;
+            }
+            node = node->next;
+        }
+        // Push the data of the node onto the stack
+        push((DCLANG_FLT)node->data);
+        NEXT;
+
+    OP_LISTINSERT:
+        if (data_stack_ptr < 3) {
+            printf("lins -- stack underflow; need <list> <slot> <value> on the stack! ");
+            return;
+        }
+        // Pop args
+        value = POP;
+        slot = (DCLANG_LONG)POP;
+        list_ptr = (DCLANG_PTR)POP;
+        // Convert pointers to the actual node structure
+        list = (struct Node *)list_ptr;
+        // Allocate memory for the new node
+        new_node = (struct Node *)dclang_malloc(sizeof(struct Node));
+        // Initialize the new node
+        new_node->data = value;
+        // Find the node before which to insert the new node
+        node_before = list;
+        for (int i = 0; i < slot; i++) {
+            if (node_before->next == list) {
+                // Reached the end of the list
+                printf("lins -- slot out of bounds! ");
+                dclang_free(new_node);
+                return;
+            }
+            node_before = node_before->next;
+        }
+        // Insert the new node before the specified node
+        insque(new_node, node_before);
+        NEXT;
+
+    OP_LISTREMOVE:
+        if (data_stack_ptr < 2) {
+            printf("lrem -- stack underflow; need <list> <slot> on the stack! ");
+            return;
+        }
+        // Pop the node slot and list pointer and node slot from the stack
+        slot = (DCLANG_LONG)POP;
+        list_ptr = (DCLANG_PTR)POP;
+        // Convert pointers to the actual node structure
+        list = (struct Node *)list_ptr;
+        // Find the node to remove
+        node_to_remove = list;
+        for (int i = 0; i < slot + 1; i++) {
+            if (node_to_remove->next == list) {
+                // Reached the end of the list
+                printf("lrem -- slot out of bounds! ");
+                return;
+            }
+            node_to_remove = node_to_remove->next;
+        }
+        // Remove the specified node from the list
+        remque(node_to_remove);
+        // Free the memory of the removed node
+        dclang_free(node_to_remove);
+        NEXT;
+
+    OP_LISTSIZE:
+        if (data_stack_ptr < 1) {
+            printf("lsize -- stack underflow; need <list> on the stack! ");
+            return;
+        }
+        // Pop the list pointer from the stack
+        list_ptr = POP;
+        // Convert pointer to the actual node structure
+        list = (struct Node *)list_ptr;
+        // Initialize the size counter
+        size = 0;
+        // Traverse the linked list and count each node
+        node = list->next;
+        while (node != list) {
+            size++;
+            node = node->next;
+        }
+        // Push the size onto the stack
+        push((DCLANG_LONG)size);
+        NEXT;
+
+    OP_LISTDELETE:
+        if (data_stack_ptr < 1) {
+            printf("ldel -- stack underflow; need <list> on the stack! ");
+            return;
+        }
+        // Pop the list pointer from the stack
+        list_ptr = (DCLANG_PTR)POP;
+        // Convert pointer to the actual node structure
+        list = (struct Node *)list_ptr;
+        // Traverse the linked list and free each node in the 'next' direction
+        node = list->next;
+        while (node != list) {
+            next = node->next;
+            dclang_free(node);
+            node = next;
+        }
+        // Free the head node
+        // Reset the list to a blank head node
+        list->next = list;
+        list->prev = list;
+        NEXT;
+
+    // looping
+
+    OP_TIMES:
+        return_stack[return_stack_ptr++] = iptr;
+        times_info[times_ptr++] = (DCLANG_LONG) POP;
+        loop_counter[loop_counter_ptr++] = 0;
+        NEXT;
+
+    OP_EXITTIMES:
+        loop_counter[--loop_counter_ptr] = 0;
+        --return_stack_ptr;
+        --times_ptr;
+        NEXT;
+
+    OP_AGAIN:
+        if (loop_counter[loop_counter_ptr - 1] < times_info[times_ptr - 1] - 1) {
+            loop_counter[loop_counter_ptr - 1] += 1;
+            iptr = return_stack[return_stack_ptr - 1];
+        } else {
+            loop_counter[--loop_counter_ptr] = 0;
+            --return_stack_ptr;
+            --times_ptr;
+        }
+        NEXT;
+
+    OP_FOR:
+        return_stack[return_stack_ptr++] = iptr;
+        fl_stack[fl_ptr].step = (DCLANG_LONG) POP;
+        loop_counter[loop_counter_ptr++] = (DCLANG_LONG) POP;
+        fl_stack[fl_ptr++].limit = (DCLANG_LONG) POP;
+        NEXT;
+
+    OP_EXITFOR:
+        --fl_ptr;
+        loop_counter[--loop_counter_ptr] = 0;
+        --return_stack_ptr;
+        NEXT;
+
+    OP_NEXT:
+        if (fl_stack[fl_ptr - 1].step > 0) {
+            if (loop_counter[loop_counter_ptr - 1] < \
+                    (fl_stack[fl_ptr - 1].limit \
+                     - fl_stack[fl_ptr - 1].step)) {
+                loop_counter[loop_counter_ptr - 1] += fl_stack[fl_ptr - 1].step;
+                iptr = return_stack[return_stack_ptr - 1];
+            } else {
+                --fl_ptr;
+                loop_counter[--loop_counter_ptr] = 0;
+                --return_stack_ptr;
+            }
+        } else {
+            if (loop_counter[loop_counter_ptr - 1] > \
+                    (fl_stack[fl_ptr - 1].limit \
+                     - fl_stack[fl_ptr - 1].step)) {
+                loop_counter[loop_counter_ptr - 1] += fl_stack[fl_ptr - 1].step;
+                iptr = return_stack[return_stack_ptr - 1];
+            } else {
+                --fl_ptr;
+                loop_counter[--loop_counter_ptr] = 0;
+                --return_stack_ptr;
+            }
+        }
+        NEXT;
+
+    OP_I:
+        push_no_check(loop_counter[loop_counter_ptr - 1]);
+        NEXT;
+
+    OP_J:
+        push_no_check(loop_counter[loop_counter_ptr - 2]);
+        NEXT;
+
+    OP_K:
+        push_no_check(loop_counter[loop_counter_ptr - 3]);
+        NEXT;
+
+    // jump if zero (false)
+    OP_JUMPZ:
+        truth = (DCLANG_LONG) POP;
+        if (!truth) {
+            iptr = (DCLANG_PTR) prog[iptr].param ;
+        }
+       NEXT;
+
+    // unconditional jump
+    OP_JUMPU:
+        iptr = (DCLANG_PTR) prog[iptr].param;
+        NEXT;
+
+    // if-else-endif
+    OP_IF:
+        // mark our location
+        return_stack[return_stack_ptr++] = iptr;
+        // set jump location for 'else'...w/o 'where' location
+        // will be filled in by 'else'
+        prog[iptr].opcode = OP_JUMPZ;
+        prog[iptr++].param = 0;
+        return;  // only in def_mode = 1
+
+    OP_ELSE:
+        // get the last starting point of the 'if' clause
+        DCLANG_LONG if_val = return_stack[--return_stack_ptr];
+        // mark out current location on the return stack
+        return_stack[return_stack_ptr++] = iptr;
+        // set the unconditional jump, but no 'where' yet
+        // (will be filled in later by 'endif')....
+        prog[iptr].opcode = OP_JUMPU;
+        prog[iptr++].param = 0;
+        // update old if val goto:
+        prog[if_val].param = iptr;
+        return;  // only in def_mode = 1
+
+    OP_ENDIF:
+        DCLANG_LONG last_val = return_stack[--return_stack_ptr];
+        prog[last_val].param = iptr;
+        return;  // only in def_mode = 1
+
+    OP_CALL:
+        locals_base_idx += 8;
+        // mark where we are for restoration later
+        return_stack[return_stack_ptr++] = iptr;
+        // set word target; execute word target
+        iptr = (DCLANG_PTR) prog[iptr].param;
+        NEXT;
+
+    OP_RETURN:
+        // restore locals_base_idx
+        locals_base_idx -= 8;
+        // restore the old iptr
+        iptr = return_stack[--return_stack_ptr];
+        NEXT;
 
 
     }
@@ -2545,158 +2918,6 @@ void regreadfunc()
 */
 
 
-/*
-// loop 'stack'
-DCLANG_LONG  loop_counter[3];
-DCLANG_PTR   loop_counter_ptr;
-// struct for 'for' loops:
-typedef struct {
-    DCLANG_LONG limit;
-    DCLANG_LONG step;
-} forloop_info;
-
-forloop_info fl_stack[3];
-DCLANG_LONG fl_ptr;
-
-// array for 'times' loop max amounts:
-DCLANG_LONG times_info[3];
-DCLANG_LONG times_ptr;
-
-// looping
-void timesfunc()
-{
-    return_stack[return_stack_ptr++] = iptr;
-    times_info[times_ptr++] = (DCLANG_LONG) POP;
-    loop_counter[loop_counter_ptr++] = 0;
-}
-
-void _conttimes()
-{
-    loop_counter[loop_counter_ptr - 1] += 1;
-    iptr = return_stack[return_stack_ptr - 1];
-}
-
-void exittimesfunc()
-{
-    loop_counter[--loop_counter_ptr] = 0;
-    --return_stack_ptr;
-    --times_ptr;
-}
-
-void againfunc()
-{
-    if (loop_counter[loop_counter_ptr - 1] < times_info[times_ptr - 1] - 1) {
-        _conttimes();
-    } else {
-        exittimesfunc();
-    }
-}
-
-// these 'for' loops are more flexible, allowing from/to/step parameters.
-void forfunc()
-{
-    return_stack[return_stack_ptr++] = iptr;
-    fl_stack[fl_ptr].step = (DCLANG_LONG) POP;
-    loop_counter[loop_counter_ptr++] = (DCLANG_LONG) POP;
-    fl_stack[fl_ptr++].limit = (DCLANG_LONG) POP;
-}
-
-void _contfor()
-{
-    loop_counter[loop_counter_ptr - 1] += fl_stack[fl_ptr - 1].step;
-    iptr = return_stack[return_stack_ptr - 1];
-}
-
-void exitforfunc()
-{
-    --fl_ptr;
-    loop_counter[--loop_counter_ptr] = 0;
-    --return_stack_ptr;
-}
-
-void nextfunc()
-{
-    if (fl_stack[fl_ptr - 1].step > 0) {
-        if (loop_counter[loop_counter_ptr - 1] < \
-                (fl_stack[fl_ptr - 1].limit \
-                 - fl_stack[fl_ptr - 1].step)) {
-            _contfor();
-        } else {
-            exitforfunc();
-        }
-    } else {
-        if (loop_counter[loop_counter_ptr - 1] > \
-                (fl_stack[fl_ptr - 1].limit \
-                 - fl_stack[fl_ptr - 1].step)) {
-            _contfor();
-        } else {
-            exitforfunc();
-        }
-    }
-}
-
-void ifunc()
-{
-    push_no_check(loop_counter[loop_counter_ptr - 1]);
-}
-
-void jfunc()
-{
-    push_no_check(loop_counter[loop_counter_ptr - 2]);
-}
-
-void kfunc()
-{
-    push_no_check(loop_counter[loop_counter_ptr - 3]);
-}
-
-
-// jump if zero (false)
-void jumpzfunc(DCLANG_FLT where)
-{
-    DCLANG_LONG truth = (DCLANG_LONG) POP;
-    if (!truth) {
-        iptr = (uintptr_t) where;
-    }
-}
-
-// unconditional jump
-void jumpufunc(DCLANG_FLT where)
-{
-    iptr = (uintptr_t) where;
-}
-
-// if-else-endif
-void iffunc()
-{
-    // mark our location
-    return_stack[return_stack_ptr++] = iptr;
-    // set jump location for 'else'...w/o 'where' location
-    // will be filled in by 'else'
-    prog[iptr].function.with_param = jumpzfunc;
-    prog[iptr++].param = 0;
-}
-
-void elsefunc()
-{
-    // get the last starting point of the 'if' clause
-    DCLANG_LONG if_val = return_stack[--return_stack_ptr];
-    // mark out current location on the return stack
-    return_stack[return_stack_ptr++] = iptr;
-    // set the unconditional jump, but no 'where' yet
-    // (will be filled in later by 'endif')....
-    prog[iptr].function.with_param = jumpufunc;
-    prog[iptr++].param = 0;
-    // update old if val goto:
-    prog[if_val].param = iptr;
-}
-
-void endiffunc()
-{
-    DCLANG_LONG last_val = return_stack[--return_stack_ptr];
-    prog[last_val].param = iptr;
-}
-*/
 
 /* Here we add the functionality necessary for the user to define named
  procedures (words). The idea is to have a struct that contains:
@@ -2724,6 +2945,7 @@ void showdefined()
                                          user_words[x].word_start);
     }
 }
+*/
 
 DCLANG_LONG dclang_findword(const char *word)
 {
@@ -2735,59 +2957,20 @@ DCLANG_LONG dclang_findword(const char *word)
     return -1;
 }
 
-void callword(DCLANG_FLT where)
+void dclang_callword(DCLANG_PTR where)
 {
     locals_base_idx += 8;
     // mark where we are for restoration later
     return_stack[return_stack_ptr++] = iptr;
     // set word target; execute word target
-    iptr = (DCLANG_PTR) where;
-    (*(prog[iptr].function.with_param)) (prog[iptr++].param);
-    // adjust the locals base pointer
-}
-
-void dclang_callword(DCLANG_PTR where)
-{
-    callword((DCLANG_FLT) where);
-    // execute all until we reach the end of the iptr queue
-    while (iptr < max_iptr) {
-        (*(prog[iptr].function.with_param)) (prog[iptr++].param);
-    }
-}
-
-void returnfunc()
-{
-    // restore locals_base_idx
-    locals_base_idx -= 8;
-    // restore the old iptr
-    iptr = return_stack[--return_stack_ptr];
-    // adjust the locals pointers
-}
-
-// respond to ':' token:
-void startword()
-{
-    // grab name
-    char *this_token;
-    // TODO: validation
-    this_token = get_token();
-    // put name and current location in user_words lookup array
-    user_words[num_user_words].name = this_token;
-    user_words[num_user_words++].word_start = iptr;
-}
-
-// respond to ';' token:
-void endword()
-{
-    // Simply insert a return call into 'prog' where 'iptr' now points.
-    prog[iptr++].function.without_param = returnfunc;
-    max_iptr = iptr;
+    iptr = where;
+    dclang_execute();
 }
 
 ////////////
 // Locals //
 ////////////
-
+/*
 // Function to swap two cells
 void swap(DCLANG_PTR *a, DCLANG_PTR *b) {
     DCLANG_PTR temp = *a;
@@ -2860,273 +3043,6 @@ void showconsts()
     for (int x=0; x < const_idx; x++) {
         printf("Constant %i: %s ==> %.19g\n", x, const_keys[x], const_vals[x]);
     }
-}
-
-
-
-// Function to create a linked list with a single node containing user-chosen data
-void listmakefunc() {
-    // Allocate memory for the head node
-    struct Node *list = (struct Node *)dclang_malloc(sizeof(struct Node));
-
-    // Set the head node to point to itself in both directions
-    list->next = list;
-    list->prev = list;
-
-    // Push the pointer to the head node onto the stack
-    push((DCLANG_PTR)list);
-}
-
-void listnextfunc() {
-    if (data_stack_ptr < 1) {
-        printf("_lnext -- stack underflow; need <existing_list_node> on the stack! ");
-        return;
-    }
-    DCLANG_PTR list_ptr = (DCLANG_PTR)POP;
-    // Convert pointers to the actual node structure
-    struct Node *list = (struct Node *)list_ptr;
-    struct Node *next = list->next;
-    push((DCLANG_PTR) next);
-}
-
-// Function to append a node to the tail of the linked list
-void listpushfunc() {
-    if (data_stack_ptr < 2) {
-        printf("lpush -- stack underflow; need <list> <value> on the stack! ");
-        return;
-    }
-
-    // Pop args
-    DCLANG_FLT value = POP;
-    DCLANG_PTR list_ptr = (DCLANG_PTR)POP;
-
-    // Convert pointers to the actual node structure
-    struct Node *list = (struct Node *)list_ptr;
-
-    // Allocate memory for the new node
-    struct Node *new_node = (struct Node *)dclang_malloc(sizeof(struct Node));
-
-    // Initialize the new node
-    new_node->data = value;
-
-    // Insert the new node before the head node (at the tail)
-    insque(new_node, list->prev);
-}
-
-// Function to pop a node from the tail of the linked list
-void listpopfunc() {
-    if (data_stack_ptr < 1) {
-        printf("lpop -- stack underflow; need <list> on the stack! ");
-        return;
-    }
-
-    // Pop arg
-    DCLANG_PTR list_ptr = (DCLANG_PTR)POP;
-
-    // Convert pointers to the actual node structure
-    struct Node *list = (struct Node *)list_ptr;
-
-    // Check if the list is empty
-    if (list->next == list) {
-        printf("lpop -- list is empty! ");
-        return;
-    }
-
-    // Get the tail node
-    struct Node *tail_node = list->prev;
-
-    // Remove the tail node from the list
-    remque(tail_node);
-
-    // Push the data of the tail node onto the stack
-    push((DCLANG_FLT)tail_node->data);
-
-    // Free the memory of the popped node
-    dclang_free(tail_node);
-}
-
-// Function to set the data of a node in the linked list
-void listsetfunc() {
-    if (data_stack_ptr < 3) {
-        printf("l! -- stack underflow; need <list> <slot> <value> on the stack! ");
-        return;
-    }
-
-    // Pop args
-    DCLANG_FLT value = POP;
-    DCLANG_LONG slot = (DCLANG_LONG)POP;
-    DCLANG_PTR list_ptr = (DCLANG_PTR)POP;
-
-    // Convert pointers to the actual node structure
-    struct Node *list = (struct Node *)list_ptr;
-
-    // Find the Nth node in the linked list
-    struct Node *node = list;
-    for (int i = 0; i < slot + 1; i++) {
-        if (node->next == list) {
-            // Reached the end of the list
-            printf("l! -- slot out of bounds! ");
-            return;
-        }
-        node = node->next;
-    }
-
-    // Set the data of the node
-    node->data = value;
-}
-
-// Function to get the data of a node in the linked list
-void listgetfunc() {
-    if (data_stack_ptr < 2) {
-        printf("l@ -- stack underflow; need <list> <slot> on the stack! ");
-        return;
-    }
-
-    // Pop args
-    DCLANG_LONG slot = (DCLANG_LONG)POP;
-    DCLANG_PTR list_ptr = (DCLANG_PTR)POP;
-
-    // Convert pointers to the actual node structure
-    struct Node *list = (struct Node *)list_ptr;
-
-    // Find the Nth node in the linked list
-    struct Node *node = list;
-    for (int i = 0; i < slot + 1; i++) {
-        if (node->next == list) {
-            // Reached the end of the list
-            printf("l@ -- slot out of bounds! ");
-            return;
-        }
-        node = node->next;
-    }
-
-    // Push the data of the node onto the stack
-    push((DCLANG_FLT)node->data);
-}
-
-
-// Function to insert a node into a linked list before a specified node
-void listinsertfunc() {
-    if (data_stack_ptr < 3) {
-        printf("lins -- stack underflow; need <list> <node_slot> <value> on the stack! ");
-        return;
-    }
-
-    // Pop args
-    DCLANG_FLT value = POP;
-    DCLANG_LONG node_slot = (DCLANG_LONG)POP;
-    DCLANG_PTR list_ptr = (DCLANG_PTR)POP;
-
-    // Convert pointers to the actual node structure
-    struct Node *list = (struct Node *)list_ptr;
-
-    // Allocate memory for the new node
-    struct Node *new_node = (struct Node *)dclang_malloc(sizeof(struct Node));
-
-    // Initialize the new node
-    new_node->data = value;
-
-    // Find the node before which to insert the new node
-    struct Node *node_before = list;
-    for (int i = 0; i < node_slot; i++) {
-        if (node_before->next == list) {
-            // Reached the end of the list
-            printf("lins -- node_slot out of bounds! ");
-            dclang_free(new_node);
-            return;
-        }
-        node_before = node_before->next;
-    }
-
-    // Insert the new node before the specified node
-    insque(new_node, node_before);
-}
-
-// Function to remove a node from a linked list at a specified node slot
-void listremovefunc() {
-    if (data_stack_ptr < 2) {
-        printf("lrem -- stack underflow; need <list> <node_slot> on the stack! ");
-        return;
-    }
-
-    // Pop the node slot and list pointer and node slot from the stack
-    DCLANG_LONG node_slot = (DCLANG_LONG)POP;
-    DCLANG_PTR list_ptr = (DCLANG_PTR)POP;
-
-    // Convert pointers to the actual node structure
-    struct Node *list = (struct Node *)list_ptr;
-
-    // Find the node to remove
-    struct Node *node_to_remove = list;
-    for (int i = 0; i < node_slot + 1; i++) {
-        if (node_to_remove->next == list) {
-            // Reached the end of the list
-            printf("lrem -- node_slot out of bounds! ");
-            return;
-        }
-        node_to_remove = node_to_remove->next;
-    }
-
-    // Remove the specified node from the list
-    remque(node_to_remove);
-
-    // Free the memory of the removed node
-    dclang_free(node_to_remove);
-}
-
-// Function to get the size (number of nodes) in a linked list
-void listsizefunc() {
-    if (data_stack_ptr < 1) {
-        printf("lsize -- stack underflow; need <list> on the stack! ");
-        return;
-    }
-
-    // Pop the list pointer from the stack
-    DCLANG_PTR list_ptr = POP;
-
-    // Convert pointer to the actual node structure
-    struct Node *list = (struct Node *)list_ptr;
-
-    // Initialize the size counter
-    int size = 0;
-
-    // Traverse the linked list and count each node
-    struct Node *current = list->next;
-    while (current != list) {
-        size++;
-        current = current->next;
-    }
-
-    // Push the size onto the stack
-    push((DCLANG_LONG)size);
-}
-
-
-// Function to delete (dclang_free) all nodes in a linked list
-void listdeletefunc() {
-    if (data_stack_ptr < 1) {
-        printf("ldel -- stack underflow; need <list> on the stack! ");
-        return;
-    }
-
-    // Pop the list pointer from the stack
-    DCLANG_PTR list_ptr = (DCLANG_PTR)POP;
-
-    // Convert pointer to the actual node structure
-    struct Node *list = (struct Node *)list_ptr;
-
-    // Traverse the linked list and free each node in the 'next' direction
-    struct Node *current_next = list->next;
-    while (current_next != list) {
-        struct Node *next_node = current_next->next;
-        dclang_free(current_next);
-        current_next = next_node;
-    }
-
-    // Free the head node
-    // Reset the list to a blank head node
-    list->next = list;
-    list->prev = list;
 }
 
 
@@ -3443,8 +3359,6 @@ void add_all_primitives()
 #ifdef HAS_TREEDESTROY
     add_primitive("tdestroy", "Trees", OP_TREEDESTROY);
 #endif
-    /*
-
     // linked lists
     add_primitive("lmake", "Lists", OP_LISTMAKE);
     add_primitive("_lnext", "Lists", OP_LISTNEXT);
@@ -3466,14 +3380,18 @@ void add_all_primitives()
     add_primitive("i", "Branching", OP_I);
     add_primitive("j", "Branching", OP_J);
     add_primitive("k", "Branching", OP_K);
-    add_primitive("if", "Branching", OP_IF);
-    add_primitive("else", "Branching", OP_ELSE);
-    add_primitive("endif", "Branching", OP_ENDIF);
+    add_primitive("if", "Branching", OP_NOOP);
+    add_primitive("else", "Branching", OP_NOOP);
+    add_primitive("endif", "Branching", OP_NOOP);
     add_primitive("return", "Branching", OP_RETURN);
+    // output and string ops
+    add_primitive("cr", "String Output", OP_CR);
+    add_primitive("print", "String Output", OP_PRINT);
     // character emitters
     add_primitive("emit", "Character Emitters", OP_EMIT);
     add_primitive("uemit", "Character Emitters", OP_UEMIT);
     add_primitive("bytes32", "Character Emitters", OP_BYTES32);
+    /*
     // character types
     add_primitive("isalnum", "Character Types", OP_ISALNUM);
     add_primitive("isalpha", "Character Types", OP_ISALPHA);
@@ -3486,9 +3404,7 @@ void add_all_primitives()
     add_primitive("isspace", "Character Types", OP_ISSPACE);
     add_primitive("isupper", "Character Types", OP_ISUPPER);
     add_primitive("isxdigit", "Character Types", OP_ISXDIGIT);
-    // output and string ops
-    add_primitive("cr", "String Output", OP_CR);
-    add_primitive("print", "String Output", OP_PRINT);
+
     // string conversion
     add_primitive("tohex", "String Conversion", OP_TOHEX);
     add_primitive("tostr", "String Conversion", OP_TOSTR);
@@ -3656,13 +3572,12 @@ void compile_or_interpret(const char *token)
         return;
     }
 
-    /*
     // Search user-defined functions (words)
     DCLANG_LONG found = dclang_findword(token);
     if (found != -1) {
         if (def_mode) {
             if (strcmp(user_words[num_user_words - 1].name, token) == 0) {
-                prog[iptr].opcode = OP_JUMP;  // don't overflow the return stack
+                prog[iptr].opcode = OP_JUMPU;  // don't overflow the return stack
                 prog[iptr++].param = found;
             } else {
                 prog[iptr].opcode = OP_CALL;  // normal return stack save
@@ -3673,7 +3588,6 @@ void compile_or_interpret(const char *token)
         }
         return;
     }
-    */
 
     // Search for a primitive word
     while (pr->name != 0) {
@@ -3684,7 +3598,7 @@ void compile_or_interpret(const char *token)
                 }
             } else {
                 if (validate(token)) {
-                    prog[iptr++].opcode = pr->opcode;
+                    prog[iptr].opcode = pr->opcode;
                     dclang_execute();
                 }
             }
@@ -3747,9 +3661,7 @@ void compile_or_interpret(const char *token)
             prog[iptr].opcode = OP_PUSH;
             prog[iptr++].param = d;
         } else {
-            prog[iptr].opcode = OP_PUSH;
-            prog[iptr++].param = d;
-            dclang_execute();
+            push(d);
         }
         return;
     }
@@ -3764,13 +3676,19 @@ void compile_or_interpret(const char *token)
 void repl() {
     char *token;
     while (strcmp(token = get_token(), "EOF")) {
-        /*
         // are we dealing with a function definition?
         if (strcmp(token, ":") == 0) {
-            startword();
+            // grab name
+            char *this_token;
+            // TODO: validation
+            this_token = get_token();
+            // put name and current location in user_words lookup array
+            user_words[num_user_words].name = this_token;
+            user_words[num_user_words++].word_start = iptr;
             def_mode = 1;
             continue; // goto top of loop
         }
+        /*
         if (strcmp(token, "{") == 0) {
             if (def_mode) {
                 _processlocals();
@@ -3779,12 +3697,13 @@ void repl() {
             }
             continue; // goto top of loop
         }
+        */
         if (strcmp(token, ";") == 0) {
-            endword();
+            // Simply insert a return call into 'prog' where 'iptr' now points.
+            prog[iptr++].opcode = OP_RETURN;
             def_mode = 0;
             continue; // goto top of loop
         }
-        */
         // 'compile' it, or interpret it on-the-fly
         compile_or_interpret(token);
     }
@@ -3920,7 +3839,7 @@ void execfunc() {
     DCLANG_LONG found = dclang_findword(argument);
     if (found > -1) {
         if (def_mode) {
-            prog[iptr].function.with_param = callword;
+            prog[iptr].opcode = OP_CALL;
             prog[iptr++].param = found;
         } else {
             dclang_callword(found);
