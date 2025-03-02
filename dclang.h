@@ -1,3 +1,9 @@
+/* dclang, an RPN programming language.
+
+'True refinement seeks simplicity.' - Bruce Lee
+
+Born on 2018-05-05 */
+
 /*
    These should be changed based on architecture. For instance, on my x86_64
    system, best performance was squeezed by making the integer type and the
@@ -12,7 +18,6 @@
 
 #include <ctype.h>
 #include <stdio.h>
-#include "noheap/malloc.c"
 #include <stdlib.h>
 #include <inttypes.h>
 #include <string.h>
@@ -32,6 +37,10 @@
 #include <portmidi.h>
 #include <porttime.h>
 #include <sqlite3.h>
+#include "noheap/malloc.c"
+#include "noheap/ht.c"
+#include "noheap/trees.c"
+#include "noheap/llist.c"
 
 // data type macros
 #define DCLANG_FLT   double
@@ -89,9 +98,69 @@ DCLANG_FLT   const_vals[64];
 DCLANG_PTR   const_idx;
 
 // hashwords
+ht *global_hash_table;
 char **hashwords;
 DCLANG_ULONG hashwords_size = 32;
 DCLANG_ULONG hashwords_cnt = 0;
+
+/* main stuct used for a dictionary-style tree entry.
+   'key' is a string, 'value' is a double, which can represent
+   either a number or a string pointer.
+
+   It is up to the user to supply checks and use the types
+   safely. */
+
+struct tree_entry
+{
+    char *key;
+    DCLANG_FLT value;
+};
+
+void *tree_roots[NUM_TREE_ROOTS] = {NULL};
+int tree_roots_idx = -1;
+
+struct tree_entry *
+make_tree_entry(char *key, DCLANG_FLT value)
+{
+    struct tree_entry *new_tree =
+        (struct tree_entry *) dclang_malloc(sizeof(struct tree_entry));
+    if(!new_tree) {
+        printf("make_tree_entry malloc fail\n");
+        exit(1);
+    }
+    new_tree->key = dclang_strdup(key);
+    new_tree->value = value;
+    return new_tree;
+}
+
+int tree_compare_func(const void *l, const void *r)
+{
+    if (l == NULL || r == NULL) return 0;
+    struct tree_entry *tree_l = (struct tree_entry *)l;
+    struct tree_entry *tree_r = (struct tree_entry *)r;
+    return strcmp(tree_l->key, tree_r->key);
+}
+
+// helper used by `treewalk`
+void print_node(const void *node, const VISIT order, const int depth)
+{
+    if (order == preorder || order == leaf ) {
+		    printf(
+		        "key=%s, value=%s\n",
+		        (*(struct tree_entry **)node)->key,
+		        (char *)(DCLANG_PTR)((*(struct tree_entry **)node)->value)
+		    );
+    }
+}
+
+// Define the structure for linked list nodes
+struct Node {
+    struct Node *next;
+    struct Node *prev;
+    DCLANG_FLT data;  // New member for data
+};
+
+
 // min and max string buffer addresses
 DCLANG_PTR MIN_STR = 0;
 DCLANG_PTR MAX_STR = 0;
@@ -198,10 +267,7 @@ enum dclang_opcodes {
     OP_HERE,
     OP_CONSTANT,
     OP_ENVGET,
-    OP_ENVSET
-};
-
-    /*
+    OP_ENVSET,
     // sorting
     OP_SORTNUMS,
     OP_SORTSTRS,
@@ -216,8 +282,11 @@ enum dclang_opcodes {
     OP_TREEWALK,
     OP_TREEDELETE,
 #ifdef HAS_TREEDESTROY,
-    OP_TREEDESTROY,
-#endif,
+    OP_TREEDESTROY
+#endif
+};
+
+    /*
     // linked lists
     OP_LISTMAKE,
     OP_LISTNEXT,
