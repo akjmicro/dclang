@@ -5,22 +5,45 @@
 Born on 2018-05-05 */
 
 #include "dclang.h"
-
-#define push(item) { \
-    if (data_stack_ptr >= DATA_STACK_SIZE) { \
-        printf("push -- stack overflow!\n"); \
-        data_stack_ptr = 0; \
-    } \
-    data_stack[data_stack_ptr++] = item; \
-}
-
-#define push_no_check(item) { \
-    data_stack[data_stack_ptr++] = item; \
-}
-
-#define POP data_stack[--data_stack_ptr]
-
 #include "token.c"
+
+////////////////////////////
+// Dealing with importing //
+////////////////////////////
+DCLANG_LONG dclang_import(char *infilestr) {
+    char *prefix = getenv("DCLANG_LIBS");
+    if (prefix == NULL) {
+        printf("DCLANG_LIBS env variable is unset!\n");
+        return -1;
+    }
+    // check existence of file:
+    if (access(infilestr, F_OK) == 0) {
+        FILE *infile;
+        infile = fopen(infilestr, "r");
+        setinput(infile);
+        repl();
+        return 0;
+    }
+    char *full_path = dclang_malloc(512);
+    memset(full_path, 0, 512);
+    char *slash = "/";
+    strcat(full_path, prefix);
+    strcat(full_path, slash);
+    strcat(full_path, infilestr);
+    if (access(full_path, F_OK) == 0) {
+        FILE *infile = fopen(full_path, "r");
+        setinput(infile);
+        repl();
+        return 0;
+    }
+    printf(
+        "The file named %s doesn't appear to exist in the current " \
+        "directory, or under %s as %s, or cannot be accessed.\n"
+        "You may want to check its existence and permissions!\n",
+        infilestr, prefix, full_path
+    );
+    return -1;
+}
 
 DCLANG_FLT dclang_pop()
 // special case -- has a return value b/c it can
@@ -46,10 +69,45 @@ int compare_strings (const void *a, const void *b)
     return strcmp(sa, sb);
 }
 
-// end helper functions
+// end helper functions for sorting
 
+// helper functions for trees
 
-#define NEXT goto  *dispatch_table[prog[++iptr].opcode]
+struct tree_entry *
+make_tree_entry(char *key, DCLANG_FLT value)
+{
+    struct tree_entry *new_tree =
+        (struct tree_entry *) dclang_malloc(sizeof(struct tree_entry));
+    if(!new_tree) {
+        printf("make_tree_entry malloc fail\n");
+        exit(1);
+    }
+    new_tree->key = dclang_strdup(key);
+    new_tree->value = value;
+    return new_tree;
+}
+
+int tree_compare_func(const void *l, const void *r)
+{
+    if (l == NULL || r == NULL) return 0;
+    struct tree_entry *tree_l = (struct tree_entry *)l;
+    struct tree_entry *tree_r = (struct tree_entry *)r;
+    return strcmp(tree_l->key, tree_r->key);
+}
+
+// helper used by `treewalk`
+void print_node(const void *node, const VISIT order, const int depth)
+{
+    if (order == preorder || order == leaf ) {
+		    printf(
+		        "key=%s, value=%s\n",
+		        (*(struct tree_entry **)node)->key,
+		        (char *)(DCLANG_PTR)((*(struct tree_entry **)node)->value)
+		    );
+    }
+}
+
+// end helper functions for trees
 
 void dclang_execute() {
     int precision, width;
@@ -60,7 +118,7 @@ void dclang_execute() {
     DCLANG_FLT value, val, val1, val2, a, b, c, tree_val;
     DCLANG_PTR arrstart, arrsize, env_key_addr, key_addr, idx, next_var, size, \
                tree_idx, list_ptr;
-    DCLANG_ULONG shift_amt, base;
+    DCLANG_ULONG shift_amt, base, fmt;
     DCLANG_LONG slot, truth;
 
     static void *dispatch_table[] = {
@@ -183,11 +241,17 @@ void dclang_execute() {
         &&OP_ENDIF,
         &&OP_CALL,
         &&OP_RETURN,
+        &&OP_CLOCK,
+        &&OP_EPOCH,
+        &&OP_EPOCH_TO_DT,
+        &&OP_DT_TO_EPOCH,
+        &&OP_SLEEP,
         &&OP_CR,
         &&OP_PRINT,
         &&OP_EMIT,
         &&OP_UEMIT,
-        &&OP_BYTES32
+        &&OP_BYTES32,
+        &&OP_IMPORT
     };
 
     while (1) {
@@ -1491,6 +1555,97 @@ void dclang_execute() {
         iptr = return_stack[--return_stack_ptr];
         NEXT;
 
+    // time and date
+
+    OP_CLOCK:
+        gettimeofday(&tval, NULL);
+        push( ((DCLANG_FLT) tval.tv_sec) + (((DCLANG_FLT) tval.tv_usec) / 1000000) );
+        NEXT;
+
+    OP_EPOCH:
+        gettimeofday(&tval, NULL);
+        push(tval.tv_sec);
+        NEXT;
+
+    OP_EPOCH_TO_DT:
+        if (data_stack_ptr < 1)
+        {
+            printf("epoch->dt: need a <epoch_int> and an <output_format> on the stack.\n");
+            return;
+        }
+        // input string setup
+        fmt = (DCLANG_ULONG) POP;
+        if (fmt < MIN_STR || fmt > MAX_STR)
+        {
+            printf("epoch->dt -- <output_format> string address out-of-range.\n");
+            return;
+        }
+        DCLANG_ULONG in_epoch_uint = (DCLANG_ULONG) POP;
+        time_t in_epoch = (time_t) in_epoch_uint;
+        char tmbuf[256];
+        memset(&tmbuf[0], 0, 256);
+        struct tm *loctime = localtime(&in_epoch);
+        if (strftime(tmbuf, 256, (char *) fmt, loctime) == 0)
+        {
+            printf("'strftime', a low-level call of 'epoch->dt', returned an error.\n");
+            return;
+        }
+        DCLANG_PTR bufaddr = (DCLANG_PTR) tmbuf;
+        if (bufaddr > MAX_STR || MAX_STR == 0)
+        {
+            MAX_STR = bufaddr;
+        }
+        if (bufaddr < MIN_STR || MIN_STR == 0)
+        {
+            MIN_STR = bufaddr;
+        }
+        push(bufaddr);
+        NEXT;
+
+    OP_DT_TO_EPOCH:
+        if (data_stack_ptr < 2)
+        {
+            printf("dt->epoch: need a <date> like \"2020-01-01 12:14:13\" and a <input_format> on the stack.\n");
+            return;
+        }
+        // input string setup
+        fmt = (DCLANG_ULONG) POP;
+        DCLANG_ULONG to_conv = (DCLANG_ULONG) POP;
+        if (fmt < MIN_STR || fmt > MAX_STR)
+        {
+            printf("dt->epoch -- <input_format> string address out-of-range.\n");
+            return;
+        }
+        if (to_conv < MIN_STR || to_conv > MAX_STR)
+        {
+            printf("dt->epoch -- <date> string address out-of-range.\n");
+            return;
+        }
+        // memset the dt_conv_tm
+        struct tm dt_epoch_tm;
+        memset(&dt_epoch_tm, 0, sizeof(dt_epoch_tm));
+        // convert to broken time
+        if (strptime((char *)to_conv, (char *) fmt, &dt_epoch_tm) == NULL)
+        {
+            printf("Conversion to broken time failed in 'dt->epoch'\n");
+            return;
+        }
+        // do the conversion to seconds since epoch
+        time_t res_time = mktime(&dt_epoch_tm);
+        push((DCLANG_ULONG) res_time);
+        NEXT;
+
+    OP_SLEEP:
+        if (data_stack_ptr < 1) {
+            printf("sleep -- need a time amount in seconds on the stack!\n");
+            return;
+        }
+        DCLANG_FLT sleeptime = POP;
+        struct timespec t1, t2;
+        t1.tv_sec = floor(sleeptime);
+        t1.tv_nsec = round(fmod(sleeptime, 1) * 1000000000);
+        nanosleep(&t1, &t2);
+        NEXT;
 
     OP_CR:
         fprintf(ofp, "\n");
@@ -1554,6 +1709,14 @@ void dclang_execute() {
         fputc(highmid, ofp);
         fputc(high, ofp);
         NEXT;
+
+    OP_IMPORT:
+        if (data_stack_ptr < 1) {
+            printf("import -- stack underflow! ");
+            return -1;
+        }
+        char *importfile = (char *)(unsigned long) POP;
+        return dclang_import(importfile);
 
     }
 }
@@ -2044,103 +2207,7 @@ void exitfunc()
 }
 
 
-void clockfunc()
-{
-    gettimeofday(&tval, NULL);
-    DCLANG_FLT now = ((DCLANG_FLT) tval.tv_sec) + (((DCLANG_FLT) tval.tv_usec) / 1000000);
-    push(now);
-}
 
-void epochfunc()
-{
-    gettimeofday(&tval, NULL);
-    DCLANG_FLT now = (tval.tv_sec);
-    push(now);
-}
-
-void sleepfunc() {
-    if (data_stack_ptr < 1) {
-        printf("sleep -- need a time amount in seconds on the stack!\n");
-        return;
-    }
-    DCLANG_FLT sleeptime = POP;
-    struct timespec t1, t2;
-    t1.tv_sec = floor(sleeptime);
-    t1.tv_nsec = round(fmod(sleeptime, 1) * 1000000000);
-    nanosleep(&t1, &t2);
-}
-
-// date functions
-
-void dt_to_epochfunc()
-{
-    if (data_stack_ptr < 2)
-    {
-        printf("dt->epoch: need a <date> like \"2020-01-01 12:14:13\" and a <input_format> on the stack.\n");
-        return;
-    }
-    // input string setup
-    DCLANG_ULONG fmt = (DCLANG_ULONG) POP;
-    DCLANG_ULONG to_conv = (DCLANG_ULONG) POP;
-    if (fmt < MIN_STR || fmt > MAX_STR)
-    {
-        printf("dt->epoch -- <input_format> string address out-of-range.\n");
-        return;
-    }
-    if (to_conv < MIN_STR || to_conv > MAX_STR)
-    {
-        printf("dt->epoch -- <date> string address out-of-range.\n");
-        return;
-    }
-    // memset the dt_conv_tm
-    struct tm dt_epoch_tm;
-    memset(&dt_epoch_tm, 0, sizeof(dt_epoch_tm));
-    // convert to broken time
-    if (strptime((char *)to_conv, (char *) fmt, &dt_epoch_tm) == NULL)
-    {
-        printf("Conversion to broken time failed in 'dt->epoch'\n");
-        return;
-    }
-    // do the conversion to seconds since epoch
-    time_t res_time = mktime(&dt_epoch_tm);
-    push((DCLANG_ULONG) res_time);
-}
-
-void epoch_to_dtfunc()
-{
-    if (data_stack_ptr < 1)
-    {
-        printf("epoch->dt: need a <epoch_int> and an <output_format> on the stack.\n");
-        return;
-    }
-    // input string setup
-    DCLANG_ULONG fmt = (DCLANG_ULONG) POP;
-    if (fmt < MIN_STR || fmt > MAX_STR)
-    {
-        printf("epoch->dt -- <output_format> string address out-of-range.\n");
-        return;
-    }
-    DCLANG_ULONG in_epoch_uint = (DCLANG_ULONG) POP;
-    time_t in_epoch = (time_t) in_epoch_uint;
-    char tmbuf[256];
-    memset(&tmbuf[0], 0, 256);
-    struct tm *loctime = localtime(&in_epoch);
-    if (strftime(tmbuf, 256, (char *) fmt, loctime) == 0)
-    {
-        printf("'strftime', a low-level call of 'epoch->dt', returned an error.\n");
-        return;
-    }
-    DCLANG_PTR bufaddr = (DCLANG_PTR) tmbuf;
-    if (bufaddr > MAX_STR || MAX_STR == 0)
-    {
-        MAX_STR = bufaddr;
-    }
-    if (bufaddr < MIN_STR || MIN_STR == 0)
-    {
-        MIN_STR = bufaddr;
-    }
-    push(bufaddr);
-}
 */
 
 /*
@@ -3380,6 +3447,12 @@ void add_all_primitives()
     add_primitive("else", "Branching", OP_ELSE);
     add_primitive("endif", "Branching", OP_ENDIF);
     add_primitive("return", "Branching", OP_RETURN);
+    // time
+    add_primitive("clock", "Time", OP_CLOCK);
+    add_primitive("epoch", "Time", OP_EPOCH);
+    add_primitive("epoch->dt", "Time", OP_EPOCH_TO_DT);
+    add_primitive("dt->epoch", "Time", OP_DT_TO_EPOCH);
+    add_primitive("sleep", "Time", OP_SLEEP);
     // output and string ops
     add_primitive("cr", "String Output", OP_CR);
     add_primitive("print", "String Output", OP_PRINT);
@@ -3460,12 +3533,6 @@ void add_all_primitives()
     add_primitive("tcpconnect", "Sockets", OP_TCPCONNECT);
     add_primitive("udprecv", "Sockets", OP_UDPRECV);
     add_primitive("udpsend", "Sockets", OP_UDPSEND);
-    // time
-    add_primitive("clock", "Time", OP_CLOCK);
-    add_primitive("sleep", "Time", OP_SLEEP);
-    add_primitive("epoch", "Time", OP_EPOCH);
-    add_primitive("dt->epoch", "Time", dt_to_OP_EPOCH);
-    add_primitive("epoch->dt", "Time", epoch_to_OP_DT);
     // block a SIGINT
     add_primitive("block_sigint", "Interrupt Blocking", OP_BLOCKSIGINT);
     add_primitive("unblock_sigint", "Interrupt Blocking", OP_UNBLOCKSIGINT);
@@ -3484,7 +3551,6 @@ void add_all_primitives()
     add_primitive("constants", "Other", OP_SHOWCONSTS);
     add_primitive("variables", "Other", OP_SHOWVARS);
     */
-    add_primitive(0, 0, 0);
 };
 
 void show_primitivesfunc()
@@ -3704,56 +3770,6 @@ void repl() {
     compile_or_interpret(0);
 }
 
-////////////////////////////
-// Dealing with importing //
-////////////////////////////
-/*
-DCLANG_LONG dclang_import(char *infilestr) {
-    char *prefix = getenv("DCLANG_LIBS");
-    if (prefix == NULL) {
-        printf("DCLANG_LIBS env variable is unset!\n");
-        return -1;
-    }
-    // check existence of file:
-    if (access(infilestr, F_OK) == 0) {
-        FILE *infile;
-        infile = fopen(infilestr, "r");
-        setinput(infile);
-        repl();
-        return 0;
-    }
-    char *full_path = dclang_malloc(512);
-    memset(full_path, 0, 512);
-    char *slash = "/";
-    strcat(full_path, prefix);
-    strcat(full_path, slash);
-    strcat(full_path, infilestr);
-    if (access(full_path, F_OK) == 0) {
-        FILE *infile = fopen(full_path, "r");
-        setinput(infile);
-        repl();
-        return 0;
-    }
-    printf(
-        "The file named %s doesn't appear to exist in the current " \
-        "directory, or under %s as %s, or cannot be accessed.\n"
-        "You may want to check its existence and permissions!\n",
-        infilestr, prefix, full_path
-    );
-    return -1;
-}
-
-
-int importfunc() {
-    if (data_stack_ptr < 1) {
-        printf("import -- stack underflow! ");
-        return -1;
-    }
-    char *importfile = (char *)(unsigned long) POP;
-    return dclang_import(importfile);
-}
-*/
-
 /*
 // a small buffer for use by `grabinput`
 char string_pad[512];
@@ -3864,26 +3880,25 @@ void execfunc() {
 }
 */
 
-/*
+
 // needed so we can add 'import' to primitives
 void load_extra_primitives()
 {
-    add_primitive("primitives", "Other", show_primitivesfunc);
-    add_primitive("import", "Other", importfunc);
-    add_primitive("input", "Other", inputfunc);
-    add_primitive("exec", "Other", execfunc);
+    //add_primitive("primitives", "Other", show_primitivesfunc);
+    add_primitive("import", "Other", OP_IMPORT);
+    //add_primitive("input", "Other", inputfunc);
+    //add_primitive("exec", "Other", execfunc);
     // final endpoint must be zeros,
     // and they won't count in the 'count':
     add_primitive(0, 0, 0);
 }
-*/
 
 void dclang_initialize()
 {
     setinput(stdin);
     resetoutfunc();
     add_all_primitives();
-    //load_extra_primitives();
+    load_extra_primitives();
     srand(time(NULL));
     // create the global hash table
     global_hash_table = hcreate(1024*256);

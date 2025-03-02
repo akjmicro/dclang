@@ -51,6 +51,7 @@ Born on 2018-05-05 */
 #define DCLANG_UINT  unsigned int
 // end of data type macros
 
+// constants
 #define DATA_STACK_SIZE   32
 #define RETURN_STACK_SIZE 128
 #define MAXWORD           1048576
@@ -59,6 +60,24 @@ Born on 2018-05-05 */
 #define NUMLOCALS         8
 #define NUMVARS           16777216
 #define NUM_TREE_ROOTS    32
+
+// function-like macros
+
+#define push(item) { \
+    if (data_stack_ptr >= DATA_STACK_SIZE) { \
+        printf("push -- stack overflow!\n"); \
+        data_stack_ptr = 0; \
+    } \
+    data_stack[data_stack_ptr++] = item; \
+}
+
+#define push_no_check(item) { \
+    data_stack[data_stack_ptr++] = item; \
+}
+
+#define POP data_stack[--data_stack_ptr]
+
+#define NEXT goto *dispatch_table[prog[++iptr].opcode]
 
 // compiled tokens get saved and put into an array of type 'inst_struct'
 typedef struct {
@@ -130,40 +149,6 @@ struct tree_entry
 
 void *tree_roots[NUM_TREE_ROOTS] = {NULL};
 int tree_roots_idx = -1;
-
-struct tree_entry *
-make_tree_entry(char *key, DCLANG_FLT value)
-{
-    struct tree_entry *new_tree =
-        (struct tree_entry *) dclang_malloc(sizeof(struct tree_entry));
-    if(!new_tree) {
-        printf("make_tree_entry malloc fail\n");
-        exit(1);
-    }
-    new_tree->key = dclang_strdup(key);
-    new_tree->value = value;
-    return new_tree;
-}
-
-int tree_compare_func(const void *l, const void *r)
-{
-    if (l == NULL || r == NULL) return 0;
-    struct tree_entry *tree_l = (struct tree_entry *)l;
-    struct tree_entry *tree_r = (struct tree_entry *)r;
-    return strcmp(tree_l->key, tree_r->key);
-}
-
-// helper used by `treewalk`
-void print_node(const void *node, const VISIT order, const int depth)
-{
-    if (order == preorder || order == leaf ) {
-		    printf(
-		        "key=%s, value=%s\n",
-		        (*(struct tree_entry **)node)->key,
-		        (char *)(DCLANG_PTR)((*(struct tree_entry **)node)->value)
-		    );
-    }
-}
 
 // Define the structure for linked list nodes
 struct Node {
@@ -324,11 +309,17 @@ enum dclang_opcodes {
     OP_ENDIF,
     OP_CALL,
     OP_RETURN,
+    OP_CLOCK,
+    OP_EPOCH,
+    OP_EPOCH_TO_DT,
+    OP_DT_TO_EPOCH,
+    OP_SLEEP,
     OP_CR,
     OP_PRINT,
     OP_EMIT,
     OP_UEMIT,
-    OP_BYTES32
+    OP_BYTES32,
+    OP_IMPORT
 };
     /*
     // character types
@@ -456,11 +447,7 @@ struct timeval tval;
 ///////////////
 
 extern void dclang_initialize();
-
 extern DCLANG_LONG dclang_import(char *infilestr);
-
 extern DCLANG_LONG dclang_findword(const char *word);
-
 extern void dclang_callword(DCLANG_PTR where);
-
 extern DCLANG_FLT dclang_pop();
