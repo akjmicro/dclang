@@ -251,7 +251,8 @@ void dclang_execute() {
         &&OP_EMIT,
         &&OP_UEMIT,
         &&OP_BYTES32,
-        &&OP_IMPORT
+        &&OP_IMPORT,
+        &&OP_SHOWDEFINED
     };
 
     while (1) {
@@ -1719,6 +1720,13 @@ void dclang_execute() {
         char *importfile = (char *)(unsigned long) POP;
         return dclang_import(importfile);
 
+    OP_SHOWDEFINED:
+        for (int x=0; x < num_user_words; x++) {
+            printf("Word %i: %s @ %li\n", x, user_words[x].name,\
+                                             user_words[x].word_start);
+        }
+        NEXT;
+
     }
 }
 
@@ -3002,13 +3010,7 @@ void regreadfunc()
 
 /*
 // for debugging
-void showdefined()
-{
-    for (int x=0; x < num_user_words; x++) {
-        printf("Word %i: %s @ %li\n", x, user_words[x].name,\
-                                         user_words[x].word_start);
-    }
-}
+
 */
 
 DCLANG_LONG dclang_findword(const char *word)
@@ -3461,6 +3463,8 @@ void add_all_primitives()
     add_primitive("emit", "Character Emitters", OP_EMIT);
     add_primitive("uemit", "Character Emitters", OP_UEMIT);
     add_primitive("bytes32", "Character Emitters", OP_BYTES32);
+    add_primitive("words", "Other", OP_SHOWDEFINED);
+
     /*
     // character types
     add_primitive("isalnum", "Character Types", OP_ISALNUM);
@@ -3548,7 +3552,6 @@ void add_all_primitives()
     add_primitive("fork", "Operating System", OP_FORK);
     add_primitive("exit", "Operating System", OP_EXIT);
     // show defined words!
-    add_primitive("words", "Other", OP_SHOWDEFINED);
     add_primitive("constants", "Other", OP_SHOWCONSTS);
     add_primitive("variables", "Other", OP_SHOWVARS);
     */
@@ -3645,10 +3648,10 @@ void compile_or_interpret(const char *token)
         if (def_mode) {
             if (strcmp(user_words[num_user_words - 1].name, token) == 0) {
                 prog[iptr].opcode = OP_JUMPU;  // don't overflow the return stack
-                prog[iptr++].param = found;
+                prog[iptr++].param = found - 1;
             } else {
                 prog[iptr].opcode = OP_CALL;  // normal return stack save
-                prog[iptr++].param = found;
+                prog[iptr++].param = found - 1;
             }
         } else {
             dclang_callword(found);

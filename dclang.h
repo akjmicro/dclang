@@ -319,7 +319,8 @@ enum dclang_opcodes {
     OP_EMIT,
     OP_UEMIT,
     OP_BYTES32,
-    OP_IMPORT
+    OP_IMPORT,
+    OP_SHOWDEFINED
 };
     /*
     // character types
