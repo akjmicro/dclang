@@ -130,15 +130,18 @@ void reverse_array(DCLANG_PTR arr[], int n) {
 // end locals helpers
 
 void dclang_execute() {
-    char *char_ptr, *env_key, *env_val, *key, *search_key, *str, *str1, *str2, *buf;
+    char *char_ptr, *env_key, *env_val, *key, *search_key, *str, *str1, *str2, *buf, *mode, *path, *host;
+    regex_t *regex;
     struct tree_entry *te, *te_del, *retval;
     struct Node *list, *next, *node_to_remove, *tail_node, *node, *new_node, *node_before;
+    struct hostent *server;
     void *hvalue, *confirm;
-    DCLANG_INT precision, width, bufsize, i, ch;
+    FILE *file;
+    DCLANG_INT precision, width, bufsize, i, ch, regex_flags, fd, sockfd, portno;
     DCLANG_FLT value, val, val1, val2, a, b, c, tree_val;
-    DCLANG_LONG slot, truth;
-    DCLANG_PTR arrstart, arrsize, env_key_addr, key_addr, idx, next_var, size, \
-               tree_idx, list_ptr, str_ptr_addr, str_ptr_addr2, dest, delim, buflen, strpt;
+    DCLANG_LONG slot, truth, result;
+    DCLANG_PTR arrstart, arrsize, env_key_addr, key_addr, idx, next_var, size, tree_idx, \
+               list_ptr, str_ptr_addr, str_ptr_addr2, dest, delim, buflen, strpt, bufaddr, num_bytes;
     DCLANG_ULONG shift_amt, base, fmt;
 
     static void *dispatch_table[] = {
@@ -300,8 +303,42 @@ void dclang_execute() {
         &&OP_STRTOK,
         &&OP_MEMPCPY,
         &&OP_MEMSET,
+        &&OP_MKBUF,
+        &&OP_FREE,
+        &&OP_MEMUSED,
+        &&OP_REGCOMP,
+        &&OP_REGEXEC,
+        &&OP_REGREAD,
         &&OP_IMPORT,
-        &&OP_SHOWWORDS
+        &&OP_FILEOPEN,
+        &&OP_FILEMEMOPEN,
+        &&OP_FILEREAD,
+        &&OP_FILEREADLINE,
+        &&OP_FILEREADALL,
+        &&OP_FILESEEK,
+        &&OP_FILETELL,
+        &&OP_FILEWRITE,
+        &&OP_FILEFLUSH,
+        &&OP_FILECLOSE,
+        &&OP_REDIRECT,
+        &&OP_RESETOUT,
+        &&OP_FLUSHOUT,
+        &&OP_OPEN,
+        &&OP_READ,
+        &&OP_WRITE,
+        &&OP_CLOSE,
+        &&OP_TCPLISTEN,
+        &&OP_TCPACCEPT,
+        &&OP_TCPCONNECT,
+        &&OP_UDPRECV,
+        &&OP_UDPSEND,
+        &&OP_BLOCKSIGINT,
+        &&OP_UNBLOCKSIGINT,
+        &&OP_FORK,
+        &&OP_EXIT,
+        &&OP_SHOWWORDS,
+        &&OP_SHOWCONSTS,
+        &&OP_SHOWVARS
     };
 
     while (1) {
@@ -1513,7 +1550,7 @@ void dclang_execute() {
                 printf("'strftime', a low-level call of 'epoch->dt', returned an error.\n");
                 return;
             }
-            DCLANG_PTR bufaddr = (DCLANG_PTR) tmbuf;
+            bufaddr = (DCLANG_PTR) tmbuf;
             if (bufaddr > MAX_STR || MAX_STR == 0)
             {
                 MAX_STR = bufaddr;
@@ -2149,7 +2186,7 @@ void dclang_execute() {
                 printf("mempcpy -- needs <dest> <source> <size> on stack!\n");
                 return;
             }
-            DCLANG_PTR size = (DCLANG_PTR) POP;
+            size = (DCLANG_PTR) POP;
             DCLANG_PTR source = (DCLANG_PTR) POP;
             dest = (DCLANG_PTR) POP;
             if ((dest != 0) && (dest < MIN_STR || dest > MAX_STR))
@@ -2183,7 +2220,120 @@ void dclang_execute() {
             }
             push((DCLANG_PTR)memset((char *)dest, (int)chr, (int)times));
             NEXT;
-
+        OP_MKBUF:
+            if (data_stack_ptr < 1)
+            {
+                printf("Stack_underflow!\n");
+                printf("'mkbuf' needs <size-as-integer> on the stack\n");
+            }
+            size = (DCLANG_PTR) POP;
+            buf = (char *) dclang_malloc(size);
+            memset(buf, 0, size);
+            DCLANG_PTR advance = (DCLANG_PTR) strlen(buf);
+            bufaddr = (DCLANG_PTR) buf;
+            bufaddr += advance;
+            // update print safety:
+            if (bufaddr < MIN_STR || MIN_STR == 0)
+            {
+                MIN_STR = bufaddr;
+            }
+            if (bufaddr + size + 1 > MAX_STR || MAX_STR == 0)
+            {
+                MAX_STR = bufaddr + size + 1;
+            }
+            // done updating
+            push(bufaddr);
+            NEXT;
+        OP_FREE:
+            if (data_stack_ptr < 1)
+            {
+                printf("free -- stack underflow! N.B. This word is actually a no-op, kept for backwards compatibility\n");
+                return;
+            }
+            DCLANG_PTR loc_PTR = (DCLANG_PTR) POP;
+            dclang_free((char *) loc_PTR);
+            NEXT;
+        OP_MEMUSED:
+            DCLANG_FLT memused = (DCLANG_FLT) (((float) unused_mem_idx) / ((float) MEMSIZE));
+            push(memused);
+            NEXT;
+        OP_REGCOMP:
+            if (data_stack_ptr < 2)
+            {
+                printf("regcomp -- stack underflow: need <pattern> and <regex_flags> on the stack!\n");
+                return;
+            }
+            // Pop the regex pattern from the stack
+            regex_flags = (DCLANG_INT) POP;
+            DCLANG_PTR pattern_ptr_addr = (DCLANG_PTR)POP;
+            if (pattern_ptr_addr < MIN_STR || pattern_ptr_addr > MAX_STR)
+            {
+                perror("regcomp -- Pattern address out-of-range.\n");
+                return;
+            }
+            char *pattern = (char *)pattern_ptr_addr;
+            // Compile the regex pattern
+            regex= (regex_t *)dclang_malloc(sizeof(regex_t));
+            if (regcomp(regex, pattern, (DCLANG_INT)regex_flags) != 0)
+            {
+                perror("regcomp -- Error compiling regex pattern\n");
+                dclang_free(regex);
+                return;
+            }
+            // Push the compiled regex object pointer onto the stack
+            push((DCLANG_PTR)regex);
+            NEXT;
+        OP_REGEXEC:
+            if (data_stack_ptr < 3)
+            {
+                printf("regexec -- stack underflow; need <regexobj> <string_to_search> <regex_flags> on the stack!\n");
+                return;
+            }
+            // Pop the input string and the compiled regex object from the stack
+            regex_flags = (DCLANG_INT) POP;
+            DCLANG_PTR input_str_ptr_addr = (DCLANG_PTR)POP;
+            DCLANG_PTR regex_obj_PTR = (DCLANG_PTR)POP;
+            if (regex_obj_PTR < 0 || input_str_ptr_addr < MIN_STR || input_str_ptr_addr > MAX_STR)
+            {
+                perror("regexec -- Invalid regex object or string address.\n");
+                return;
+            }
+            regex= (regex_t *)regex_obj_PTR;
+            char *input_str = (char *)input_str_ptr_addr;
+            // Execute the regex matching
+            regmatch_t *match = (regmatch_t *)dclang_malloc(10 * sizeof(regmatch_t));
+            if (regexec(regex, input_str, 10, match, (DCLANG_INT)regex_flags) == 0)
+            {
+                // If a match is found, push the match object onto the stack
+                push((DCLANG_PTR)match);
+            }
+            else
+            {
+                // No match found, push -1 to indicate failure
+                push((DCLANG_LONG)-1);
+            }
+            NEXT;
+        OP_REGREAD:
+            if (data_stack_ptr < 2)
+            {
+                printf("regread -- stack underflow; need <regexec_result> <match_index> on the stack! \n");
+                printf("regread will return a start and end index relative to the original searched string. \n");
+                printf("If the user actually wants that substring, it makes sense to have saved the original \n");
+                printf("string, and put the results of regread at the top of stack, then call `strslice`,\n");
+                printf("which needs to be imported from the 'string' module.\n");
+                return;
+            }
+            DCLANG_LONG index = (DCLANG_LONG)POP;
+            DCLANG_PTR regmatch_pnt = (DCLANG_PTR)POP;
+            if ((DCLANG_LONG)regmatch_pnt > 0) {
+                regmatch_t *match = (regmatch_t *)regmatch_pnt;
+                push((DCLANG_LONG)(match[index].rm_so));
+                push((DCLANG_LONG)(match[index].rm_eo));
+            } else {
+                push((DCLANG_LONG)-1);
+                push((DCLANG_LONG)-1);
+            }
+            NEXT;
         OP_IMPORT:
             if (data_stack_ptr < 1) {
                 printf("import -- stack underflow! ");
@@ -2191,656 +2341,430 @@ void dclang_execute() {
             }
             char *importfile = (char *)(unsigned long) POP;
             return dclang_import(importfile);
+        OP_FILEOPEN:
+            if (data_stack_ptr < 2)
+            {
+                printf("Stack underflow!\n");
+                printf("'fopen' needs <filename> <open-mode> on the stack\n");
+                return;
+            }
+            // file mode string
+            mode = (char *)(DCLANG_PTR) POP;
+            // file path
+            path = (char *)(DCLANG_PTR) POP;
+            // if mode is read or append, file must exist:
+            if ( (access(path, F_OK) == -1)
+                 && ( !strcmp("r", mode) || !strcmp("r+", mode) ) )
+            {
+                printf("The file named %s doesn't appear to exist, " \
+                       "or cannot be accessed.\n", path);
+                return;
+            }
+            file = fopen(path, mode);
+            push((DCLANG_PTR)file);
+            NEXT;
+        OP_FILEMEMOPEN:
+            if (data_stack_ptr < 3)
+            {
+                printf("Stack underflow!\n");
+                printf("'fmemopen' needs <buf (can be 0)> <size> <open-mode> on the stack\n");
+                return;
+            }
+            mode = (char *)(DCLANG_PTR) POP;
+            size = (DCLANG_PTR) POP;
+            bufaddr = (DCLANG_PTR) POP;
+            file = fmemopen(bufaddr, size, mode);
+            push((DCLANG_PTR)file);
+            NEXT;
+        OP_FILECLOSE:
+            if (data_stack_ptr < 1)
+            {
+                printf("Stack underflow!\n");
+                printf("'fclose' needs <file_pointer> on the stack\n");
+                return;
+            }
+            file = (FILE *)(DCLANG_PTR) POP;
+            fclose(file);
+            NEXT;
+        OP_FILEREAD:
+            if (data_stack_ptr < 3)
+            {
+                printf("Stack underflow!\n");
+                printf("'fread' needs <buf_pointer> <number-of-bytes> <file_pointer> on the stack\n");
+                return;
+            }
+            file = (FILE *)(DCLANG_PTR) POP;
+            DCLANG_PTR num_bytes_in = (DCLANG_PTR) POP;
+            buf = (char *)(DCLANG_PTR) POP;
+            num_bytes = fread(buf, 1, num_bytes_in, file);
+            // update print safety:
+            if ((DCLANG_PTR)buf < MIN_STR || MIN_STR == 0)
+            {
+                MIN_STR = (DCLANG_PTR)buf;
+            }
+            if ((DCLANG_PTR)buf + num_bytes + 1 > MAX_STR || MAX_STR == 0)
+            {
+                MAX_STR = (DCLANG_PTR)buf + num_bytes + 1;
+            }
+            // push the number of bytes read
+            push((DCLANG_LONG) num_bytes);
+            NEXT;
+        OP_FILEREADLINE:
+            if (data_stack_ptr < 1)
+            {
+                printf("Stack underflow!\n");
+                printf("'freadline' needs <file_pointer> on the stack\n");
+                return;
+            }
+            file = (FILE *)(DCLANG_PTR) POP;
+            num_bytes = getline(&linebuf, &linelen, file);
+            // update print safety:
+            if ((DCLANG_PTR) linebuf < MIN_STR || MIN_STR == 0)
+            {
+                MIN_STR = (DCLANG_PTR) linebuf;
+            }
+            if ((DCLANG_PTR) linebuf + num_bytes + 1 > MAX_STR || MAX_STR == 0)
+            {
+                MAX_STR = (DCLANG_PTR) linebuf + num_bytes + 1;
+            }
+            // push the address of our new string and length
+            push((DCLANG_PTR) linebuf);
+            // push the number of bytes read
+            push((DCLANG_LONG) num_bytes);
+            NEXT;
+        OP_FILEREADALL:
+            if (data_stack_ptr < 1)
+            {
+                printf("Stack underflow!\n");
+                printf("'freadall' needs <file_pointer> on the stack\n");
+                return;
+            }
+            DCLANG_PTR chr_cnt = 0;
+            DCLANG_PTR req_bufsize = 64;
+            DCLANG_LONG ch;
+            char *allbuf = (char *) dclang_malloc(req_bufsize);
+            memset(allbuf, 0, req_bufsize);
+            file = (FILE *)(DCLANG_PTR) POP;
+            while ((ch = fgetc(file)) != EOF)
+            {
+                chr_cnt += 1;
+                if (chr_cnt > req_bufsize)
+                {
+                    req_bufsize *= 2;
+                    allbuf = (char *) dclang_realloc(allbuf, req_bufsize);
+                }
+                memset(allbuf + chr_cnt - 1, ch, 1);
+            }
+            memset(allbuf + chr_cnt, 0, 1);
+            // update print safety:
+            if ((DCLANG_PTR) allbuf < MIN_STR || MIN_STR == 0)
+            {
+                MIN_STR = (DCLANG_PTR) allbuf;
+            }
+            if ((DCLANG_PTR) allbuf + chr_cnt + 1 > MAX_STR || MAX_STR == 0)
+            {
+                MAX_STR = (DCLANG_PTR) allbuf + chr_cnt + 1;
+            }
+            // push the address of our new string and length
+            push((DCLANG_PTR) allbuf);
+            // push the number of bytes read
+            push((DCLANG_LONG) chr_cnt);
+            NEXT;
+        OP_FILESEEK:
+            if (data_stack_ptr < 3)
+            {
+                printf("Stack underflow!\n");
+                printf("'fseek' needs <file_pointer> <offset> <whence> on the stack\n");
+                printf("'Whence' must be 0 (SEEK_SET), 1 (SEEK_CUR), or 2 (SEEK_END).\n");
+                return;
+            }
+            DCLANG_PTR whence = (DCLANG_PTR) POP;
+            if (!(whence >= 0 && whence <= 2))
+            {
+                printf("Whence parameter must be between 0 and 2 inclusive!\n");
+                return;
+            }
+            DCLANG_LONG offset = (DCLANG_LONG) POP;
+            file = (FILE *)(DCLANG_PTR) POP;
+            fseek(file, offset, whence);
+            NEXT;
+        OP_FILETELL:
+            if (data_stack_ptr < 1)
+            {
+                printf("Stack underflow!\n");
+                printf("'ftell' needs a <file_pointer> on the stack\n");
+                return;
+            }
+            file = (FILE *)(DCLANG_PTR) POP;
+            DCLANG_PTR mylen = ftell(file);
+            push((DCLANG_PTR) mylen);
+            NEXT;
+        OP_FILEWRITE:
+            if (data_stack_ptr < 3)
+            {
+                printf("'fwrite' -- needs <string-address> <num_of_bytes> <file_pointer> on the stack\n");
+                return;
+            }
+            file = (FILE *)(DCLANG_PTR) POP;
+            num_bytes = (DCLANG_PTR) POP;
+            str = (char *)(DCLANG_PTR) POP;
+            result = fwrite(str, 1, num_bytes, file);
+            push(result);
+            NEXT;
+        OP_FILEFLUSH:
+            if (data_stack_ptr < 1)
+            {
+                printf("'fflush' -- needs <file_pointer> on the stack\n");
+                return;
+            }
+            file = (FILE *)(DCLANG_PTR) POP;
+            fflush(file);
+            NEXT;
+        OP_REDIRECT:
+            if (data_stack_ptr < 1) {
+                printf("Stack underflow! 'redirect' needs an output file pointer before being called\n");
+                return;
+            }
+            ofp = (FILE *)(DCLANG_PTR) POP;
+            NEXT;
+        OP_RESETOUT:
+            ofp = stdout;
+            NEXT;
+        OP_FLUSHOUT:
+            fflush(ofp);
+            NEXT;
+        OP_OPEN:
+            if (data_stack_ptr < 2)
+            {
+                printf("Stack_underflow!\n");
+                printf("'open' needs <filestr> <flagint> on the stack\n");
+                return;
+            }
+            DCLANG_PTR flagint = (DCLANG_PTR) POP;
+            path = (char *)(DCLANG_PTR)POP;
+            fd = open(path, flagint);
+            push((DCLANG_PTR) fd);
+            NEXT;
+        OP_READ:
+            if (data_stack_ptr < 1)
+            {
+                printf("Stack_underflow!\n");
+                printf("'read' needs <file_pointer> <buffer-pointer> <num_bytes> on the stack\n");
+                return;
+            }
+            num_bytes = (DCLANG_PTR) POP;
+            buf = (void *)(DCLANG_PTR)POP;
+            fd = (int) POP;
+            result = read(fd, buf, num_bytes);
+            push(result);
+            NEXT;
+        OP_WRITE:
+            if (data_stack_ptr < 3)
+            {
+                printf("Stack_underflow!\n");
+                printf("'write' needs <file_pointer> <buffer-pointer> <num_bytes> on the stack\n");
+                return;
+            }
+            num_bytes = (DCLANG_PTR) POP;
+            buf = (void *)(DCLANG_PTR)POP;
+            fd = (int) POP;
+            result = write(fd, buf, num_bytes);
+            push(result);
+            NEXT;
+        OP_CLOSE:
+            if (data_stack_ptr < 1)
+            {
+                printf("Stack_underflow!\n");
+                printf("'close' needs <file_pointer> on the stack\n");
+                return;
+            }
+            int fp = (int) POP;
+            result = close(fp);
+            push(result);
+            NEXT;
+        OP_TCPLISTEN:
+            // Sets up a new listening TCP socket 'object' for listening
+            // and returns its address onto the stack
+            if (data_stack_ptr < 1) {
+                printf("tcplisten -- need <port_number> on the\n");
+                return;
+            }
+            sockfd = socket(AF_INET, SOCK_STREAM, 0);
+            const int enable = 1;
+            setsockopt(sockfd, SOL_SOCKET, SO_REUSEADDR, (const char*)&enable, sizeof(DCLANG_INT));
+            if (sockfd < 0) {
+               perror("tcplisten -- ERROR opening socket.");
+            }
+            bzero((char *) &serv_addr, sizeof(serv_addr));
+            portno = (DCLANG_INT) POP;
+            serv_addr.sin_family = AF_INET;
+            serv_addr.sin_addr.s_addr = INADDR_ANY;
+            serv_addr.sin_port = htons(portno);
+            if (bind(sockfd, (struct sockaddr *) &serv_addr,
+                  sizeof(serv_addr)) < 0)
+                  perror("ERROR on binding");
+            listen(sockfd, 5);
+            push((DCLANG_INT) sockfd);
+            NEXT;
+        OP_TCPACCEPT:
+            // Take a given tcplisten-ready socket object and actually make it
+            // accept a connection. Returns a handle to the established connection.
+            // Can be used inside a loop as a basis for a "multi-connection handling"
+            // forking server via `fork`.
+            if (data_stack_ptr < 1) {
+                printf("tcpaccept -- need <socket> on the stack");
+                return;
+            }
+            DCLANG_UINT clilen = sizeof(cli_addr);
+            sockfd = (DCLANG_INT) POP;
+            DCLANG_INT newsockfd = accept(sockfd, (struct sockaddr *) &cli_addr, &clilen);
+            if (newsockfd < 0) perror("tcpaccept -- ERROR on accept step!");
+            push((DCLANG_INT) newsockfd);
+            NEXT;
+        OP_TCPCONNECT:
+            // A tcp client word. This can reach out to a pre-established tcp server
+            // already set up with the above words.
+            if (data_stack_ptr < 2) {
+                printf("tcpconnect -- need <host> <port> on the stack");
+                return;
+            }
+            sockfd = socket(AF_INET, SOCK_STREAM, 0);
+            if (sockfd < 0) perror("tcpconnect -- ERROR opening socket");
+            portno = (DCLANG_INT) POP;
+            struct sockaddr_in host_addr;
+            host = (char *) (DCLANG_PTR) POP;
+            server = gethostbyname(host);
+            if (server == NULL) {
+                fprintf(stderr, "tcpconnect -- ERROR, no such host\n");
+                exit(0);
+            }
+            bzero((char *) &host_addr, sizeof(host_addr));
+            host_addr.sin_family = AF_INET;
+            bcopy((char *)server->h_addr, (char *)&host_addr.sin_addr.s_addr, server->h_length);
+            host_addr.sin_port = htons(portno);
+            if (connect(sockfd, (struct sockaddr *)&host_addr, sizeof(host_addr)) < 0)
+                perror("tcpconnect -- ERROR connecting");
+            push((DCLANG_INT) sockfd);
+            NEXT;
+        OP_UDPRECV:
+            // Receive data over UDP
+            if (data_stack_ptr < 3) {
+                printf("udprecv -- need <port_number> <max_bytes> <buffer> on the stack\n");
+                return;
+            }
+            // stack values
+            buf = (char *) (DCLANG_PTR) POP;
+            DCLANG_INT max_bytes = (DCLANG_INT) POP;
+            portno = (DCLANG_INT) POP;
+            // make a socket
+            sockfd = socket(AF_INET, SOCK_DGRAM, 0);
+            if (sockfd < 0) {
+                perror("udprecv -- ERROR opening socket");
+                return;
+            }
+            socklen_t udp_clilen = sizeof(udp_cli_addr);
+            bzero((char *) &udp_serv_addr, sizeof(udp_serv_addr));
+            udp_serv_addr.sin_family = AF_INET;
+            udp_serv_addr.sin_addr.s_addr = INADDR_ANY;
+            udp_serv_addr.sin_port = htons(portno);
+            // bind the socket
+            if (bind(sockfd, (struct sockaddr *) &udp_serv_addr,
+                     sizeof(udp_serv_addr)) < 0) {
+                perror("udprecv -- ERROR on binding");
+            }
+            result = recvfrom(
+                sockfd, buf, max_bytes, 0,
+                (struct sockaddr *)&udp_cli_addr, &udp_clilen
+            );
+            if (result < 0) {
+                perror("udprecv -- ERROR receiving data");
+            }
+            buf[result] = '\0'; // Null terminate the received data
+            close(sockfd);
+            push((DCLANG_LONG) result);
+            NEXT;
+        OP_UDPSEND:
+            // Send data over UDP to a specified host and port
+            if (data_stack_ptr < 3) {
+                printf("udpsend -- need <host> <port> <buffer> on the stack\n");
+                return;
+            }
+            // stack values
+            buf = (char *) (DCLANG_PTR) POP;
+            portno = (DCLANG_INT) POP;
+            host = (char *) (DCLANG_PTR) POP;
+            // make a socket
+            sockfd = socket(AF_INET, SOCK_DGRAM, 0);
+            if (sockfd < 0) {
+                perror("udpsend -- ERROR opening socket");
+                return;
+            }
+            server = gethostbyname(host);
+            if (server == NULL) {
+                fprintf(stderr, "udpsend -- ERROR, no such host\n");
+                return;
+            }
+            bzero((char *) &dest_addr, sizeof(dest_addr));
+            dest_addr.sin_family = AF_INET;
+            bcopy(
+                (char *)server->h_addr,
+                (char *)&dest_addr.sin_addr.s_addr,
+                server->h_length
+            );
+            dest_addr.sin_port = htons(portno);
+            result = sendto(
+                sockfd, buf, strlen(buf) + 1, 0,
+                (struct sockaddr *)&dest_addr, sizeof(dest_addr)
+            );
+            if (result < 0) {
+                perror("udpsend -- ERROR sending data");
+            }
+            close(sockfd);
+            push((DCLANG_INT) result);
+            NEXT;
+        OP_BLOCKSIGINT:
+            sigemptyset(&block_sigint);
+            sigaddset(&block_sigint, SIGINT);
+            sigprocmask(SIG_BLOCK, &block_sigint, NULL);
+            NEXT;
+        OP_UNBLOCKSIGINT:
+            sigprocmask(SIG_UNBLOCK, &block_sigint, NULL);
+            NEXT;
+        OP_FORK:
+            // This wrod mainly exists so that a multi-client capable tcp/web server
+            // can be had. It is assumed that the return value will be caught, inspected,
+            // and handled by the caller, so this is really quite a simple c->dclang mapping.
+            // TODO: a future enhancement might be to have a counting system in place for
+            // avoiding fork-bomb DoS attacks. So, the introspection of a connection limit
+            // before granting a new `fork`.
+            push((DCLANG_INT) fork());
+            NEXT;
+        OP_EXIT:
+            if (data_stack_ptr < 1) {
+                printf("exit -- need an integer exit code on the stack");
+                return;
+            }
+            DCLANG_INT code = (DCLANG_INT) POP;
+            exit(code);
+            NEXT;
         OP_SHOWWORDS:
             for (int x=0; x < num_user_words; x++) {
                 printf("Word %i: %s @ %li\n", x, user_words[x].name,\
                                                  user_words[x].word_start);
             }
             NEXT;
+        OP_SHOWCONSTS:
+            for (int x=0; x < const_idx; x++) {
+                printf("Constant %i: %s ==> %.19g\n", x, const_keys[x], const_vals[x]);
+            }
+            NEXT;
+        OP_SHOWVARS:
+            for (int x=0; x < var_map_idx; x++) {
+                printf("Variable %i: %s @ %li\n", x, var_keys[x], var_vals[x]);
+            }
+            NEXT;
     }
 }
-/*
-// used by 'freadline' function, which calls 'getline'
-// must be global so it is accessible to the data stack:
-char *linebuf = NULL;
-size_t linelen = 0;
-void fileopen:
-{
-    if (data_stack_ptr < 2)
-    {
-        printf("Stack underflow!\n");
-        printf("'fopen' needs <filename> <open-mode> on the stack\n");
-        return;
-    }
-    // file mode string
-    char *mode = (char *)(DCLANG_PTR) POP;
-    // file path
-    char *path = (char *)(DCLANG_PTR) POP;
-    // if mode is read or append, file must exist:
-    if ( (access(path, F_OK) == -1)
-         && ( !strcmp("r", mode) || !strcmp("r+", mode) ) )
-    {
-        printf("The file named %s doesn't appear to exist, " \
-               "or cannot be accessed.\n", path);
-        return;
-    }
-    FILE *openfptr = fopen(path, mode);
-    push((DCLANG_PTR)openfptr);
-}
-
-void filememopen:
-{
-    if (data_stack_ptr < 3)
-    {
-        printf("Stack underflow!\n");
-        printf("'fmemopen' needs <buf (can be 0)> <size> <open-mode> on the stack\n");
-        return;
-    }
-    char *mode = (char *)(DCLANG_PTR) POP;
-    DCLANG_PTR size = (DCLANG_PTR) POP;
-    DCLANG_PTR buf = (DCLANG_PTR) POP;
-    FILE *openfptr = fmemopen(buf, size, mode);
-    push((DCLANG_PTR)openfptr);
-}
-
-void fileclose:
-{
-    if (data_stack_ptr < 1)
-    {
-        printf("Stack underflow!\n");
-        printf("'fclose' needs <file_pointer> on the stack\n");
-        return;
-    }
-    FILE *file_to_close = (FILE *)(DCLANG_PTR) POP;
-    fclose(file_to_close);
-}
-
-void fileread:
-{
-    if (data_stack_ptr < 3)
-    {
-        printf("Stack underflow!\n");
-        printf("'fread' needs <buf_pointer> <number-of-bytes> <file_pointer> on the stack\n");
-        return;
-    }
-    FILE *file_to_read = (FILE *)(DCLANG_PTR) POP;
-    DCLANG_LONG num_bytes = (DCLANG_PTR) POP;
-    buf = (char *)(DCLANG_PTR) POP;
-    DCLANG_PTR num_bytes_read = fread(buf, 1, num_bytes, file_to_read);
-    // update print safety:
-    if ((DCLANG_PTR)buf < MIN_STR || MIN_STR == 0)
-    {
-        MIN_STR = (DCLANG_PTR)buf;
-    }
-    if ((DCLANG_PTR)buf + num_bytes_read + 1 > MAX_STR || MAX_STR == 0)
-    {
-        MAX_STR = (DCLANG_PTR)buf + num_bytes_read + 1;
-    }
-    // push the number of bytes read
-    push((DCLANG_LONG) num_bytes_read);
-}
-
-void filereadline:
-{
-    if (data_stack_ptr < 1)
-    {
-        printf("Stack underflow!\n");
-        printf("'freadline' needs <file_pointer> on the stack\n");
-        return;
-    }
-    FILE *file_to_read = (FILE *)(DCLANG_PTR) POP;
-    DCLANG_PTR num_bytes_read = getline(&linebuf, &linelen, file_to_read);
-    // update print safety:
-    if ((DCLANG_PTR) linebuf < MIN_STR || MIN_STR == 0)
-    {
-        MIN_STR = (DCLANG_PTR) linebuf;
-    }
-    if ((DCLANG_PTR) linebuf + num_bytes_read + 1 > MAX_STR || MAX_STR == 0)
-    {
-        MAX_STR = (DCLANG_PTR) linebuf + num_bytes_read + 1;
-    }
-    // push the address of our new string and length
-    push((DCLANG_PTR) linebuf);
-    // push the number of bytes read
-    push((DCLANG_LONG) num_bytes_read);
-}
-
-void filereadall:
-{
-    if (data_stack_ptr < 1)
-    {
-        printf("Stack underflow!\n");
-        printf("'freadall' needs <file_pointer> on the stack\n");
-        return;
-    }
-    DCLANG_PTR chr_cnt = 0;
-    DCLANG_PTR req_bufsize = 64;
-    DCLANG_LONG ch;
-    char *allbuf = (char *) dclang_malloc(req_bufsize);
-    memset(allbuf, 0, req_bufsize);
-    FILE *file_to_read = (FILE *)(DCLANG_PTR) POP;
-    while ((ch = fgetc(file_to_read)) != EOF)
-    {
-        chr_cnt += 1;
-        if (chr_cnt > req_bufsize)
-        {
-            req_bufsize *= 2;
-            allbuf = (char *) dclang_realloc(allbuf, req_bufsize);
-        }
-        memset(allbuf + chr_cnt - 1, ch, 1);
-    }
-    memset(allbuf + chr_cnt, 0, 1);
-    // update print safety:
-    if ((DCLANG_PTR) allbuf < MIN_STR || MIN_STR == 0)
-    {
-        MIN_STR = (DCLANG_PTR) allbuf;
-    }
-    if ((DCLANG_PTR) allbuf + chr_cnt + 1 > MAX_STR || MAX_STR == 0)
-    {
-        MAX_STR = (DCLANG_PTR) allbuf + chr_cnt + 1;
-    }
-    // push the address of our new string and length
-    push((DCLANG_PTR) allbuf);
-    // push the number of bytes read
-    push((DCLANG_LONG) chr_cnt);
-}
-
-void fileseek:
-{
-    if (data_stack_ptr < 3)
-    {
-        printf("Stack underflow!\n");
-        printf("'fseek' needs <offset> <whence> <file_pointer> on the stack\n");
-        printf("'Whence' must be 0 (SEEK_SET), 1 (SEEK_CUR), or 2 (SEEK_END).\n");
-        return;
-    }
-    FILE *file_to_seek = (FILE *)(DCLANG_PTR) POP;
-    DCLANG_PTR whence = (DCLANG_PTR) POP;
-    if (!(whence >= 0 && whence <= 2))
-    {
-        printf("Whence parameter must be between 0 and 2 inclusive!\n");
-        return;
-    }
-    DCLANG_LONG offset = (DCLANG_LONG) POP;
-    fseek(file_to_seek, offset, whence);
-}
-
-void filetell:
-{
-    if (data_stack_ptr < 1)
-    {
-        printf("Stack underflow!\n");
-        printf("'ftell' needs a <file_pointer> on the stack\n");
-        return;
-    }
-    FILE *file_to_tell = (FILE *)(DCLANG_PTR) POP;
-    DCLANG_PTR mylen = ftell(file_to_tell);
-    push((DCLANG_PTR) mylen);
-}
-
-void filewrite:
-{
-    if (data_stack_ptr < 3)
-    {
-        printf("'fwrite' -- needs <string-address> <num_of_bytes> <file_pointer> on the stack\n");
-        return;
-    }
-    FILE *file_to_write = (FILE *)(DCLANG_PTR) POP;
-    DCLANG_PTR num_bytes = (DCLANG_PTR) POP;
-    str = (char *)(DCLANG_PTR) POP;
-    DCLANG_LONG result = fwrite(str, 1, num_bytes, file_to_write);
-    push(result);
-}
-
-void fileflush:
-{
-    if (data_stack_ptr < 1)
-    {
-        printf("'fflush' -- needs <file_pointer> on the stack\n");
-        return;
-    }
-    FILE *file_to_flush = (FILE *)(DCLANG_PTR) POP;
-    fflush(file_to_flush);
-}
-
-// lower-level OS calls:
-
-void open:
-{
-    if (data_stack_ptr < 2)
-    {
-        printf("Stack_underflow!\n");
-        printf("'open' needs <filestr> <flagint> on the stack\n");
-        return;
-    }
-    DCLANG_PTR flagint = (DCLANG_PTR) POP;
-    char *path = (char *)(DCLANG_PTR)POP;
-    int fd = open(path, flagint);
-    push((DCLANG_PTR) fd);
-}
-
-void read:
-{
-    if (data_stack_ptr < 1)
-    {
-        printf("Stack_underflow!\n");
-        printf("'read' needs <file_pointer> <buffer-pointer> <numbytes> on the stack\n");
-        return;
-    }
-    DCLANG_PTR numbytes = (DCLANG_PTR) POP;
-    void *buf = (void *)(DCLANG_PTR)POP;
-    int fd = (int) POP;
-    int res = read(fd, buf, numbytes);
-    push((int)res);
-}
-
-void write:
-{
-    if (data_stack_ptr < 3)
-    {
-        printf("Stack_underflow!\n");
-        printf("'write' needs <file_pointer> <buffer-pointer> <numbytes> on the stack\n");
-        return;
-    }
-    DCLANG_PTR numbytes = (DCLANG_PTR) POP;
-    void *buf = (void *)(DCLANG_PTR)POP;
-    int fd = (int) POP;
-    int res = write(fd, buf, numbytes);
-    push((int)res);
-}
-
-void close:
-{
-    if (data_stack_ptr < 1)
-    {
-        printf("Stack_underflow!\n");
-        printf("'close' needs <file_pointer> on the stack\n");
-        return;
-    }
-    int fp = (int) POP;
-    int res = close(fp);
-    push(res);
-}
-void redirect:
-{
-    if (data_stack_ptr < 1) {
-        printf("Stack underflow! 'redirect' needs an output file pointer before being called\n");
-        return;
-    }
-    ofp = (FILE *)(DCLANG_PTR) POP;
-}
-
-void resetout:
-{
-    ofp = stdout;
-}
-
-void flushout:
-{
-    fflush(ofp);
-}
-
-struct sockaddr_in serv_addr, cli_addr;
-struct sockaddr_in udp_serv_addr, udp_cli_addr, dest_addr;
-
-void tcplisten:
-{
-    // Sets up a new listening TCP socket 'object' for listening
-    // and returns its address onto the stack
-    if (data_stack_ptr < 1) {
-        printf("tcplisten -- need <port_number> on the\n");
-        return;
-    }
-    DCLANG_INT sockfd = socket(AF_INET, SOCK_STREAM, 0);
-    DCLANG_INT true = 1;
-    setsockopt(sockfd, SOL_SOCKET, SO_REUSEADDR, &true, sizeof(DCLANG_INT));
-    if (sockfd < 0) {
-       perror("tcplisten -- ERROR opening socket.");
-    }
-    bzero((char *) &serv_addr, sizeof(serv_addr));
-    DCLANG_INT portno = (DCLANG_INT) POP;
-    serv_addr.sin_family = AF_INET;
-    serv_addr.sin_addr.s_addr = INADDR_ANY;
-    serv_addr.sin_port = htons(portno);
-    if (bind(sockfd, (struct sockaddr *) &serv_addr,
-          sizeof(serv_addr)) < 0)
-          perror("ERROR on binding");
-    listen(sockfd, 5);
-    push((DCLANG_INT) sockfd);
-}
-
-void tcpaccept:
-{
-    // Take a given tcplisten-ready socket object and actually make it
-    // accept a connection. Returns a handle to the established connection.
-    // Can be used inside a loop as a basis for a "multi-connection handling"
-    // forking server via `fork`.
-    if (data_stack_ptr < 1) {
-        printf("tcpaccept -- need <socket> on the stack");
-        return;
-    }
-    DCLANG_UINT clilen = sizeof(cli_addr);
-    DCLANG_INT sockfd = (DCLANG_INT) POP;
-    DCLANG_INT newsockfd = accept(sockfd, (struct sockaddr *) &cli_addr, &clilen);
-    if (newsockfd < 0) perror("tcpaccept -- ERROR on accept step!");
-    push((DCLANG_INT) newsockfd);
-}
-
-void tcpconnect:
-{
-    // A tcp client word. This can reach out to a pre-established tcp server
-    // already set up with the above words.
-    if (data_stack_ptr < 2) {
-        printf("tcpconnect -- need <host> <port> on the stack");
-        return;
-    }
-    DCLANG_INT sockfd = socket(AF_INET, SOCK_STREAM, 0);
-    if (sockfd < 0) perror("tcpconnect -- ERROR opening socket");
-    DCLANG_INT portno = (DCLANG_INT) POP;
-    struct sockaddr_in host_addr;
-    char *host = (char *) (DCLANG_PTR) POP;
-    struct hostent *server = gethostbyname(host);
-    if (server == NULL) {
-        fprintf(stderr, "tcpconnect -- ERROR, no such host\n");
-        exit(0);
-    }
-    bzero((char *) &host_addr, sizeof(host_addr));
-    host_addr.sin_family = AF_INET;
-    bcopy((char *)server->h_addr, (char *)&host_addr.sin_addr.s_addr, server->h_length);
-    host_addr.sin_port = htons(portno);
-    if (connect(sockfd, (struct sockaddr *)&host_addr, sizeof(host_addr)) < 0)
-        perror("tcpconnect -- ERROR connecting");
-    push((DCLANG_INT) sockfd);
-}
-
-/////////
-// UDP //
-/////////
-
-// Possible TODO: make these more 'modular' and configurable w/re: socket opts.
-
-void udprecv: {
-    // Receive data over UDP
-    if (data_stack_ptr < 3) {
-        printf("udprecv -- need <port_number> <max_bytes> <buffer> on the stack\n");
-        return;
-    }
-    // stack values
-    char *buffer = (char *) (DCLANG_PTR) POP;
-    DCLANG_INT max_bytes = (DCLANG_INT) POP;
-    DCLANG_INT portno = (DCLANG_INT) POP;
-    // make a socket
-    DCLANG_INT sockfd = socket(AF_INET, SOCK_DGRAM, 0);
-    if (sockfd < 0) {
-        perror("udprecv -- ERROR opening socket");
-        return;
-    }
-    socklen_t udp_clilen = sizeof(udp_cli_addr);
-    bzero((char *) &udp_serv_addr, sizeof(udp_serv_addr));
-    udp_serv_addr.sin_family = AF_INET;
-    udp_serv_addr.sin_addr.s_addr = INADDR_ANY;
-    udp_serv_addr.sin_port = htons(portno);
-    // bind the socket
-    if (bind(sockfd, (struct sockaddr *) &udp_serv_addr,
-             sizeof(udp_serv_addr)) < 0) {
-        perror("udprecv -- ERROR on binding");
-    }
-    ssize_t num_bytes = recvfrom(
-        sockfd, buffer, max_bytes, 0,
-        (struct sockaddr *)&udp_cli_addr, &udp_clilen
-    );
-    if (num_bytes < 0) {
-        perror("udprecv -- ERROR receiving data");
-    }
-    buffer[num_bytes] = '\0'; // Null terminate the received data
-    close(sockfd);
-    push((DCLANG_INT) num_bytes);
-}
-
-void udpsend: {
-    // Send data over UDP to a specified host and port
-    if (data_stack_ptr < 3) {
-        printf("udpsend -- need <host> <port> <buffer> on the stack\n");
-        return;
-    }
-    // stack values
-    char *buffer = (char *) (DCLANG_PTR) POP;
-    DCLANG_INT portno = (DCLANG_INT) POP;
-    char *host = (char *) (DCLANG_PTR) POP;
-    // make a socket
-    DCLANG_INT sockfd = socket(AF_INET, SOCK_DGRAM, 0);
-    if (sockfd < 0) {
-        perror("udpsend -- ERROR opening socket");
-        return;
-    }
-    struct hostent *server = gethostbyname(host);
-    if (server == NULL) {
-        fprintf(stderr, "udpsend -- ERROR, no such host\n");
-        return;
-    }
-    bzero((char *) &dest_addr, sizeof(dest_addr));
-    dest_addr.sin_family = AF_INET;
-    bcopy(
-        (char *)server->h_addr,
-        (char *)&dest_addr.sin_addr.s_addr,
-        server->h_length
-    );
-    dest_addr.sin_port = htons(portno);
-    ssize_t num_bytes = sendto(
-        sockfd, buffer, strlen(buffer) + 1, 0,
-        (struct sockaddr *)&dest_addr, sizeof(dest_addr)
-    );
-    if (num_bytes < 0) {
-        perror("udpsend -- ERROR sending data");
-    }
-    close(sockfd);
-    push((DCLANG_INT) num_bytes);
-}
-sigset_t block_sigint;
-
-void blocksigint:
-{
-  sigemptyset(&block_sigint);
-  sigaddset(&block_sigint, SIGINT);
-  sigprocmask(SIG_BLOCK, &block_sigint, NULL);
-}
-
-void unblocksigint:
-{
-  sigprocmask(SIG_UNBLOCK, &block_sigint, NULL);
-}
-
-void fork:
-{
-    // This function mainly exists so that a multi-client capable tcp/web server
-    // can be had. It is assumed that the return value will be caught, inspected,
-    // and handled by the caller, so this is really quite a simple c->dclang mapping.
-    // TODO: a future enhancement might be to have a counting system in place for
-    // avoiding fork-bomb DoS attacks. So, the introspection of a connection limit
-    // before granting a new `fork`.
-    push((DCLANG_INT) fork());
-}
-
-void exit:
-{
-    if (data_stack_ptr < 1) {
-        printf("exit -- need an integer exit code on the stack");
-        return;
-    }
-    DCLANG_INT code = (DCLANG_INT) POP;
-    exit(code);
-}
-
-///////////////////////
-// character testers //
-///////////////////////
-
-
-
-////////////////////
-// memory buffers //
-////////////////////
-
-void mkbuf:
-{
-    if (data_stack_ptr < 1)
-    {
-        printf("Stack_underflow!\n");
-        printf("'mkbuf' needs <size-as-integer> on the stack\n");
-    }
-    DCLANG_PTR size = (DCLANG_PTR) POP;
-    buf = (char *) dclang_malloc(size);
-    memset(buf, 0, size);
-    DCLANG_PTR advance = (DCLANG_PTR) strlen(buf);
-    DCLANG_PTR bufaddr = (DCLANG_PTR) buf;
-    bufaddr += advance;
-    // update print safety:
-    if (bufaddr < MIN_STR || MIN_STR == 0)
-    {
-        MIN_STR = bufaddr;
-    }
-    if (bufaddr + size + 1 > MAX_STR || MAX_STR == 0)
-    {
-        MAX_STR = bufaddr + size + 1;
-    }
-    // done updating
-    push(bufaddr);
-}
-
-void free:
-{
-    if (data_stack_ptr < 1)
-    {
-        printf("free -- stack underflow! N.B. This word is actually a no-op, kept for backwards compatibility\n");
-        return;
-    }
-    DCLANG_PTR loc_PTR = (DCLANG_PTR) POP;
-    dclang_free((char *) loc_PTR);
-}
-
-void memused:
-{
-    DCLANG_FLT memused = (DCLANG_FLT) (((float) unused_mem_idx) / ((float) MEMSIZE));
-    push(memused);
-}
-// Function to compile a regex pattern
-void regcomp:
-{
-    if (data_stack_ptr < 2)
-    {
-        printf("regcomp -- stack underflow: need <pattern> and <flags> on the stack!\n");
-        return;
-    }
-
-    // Pop the regex pattern from the stack
-    DCLANG_ULONG flags = (DCLANG_ULONG)POP;
-    DCLANG_PTR pattern_ptr_addr = (DCLANG_PTR)POP;
-
-    if (pattern_ptr_addr < MIN_STR || pattern_ptr_addr > MAX_STR)
-    {
-        perror("regcomp -- Pattern address out-of-range.\n");
-        return;
-    }
-
-    char *pattern = (char *)pattern_ptr_addr;
-
-    // Compile the regex pattern
-    regex_t *regex = (regex_t *)dclang_malloc(sizeof(regex_t));
-    if (regcomp(regex, pattern, (int)flags) != 0)
-    {
-        perror("regcomp -- Error compiling regex pattern\n");
-        dclang_free(regex);
-        return;
-    }
-
-    // Push the compiled regex object pointer onto the stack
-    push((DCLANG_PTR)regex);
-}
-
-// Function to execute the regex matching
-void regexec:
-{
-    if (data_stack_ptr < 3)
-    {
-        printf("regexec -- stack underflow; need <regexobj> <string_to_search> <flags> on the stack!\n");
-        return;
-    }
-
-    // Pop the input string and the compiled regex object from the stack
-    DCLANG_LONG flags = (DCLANG_LONG)POP;
-    DCLANG_PTR input_str_ptr_addr = (DCLANG_PTR)POP;
-    DCLANG_PTR regex_obj_PTR = (DCLANG_PTR)POP;
-
-    if (regex_obj_PTR < 0 || input_str_ptr_addr < MIN_STR || input_str_ptr_addr > MAX_STR)
-    {
-        perror("regexec -- Invalid regex object or string address.\n");
-        return;
-    }
-
-    regex_t *regex = (regex_t *)regex_obj_PTR;
-    char *input_str = (char *)input_str_ptr_addr;
-
-    // Execute the regex matching
-    regmatch_t *match = (regmatch_t *)dclang_malloc(10 * sizeof(regmatch_t));
-    if (regexec(regex, input_str, 10, match, (int)flags) == 0)
-    {
-        // If a match is found, push the match object onto the stack
-        push((DCLANG_PTR)match);
-    }
-    else
-    {
-        // No match found, push -1 to indicate failure
-        push((DCLANG_LONG)-1);
-    }
-}
-
-void regread:
-{
-    if (data_stack_ptr < 2)
-    {
-        printf("regread -- stack underflow; need <regexec_result> <match_index> on the stack! \n");
-        printf("regread will return a start and end index relative to the original searched string. \n");
-        printf("If the user actually wants that substring, it makes sense to have saved the original \n");
-        printf("string, and put the results of regread at the top of stack, then call `strslice`,\n");
-        printf("which needs to be imported from the 'string' module.\n");
-        return;
-    }
-
-    DCLANG_LONG index = (DCLANG_LONG)POP;
-    DCLANG_PTR regmatch_pnt = (DCLANG_PTR)POP;
-
-    if ((DCLANG_LONG)regmatch_pnt > 0) {
-        regmatch_t *match = (regmatch_t *)regmatch_pnt;
-        push((DCLANG_LONG)(match[index].rm_so));
-        push((DCLANG_LONG)(match[index].rm_eo));
-    } else {
-        push((DCLANG_LONG)-1);
-        push((DCLANG_LONG)-1);
-    }
-}
-*/
-
-/* Here we add the functionality necessary for the user to define named
- procedures (words). The idea is to have a struct that contains:
- 1) a string naming the word.
- 2) the position of that word in the 'prog' array.
-
- The difference between this and the already defined primitives is that the
- 2nd element in the primitives struct was a function pointer.  Here, it is
- an index (which is also a pointer) to the start of a procedure, which
- itself may contain other procedures that the code may jump to, or simply
- resolve to some primitives.
-
- In the 'prog' array, which is indexed by 'iptr', in effect, a word call
- is simply a jump to the start of that procedure.  When the 'compile'
- function finds that a user-defined bit of code is being referenced, what is
- put into 'prog' is a call to 'callfunc', with the parameter to that call
- being the index in 'prog' where the word resides. */
-
-/*
-// for debugging
-
-*/
 
 DCLANG_LONG dclang_findword(const char *word) {
     for (DCLANG_LONG x = num_user_words - 1; x > -1 ; x--) {
@@ -2860,113 +2784,9 @@ void dclang_callword(DCLANG_PTR where) {
     dclang_execute();
 }
 
-/////////////
-// Globals //
-/////////////
-
-// some helpers to show stuff
 /*
-void showvars() {
-    for (int x=0; x < var_map_idx; x++) {
-        printf("Variable %i: %s @ %li\n", x, var_keys[x], var_vals[x]);
-    }
-}
-
-void showconsts() {
-    for (int x=0; x < const_idx; x++) {
-        printf("Constant %i: %s ==> %.19g\n", x, const_keys[x], const_vals[x]);
-    }
-}
-
-// will be the private pointer to the working MIDI stream
-PmStream *midi_stream;
-#define TIME_PROC ((int32_t (*)(void *)) Pt_Time)
-#define TIME_INFO NULL
-
-void _pm_list:
-{
-    // list device information
-    int default_in = Pm_GetDefaultInputDeviceID();
-    int default_out = Pm_GetDefaultOutputDeviceID();
-    for (int i = 0; i < Pm_CountDevices(); i++) {
-        char *deflt;
-        const PmDeviceInfo *info = Pm_GetDeviceInfo(i);
-        printf("%d: %s, %s", i, info->interf, info->name);
-        if (info->input) {
-            deflt = (i == default_in ? "default " : "");
-            printf(" (%sinput)", deflt);
-        }
-        if (info->output) {
-            deflt = (i == default_out ? "default " : "");
-            printf(" (%soutput)", deflt);
-        }
-        printf("\n");
-    }
-}
-
-void _pm_openout:
-{
-    if (data_stack_ptr < 1)
-    {
-        printf("'_pm_open_out' needs a device number on the stack!\n");
-        return;
-    }
-    DCLANG_LONG device = (DCLANG_LONG) POP;
-    Pm_OpenOutput(&midi_stream, device, NULL, 0, NULL, NULL , 0);
-}
-
-void _pm_ws:
-{
-    if (data_stack_ptr < 3)
-    {
-        printf("'_pm_ws' needs 3 integers on the stack:\n");
-        printf("    <status> <data1> <data2>\n");
-        return;
-    }
-    DCLANG_LONG data2 = (DCLANG_LONG) POP;
-    DCLANG_LONG data1 = (DCLANG_LONG) POP;
-    DCLANG_LONG status = (DCLANG_LONG) POP;
-    Pm_WriteShort(
-        midi_stream,
-        TIME_PROC(TIME_INFO),
-        Pm_Message(status, data1, data2)
-    );
-}
-
-void _pm_wsr:
-{
-    if (data_stack_ptr < 3)
-    {
-        printf("'_pm_wsr' needs 3 integers on the stack:\n");
-        printf("    <data2> <data1> <status>\n");
-        return;
-    }
-    DCLANG_LONG status = (DCLANG_LONG) POP;
-    DCLANG_LONG data1 = (DCLANG_LONG) POP;
-    DCLANG_LONG data2 = (DCLANG_LONG) POP;
-    Pm_WriteShort(
-        midi_stream,
-        0,
-        Pm_Message(status, data1, data2)
-    );
-}
-
-void _pm_close:
-{
-    Pm_Close(midi_stream);
-    printf("Portmidi port closed.\n");
-}
-
-void _pm_terminate:
-{
-    Pm_Terminate();
-    printf("Portmidi process terminated.\n");
-}
-
-
 // Wrapper function for sqlite3_open
-void _sqliteopen:
-{
+OP_sqliteopen:
     const char* db_path = (const char*)(DCLANG_PTR)POP;
     sqlite3* db;
     int rc = sqlite3_open(db_path, &db);
@@ -2978,7 +2798,7 @@ void _sqliteopen:
 }
 
 // Wrapper function for sqlite3_prepare
-void _sqliteprepare: {
+OP_sqliteprepare: {
     char *sql = (char *)(DCLANG_PTR)POP;
     sqlite3* db = (sqlite3 *)(DCLANG_PTR)POP;
     const char *sql_const = (const char *) sql;
@@ -2992,7 +2812,7 @@ void _sqliteprepare: {
 }
 
 // Wrapper function for sqlite3_step
-void _sqlitestep: {
+OP_sqlitestep: {
     sqlite3_stmt* stmt = (sqlite3_stmt *)(DCLANG_PTR)POP;
     int rc = sqlite3_step(stmt);
     if (rc != SQLITE_DONE && rc != SQLITE_ROW) {
@@ -3003,7 +2823,7 @@ void _sqlitestep: {
 }
 
 // Wrapper function for sqlite3_column
-void _sqlitecolumn: {
+OP_sqlitecolumn: {
     int col_index = (int)POP;
     sqlite3_stmt* stmt = (sqlite3_stmt *)(DCLANG_PTR)POP;
     // Get the number of columns in the result set
@@ -3029,7 +2849,7 @@ void _sqlitecolumn: {
 }
 
 // Wrapper function for sqlite3_finalize
-void _sqlitefinalize: {
+OP_sqlitefinalize: {
     sqlite3_stmt* stmt = (sqlite3_stmt *)(DCLANG_PTR)POP;
     int rc = sqlite3_finalize(stmt);
     if (rc != SQLITE_OK) {
@@ -3048,7 +2868,7 @@ static int __sqlcallback(void *NotUsed, int argc, char **argv, char **azColName)
   return 0;
 }
 
-void _sqliteexec: {
+OP_sqliteexec: {
     char *zErrMsg = 0;
     char *sql = (char *)(DCLANG_PTR)POP;
     sqlite3* db = (sqlite3 *)(DCLANG_PTR)POP;
@@ -3060,7 +2880,7 @@ void _sqliteexec: {
 }
 
 // Wrapper function for sqlite3_close
-void _sqliteclose: {
+OP_sqliteclose: {
     sqlite3* db = (sqlite3 *)(DCLANG_PTR)POP;
     int rc = sqlite3_close(db);
     if (rc != SQLITE_OK) {
@@ -3068,6 +2888,86 @@ void _sqliteclose: {
         return;
     }
 }
+
+// will be the private pointer to the working MIDI stream
+PmStream *midi_stream;
+#define TIME_PROC ((int32_t (*)(void *)) Pt_Time)
+#define TIME_INFO NULL
+
+OP_pm_list:
+    // list device information
+    int default_in = Pm_GetDefaultInputDeviceID();
+    int default_out = Pm_GetDefaultOutputDeviceID();
+    for (int i = 0; i < Pm_CountDevices(); i++) {
+        char *deflt;
+        const PmDeviceInfo *info = Pm_GetDeviceInfo(i);
+        printf("%d: %s, %s", i, info->interf, info->name);
+        if (info->input) {
+            deflt = (i == default_in ? "default " : "");
+            printf(" (%sinput)", deflt);
+        }
+        if (info->output) {
+            deflt = (i == default_out ? "default " : "");
+            printf(" (%soutput)", deflt);
+        }
+        printf("\n");
+    }
+}
+
+OP_pm_openout:
+    if (data_stack_ptr < 1)
+    {
+        printf("'_pm_open_out' needs a device number on the stack!\n");
+        return;
+    }
+    DCLANG_LONG device = (DCLANG_LONG) POP;
+    Pm_OpenOutput(&midi_stream, device, NULL, 0, NULL, NULL , 0);
+}
+
+OP_pm_ws:
+    if (data_stack_ptr < 3)
+    {
+        printf("'_pm_ws' needs 3 integers on the stack:\n");
+        printf("    <status> <data1> <data2>\n");
+        return;
+    }
+    DCLANG_LONG data2 = (DCLANG_LONG) POP;
+    DCLANG_LONG data1 = (DCLANG_LONG) POP;
+    DCLANG_LONG status = (DCLANG_LONG) POP;
+    Pm_WriteShort(
+        midi_stream,
+        TIME_PROC(TIME_INFO),
+        Pm_Message(status, data1, data2)
+    );
+}
+
+OP_pm_wsr:
+    if (data_stack_ptr < 3)
+    {
+        printf("'_pm_wsr' needs 3 integers on the stack:\n");
+        printf("    <data2> <data1> <status>\n");
+        return;
+    }
+    DCLANG_LONG status = (DCLANG_LONG) POP;
+    DCLANG_LONG data1 = (DCLANG_LONG) POP;
+    DCLANG_LONG data2 = (DCLANG_LONG) POP;
+    Pm_WriteShort(
+        midi_stream,
+        0,
+        Pm_Message(status, data1, data2)
+    );
+}
+
+OP_pm_close:
+    Pm_Close(midi_stream);
+    printf("Portmidi port closed.\n");
+}
+
+OP_pm_terminate:
+    Pm_Terminate();
+    printf("Portmidi process terminated.\n");
+}
+
 */
 //////////////////////////////////////////////
 // Registration of primitives (AKA opcodes) //
@@ -3254,9 +3154,6 @@ void add_all_primitives() {
     add_primitive("strtok", "String Ops", OP_STRTOK);
     add_primitive("mempcpy", "String Ops", OP_MEMPCPY);
     add_primitive("memset", "String Ops", OP_MEMSET);
-    // info primitives
-    add_primitive("words", "Info", OP_SHOWWORDS);
-    /*
     // memory buffers
     add_primitive("mkbuf", "Memory", OP_MKBUF);
     add_primitive("free", "Memory", OP_FREE);
@@ -3266,6 +3163,7 @@ void add_all_primitives() {
     add_primitive("regexec", "Regex", OP_REGEXEC);
     add_primitive("regread", "Regex", OP_REGREAD);
     // file
+    add_primitive("import", "Files", OP_IMPORT);
     add_primitive("fopen", "Files", OP_FILEOPEN);
     add_primitive("fmemopen", "Files", OP_FILEMEMOPEN);
     add_primitive("fread", "Files", OP_FILEREAD);
@@ -3284,14 +3182,6 @@ void add_all_primitives() {
     add_primitive("read", "Files (no buffer)", OP_READ);
     add_primitive("write", "Files (no buffer)", OP_WRITE);
     add_primitive("close", "Files (no buffer)", OP_CLOSE);
-    // SQLite3 interface
-    add_primitive("_sqlite_open", "SQLite", _OP_SQLITEOPEN);
-    add_primitive("_sqlite_prepare", "SQLite", _OP_SQLITEPREPARE);
-    add_primitive("_sqlite_step", "SQLite", _OP_SQLITESTEP);
-    add_primitive("_sqlite_column", "SQLite", _OP_SQLITECOLUMN);
-    add_primitive("_sqlite_finalize", "SQLite", _OP_SQLITEFINALIZE);
-    add_primitive("_sqlite_exec", "SQLite", _OP_SQLITEEXEC);
-    add_primitive("_sqlite_close", "SQLite", _OP_SQLITECLOSE);
     // tcp/udp networking using sockets
     add_primitive("tcplisten", "Sockets", OP_TCPLISTEN);
     add_primitive("tcpaccept", "Sockets", OP_TCPACCEPT);
@@ -3301,6 +3191,22 @@ void add_all_primitives() {
     // block a SIGINT
     add_primitive("block_sigint", "Interrupt Blocking", OP_BLOCKSIGINT);
     add_primitive("unblock_sigint", "Interrupt Blocking", OP_UNBLOCKSIGINT);
+    // os fork and exit
+    add_primitive("fork", "Operating System", OP_FORK);
+    add_primitive("exit", "Operating System", OP_EXIT);
+    // info primitives
+    add_primitive("words", "Info", OP_SHOWWORDS);
+    add_primitive("constants", "Info", OP_SHOWCONSTS);
+    add_primitive("variables", "Info", OP_SHOWVARS);
+/*
+    // SQLite3 interface
+    add_primitive("_sqlite_open", "SQLite", _OP_SQLITEOPEN);
+    add_primitive("_sqlite_prepare", "SQLite", _OP_SQLITEPREPARE);
+    add_primitive("_sqlite_step", "SQLite", _OP_SQLITESTEP);
+    add_primitive("_sqlite_column", "SQLite", _OP_SQLITECOLUMN);
+    add_primitive("_sqlite_finalize", "SQLite", _OP_SQLITEFINALIZE);
+    add_primitive("_sqlite_exec", "SQLite", _OP_SQLITEEXEC);
+    add_primitive("_sqlite_close", "SQLite", _OP_SQLITECLOSE);
     // portmidi
     add_primitive("_pm_list", "MIDI", _OP_PM_LIST);
     add_primitive("_pm_open_out", "MIDI", _OP_PM_OPENOUT);
@@ -3308,12 +3214,6 @@ void add_all_primitives() {
     add_primitive("_pm_wsr", "MIDI", _OP_PM_WSR);
     add_primitive("_pm_close", "MIDI", _OP_PM_CLOSE);
     add_primitive("_pm_terminate", "MIDI", _OP_PM_TERMINATE);
-    // os fork and exit
-    add_primitive("fork", "Operating System", OP_FORK);
-    add_primitive("exit", "Operating System", OP_EXIT);
-    // info words
-    add_primitive("constants", "Info", OP_SHOWCONSTS);
-    add_primitive("variables", "Info", OP_SHOWVARS);
     */
 };
 
@@ -3535,7 +3435,7 @@ void repl() {
 char string_pad[512];
 int string_here;
 
-void grabinput() {
+OP_grabinput() {
     setinput(stdin);
     char ch;
     // get a starting marker for length
@@ -3580,7 +3480,7 @@ void grabinput() {
     revertinput();
 }
 
-void input: {
+OP_input: {
     if (def_mode) {
         prog[iptr++].function.without_param = grabinput;
     } else {
@@ -3588,7 +3488,7 @@ void input: {
     }
 }
 
-void exec: {
+OP_exec: {
     if (data_stack_ptr < 1)
     {
         printf("exec -- stack underflow! ");
@@ -3640,7 +3540,6 @@ void exec: {
 // needed so we can add 'import' to primitives
 void load_extra_primitives() {
     //add_primitive("primitives", "Other", show_primitivesfunc);
-    add_primitive("import", "Other", OP_IMPORT);
     //add_primitive("input", "Other", inputfunc);
     //add_primitive("exec", "Other", execfunc);
     add_primitive(0, 0, 0);  // end of primitives 'barrier'

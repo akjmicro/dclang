@@ -351,12 +351,6 @@ enum dclang_opcodes {
     OP_STRTOK,
     OP_MEMPCPY,
     OP_MEMSET,
-    // other
-    OP_IMPORT,
-    OP_SHOWWORDS
-};
-    /*
-
     // memory buffers
     OP_MKBUF,
     OP_FREE,
@@ -366,6 +360,7 @@ enum dclang_opcodes {
     OP_REGEXEC,
     OP_REGREAD,
     // file
+    OP_IMPORT,
     OP_FILEOPEN,
     OP_FILEMEMOPEN,
     OP_FILEREAD,
@@ -384,6 +379,24 @@ enum dclang_opcodes {
     OP_READ,
     OP_WRITE,
     OP_CLOSE,
+    // tcp/udp networking using sockets
+    OP_TCPLISTEN,
+    OP_TCPACCEPT,
+    OP_TCPCONNECT,
+    OP_UDPRECV,
+    OP_UDPSEND,
+    // block a SIGINT
+    OP_BLOCKSIGINT,
+    OP_UNBLOCKSIGINT,
+    // os fork and exit
+    OP_FORK,
+    OP_EXIT,
+    // info
+    OP_SHOWWORDS,
+    OP_SHOWCONSTS,
+    OP_SHOWVARS
+};
+    /*
     // SQLite3 interface
     OP_SQLITEOPEN,
     OP_SQLITEPREPARE,
@@ -392,21 +405,6 @@ enum dclang_opcodes {
     OP_SQLITEFINALIZE,
     OP_SQLITEEXEC,
     OP_SQLITECLOSE,
-    // tcp/udp networking using sockets
-    OP_TCPLISTEN,
-    OP_TCPACCEPT,
-    OP_TCPCONNECT,
-    OP_UDPRECV,
-    OP_UDPSEND,
-    // time
-    OP_CLOCK,
-    OP_SLEEP,
-    OP_EPOCH,
-    OP_EPOCH,
-    OP_DT,
-    // block a SIGINT
-    OP_BLOCKSIGINT,
-    OP_UNBLOCKSIGINT,
     // portmidi
     OP_PM_LIST,
     OP_PM_OPENOUT,
@@ -414,13 +412,6 @@ enum dclang_opcodes {
     OP_PM_WSR,
     OP_PM_CLOSE,
     OP_PM_TERMINATE,
-    // os fork and exit
-    OP_FORK,
-    OP_EXIT,
-    // show defined words!
-    OP_SHOWWORDS,
-    OP_SHOWCONSTS,
-    OP_SHOWVARS
     */
 
 // user words
@@ -439,6 +430,11 @@ FILE *ifp;
 char buf[IBUFSIZE];
 DCLANG_LONG bufused;
 DCLANG_LONG live_repl = 0;
+// used by 'freadline' function, which calls 'getline'
+// must be global so it is accessible to the data stack:
+char *linebuf = NULL;
+size_t linelen = 0;
+
 // output file, usually stdout, but can be redirected with 'redirect'
 FILE *ofp;
 // file stack for imports
@@ -446,6 +442,9 @@ FILE *file_stack[32];
 DCLANG_PTR fsp;
 
 struct timeval tval;
+struct sockaddr_in serv_addr, cli_addr;
+struct sockaddr_in udp_serv_addr, udp_cli_addr, dest_addr;
+sigset_t block_sigint;
 
 ///////////////
 // API calls //
