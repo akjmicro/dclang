@@ -3634,10 +3634,6 @@ void compile_or_interpret(const char *token)
     DCLANG_LONG const_search_idx = const_idx - 1;
     DCLANG_LONG var_search_idx = var_map_idx - 1;
 
-    if (def_mode) {
-        printf("iptr is: %d\n", iptr);
-    }
-
     if (token == 0) {
         return;
     }
