@@ -333,11 +333,6 @@ enum dclang_opcodes {
     OP_ISSPACE,
     OP_ISUPPER,
     OP_ISXDIGIT,
-    // other
-    OP_IMPORT,
-    OP_SHOWWORDS
-};
-    /*
     // string conversion
     OP_TOHEX,
     OP_TOSTR,
@@ -356,6 +351,12 @@ enum dclang_opcodes {
     OP_STRTOK,
     OP_MEMPCPY,
     OP_MEMSET,
+    // other
+    OP_IMPORT,
+    OP_SHOWWORDS
+};
+    /*
+
     // memory buffers
     OP_MKBUF,
     OP_FREE,

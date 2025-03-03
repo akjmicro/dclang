@@ -130,16 +130,16 @@ void reverse_array(DCLANG_PTR arr[], int n) {
 // end locals helpers
 
 void dclang_execute() {
-    int precision, width;
-    char *char_ptr, *env_key, *key, *search_key;
+    char *char_ptr, *env_key, *env_val, *key, *search_key, *str, *str1, *str2, *buf;
     struct tree_entry *te, *te_del, *retval;
     struct Node *list, *next, *node_to_remove, *tail_node, *node, *new_node, *node_before;
     void *hvalue, *confirm;
+    DCLANG_INT precision, width, bufsize, i, ch;
     DCLANG_FLT value, val, val1, val2, a, b, c, tree_val;
-    DCLANG_PTR arrstart, arrsize, env_key_addr, key_addr, idx, next_var, size, \
-               tree_idx, list_ptr, string_ptr_addr;
-    DCLANG_ULONG shift_amt, base, fmt;
     DCLANG_LONG slot, truth;
+    DCLANG_PTR arrstart, arrsize, env_key_addr, key_addr, idx, next_var, size, \
+               tree_idx, list_ptr, str_ptr_addr, str_ptr_addr2, dest, delim, buflen, strpt;
+    DCLANG_ULONG shift_amt, base, fmt;
 
     static void *dispatch_table[] = {
         &&OP_NOOP,
@@ -284,6 +284,22 @@ void dclang_execute() {
         &&OP_ISSPACE,
         &&OP_ISUPPER,
         &&OP_ISXDIGIT,
+        &&OP_TOHEX,
+        &&OP_TOSTR,
+        &&OP_TONUM,
+        &&OP_ORD,
+        &&OP_TOLOWER,
+        &&OP_TOUPPER,
+        &&OP_STRLEN,
+        &&OP_STREQ,
+        &&OP_STRLT,
+        &&OP_STRGT,
+        &&OP_STRFIND,
+        &&OP_STRSPN,
+        &&OP_STRCSPN,
+        &&OP_STRTOK,
+        &&OP_MEMPCPY,
+        &&OP_MEMSET,
         &&OP_IMPORT,
         &&OP_SHOWWORDS
     };
@@ -939,7 +955,7 @@ void dclang_execute() {
                 return;
             }
             // grab the value from the stack
-            char *env_val = (char *)(DCLANG_PTR) POP;
+            env_val = (char *)(DCLANG_PTR) POP;
             DCLANG_PTR env_val_addr = (DCLANG_PTR) env_val;
             if (env_val_addr < MIN_STR || env_val_addr > MAX_STR)
             {
@@ -963,8 +979,8 @@ void dclang_execute() {
                 perror("envget -- String address for hash key out-of-range.");
                 return;
             }
-            char *val = getenv(env_key);
-            DCLANG_PTR val_addr = (DCLANG_PTR) val;
+            env_val = getenv(env_key);
+            DCLANG_PTR val_addr = (DCLANG_PTR) env_val;
             if (val_addr > MAX_STR || MAX_STR == 0)
             {
                 MAX_STR = val_addr;
@@ -1560,18 +1576,18 @@ void dclang_execute() {
                 printf("print -- stack underflow!\n");
                 return;
             }
-            string_ptr_addr = (DCLANG_PTR) POP;
-            if (string_ptr_addr == 0)
+            str_ptr_addr = (DCLANG_PTR) POP;
+            if (str_ptr_addr == 0)
             {
                 printf("print -- Nothing to print.\n");
                 return;
             }
-            if (string_ptr_addr < MIN_STR || string_ptr_addr > MAX_STR)
+            if (str_ptr_addr < MIN_STR || str_ptr_addr > MAX_STR)
             {
                 perror("print -- String address out-of-range.\n");
                 return;
             }
-            fprintf(ofp, "%s", (char *) string_ptr_addr);
+            fprintf(ofp, "%s", (char *) str_ptr_addr);
             fflush(ofp);
             NEXT;
         OP_EMIT:
@@ -1615,13 +1631,13 @@ void dclang_execute() {
                 printf("isalnum -- stack underflow! ");
                 return;
             }
-            string_ptr_addr = (DCLANG_PTR) POP;
-            if (string_ptr_addr < MIN_STR || string_ptr_addr > MAX_STR)
+            str_ptr_addr = (DCLANG_PTR) POP;
+            if (str_ptr_addr < MIN_STR || str_ptr_addr > MAX_STR)
             {
                 perror("isalnum -- String address out-of-range.");
                 return;
             }
-            char_ptr = (char *) string_ptr_addr;
+            char_ptr = (char *) str_ptr_addr;
             if (isalnum(char_ptr[0])) {
                 push((DCLANG_LONG) -1);
             } else {
@@ -1634,13 +1650,13 @@ void dclang_execute() {
                 printf("isalpha -- stack underflow! ");
                 return;
             }
-            string_ptr_addr = (DCLANG_PTR) POP;
-            if (string_ptr_addr < MIN_STR || string_ptr_addr > MAX_STR)
+            str_ptr_addr = (DCLANG_PTR) POP;
+            if (str_ptr_addr < MIN_STR || str_ptr_addr > MAX_STR)
             {
                 perror("isalpha -- String address out-of-range.");
                 return;
             }
-            char_ptr = (char *) string_ptr_addr;
+            char_ptr = (char *) str_ptr_addr;
             if (isalpha(char_ptr[0])) {
                 push((DCLANG_LONG) -1);
             } else {
@@ -1653,13 +1669,13 @@ void dclang_execute() {
                 printf("iscntrl -- stack underflow! ");
                 return;
             }
-            string_ptr_addr = (DCLANG_PTR) POP;
-            if (string_ptr_addr < MIN_STR || string_ptr_addr > MAX_STR)
+            str_ptr_addr = (DCLANG_PTR) POP;
+            if (str_ptr_addr < MIN_STR || str_ptr_addr > MAX_STR)
             {
                 perror("iscntrl -- String address out-of-range.");
                 return;
             }
-            char_ptr = (char *) string_ptr_addr;
+            char_ptr = (char *) str_ptr_addr;
             if (iscntrl(char_ptr[0])) {
                 push((DCLANG_LONG) -1);
             } else {
@@ -1672,13 +1688,13 @@ void dclang_execute() {
                 printf("isdigit -- stack underflow! ");
                 return;
             }
-            string_ptr_addr = (DCLANG_PTR) POP;
-            if (string_ptr_addr < MIN_STR || string_ptr_addr > MAX_STR)
+            str_ptr_addr = (DCLANG_PTR) POP;
+            if (str_ptr_addr < MIN_STR || str_ptr_addr > MAX_STR)
             {
                 perror("isdigit -- String address out-of-range.");
                 return;
             }
-            char_ptr = (char *) string_ptr_addr;
+            char_ptr = (char *) str_ptr_addr;
             if (isdigit(char_ptr[0])) {
                 push((DCLANG_LONG) -1);
             } else {
@@ -1691,13 +1707,13 @@ void dclang_execute() {
                 printf("isgraph -- stack underflow! ");
                 return;
             }
-            string_ptr_addr = (DCLANG_PTR) POP;
-            if (string_ptr_addr < MIN_STR || string_ptr_addr > MAX_STR)
+            str_ptr_addr = (DCLANG_PTR) POP;
+            if (str_ptr_addr < MIN_STR || str_ptr_addr > MAX_STR)
             {
                 perror("isgraph -- String address out-of-range.");
                 return;
             }
-            char_ptr = (char *) string_ptr_addr;
+            char_ptr = (char *) str_ptr_addr;
             if (isgraph(char_ptr[0])) {
                 push((DCLANG_LONG) -1);
             } else {
@@ -1710,13 +1726,13 @@ void dclang_execute() {
                 printf("islower -- stack underflow! ");
                 return;
             }
-            string_ptr_addr = (DCLANG_PTR) POP;
-            if (string_ptr_addr < MIN_STR || string_ptr_addr > MAX_STR)
+            str_ptr_addr = (DCLANG_PTR) POP;
+            if (str_ptr_addr < MIN_STR || str_ptr_addr > MAX_STR)
             {
                 perror("islower -- String address out-of-range.");
                 return;
             }
-            char_ptr = (char *) string_ptr_addr;
+            char_ptr = (char *) str_ptr_addr;
             if (islower(char_ptr[0])) {
                 push((DCLANG_LONG) -1);
             } else {
@@ -1729,13 +1745,13 @@ void dclang_execute() {
                 printf("isprint -- stack underflow! ");
                 return;
             }
-            string_ptr_addr = (DCLANG_PTR) POP;
-            if (string_ptr_addr < MIN_STR || string_ptr_addr > MAX_STR)
+            str_ptr_addr = (DCLANG_PTR) POP;
+            if (str_ptr_addr < MIN_STR || str_ptr_addr > MAX_STR)
             {
                 perror("isprint -- String address out-of-range.");
                 return;
             }
-            char_ptr = (char *) string_ptr_addr;
+            char_ptr = (char *) str_ptr_addr;
             if (isprint(char_ptr[0])) {
                 push((DCLANG_LONG) -1);
             } else {
@@ -1748,13 +1764,13 @@ void dclang_execute() {
                 printf("ispunct -- stack underflow! ");
                 return;
             }
-            string_ptr_addr = (DCLANG_PTR) POP;
-            if (string_ptr_addr < MIN_STR || string_ptr_addr > MAX_STR)
+            str_ptr_addr = (DCLANG_PTR) POP;
+            if (str_ptr_addr < MIN_STR || str_ptr_addr > MAX_STR)
             {
                 perror("ispunct -- String address out-of-range.");
                 return;
             }
-            char_ptr = (char *) string_ptr_addr;
+            char_ptr = (char *) str_ptr_addr;
             if (ispunct(char_ptr[0])) {
                 push((DCLANG_LONG) -1);
             } else {
@@ -1767,13 +1783,13 @@ void dclang_execute() {
                 printf("isspace -- stack underflow! ");
                 return;
             }
-            string_ptr_addr = (DCLANG_PTR) POP;
-            if (string_ptr_addr < MIN_STR || string_ptr_addr > MAX_STR)
+            str_ptr_addr = (DCLANG_PTR) POP;
+            if (str_ptr_addr < MIN_STR || str_ptr_addr > MAX_STR)
             {
                 perror("isspace -- String address out-of-range.");
                 return;
             }
-            char_ptr = (char *) string_ptr_addr;
+            char_ptr = (char *) str_ptr_addr;
             if (isspace(char_ptr[0])) {
                 push((DCLANG_LONG) -1);
             } else {
@@ -1786,13 +1802,13 @@ void dclang_execute() {
                 printf("isupper -- stack underflow! ");
                 return;
             }
-            string_ptr_addr = (DCLANG_PTR) POP;
-            if (string_ptr_addr < MIN_STR || string_ptr_addr > MAX_STR)
+            str_ptr_addr = (DCLANG_PTR) POP;
+            if (str_ptr_addr < MIN_STR || str_ptr_addr > MAX_STR)
             {
                 perror("isupper -- String address out-of-range.");
                 return;
             }
-            char_ptr = (char *) string_ptr_addr;
+            char_ptr = (char *) str_ptr_addr;
             if (isupper(char_ptr[0])) {
                 push((DCLANG_LONG) -1);
             } else {
@@ -1805,19 +1821,369 @@ void dclang_execute() {
                 printf("isxdigit -- stack underflow! ");
                 return;
             }
-            string_ptr_addr = (DCLANG_PTR) POP;
-            if (string_ptr_addr < MIN_STR || string_ptr_addr > MAX_STR)
+            str_ptr_addr = (DCLANG_PTR) POP;
+            if (str_ptr_addr < MIN_STR || str_ptr_addr > MAX_STR)
             {
                 perror("isxdigit -- String address out-of-range.");
                 return;
             }
-            char_ptr = (char *) string_ptr_addr;
+            char_ptr = (char *) str_ptr_addr;
             if (isxdigit(char_ptr[0])) {
                 push((DCLANG_LONG) -1);
             } else {
                 push((DCLANG_LONG) 0);
             }
             NEXT;
+        OP_TOHEX:
+            if (data_stack_ptr < 1)
+            {
+                printf("tohex -- stack underflow! Needs a number on the stack\n");
+                return;
+            }
+            DCLANG_LONG val = (DCLANG_LONG) POP;
+            bufsize = snprintf(NULL, 0, "0x%.2lx", val);
+            str = dclang_malloc(bufsize + 1);
+            snprintf(str, bufsize + 1, "0x%.2lx", val);
+            str_ptr_addr = (DCLANG_PTR) str;
+            if (str_ptr_addr < MIN_STR || MIN_STR == 0)
+            {
+                MIN_STR = str_ptr_addr;
+            }
+            if (str_ptr_addr + bufsize + 1 > MAX_STR || MAX_STR == 0)
+            {
+                MAX_STR = str_ptr_addr + bufsize + 1;
+            }
+            push((DCLANG_PTR) str_ptr_addr);
+            NEXT;
+        OP_TOSTR:
+            if (data_stack_ptr < 1)
+            {
+                printf("tostr -- needs a number on stack!\n");
+                return;
+            }
+            DCLANG_FLT var = POP;
+            bufsize = snprintf(NULL, 0, "%g", var);
+            str = dclang_malloc(bufsize + 1);
+            snprintf(str, bufsize + 1, "%g", var);
+            str_ptr_addr = (DCLANG_PTR) str;
+            if (str_ptr_addr < MIN_STR || MIN_STR == 0)
+            {
+                MIN_STR = str_ptr_addr;
+            }
+            if (str_ptr_addr + bufsize + 1 > MAX_STR || MAX_STR == 0)
+            {
+                MAX_STR = str_ptr_addr + bufsize + 1;
+            }
+            push((DCLANG_PTR) str_ptr_addr);
+            NEXT;
+        OP_TONUM:
+            if (data_stack_ptr < 1)
+            {
+                printf("tonum -- needs a <str-pointer> on stack!\n");
+                return;
+            }
+            str_ptr_addr = (DCLANG_PTR) POP;
+            if (str_ptr_addr < MIN_STR || str_ptr_addr > MAX_STR)
+            {
+                perror("tonum -- String address out-of-range.\n");
+                return;
+            }
+            str = (char *) str_ptr_addr;
+            DCLANG_FLT num = strtod(str, NULL);
+            push(num);
+            NEXT;
+        OP_ORD:
+            if (data_stack_ptr < 1)
+            {
+                printf("ord -- stack underflow! Needs a single character in double-quotes on the stack.\n");
+                return;
+            }
+            str_ptr_addr = (DCLANG_PTR) POP;
+            if (str_ptr_addr < (DCLANG_PTR) &memory_pool)
+            {
+                perror("ord -- String address out-of-range.\n");
+                return;
+            }
+            char *string_loc = (char *) str_ptr_addr;
+            push((int) *string_loc);
+            NEXT;
+        OP_TOLOWER:
+            if (data_stack_ptr < 1)
+            {
+                printf("tolower -- needs a <source_str> pointer on the stack!\n");
+                return;
+            }
+            str_ptr_addr = (DCLANG_PTR) POP;
+            if (str_ptr_addr < MIN_STR || str_ptr_addr > MAX_STR)
+            {
+                perror("tolower -- String address out-of-range.\n");
+                return;
+            }
+            str = (char *) str_ptr_addr;
+            buflen = (DCLANG_PTR) strlen(str);
+            buf = (char *) dclang_malloc(buflen);
+            str_ptr_addr = (DCLANG_PTR) buf;
+            i = 0;
+            ch = 0;
+            while(*(str + i)) {
+              ch = (int) *(str + i);
+              memset(buf + i, tolower(ch), 1);
+              i++;
+            }
+            if (str_ptr_addr < MIN_STR || MIN_STR == 0)
+            {
+                MIN_STR = str_ptr_addr;
+            }
+            if (str_ptr_addr + buflen > MAX_STR || MAX_STR == 0)
+            {
+                MAX_STR = str_ptr_addr + buflen;
+            }
+            push((DCLANG_PTR) buf);
+            NEXT;
+        OP_TOUPPER:
+            if (data_stack_ptr < 1)
+            {
+                printf("toupper -- needs a <source_str> pointer on the stack!\n");
+                return;
+            }
+            str_ptr_addr = (DCLANG_PTR) POP;
+            if (str_ptr_addr < MIN_STR || str_ptr_addr > MAX_STR)
+            {
+                perror("toupper -- String address out-of-range.\n");
+                return;
+            }
+            str = (char *) str_ptr_addr;
+            buflen = (DCLANG_PTR) strlen(str);
+            buf = (char *) dclang_malloc(buflen);
+            str_ptr_addr = (DCLANG_PTR) buf;
+            i = 0;
+            ch = 0;
+            while(*(str + i)) {
+              ch = (int) *(str + i);
+              memset(buf + i, toupper(ch), 1);
+              i++;
+            }
+            if (str_ptr_addr < MIN_STR || MIN_STR == 0)
+            {
+                MIN_STR = str_ptr_addr;
+            }
+            if (str_ptr_addr + buflen > MAX_STR || MAX_STR == 0)
+            {
+                MAX_STR = str_ptr_addr + buflen;
+            }
+            push((DCLANG_PTR) buf);
+            NEXT;
+        OP_STRLEN:
+            if (data_stack_ptr < 1)
+            {
+                printf("strlen -- stack underflow!\n");
+                return;
+            }
+            str_ptr_addr = (DCLANG_PTR) POP;
+            if (str_ptr_addr < MIN_STR || str_ptr_addr > MAX_STR)
+            {
+                perror("strlen -- String address out-of-range.\n");
+                return;
+            }
+            str = (char *) str_ptr_addr;
+            push((DCLANG_PTR) strlen(str));
+            NEXT;
+        OP_STREQ:
+            if (data_stack_ptr < 2)
+            {
+                printf("str= -- stack underflow!\n");
+                return;
+            }
+            str_ptr_addr2 = (DCLANG_PTR) POP;
+            str_ptr_addr = (DCLANG_PTR) POP;
+            if (str_ptr_addr < MIN_STR || str_ptr_addr > MAX_STR)
+            {
+                perror("strlen -- First given string address out-of-range.\n");
+                return;
+            }
+            if (str_ptr_addr2 < MIN_STR || str_ptr_addr2 > MAX_STR)
+            {
+                perror("strlen -- Second given string address out-of-range.\n");
+                return;
+            }
+            str1 = (char *) str_ptr_addr;
+            str2 = (char *) str_ptr_addr2;
+            push(((DCLANG_LONG) strcmp(str1, str2) == 0) * -1);
+            NEXT;
+        OP_STRLT:
+            if (data_stack_ptr < 2)
+            {
+                printf("str< -- stack underflow!\n");
+                return;
+            }
+            str_ptr_addr2 = (DCLANG_PTR) POP;
+            str_ptr_addr = (DCLANG_PTR) POP;
+            if (str_ptr_addr < MIN_STR || str_ptr_addr > MAX_STR)
+            {
+                perror("str< -- First given string address out-of-range.\n");
+                return;
+            }
+            if (str_ptr_addr2 < MIN_STR || str_ptr_addr2 > MAX_STR)
+            {
+                perror("str< -- Second given string address out-of-range\n");
+                return;
+            }
+            str1 = (char *) str_ptr_addr;
+            str2 = (char *) str_ptr_addr2;
+            push(((DCLANG_LONG) strcmp(str1, str2) < 0) * -1);
+            NEXT;
+        OP_STRGT:
+            if (data_stack_ptr < 2)
+            {
+                printf("str> -- stack underflow!\n");
+                return;
+            }
+            str_ptr_addr2 = (DCLANG_PTR) POP;
+            str_ptr_addr = (DCLANG_PTR) POP;
+            if (str_ptr_addr < MIN_STR || str_ptr_addr > MAX_STR)
+            {
+                perror("str> -- First given string address out-of-range\n");
+                return;
+            }
+            if (str_ptr_addr2 < MIN_STR || str_ptr_addr2 > MAX_STR)
+            {
+                perror("str> -- Second given string address out-of-range.\n");
+                return;
+            }
+            str1 = (char *) str_ptr_addr;
+            str2 = (char *) str_ptr_addr2;
+            push(((DCLANG_LONG) strcmp(str1, str2) > 0) * -1);
+            NEXT;
+        OP_STRFIND:
+            if (data_stack_ptr < 2)
+            {
+                printf("strfind -- needs <haystack> <needle> string pointers on stack!\n");
+                return;
+            }
+            str_ptr_addr2 = (DCLANG_PTR) POP;
+            str_ptr_addr = (DCLANG_PTR) POP;
+            if (str_ptr_addr < MIN_STR || str_ptr_addr > MAX_STR)
+            {
+                perror("strfind -- 'haystack' (first) string address out-of-range.\n");
+                return;
+            }
+            if (str_ptr_addr2 < MIN_STR || str_ptr_addr2 > MAX_STR)
+            {
+                perror("strfind -- 'needle' (second) string address out-of-range.\n");
+                return;
+            }
+            str1 = (char *) str_ptr_addr;
+            str2 = (char *) str_ptr_addr2;
+            push((DCLANG_LONG) strstr(str1, str2));
+            NEXT;
+        OP_STRSPN:
+            if (data_stack_ptr < 2)
+            {
+                printf("strspn -- needs <str> <test_chars_str> pointers on the stack!\n");
+                return;
+            }
+            delim = (DCLANG_PTR) POP;
+            strpt = (DCLANG_PTR) POP;
+            if ((delim != 0) && (delim < MIN_STR || delim > MAX_STR))
+            {
+                perror("strspn -- <delim> string address out-of-range.\n");
+                return;
+            }
+            if (str < MIN_STR || str > MAX_STR)
+            {
+                perror("strspn -- <str> string address out-of-range.\n");
+                return;
+            }
+            push((DCLANG_LONG) strspn((char *)str, (char *)delim));
+            NEXT;
+        OP_STRCSPN:
+            if (data_stack_ptr < 2)
+            {
+                printf("strcspn -- needs <str> <test_chars_str> pointers on the stack!\n");
+                return;
+            }
+            delim = (DCLANG_PTR) POP;
+            strpt = (DCLANG_PTR) POP;
+            if ((delim != 0) && (delim < MIN_STR || delim > MAX_STR))
+            {
+                perror("strcspn -- <test_chars_str> string address out-of-range.\n");
+                return;
+            }
+            if (str < MIN_STR || str > MAX_STR)
+            {
+                perror("strcspn -- <str> string address out-of-range.");
+                return;
+            }
+            push((DCLANG_LONG) strcspn((char *)str, (char *)delim));
+            NEXT;
+        OP_STRTOK:
+            if (data_stack_ptr < 3)
+            {
+                printf("strtok -- needs <str> <delim> <saveptr> string pointers on stack!\n");
+                printf("<saveptr> should be a variable slot declared with `var`, without being dereferenced with `@`.\n");
+                printf("e.g.:\n\nvar mysave\n\"split.this.string!\" \".\" mysave strtok print cr\n");
+                printf("split\nnull \".\" mysave strtok print cr\n");
+                printf("this\nnull \".\" mysave strtok print cr\n");
+                printf("string!\n\n");
+                return;
+            }
+            DCLANG_PTR savepoint = (DCLANG_PTR) POP;
+            char **savepoint_ptr = (char **) &vars[savepoint];
+            delim = (DCLANG_PTR) POP;
+            strpt = (DCLANG_PTR) POP;
+            if ((str != 0) && (str < MIN_STR || str > MAX_STR))
+            {
+                perror("strtok -- <str> (first) string address out-of-range.\n");
+                return;
+            }
+            if (delim < MIN_STR || delim > MAX_STR)
+            {
+                perror("strtok -- <delim> (second) string address out-of-range.\n");
+                return;
+            }
+            push((DCLANG_LONG) strtok_r((char *)str, (char *)delim, savepoint_ptr));
+            NEXT;
+        OP_MEMPCPY:
+            if (data_stack_ptr < 3)
+            {
+                printf("mempcpy -- needs <dest> <source> <size> on stack!\n");
+                return;
+            }
+            DCLANG_PTR size = (DCLANG_PTR) POP;
+            DCLANG_PTR source = (DCLANG_PTR) POP;
+            dest = (DCLANG_PTR) POP;
+            if ((dest != 0) && (dest < MIN_STR || dest > MAX_STR))
+            {
+                perror("mempcpy -- <dest> string address out-of-range.\n");
+                return;
+            }
+            if (source < MIN_STR || source > MAX_STR)
+            {
+                perror("mempcpy -- <source> string address out-of-range.\n");
+                return;
+            }
+            push(
+                (DCLANG_PTR) memcpy(
+                (char *)dest, (char *)source, (DCLANG_PTR) size) + size
+            );
+            NEXT;
+        OP_MEMSET:
+            if (data_stack_ptr < 3)
+            {
+                printf("memset -- needs <dest_str> <char-int> <times-int> on stack!\n");
+                return;
+            }
+            DCLANG_PTR times = (DCLANG_PTR) POP;
+            DCLANG_PTR chr = (DCLANG_PTR) POP;
+            dest = (DCLANG_PTR) POP;
+            if ((dest != 0) && (dest < MIN_STR || dest > MAX_STR))
+            {
+                perror("memset -- <dest> string address out-of-range.\n");
+                return;
+            }
+            push((DCLANG_PTR)memset((char *)dest, (int)chr, (int)times));
+            NEXT;
+
         OP_IMPORT:
             if (data_stack_ptr < 1) {
                 printf("import -- stack underflow! ");
@@ -1838,7 +2204,6 @@ void dclang_execute() {
 // must be global so it is accessible to the data stack:
 char *linebuf = NULL;
 size_t linelen = 0;
-
 void fileopen:
 {
     if (data_stack_ptr < 2)
@@ -1900,7 +2265,7 @@ void fileread:
     }
     FILE *file_to_read = (FILE *)(DCLANG_PTR) POP;
     DCLANG_LONG num_bytes = (DCLANG_PTR) POP;
-    char *buf = (char *)(DCLANG_PTR) POP;
+    buf = (char *)(DCLANG_PTR) POP;
     DCLANG_PTR num_bytes_read = fread(buf, 1, num_bytes, file_to_read);
     // update print safety:
     if ((DCLANG_PTR)buf < MIN_STR || MIN_STR == 0)
@@ -1949,18 +2314,18 @@ void filereadall:
         return;
     }
     DCLANG_PTR chr_cnt = 0;
-    DCLANG_PTR bufsize = 64;
+    DCLANG_PTR req_bufsize = 64;
     DCLANG_LONG ch;
-    char *allbuf = (char *) dclang_malloc(bufsize);
-    memset(allbuf, 0, bufsize);
+    char *allbuf = (char *) dclang_malloc(req_bufsize);
+    memset(allbuf, 0, req_bufsize);
     FILE *file_to_read = (FILE *)(DCLANG_PTR) POP;
     while ((ch = fgetc(file_to_read)) != EOF)
     {
         chr_cnt += 1;
-        if (chr_cnt > bufsize)
+        if (chr_cnt > req_bufsize)
         {
-            bufsize *= 2;
-            allbuf = (char *) dclang_realloc(allbuf, bufsize);
+            req_bufsize *= 2;
+            allbuf = (char *) dclang_realloc(allbuf, req_bufsize);
         }
         memset(allbuf + chr_cnt - 1, ch, 1);
     }
@@ -2022,7 +2387,7 @@ void filewrite:
     }
     FILE *file_to_write = (FILE *)(DCLANG_PTR) POP;
     DCLANG_PTR num_bytes = (DCLANG_PTR) POP;
-    char *str = (char *)(DCLANG_PTR) POP;
+    str = (char *)(DCLANG_PTR) POP;
     DCLANG_LONG result = fwrite(str, 1, num_bytes, file_to_write);
     push(result);
 }
@@ -2232,7 +2597,6 @@ void udprecv: {
     push((DCLANG_INT) num_bytes);
 }
 
-
 void udpsend: {
     // Send data over UDP to a specified host and port
     if (data_stack_ptr < 3) {
@@ -2281,12 +2645,10 @@ void blocksigint:
   sigprocmask(SIG_BLOCK, &block_sigint, NULL);
 }
 
-
 void unblocksigint:
 {
   sigprocmask(SIG_UNBLOCK, &block_sigint, NULL);
 }
-
 
 void fork:
 {
@@ -2314,394 +2676,6 @@ void exit:
 ///////////////////////
 
 
-//num to hex string, e.g. 0x73af
-void tohex:
-{
-    if (data_stack_ptr < 1)
-    {
-        printf("tohex -- stack underflow! Needs a number on the stack\n");
-        return;
-    }
-    DCLANG_LONG val = (DCLANG_LONG) POP;
-    int bufsize = snprintf(NULL, 0, "0x%.2lx", val);
-    char *str = dclang_malloc(bufsize + 1);
-    snprintf(str, bufsize + 1, "0x%.2lx", val);
-    string_ptr_addr = (DCLANG_PTR) str;
-    if (string_ptr_addr < MIN_STR || MIN_STR == 0)
-    {
-        MIN_STR = string_ptr_addr;
-    }
-    if (string_ptr_addr + bufsize + 1 > MAX_STR || MAX_STR == 0)
-    {
-        MAX_STR = string_ptr_addr + bufsize + 1;
-    }
-    push((DCLANG_PTR) string_ptr_addr);
-}
-
-//num to string
-void tostr:
-{
-    if (data_stack_ptr < 1)
-    {
-        printf("tostr -- needs a number on stack!\n");
-        return;
-    }
-    DCLANG_FLT var = POP;
-    int bufsize = snprintf(NULL, 0, "%g", var);
-    char *str = dclang_malloc(bufsize + 1);
-    snprintf(str, bufsize + 1, "%g", var);
-    string_ptr_addr = (DCLANG_PTR) str;
-    if (string_ptr_addr < MIN_STR || MIN_STR == 0)
-    {
-        MIN_STR = string_ptr_addr;
-    }
-    if (string_ptr_addr + bufsize + 1 > MAX_STR || MAX_STR == 0)
-    {
-        MAX_STR = string_ptr_addr + bufsize + 1;
-    }
-    push((DCLANG_PTR) string_ptr_addr);
-}
-
-// string to number
-void tonum:
-{
-    if (data_stack_ptr < 1)
-    {
-        printf("tonum -- needs a <str-pointer> on stack!\n");
-        return;
-    }
-    string_ptr_addr = (DCLANG_PTR) POP;
-    if (string_ptr_addr < MIN_STR || string_ptr_addr > MAX_STR)
-    {
-        perror("tonum -- String address out-of-range.\n");
-        return;
-    }
-    char *mystr = (char *) string_ptr_addr;
-    DCLANG_FLT num = strtod(mystr, NULL);
-    push(num);
-}
-
-// character to number
-void ord:
-{
-    if (data_stack_ptr < 1)
-    {
-        printf("ord -- stack underflow! Needs a single character in double-quotes on the stack.\n");
-        return;
-    }
-    string_ptr_addr = (DCLANG_PTR) POP;
-    if (string_ptr_addr < (DCLANG_PTR) &memory_pool)
-    {
-        perror("ord -- String address out-of-range.\n");
-        return;
-    }
-    char *string_loc = (char *) string_ptr_addr;
-    push((int) *string_loc);
-}
-
-void tolower:
-{
-    if (data_stack_ptr < 1)
-    {
-        printf("tolower -- needs a <source_str> pointer on the stack!\n");
-        return;
-    }
-    string_ptr_addr = (DCLANG_PTR) POP;
-    if (string_ptr_addr < MIN_STR || string_ptr_addr > MAX_STR)
-    {
-        perror("tolower -- String address out-of-range.\n");
-        return;
-    }
-    char *mystr = (char *) string_ptr_addr;
-    DCLANG_PTR buflen = (DCLANG_PTR) strlen(mystr);
-    char *buf = (char *) dclang_malloc(buflen);
-    DCLANG_PTR string_dest_PTR = (DCLANG_PTR) buf;
-    int i = 0;
-    int c = 0;
-    while(*(mystr + i)) {
-      c = (int) *(mystr + i);
-      memset(buf + i, tolower(c), 1);
-      i++;
-    }
-    if (string_dest_PTR < MIN_STR || MIN_STR == 0)
-    {
-        MIN_STR = string_dest_PTR;
-    }
-    if (string_dest_PTR + buflen > MAX_STR || MAX_STR == 0)
-    {
-        MAX_STR = string_dest_PTR + buflen;
-    }
-    push((DCLANG_PTR) buf);
-}
-
-void toupper:
-{
-    if (data_stack_ptr < 1)
-    {
-        printf("toupper -- needs a <source_str> pointer on the stack!\n");
-        return;
-    }
-    string_ptr_addr = (DCLANG_PTR) POP;
-    if (string_ptr_addr < MIN_STR || string_ptr_addr > MAX_STR)
-    {
-        perror("toupper -- String address out-of-range.\n");
-        return;
-    }
-    char *mystr = (char *) string_ptr_addr;
-    DCLANG_PTR buflen = (DCLANG_PTR) strlen(mystr);
-    char *buf = (char *) dclang_malloc(buflen);
-    DCLANG_PTR string_dest_PTR = (DCLANG_PTR) buf;
-    int i = 0;
-    int c = 0;
-    while(*(mystr + i)) {
-      c = (int) *(mystr + i);
-      memset(buf + i, toupper(c), 1);
-      i++;
-    }
-    if (string_dest_PTR < MIN_STR || MIN_STR == 0)
-    {
-        MIN_STR = string_dest_PTR;
-    }
-    if (string_dest_PTR + buflen > MAX_STR || MAX_STR == 0)
-    {
-        MAX_STR = string_dest_PTR + buflen;
-    }
-    push((DCLANG_PTR) buf);
-}
-
-/////////////////////////////////////
-// Standard libc string operations //
-/////////////////////////////////////
-
-void strlen:
-{
-    if (data_stack_ptr < 1)
-    {
-        printf("strlen -- stack underflow!\n");
-        return;
-    }
-    string_ptr_addr = (DCLANG_PTR) POP;
-    if (string_ptr_addr < MIN_STR || string_ptr_addr > MAX_STR)
-    {
-        perror("strlen -- String address out-of-range.\n");
-        return;
-    }
-    char *mystr = (char *) string_ptr_addr;
-    push((DCLANG_PTR) strlen(mystr));
-}
-
-void streq:
-{
-    if (data_stack_ptr < 2)
-    {
-        printf("str= -- stack underflow!\n");
-        return;
-    }
-    string_ptr_addr2 = (DCLANG_PTR) POP;
-    string_ptr_addr1 = (DCLANG_PTR) POP;
-    if (string_ptr_addr1 < MIN_STR || string_ptr_addr1 > MAX_STR)
-    {
-        perror("strlen -- First given string address out-of-range.\n");
-        return;
-    }
-    if (string_ptr_addr2 < MIN_STR || string_ptr_addr2 > MAX_STR)
-    {
-        perror("strlen -- Second given string address out-of-range.\n");
-        return;
-    }
-    char *str1 = (char *) string_ptr_addr1;
-    char *str2 = (char *) string_ptr_addr2;
-    push(((DCLANG_LONG) strcmp(str1, str2) == 0) * -1);
-}
-
-void strlt:
-{
-    if (data_stack_ptr < 2)
-    {
-        printf("str< -- stack underflow!\n");
-        return;
-    }
-    string_ptr_addr2 = (DCLANG_PTR) POP;
-    string_ptr_addr1 = (DCLANG_PTR) POP;
-    if (string_ptr_addr1 < MIN_STR || string_ptr_addr1 > MAX_STR)
-    {
-        perror("str< -- First given string address out-of-range.\n");
-        return;
-    }
-    if (string_ptr_addr2 < MIN_STR || string_ptr_addr2 > MAX_STR)
-    {
-        perror("str< -- Second given string address out-of-range\n");
-        return;
-    }
-    char *str1 = (char *) string_ptr_addr1;
-    char *str2 = (char *) string_ptr_addr2;
-    push(((DCLANG_LONG) strcmp(str1, str2) < 0) * -1);
-}
-
-void strgt:
-{
-    if (data_stack_ptr < 2)
-    {
-        printf("str> -- stack underflow!\n");
-        return;
-    }
-    string_ptr_addr2 = (DCLANG_PTR) POP;
-    string_ptr_addr1 = (DCLANG_PTR) POP;
-    if (string_ptr_addr1 < MIN_STR || string_ptr_addr1 > MAX_STR)
-    {
-        perror("str> -- First given string address out-of-range\n");
-        return;
-    }
-    if (string_ptr_addr2 < MIN_STR || string_ptr_addr2 > MAX_STR)
-    {
-        perror("str> -- Second given string address out-of-range.\n");
-        return;
-    }
-    char *str1 = (char *) string_ptr_addr1;
-    char *str2 = (char *) string_ptr_addr2;
-    push(((DCLANG_LONG) strcmp(str1, str2) > 0) * -1);
-}
-
-void strfind:
-{
-    if (data_stack_ptr < 2)
-    {
-        printf("strfind -- needs <haystack> <needle> string pointers on stack!\n");
-        return;
-    }
-    string_ptr_addr2 = (DCLANG_PTR) POP;
-    string_ptr_addr1 = (DCLANG_PTR) POP;
-    if (string_ptr_addr1 < MIN_STR || string_ptr_addr1 > MAX_STR)
-    {
-        perror("strfind -- 'haystack' (first) string address out-of-range.\n");
-        return;
-    }
-    if (string_ptr_addr2 < MIN_STR || string_ptr_addr2 > MAX_STR)
-    {
-        perror("strfind -- 'needle' (second) string address out-of-range.\n");
-        return;
-    }
-    char *str1 = (char *) string_ptr_addr1;
-    char *str2 = (char *) string_ptr_addr2;
-    push((DCLANG_LONG) strstr(str1, str2));
-}
-
-void strspn:
-{
-    if (data_stack_ptr < 2)
-    {
-        printf("strspn -- needs <str> <test_chars_str> pointers on the stack!\n");
-        return;
-    }
-    DCLANG_PTR delim = (DCLANG_PTR) POP;
-    DCLANG_PTR str = (DCLANG_PTR) POP;
-    if ((delim != 0) && (delim < MIN_STR || delim > MAX_STR))
-    {
-        perror("strspn -- <delim> string address out-of-range.\n");
-        return;
-    }
-    if (str < MIN_STR || str > MAX_STR)
-    {
-        perror("strspn -- <str> string address out-of-range.\n");
-        return;
-    }
-    push((DCLANG_LONG) strspn((char *)str, (char *)delim));
-}
-
-void strcspn:
-{
-    if (data_stack_ptr < 2)
-    {
-        printf("strcspn -- needs <str> <test_chars_str> pointers on the stack!\n");
-        return;
-    }
-    DCLANG_PTR delim = (DCLANG_PTR) POP;
-    DCLANG_PTR str = (DCLANG_PTR) POP;
-    if ((delim != 0) && (delim < MIN_STR || delim > MAX_STR))
-    {
-        perror("strcspn -- <test_chars_str> string address out-of-range.\n");
-        return;
-    }
-    if (str < MIN_STR || str > MAX_STR)
-    {
-        perror("strcspn -- <str> string address out-of-range.");
-        return;
-    }
-    push((DCLANG_LONG) strcspn((char *)str, (char *)delim));
-}
-
-void strtok:
-{
-    if (data_stack_ptr < 3)
-    {
-        printf("strtok -- needs <str> <delim> <saveptr> string pointers on stack!\n");
-        printf("<saveptr> should be a variable slot declared with `var`, without being dereferenced with `@`.\n");
-        printf("e.g.:\n\nvar mysave\n\"split.this.string!\" \".\" mysave strtok print cr\n");
-        printf("split\nnull \".\" mysave strtok print cr\n");
-        printf("this\nnull \".\" mysave strtok print cr\n");
-        printf("string!\n\n");
-        return;
-    }
-    DCLANG_PTR savepoint = (DCLANG_PTR) POP;
-    char **savepoint_ptr = (char **) &vars[savepoint];
-    DCLANG_PTR delim = (DCLANG_PTR) POP;
-    DCLANG_PTR str = (DCLANG_PTR) POP;
-    if ((str != 0) && (str < MIN_STR || str > MAX_STR))
-    {
-        perror("strtok -- <str> (first) string address out-of-range.\n");
-        return;
-    }
-    if (delim < MIN_STR || delim > MAX_STR)
-    {
-        perror("strtok -- <delim> (second) string address out-of-range.\n");
-        return;
-    }
-    push((DCLANG_LONG) strtok_r((char *)str, (char *)delim, savepoint_ptr));
-}
-
-void mempcpy:
-{
-    if (data_stack_ptr < 3)
-    {
-        printf("mempcpy -- needs <dest> <source> <size> on stack!\n");
-        return;
-    }
-    DCLANG_PTR size = (DCLANG_PTR) POP;
-    DCLANG_PTR source = (DCLANG_PTR) POP;
-    DCLANG_PTR dest = (DCLANG_PTR) POP;
-    if ((dest != 0) && (dest < MIN_STR || dest > MAX_STR))
-    {
-        perror("mempcpy -- <dest> string address out-of-range.\n");
-        return;
-    }
-    if (source < MIN_STR || source > MAX_STR)
-    {
-        perror("mempcpy -- <source> string address out-of-range.\n");
-        return;
-    }
-    push(
-        (DCLANG_PTR) memcpy(
-        (char *)dest, (char *)source, (DCLANG_PTR) size) + size
-    );
-}
-
-void memset:
-{
-    if (data_stack_ptr < 3)
-    {
-        printf("memset -- needs <dest_str> <char-int> <times-int> on stack!\n");
-        return;
-    }
-    DCLANG_PTR times = (DCLANG_PTR) POP;
-    DCLANG_PTR chr = (DCLANG_PTR) POP;
-    DCLANG_PTR dest = (DCLANG_PTR) POP;
-    if ((dest != 0) && (dest < MIN_STR || dest > MAX_STR))
-    {
-        perror("memset -- <dest> string address out-of-range.\n");
-        return;
-    }
-    push((DCLANG_PTR)memset((char *)dest, (int)chr, (int)times));
-}
 
 ////////////////////
 // memory buffers //
@@ -2715,7 +2689,7 @@ void mkbuf:
         printf("'mkbuf' needs <size-as-integer> on the stack\n");
     }
     DCLANG_PTR size = (DCLANG_PTR) POP;
-    char *buf = (char *) dclang_malloc(size);
+    buf = (char *) dclang_malloc(size);
     memset(buf, 0, size);
     DCLANG_PTR advance = (DCLANG_PTR) strlen(buf);
     DCLANG_PTR bufaddr = (DCLANG_PTR) buf;
@@ -3262,9 +3236,6 @@ void add_all_primitives() {
     add_primitive("isspace", "Character Types", OP_ISSPACE);
     add_primitive("isupper", "Character Types", OP_ISUPPER);
     add_primitive("isxdigit", "Character Types", OP_ISXDIGIT);
-    // info primitives
-    add_primitive("words", "Info", OP_SHOWWORDS);
-    /*
     // string conversion
     add_primitive("tohex", "String Conversion", OP_TOHEX);
     add_primitive("tostr", "String Conversion", OP_TOSTR);
@@ -3283,6 +3254,9 @@ void add_all_primitives() {
     add_primitive("strtok", "String Ops", OP_STRTOK);
     add_primitive("mempcpy", "String Ops", OP_MEMPCPY);
     add_primitive("memset", "String Ops", OP_MEMSET);
+    // info primitives
+    add_primitive("words", "Info", OP_SHOWWORDS);
+    /*
     // memory buffers
     add_primitive("mkbuf", "Memory", OP_MKBUF);
     add_primitive("free", "Memory", OP_FREE);
@@ -3595,14 +3569,14 @@ void grabinput() {
     char *string_dest = dclang_malloc(string_size + 1);
     char nullstr[] = "\0";
     memcpy(string_dest, (char *)((DCLANG_PTR)&string_pad[0] + string_addr), string_size);
-    DCLANG_PTR string_dest_PTR = (DCLANG_PTR) string_dest;
-    if (string_dest_PTR < MIN_STR || MIN_STR == 0) {
-        MIN_STR = string_dest_PTR;
+    str_ptr_addr = (DCLANG_PTR) string_dest;
+    if (str_ptr_addr < MIN_STR || MIN_STR == 0) {
+        MIN_STR = str_ptr_addr;
     }
-    if (string_dest_PTR + string_size + 1 > MAX_STR || MAX_STR == 0) {
-        MAX_STR = string_dest_PTR + string_size + 1;
+    if (str_ptr_addr + string_size + 1 > MAX_STR || MAX_STR == 0) {
+        MAX_STR = str_ptr_addr + string_size + 1;
     }
-    push(string_dest_PTR);
+    push(str_ptr_addr);
     revertinput();
 }
 
