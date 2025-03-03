@@ -4,15 +4,6 @@
 
 Born on 2018-05-05 */
 
-/*
-   These should be changed based on architecture. For instance, on my x86_64
-   system, best performance was squeezed by making the integer type and the
-   float type to both be optimized in alignment to 8-bytes, which turns out
-   to be 'long' for integers, and 'double' for floating-point values.
-   On the Raspberry Pi 3, probably best to use 'long' and 'double' as well.
-   I've found it crawls to a halt on the benchmarks if you use 'float'!
-*/
-
 #define _GNU_SOURCE
 #define __USE_GNU 1
 
@@ -41,6 +32,16 @@ Born on 2018-05-05 */
 #include "noheap/ht.c"
 #include "noheap/trees.c"
 #include "noheap/llist.c"
+
+/*
+  These type macros should be changed based on architecture. For instance,
+  on my x86_64 system, best performance was squeezed by making the integer
+  type and the float type to both be optimized in alignment to 8-bytes,
+  which turns out to be 'long' for integers, and 'double' for
+  floating-point values. On the Raspberry Pi 3, probably best to use
+  'long' and 'double' as well. I've found it crawls to a halt on the
+  benchmarks if you use 'float'!
+*/
 
 // data type macros
 #define DCLANG_FLT   double
@@ -111,9 +112,9 @@ DCLANG_LONG fl_ptr;
 DCLANG_LONG times_info[3];
 DCLANG_LONG times_ptr;
 // local variables
-DCLANG_PTR   locals_keys[NUMLOCALS];
-DCLANG_FLT   locals_vals[NUMLOCALS * RETURN_STACK_SIZE];
-DCLANG_PTR   locals_base_idx;
+DCLANG_PTR  locals_keys[NUMLOCALS];
+DCLANG_FLT  locals_vals[NUMLOCALS * RETURN_STACK_SIZE];
+DCLANG_PTR  locals_base_idx;
 // global variables
 // track variables - mapping from name to index
 char        *var_keys[NUMVARS];
@@ -156,7 +157,6 @@ struct Node {
     struct Node *prev;
     DCLANG_FLT data;  // New member for data
 };
-
 
 // min and max string buffer addresses
 DCLANG_PTR MIN_STR = 0;
@@ -263,8 +263,8 @@ enum dclang_opcodes {
     OP_COMMA,
     OP_HERE,
     OP_CONSTANT,
-    OP_ENVGET,
     OP_ENVSET,
+    OP_ENVGET,
     // sorting
     OP_SORTNUMS,
     OP_SORTSTRS,
@@ -308,6 +308,8 @@ enum dclang_opcodes {
     OP_ELSE,
     OP_ENDIF,
     OP_CALL,
+    OP_SET_LOCAL,
+    OP_GET_LOCAL,
     OP_RETURN,
     OP_CLOCK,
     OP_EPOCH,
@@ -319,10 +321,6 @@ enum dclang_opcodes {
     OP_EMIT,
     OP_UEMIT,
     OP_BYTES32,
-    OP_IMPORT,
-    OP_SHOWDEFINED
-};
-    /*
     // character types
     OP_ISALNUM,
     OP_ISALPHA,
@@ -335,6 +333,11 @@ enum dclang_opcodes {
     OP_ISSPACE,
     OP_ISUPPER,
     OP_ISXDIGIT,
+    // other
+    OP_IMPORT,
+    OP_SHOWWORDS
+};
+    /*
     // string conversion
     OP_TOHEX,
     OP_TOSTR,
@@ -414,7 +417,7 @@ enum dclang_opcodes {
     OP_FORK,
     OP_EXIT,
     // show defined words!
-    OP_SHOWDEFINED,
+    OP_SHOWWORDS,
     OP_SHOWCONSTS,
     OP_SHOWVARS
     */

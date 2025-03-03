@@ -1,8 +1,7 @@
 // utf-8 char buffer
 char utf8_buf[5];
 
-long utf8_encode(char *out, uint64_t utf)
-{
+long utf8_encode(char *out, uint64_t utf) {
     if (utf <= 0x7F)
     {
         // Plain ASCII
@@ -47,8 +46,7 @@ long utf8_encode(char *out, uint64_t utf)
     }
 }
 
-int get_unicode_by_hex(char *chbuf, int usize)
-{
+int get_unicode_by_hex(char *chbuf, int usize) {
     char numstr[usize];
     long int status = (long int) fgets(numstr, usize, ifp);
     int ucode = strtol(numstr, NULL, 16);
@@ -56,8 +54,7 @@ int get_unicode_by_hex(char *chbuf, int usize)
     return status;
 }
 
-int get_ascii(char *chbuf, int usize)
-{
+int get_ascii(char *chbuf, int usize) {
     char numstr[usize];
     long int status = (long int) fgets(numstr, usize, ifp);
     int acode = strtol(numstr, NULL, 16);
@@ -78,7 +75,7 @@ char *buf2str() {
     return dclang_strdup(buf);
 }
 
-void setinput(FILE *fp)  {
+void setinput(FILE *fp) {
     file_stack[fsp++] = ifp;
     ifp = fp;
 }
@@ -90,8 +87,7 @@ void revertinput() {
     ifp = file_stack[--fsp];
 }
 
-void stringfunc()
-{
+void stringfunc() {
     char ch;
     char escape_ch;
     char chbuf[5];

@@ -1,8 +1,7 @@
 #include "libdclang.c"
 
 // Where all the juicy fun begins...
-int main(int argc, char **argv)
-{
+int main(int argc, char **argv) {
     dclang_initialize();
     //setlocale(LC_ALL, "");
     if (argc > 1) {
