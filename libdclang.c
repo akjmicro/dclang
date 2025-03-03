@@ -1548,7 +1548,7 @@ void dclang_execute() {
         return_stack[return_stack_ptr++] = iptr;
         // set word target; execute word target
         iptr = (DCLANG_PTR) prog[iptr].param;
-        NEXT;
+        goto *dispatch_table[prog[iptr].opcode];
 
     OP_RETURN:
         // restore locals_base_idx
@@ -3647,7 +3647,7 @@ void compile_or_interpret(const char *token)
                 prog[iptr++].param = found;
             } else {
                 prog[iptr].opcode = OP_CALL;  // normal return stack save
-                prog[iptr++].param = found - 1;
+                prog[iptr++].param = found;
             }
         } else {
             dclang_callword(found);
