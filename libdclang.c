@@ -3648,7 +3648,7 @@ void compile_or_interpret(const char *token)
         if (def_mode) {
             if (strcmp(user_words[num_user_words - 1].name, token) == 0) {
                 prog[iptr].opcode = OP_JUMPU;  // don't overflow the return stack
-                prog[iptr++].param = found - 1;
+                prog[iptr++].param = found;
             } else {
                 prog[iptr].opcode = OP_CALL;  // normal return stack save
                 prog[iptr++].param = found - 1;
