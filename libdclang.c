@@ -1503,14 +1503,15 @@ void dclang_execute() {
     OP_JUMPZ:
         truth = (DCLANG_LONG) POP;
         if (!truth) {
-            iptr = (DCLANG_PTR) prog[iptr].param ;
+            iptr = (DCLANG_PTR) prog[iptr].param;
+            goto *dispatch_table[prog[iptr].opcode];
         }
-       NEXT;
+        NEXT;
 
     // unconditional jump
     OP_JUMPU:
         iptr = (DCLANG_PTR) prog[iptr].param;
-        NEXT;
+        goto *dispatch_table[prog[iptr].opcode];
 
     // if-else-endif
     OP_IF:
@@ -1530,14 +1531,14 @@ void dclang_execute() {
         // set the unconditional jump, but no 'where' yet
         // (will be filled in later by 'endif')....
         prog[iptr].opcode = OP_JUMPU;
-        prog[iptr++].param = 0;
+        prog[iptr].param = 0;
         // update old if val goto:
-        prog[if_val].param = iptr++;
+        prog[if_val].param = ++iptr;
         return;  // only in def_mode = 1
 
     OP_ENDIF:
         DCLANG_LONG last_val = return_stack[--return_stack_ptr];
-        prog[last_val].param = iptr++;
+        prog[last_val].param = iptr;
         return;  // only in def_mode = 1
 
     OP_CALL:
@@ -3630,6 +3631,10 @@ void compile_or_interpret(const char *token)
     DCLANG_LONG const_search_idx = const_idx - 1;
     DCLANG_LONG var_search_idx = var_map_idx - 1;
 
+    if (def_mode) {
+        printf("iptr is: %d\n", iptr);
+    }
+
     if (token == 0) {
         return;
     }
@@ -3655,7 +3660,7 @@ void compile_or_interpret(const char *token)
     while (pr->name != 0) {
         if (strcmp(pr->name, token) == 0) {
             if ((def_mode) && (!is_special_form(pr->name))) {
-                    prog[iptr++].opcode = pr->opcode;
+                prog[iptr++].opcode = pr->opcode;
             } else {
                 if (validate(token)) {
                     prog[iptr].opcode = pr->opcode;

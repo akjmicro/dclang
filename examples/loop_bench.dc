@@ -6,14 +6,6 @@
   "The time difference is: " print . "seconds" print cr
 ;
 
-: sl-helper
-  # ( sum max cur )
-  rot       # ( max cur sum )
-  over      # ( max cur sum cur )
-  +         # ( max cur sum1 )
-  rot rot   # ( cur sum1 max -- sum1 max cur )
-;
-
 : recur-loop
   1 +        # sum cur'
   tuck       # cur' sum cur'
