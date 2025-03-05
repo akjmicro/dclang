@@ -46,23 +46,112 @@ long utf8_encode(char *out, uint64_t utf) {
     }
 }
 
-int get_unicode_by_hex(char *chbuf, int usize) {
+int get_unicode_by_hex(char *chbuf, int usize, char **line_ptr) {
     char numstr[usize];
-    long int status = (long int) fgets(numstr, usize, ifp);
+    for (int i = 0; i < usize - 1; i++) {
+        if (**line_ptr == '\0') return 0; // End of line reached unexpectedly
+        numstr[i] = **line_ptr;
+        (*line_ptr)++;
+    }
+    numstr[usize - 1] = '\0'; // Null terminate
     int ucode = strtol(numstr, NULL, 16);
     int num_bytes_ret = utf8_encode(chbuf, ucode);
-    return status;
+    return num_bytes_ret > 0 ? 1 : 0;
 }
 
-int get_ascii(char *chbuf, int usize) {
+int get_ascii(char *chbuf, int usize, char **line_ptr) {
     char numstr[usize];
-    long int status = (long int) fgets(numstr, usize, ifp);
+    for (int i = 0; i < usize - 1; i++) {
+        if (**line_ptr == '\0') return 0; // End of line reached unexpectedly
+        numstr[i] = **line_ptr;
+        (*line_ptr)++;
+    }
+    numstr[usize - 1] = '\0'; // Null terminate
     int acode = strtol(numstr, NULL, 16);
     chbuf[0] = (char) acode;
     chbuf[1] = 0;
-    return status;
+    return 1;
 }
 
+char get_char() {
+    static char line_buf[256] = {0};
+    static char *line_ptr = line_buf;
+    static char *rocket_prompt = "🚀dclang=> ";
+    static char *continue_prompt = "...=> ";
+    // If we're at the end of the buffer, read a new line
+    if (*line_ptr == '\0') {
+        if (live_repl) {
+            // Show the prompt in interactive mode
+            fprintf(ofp, "%s", (in_string || def_mode) ? continue_prompt : rocket_prompt);
+            fflush(ofp);
+        }
+        if (!fgets(line_buf, 256, ifp)) {
+            return EOF;  // End of input (CTRL+D or file EOF)
+        }
+        line_ptr = line_buf;
+    }
+    char ch = *line_ptr;
+    fflush(ofp);
+    return (*line_ptr) ? *line_ptr++ : EOF;
+}
+
+void stringfunc() {
+    char ch, escape_ch, chbuf[5];
+    int stat = -1;
+    char *scratch = &memory_pool[unused_mem_idx];
+    char *scratch_start = scratch;
+    in_string = 1;
+    // Get the first character
+    if ((ch = get_char()) == EOF) exit(0);
+    while (ch != '"') {
+        if (ch == '\\') {
+            printf("Found backslash!\n");
+            // Handle escape sequences
+            if ((escape_ch = get_char()) == EOF) exit(0);
+            switch (escape_ch) {
+                case 'b': chbuf[0] = 8; break;   // Backspace
+                case 't': chbuf[0] = 9; break;   // Tab
+                case 'n': chbuf[0] = 10; break;  // Newline
+                case 'r': chbuf[0] = 13; break;  // Carriage return
+                case 'x': stat = get_ascii(chbuf, 3, &line_ptr); goto check_valid;
+                case 'u': stat = get_unicode_by_hex(chbuf, 5, &line_ptr); goto check_valid;
+                case 'U': stat = get_unicode_by_hex(chbuf, 9, &line_ptr); goto check_valid;
+                default:  chbuf[0] = escape_ch; break; // Literal char
+            }
+            chbuf[1] = 0;
+        } else {
+            // Regular character
+            chbuf[0] = ch;
+            chbuf[1] = 0;
+        }
+    check_valid:
+        if (stat == 0) {
+            printf("Illegal escape sequence in string.\n");
+            return;
+        }
+        scratch = mempcpy(scratch, chbuf, strlen(chbuf));
+        if ((ch = get_char()) == EOF) exit(0);
+        continue;
+    }
+    *scratch = '\0'; // Null-terminate string
+    int chr_cnt = (scratch - scratch_start) + 1;
+    unused_mem_idx = (unused_mem_idx + chr_cnt + 0x0f) & ~0x0f;
+    // Register string memory range
+    DCLANG_PTR string_dest_ptr = (DCLANG_PTR) scratch_start;
+    DCLANG_PTR buflen = (DCLANG_PTR) chr_cnt;
+    MIN_STR = (MIN_STR == 0 || string_dest_ptr < MIN_STR) ? string_dest_ptr : MIN_STR;
+    MAX_STR = (MAX_STR == 0 || string_dest_ptr + buflen > MAX_STR) ? string_dest_ptr + buflen : MAX_STR;
+    // Handle stack or program storage
+    if (def_mode) {
+        prog[iptr].opcode = OP_PUSH;
+        prog[iptr++].param = string_dest_ptr;
+    } else {
+        push(string_dest_ptr);
+    }
+    in_string = 0;
+}
+
+// Helpers for `get_token()`
 
 void add_to_buf(char ch) {
     if((bufused < IBUFSIZE - 1) && ch != EOF) {
@@ -75,161 +164,39 @@ char *buf2str() {
     return dclang_strdup(buf);
 }
 
-void setinput(FILE *fp) {
-    file_stack[fsp++] = ifp;
-    ifp = fp;
-}
-
-void revertinput() {
-    if (fsp == 0) {
-        exit(0);
-    }
-    ifp = file_stack[--fsp];
-}
-
-void stringfunc() {
-    char ch;
-    char escape_ch;
-    char chbuf[5];
-    int stat;
-    char *scratch = &memory_pool[unused_mem_idx];
-    char *start_scratch = scratch;
-    // get the next character, and start the process for real:
-    if ((ch = fgetc(ifp)) == EOF) exit(0);
-    while (! strchr("\"", ch))
-    {
-        if (strchr("\\", ch))
-        {
-            // consume an extra char due to backslash
-            if ((escape_ch = fgetc(ifp)) == EOF) exit(0);
-            switch(escape_ch)
-            {
-                // backspace
-                case 'b' :
-                  chbuf[0] = 8;
-                  chbuf[1] = 0;
-                  break;
-                // tab
-                case 't' :
-                    chbuf[0] = 9;
-                    chbuf[1] = 0;
-                    break;
-                // newline
-                // (line-feed and carriage return together on unix)
-                case 'n' :
-                    chbuf[0] = 10;
-                    chbuf[1] = 0;
-                    break;
-                // carriage return
-                case 'r' :
-                    chbuf[0] = 13;
-                    chbuf[1] = 0;
-                    break;
-                // 1-byte ASCII code
-                case 'x' :
-                    stat = get_ascii(chbuf, 3);
-                    if (stat == 0)
-                    {
-                        printf("Illegal 1-byte ASCII string denoted with \\x.\n");
-                        return;
-                    }
-                    break;
-                // 2-byte unicode
-                case 'u' :
-                    stat = get_unicode_by_hex(chbuf, 5);
-                    if (stat == 0)
-                    {
-                        printf("Illegal 2-byte unicode entry in string.\n");
-                        return;
-                    }
-                    break;
-                // 4-byte unicode
-                case 'U' :
-                    stat = get_unicode_by_hex(chbuf, 9);
-                    if (stat == 0)
-                    {
-                        printf("Illegal 4-byte unicode entry in string.\n");
-                    }
-                    break;
-                default :
-                    chbuf[0] = escape_ch;
-                    chbuf[1] = 0;
-            }
-        } else {
-            chbuf[0] = ch;
-            chbuf[1] = 0;
-        }
-        scratch = mempcpy(scratch, chbuf, strlen(chbuf));
-        if ((ch = fgetc(ifp)) == EOF) exit(0);
-    }
-    memset(scratch, 0, 1);
-    int chr_cnt = (scratch - start_scratch) + 1;
-    unused_mem_idx = (unused_mem_idx + chr_cnt + 0x0f) & ~0x0f;
-    // register the string with MIN_STR and MAX_STR
-    DCLANG_PTR string_dest_ptr = (DCLANG_PTR) start_scratch;
-    DCLANG_PTR buflen = (DCLANG_PTR) chr_cnt;
-    if (string_dest_ptr < MIN_STR || MIN_STR == 0)
-    {
-        MIN_STR = string_dest_ptr;
-    }
-    if (string_dest_ptr + buflen > MAX_STR || MAX_STR == 0)
-    {
-        MAX_STR = string_dest_ptr + buflen;
-    }
-    // Do the right thing depending on def_mode
-    if (def_mode)
-    {
-        prog[iptr].opcode = OP_PUSH;
-        prog[iptr++].param = string_dest_ptr;
-    } else {
-        push(string_dest_ptr);
-    }
-}
+// End helpers for `get_token()`
 
 char *get_token() {
     DCLANG_LONG ch;
     bufused = 0;
-    // skip leading spaces and comments
-    while (1) {
-        // skip leading space
-        do {
-            if((ch = fgetc(ifp)) == EOF) {
-                revertinput();
-                return "EOF";
-            }
-        } while(isspace(ch));
-        // if we are starting a comment:
-        if (strchr("#", ch)) {
-            // go to the end of the line
-            do {
-                if((ch = fgetc(ifp)) == EOF) {
-                    revertinput();
-                    return "EOF";
-                }
-            } while(! strchr("\n", ch));
-            continue;
-        }
-        // is this a string?
-        if (strchr("\"", ch)) {
-            // call the sub-routine to deal with the string:
-            stringfunc();
-            continue;
-        } else {
-            add_to_buf(ch);
-            break;
+    // Skip leading spaces and handle comments
+    while ((ch = get_char()) != EOF) {
+        if (isspace(ch)) continue;
+        switch (ch) {
+            case '#': // Comment detected, skip to end of line
+                while ((ch = get_char()) != EOF && ch != '\n');
+                continue;
+            case '"': // String detected, handle it separately
+                stringfunc();
+                continue;
+            default:
+                add_to_buf(ch);
+                goto read_token;
         }
     }
-    // grab all the next non-whitespace characters
-    while (1) {
-        // check again for EOF
-        if ((ch = fgetc(ifp)) == EOF) {
-            revertinput();
-            return "EOF";
-        }
+    // Handle EOF case
+    revertinput();
+    return "EOF";
+  read_token:
+    // Read remaining characters until whitespace or EOF
+    while ((ch = get_char()) != EOF) {
         if (isspace(ch)) {
-            ungetc(ch, ifp);
+            //ungetc(ch, ifp);  // Put back the whitespace
             return buf2str();
         }
         add_to_buf(ch);
     }
+    // Handle EOF case at the end
+    revertinput();
+    return "EOF";
 }

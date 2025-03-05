@@ -77,7 +77,7 @@ void *tsearch(const void *key, void **rootp,
         a[i++] = &n->a[c>0];
         n = n->a[c>0];
     }
-    r = dclang_malloc(sizeof *r);
+    r = (struct tree_node *)dclang_malloc((char *)sizeof *r);
     if (!r)
         return 0;
     r->key = key;

@@ -102,13 +102,13 @@ static const char* hset_entry(
     }
     // Didn't find key, allocate+copy if needed, then insert it.
     if (plength != NULL) {
-        key = dclang_strdup(key);
+        key = dclang_strdup((char *)key);
         if (key == NULL) {
             return NULL;
         }
         (*plength)++;
     }
-    entries[index].key = (char*)key;
+    entries[index].key = (char *)key;
     entries[index].value = value;
     return key;
 }

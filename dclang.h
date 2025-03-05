@@ -61,6 +61,7 @@ Born on 2018-05-05 */
 #define NUMLOCALS         8
 #define NUMVARS           16777216
 #define NUM_TREE_ROOTS    32
+#define LINE_MAX          128
 
 // function-like macros
 
@@ -278,7 +279,7 @@ enum dclang_opcodes {
     OP_TREEGET,
     OP_TREEWALK,
     OP_TREEDELETE,
-#ifdef HAS_TREEDESTROY,
+#ifdef HAS_TREEDESTROY
     OP_TREEDESTROY,
 #endif
     // linked lists
@@ -425,10 +426,14 @@ DCLANG_PTR  num_user_words;
 
 // flag for if we are defining a new word (function)
 DCLANG_LONG def_mode;
+// flag for if we're in the middle of creating a string
+DCLANG_INT in_string;
 // input buffer and input file (stdin or file input) stuff
 FILE *ifp;
-char buf[IBUFSIZE];
-DCLANG_LONG bufused;
+char buf[IBUFSIZE];   // for tokens
+DCLANG_LONG bufused;  // for tokens
+static char line_buf[256] = {0}; // for fgets input
+static char *line_ptr;           // for fgets input
 DCLANG_LONG live_repl = 0;
 // used by 'freadline' function, which calls 'getline'
 // must be global so it is accessible to the data stack:
@@ -445,6 +450,10 @@ struct timeval tval;
 struct sockaddr_in serv_addr, cli_addr;
 struct sockaddr_in udp_serv_addr, udp_cli_addr, dest_addr;
 sigset_t block_sigint;
+
+void repl(void);
+void (*repl_pnt)(void);
+void dclang_execute(void);
 
 ///////////////
 // API calls //

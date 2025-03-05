@@ -7,6 +7,22 @@ Born on 2018-05-05 */
 #include "dclang.h"
 #include "token.c"
 
+// BEGIN HELPERS
+
+// Input pointer handling
+
+void setinput(FILE *fp) {
+    file_stack[fsp++] = ifp;
+    ifp = fp;
+}
+
+void revertinput() {
+    if (fsp == 0) {
+        exit(0);
+    }
+    ifp = file_stack[--fsp];
+}
+
 ////////////////////////////
 // Dealing with importing //
 ////////////////////////////
@@ -21,7 +37,7 @@ DCLANG_LONG dclang_import(char *infilestr) {
         FILE *infile;
         infile = fopen(infilestr, "r");
         setinput(infile);
-        repl();
+        repl_pnt();
         return 0;
     }
     char *full_path = dclang_malloc(512);
@@ -129,6 +145,8 @@ void reverse_array(DCLANG_PTR arr[], int n) {
 }
 // end locals helpers
 
+// END HELPERS
+
 void dclang_execute() {
     char *char_ptr, *env_key, *env_val, *key, *search_key, *str, *str1, *str2, *buf, *mode, *path, *host;
     regex_t *regex;
@@ -235,7 +253,7 @@ void dclang_execute() {
         &&OP_TREEGET,
         &&OP_TREEWALK,
         &&OP_TREEDELETE,
-    #ifdef HAS_TREEDESTROY,
+    #ifdef HAS_TREEDESTROY
         &&OP_TREEDESTROY,
     #endif
         &&OP_LISTMAKE,
@@ -2337,10 +2355,9 @@ void dclang_execute() {
         OP_IMPORT:
             if (data_stack_ptr < 1) {
                 printf("import -- stack underflow! ");
-                return -1;
             }
             char *importfile = (char *)(unsigned long) POP;
-            return dclang_import(importfile);
+            dclang_import(importfile);
         OP_FILEOPEN:
             if (data_stack_ptr < 2)
             {
@@ -2373,7 +2390,7 @@ void dclang_execute() {
             mode = (char *)(DCLANG_PTR) POP;
             size = (DCLANG_PTR) POP;
             bufaddr = (DCLANG_PTR) POP;
-            file = fmemopen(bufaddr, size, mode);
+            file = fmemopen((void *)bufaddr, size, mode);
             push((DCLANG_PTR)file);
             NEXT;
         OP_FILECLOSE:
@@ -2860,12 +2877,12 @@ OP_sqlitefinalize: {
 
 // _sqliteexecfunc is a convenience wrapper
 static int __sqlcallback(void *NotUsed, int argc, char **argv, char **azColName) {
-  int i;
-  for(i=0; i<argc; i++){
-    printf("%s = %s\n", azColName[i], argv[i] ? argv[i] : "NULL");
-  }
-  printf("\n");
-  return 0;
+    int i;
+    for(i=0; i<argc; i++){
+      printf("%s = %s\n", azColName[i], argv[i] ? argv[i] : "NULL");
+    }
+    printf("\n");
+    return 0;
 }
 
 OP_sqliteexec: {
@@ -2969,9 +2986,9 @@ OP_pm_terminate:
 }
 
 */
-//////////////////////////////////////////////
-// Registration of primitives (AKA opcodes) //
-//////////////////////////////////////////////
+///////////////////////////////////////////
+// PRIMITIVES REGISTRATION (AKA opcodes) //
+///////////////////////////////////////////
 
 void add_primitive(char *name, char *category, int opcode) {
     primitives_idx += 1;
@@ -2981,7 +2998,7 @@ void add_primitive(char *name, char *category, int opcode) {
 };
 
 void add_all_primitives() {
-    primitives = dclang_malloc(208*sizeof(primitive));
+    primitives = (struct primitive *)dclang_malloc(208*sizeof(primitive));
     // stack manipulation
     add_primitive("drop", "Stack Ops", OP_DROP);
     add_primitive("dup", "Stack Ops", OP_DUP);
@@ -3198,7 +3215,7 @@ void add_all_primitives() {
     add_primitive("words", "Info", OP_SHOWWORDS);
     add_primitive("constants", "Info", OP_SHOWCONSTS);
     add_primitive("variables", "Info", OP_SHOWVARS);
-/*
+    /*
     // SQLite3 interface
     add_primitive("_sqlite_open", "SQLite", _OP_SQLITEOPEN);
     add_primitive("_sqlite_prepare", "SQLite", _OP_SQLITEPREPARE);
@@ -3240,7 +3257,12 @@ void show_primitivesfunc() {
     }
     //printf(": ; { }\n");
     printf("\nStrings are written by simply typing a string literal in double-quotes, e.g. \"Hello there!\".\n\n");
+    fflush(ofp);
 }
+
+////////////////
+// REPL STUFF //
+////////////////
 
 const char *illegal[] = {"times", "again", "exittimes",
                          "for", "next", "exitfor"};
@@ -3249,8 +3271,8 @@ DCLANG_LONG num_illegal = sizeof(illegal) / sizeof(illegal[0]);
 const char *special[] = {"if", "else", "endif"};
 DCLANG_LONG num_special = sizeof(special) / sizeof(special[0]);
 
-/* function to validate and return an error message if we are using control
- * structures outside of a definition */
+// function to validate and return an error message if we are using control
+// structures outside of a definition
 DCLANG_LONG validate(const char *token) {
     DCLANG_LONG checkval = 1;
     for (DCLANG_LONG i=0; i < num_illegal; i++) {
@@ -3264,8 +3286,8 @@ DCLANG_LONG validate(const char *token) {
     return checkval;
 }
 
-/* conditionals are 'special forms' that need to be handled in a certain
-   way by the compilation process: */
+// conditionals are 'special forms' that need to be handled in a certain
+//   way by the compilation process:
 DCLANG_LONG is_special_form(const char *token) {
     DCLANG_LONG checkval = 0;
     for (DCLANG_LONG i=0; i < num_special; i++) {
@@ -3324,7 +3346,7 @@ void compile_or_interpret(const char *token) {
     if (def_mode) {
         while (locals_idx < 8) {
             if (locals_keys[locals_idx] == NULL) break;
-            if (strcmp(locals_keys[locals_idx], token) == 0) {
+            if (strcmp((char *)locals_keys[locals_idx], token) == 0) {
                 prog[iptr].opcode = OP_GET_LOCAL;
                 prog[iptr++].param = locals_idx;
                 return;
@@ -3430,6 +3452,7 @@ void repl() {
     }
     compile_or_interpret(0);
 }
+
 /*
 // a small buffer for use by `grabinput`
 char string_pad[512];
@@ -3537,6 +3560,7 @@ OP_exec: {
            " and then calling 'exec' with the constant on the stack.\n");
 }
 */
+
 // needed so we can add 'import' to primitives
 void load_extra_primitives() {
     //add_primitive("primitives", "Other", show_primitivesfunc);
@@ -3548,6 +3572,7 @@ void load_extra_primitives() {
 void dclang_initialize() {
     setinput(stdin);                       // start input in sane state
     ofp = stdout;                          // start output in sane state
+    repl_pnt = repl;                       // assign the repl function to its pointer
     add_all_primitives();                  // register most of the primitives
     load_extra_primitives();               // register the tricky chicken-or-egg ones
     srand(time(NULL));                     // seed the random # generator
