@@ -432,9 +432,9 @@ DCLANG_INT in_string;
 FILE *ifp;
 char buf[IBUFSIZE];   // for tokens
 DCLANG_LONG bufused;  // for tokens
-char line_buf[256]; // for fgets input
-char *line_ptr;     // for fgets input
-DCLANG_LONG live_repl = 0;
+char line_buf[256] = {0};  // for fgets input
+char *line_ptr = line_buf; // for fgets input
+DCLANG_INT live_repl = 0;
 // used by 'freadline' function, which calls 'getline'
 // must be global so it is accessible to the data stack:
 char *linebuf = NULL;

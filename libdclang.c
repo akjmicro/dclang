@@ -27,6 +27,8 @@ void revertinput() {
 // Dealing with importing //
 ////////////////////////////
 DCLANG_LONG dclang_import(char *infilestr) {
+    DCLANG_INT saved_live_repl = live_repl;
+    live_repl = 0;
     char *prefix = getenv("DCLANG_LIBS");
     if (prefix == NULL) {
         printf("DCLANG_LIBS env variable is unset!\n");
@@ -38,6 +40,7 @@ DCLANG_LONG dclang_import(char *infilestr) {
         infile = fopen(infilestr, "r");
         setinput(infile);
         repl_pnt();
+        live_repl = saved_live_repl;
         return 0;
     }
     char *full_path = dclang_malloc(512);
@@ -49,7 +52,8 @@ DCLANG_LONG dclang_import(char *infilestr) {
     if (access(full_path, F_OK) == 0) {
         FILE *infile = fopen(full_path, "r");
         setinput(infile);
-        repl();
+        repl_pnt();
+        live_repl = saved_live_repl;
         return 0;
     }
     printf(
