@@ -74,10 +74,10 @@ int get_ascii(char *chbuf, int usize, char **line_ptr) {
 }
 
 char get_char() {
-    static char line_buf[256] = {0};
-    static char *line_ptr = line_buf;
+    //static char line_buf[256] = {0};
     static char *rocket_prompt = "🚀dclang=> ";
     static char *continue_prompt = "...=> ";
+    //line_ptr = line_buf;
     // If we're at the end of the buffer, read a new line
     if (*line_ptr == '\0') {
         if (live_repl) {
