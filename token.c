@@ -75,7 +75,7 @@ int get_ascii(char *chbuf, int usize, char **line_ptr) {
 
 char get_char() {
     static char *rocket_prompt = "🚀dclang=> ";
-    static char *continue_prompt = "...=> ";
+    static char *continue_prompt = "🔗...=> ";
     // If we're at the end of the buffer, read a new line
     if (*line_ptr == '\0') {
         if (live_repl) {

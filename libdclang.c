@@ -583,7 +583,7 @@ void dclang_execute() {
         OP_EQ:
             if (data_stack_ptr < 2)
             {
-                printf("'=' needs two elements on the stack!\n");
+                printf("= -- stack underflow; needs <val1> <val2> on the stack!\n");
                 return;
             }
             push(((DCLANG_FLT) POP == (DCLANG_FLT) POP) * -1);
@@ -591,7 +591,7 @@ void dclang_execute() {
         OP_NOTEQ:
             if (data_stack_ptr < 2)
             {
-                printf("'!=' needs two elements on the stack!\n");
+                printf("!= -- stack underflow; needs <val1> <val2> on the stack!\n");
                 return;
             }
             push(((DCLANG_FLT) POP != (DCLANG_FLT) POP) * -1);
@@ -599,7 +599,7 @@ void dclang_execute() {
         OP_GT:
             if (data_stack_ptr < 2)
             {
-                printf("'>' needs two elements on the stack!\n");
+                printf("> -- stack underflow; needs <val1> <val2> on the stack!\n");
                 return;
             }
             push(((DCLANG_FLT) POP < (DCLANG_FLT) POP) * -1);
@@ -607,7 +607,7 @@ void dclang_execute() {
         OP_LT:
             if (data_stack_ptr < 2)
             {
-                printf("'<' needs two elements on the stack!\n");
+                printf("< -- stack underflow; needs <val1> <val2> on the stack!\n");
                 return;
             }
             push(((DCLANG_FLT) POP > (DCLANG_FLT) POP) * -1);
@@ -615,7 +615,7 @@ void dclang_execute() {
         OP_GTE:
             if (data_stack_ptr < 2)
             {
-                printf("'>=' needs two elements on the stack!\n");
+                printf(">= -- stack underflow; needs <val1> <val2> on the stack!\n");
                 return;
             }
             push(((DCLANG_FLT) POP <= (DCLANG_FLT) POP) * -1);
@@ -623,7 +623,7 @@ void dclang_execute() {
         OP_LTE:
             if (data_stack_ptr < 2)
             {
-                printf("'<=' needs two elements on the stack!\n");
+                printf("<= -- stack underflow; needs <val1> <val2> on the stack!\n");
                 return;
             }
             push(((DCLANG_FLT) POP >= (DCLANG_FLT) POP) * -1);
@@ -632,7 +632,7 @@ void dclang_execute() {
         OP_ASSERT:
             if (data_stack_ptr < 1)
             {
-                printf("'assert' needs an element on the stack!\n");
+                printf("assert -- stack underflow; needs <bool> on the stack!\n");
                 return;
             }
             truth = POP;
@@ -644,7 +644,7 @@ void dclang_execute() {
         OP_AND:
             if (data_stack_ptr < 2)
             {
-                printf("'and' needs two elements on the stack!\n");
+                printf("and -- stack underflow; needs <int1> <int2> on the stack!\n");
                 return;
             }
             push((DCLANG_LONG) POP & (DCLANG_LONG) POP);
@@ -652,7 +652,7 @@ void dclang_execute() {
         OP_OR:
             if (data_stack_ptr < 2)
             {
-                printf("'or' needs two elements on the stack!\n");
+                printf("or -- stack underflow; needs <int1> <int2> on the stack!\n");
                 return;
             }
             push((DCLANG_LONG) POP | (DCLANG_LONG) POP);
@@ -660,7 +660,7 @@ void dclang_execute() {
         OP_XOR:
             if (data_stack_ptr < 2)
             {
-                printf("'xor' needs two elements on the stack!\n");
+                printf("xor -- stack underflow; needs <int1> <int2> on the stack!\n");
                 return;
             }
             push((DCLANG_LONG) POP ^ (DCLANG_LONG) POP);
@@ -668,7 +668,7 @@ void dclang_execute() {
         OP_NOT:
             if (data_stack_ptr < 1)
             {
-                printf("'not' needs an element on the stack!\n");
+                printf("not -- stack underflow; needs <int> on the stack!\n");
                 return;
             }
             push(~(DCLANG_LONG) POP);
@@ -676,7 +676,7 @@ void dclang_execute() {
         OP_LSHIFT:
             if (data_stack_ptr < 2)
             {
-                printf("'<<' needs two numbers on the stack!\n");
+                printf("<< -- stack underflow; needs <int1> <int2> on the stack!\n");
                 return;
             }
             shift_amt = (DCLANG_ULONG) POP;
@@ -686,7 +686,7 @@ void dclang_execute() {
         OP_RSHIFT:
             if (data_stack_ptr < 2)
             {
-                printf("'>>' needs two numbers on the stack!\n");
+                printf(">> -- stack underflow; needs <int1> <int2> on the stack!\n");
                 return;
             }
             shift_amt = (DCLANG_ULONG) POP;
@@ -697,7 +697,7 @@ void dclang_execute() {
         OP_ADD:
             if (data_stack_ptr < 2)
             {
-                printf("'+' needs two numbers on the stack!\n");
+                printf("+ -- stack underflow; needs <num1> <num2> on the stack!\n");
                 return;
             }
             push(POP + POP);
@@ -705,7 +705,7 @@ void dclang_execute() {
         OP_SUB:
             if (data_stack_ptr < 2)
             {
-                printf("'-' needs two numbers on the stack!\n");
+                printf("- -- stack underflow; needs <num1> <num2> on the stack!\n");
                 return;
             }
             DCLANG_FLT subtrahend = POP;
@@ -714,7 +714,7 @@ void dclang_execute() {
         OP_MUL:
             if (data_stack_ptr < 2)
             {
-                printf("'*' needs two numbers on the stack!\n");
+                printf("* -- stack underflow; needs <num1> <num2> on the stack!\n");
                 return;
             }
             push(POP * POP);
@@ -722,7 +722,7 @@ void dclang_execute() {
         OP_DIV:
             if (data_stack_ptr < 2)
             {
-                printf("'/' needs two numbers on the stack!\n");
+                printf("/ -- stack underflow; needs <num1> <num2> on the stack!\n");
                 return;
             }
             DCLANG_FLT divisor = POP;
@@ -731,7 +731,7 @@ void dclang_execute() {
         OP_MOD:
             if (data_stack_ptr < 2)
             {
-                printf("'%%' needs two numbers on the stack!\n");
+                printf("%% -- stack underflow; needs <num1> <num2> on the stack!\n");
                 return;
             }
             DCLANG_FLT modulus = POP;
@@ -740,7 +740,7 @@ void dclang_execute() {
         OP_ABS:
             if (data_stack_ptr < 1)
             {
-                printf("'abs' needs a number on the stack!\n");
+                printf("abs -- stack underflow; needs <num> on the stack!\n");
                 return;
             }
             push(fabs(POP));
@@ -748,7 +748,7 @@ void dclang_execute() {
         OP_MIN:
             if (data_stack_ptr < 2)
             {
-                printf("'min' needs two numbers on the stack!\n");
+                printf("min -- stack underflow; needs <num1> <num2> on the stack!\n");
                 return;
             }
             a = POP;
@@ -759,7 +759,7 @@ void dclang_execute() {
         OP_MAX:
             if (data_stack_ptr < 2)
             {
-                printf("'max' needs two numbers on the stack!\n");
+                printf("max -- stack underflow; needs <num1> <num2> on the stack!\n");
                 return;
             }
             a = POP;
@@ -770,7 +770,7 @@ void dclang_execute() {
         OP_ROUND:
             if (data_stack_ptr < 1)
             {
-                printf("'round' needs a number on the stack!\n");
+                printf("round needs a number on the stack!\n");
                 return;
             }
             push((DCLANG_LONG) round(POP));
@@ -778,7 +778,7 @@ void dclang_execute() {
         OP_FLOOR:
             if (data_stack_ptr < 1)
             {
-                printf("'floor' needs a number on the stack!\n");
+                printf("floor needs a number on the stack!\n");
                 return;
             }
             push((DCLANG_LONG) floor(POP));
@@ -786,7 +786,7 @@ void dclang_execute() {
         OP_CEIL:
             if (data_stack_ptr < 1)
             {
-                printf("'ceil' needs a number on the stack!\n");
+                printf("ceil needs a number on the stack!\n");
                 return;
             }
             push((DCLANG_LONG) ceil(POP));
@@ -795,7 +795,7 @@ void dclang_execute() {
         OP_POWER:
             if (data_stack_ptr < 2)
             {
-                printf("'pow' needs two numbers on the stack!\n");
+                printf("pow -- stack underflow; needs <num1> <num2> on the stack!\n");
                 return;
             }
             DCLANG_FLT raise = POP;
@@ -804,7 +804,7 @@ void dclang_execute() {
         OP_SQRT:
             if (data_stack_ptr < 1)
             {
-                printf("'sqrt' needs a number on the stack!\n");
+                printf("sqrt needs a number on the stack!\n");
                 return;
             }
             push(sqrt(POP));
@@ -812,7 +812,7 @@ void dclang_execute() {
         OP_EXP:
             if (data_stack_ptr < 1)
             {
-                printf("'exp' need a number on the stack!\n");
+                printf("exp needs a number on the stack!\n");
                 return;
             }
             push(exp(POP));
@@ -820,7 +820,7 @@ void dclang_execute() {
         OP_LOG:
             if (data_stack_ptr < 1)
             {
-                printf("'log' needs a number on the stack!\n");
+                printf("log needs a number on the stack!\n");
                 return;
             }
             push(log(POP));
@@ -828,7 +828,7 @@ void dclang_execute() {
         OP_LOG2:
             if (data_stack_ptr < 1)
             {
-                printf("'log2' needs a number on the stack!\n");
+                printf("log2 needs a number on the stack!\n");
                 return;
             }
             push(log2(POP));
@@ -836,7 +836,7 @@ void dclang_execute() {
         OP_LOG10:
             if (data_stack_ptr < 1)
             {
-                printf("'log10' needs a number on the stack!\n");
+                printf("log10 needs a number on the stack!\n");
                 return;
             }
             push(log10(POP));
@@ -851,7 +851,7 @@ void dclang_execute() {
         OP_SINE:
             if (data_stack_ptr < 1)
             {
-                printf("'sin' needs a number on the stack!\n");
+                printf("sin needs a number on the stack!\n");
                 return;
             }
             push(sin(POP));
@@ -859,7 +859,7 @@ void dclang_execute() {
         OP_COS:
             if (data_stack_ptr < 1)
             {
-                printf("'cos' needs a number on the stack!\n");
+                printf("cos needs a number on the stack!\n");
                 return;
             }
             push(cos(POP));
@@ -867,7 +867,7 @@ void dclang_execute() {
         OP_TAN:
             if (data_stack_ptr < 1)
             {
-                printf("'tan' needs a number on the stack!\n");
+                printf("tan needs a number on the stack!\n");
                 return;
             }
             push(tan(POP));
@@ -875,7 +875,7 @@ void dclang_execute() {
         OP_ASINE:
             if (data_stack_ptr < 1)
             {
-                printf("'asin' needs a number on the stack!\n");
+                printf("asin needs a number on the stack!\n");
                 return;
             }
             push(asin(POP));
@@ -883,7 +883,7 @@ void dclang_execute() {
         OP_ACOS:
             if (data_stack_ptr < 1)
             {
-                printf("'acos' needs a numbera on the stack!\n");
+                printf("acos needs a number on the stack!\n");
                 return;
             }
             push(acos(POP));
@@ -891,7 +891,7 @@ void dclang_execute() {
         OP_ATAN:
             if (data_stack_ptr < 1)
             {
-                printf("'atan' needs a number on the stack!\n");
+                printf("atan needs a number on the stack!\n");
                 return;
             }
             push(atan(POP));
@@ -899,7 +899,7 @@ void dclang_execute() {
         OP_ATAN2:
             if (data_stack_ptr < 2)
             {
-                printf("'atan2' needs two numbers on the stack!\n");
+                printf("atan2 -- stack underflow; needs <num1> <num2> on the stack!\n");
                 return;
             }
             DCLANG_FLT x = POP;
@@ -909,7 +909,7 @@ void dclang_execute() {
         OP_SINH:
             if (data_stack_ptr < 1)
             {
-                printf("'sinh' needs a number on the stack!\n");
+                printf("sinh needs a number on the stack!\n");
                 return;
             }
             push(sinh(POP));
@@ -917,7 +917,7 @@ void dclang_execute() {
         OP_COSH:
             if (data_stack_ptr < 1)
             {
-                printf("'cosh' needs a number on the stack!\n");
+                printf("cosh needs a number on the stack!\n");
                 return;
             }
             push(cosh(POP));
@@ -925,7 +925,7 @@ void dclang_execute() {
         OP_TANH:
             if (data_stack_ptr < 1)
             {
-                printf("'tanh' needs a number on the stack!\n");
+                printf("tanh needs a number on the stack!\n");
                 return;
             }
             push(tanh(POP));
@@ -943,7 +943,7 @@ void dclang_execute() {
         OP_POKE:
             if (data_stack_ptr < 2)
             {
-                printf("! -- stack underflow! ");
+                printf("! -- stack underflow; needs <val> <variable> on the stack! ");
                 return;
             }
             idx = (DCLANG_PTR) POP;
@@ -958,7 +958,7 @@ void dclang_execute() {
         OP_PEEK:
             if (data_stack_ptr < 1)
             {
-                printf("@ -- stack underflow! ");
+                printf("@ -- stack underflow; needs <variable> on the stack! ");
                 return;
             }
             idx = (DCLANG_PTR) POP;
@@ -972,7 +972,7 @@ void dclang_execute() {
         OP_ALLOT:
             if (data_stack_ptr < 1)
             {
-                printf("allot -- stack underflow! ");
+                printf("allot -- stack underflow; needs <num-of-slots> value on the stack! ");
                 return;
             }
             vars_idx += (DCLANG_PTR) POP - 1;
@@ -986,7 +986,7 @@ void dclang_execute() {
         OP_COMMA:
             if (data_stack_ptr < 1)
             {
-                printf(", -- stack underflow! ");
+                printf(", -- stack underflow; needs a <num> to push into a slot! ");
                 return;
             }
             val = POP;
@@ -1003,7 +1003,7 @@ void dclang_execute() {
         OP_ENVSET:
             if (data_stack_ptr < 2)
             {
-                printf("envset -- need <env_val> <env_key> strings on the stack.\n");
+                printf("envset -- needs <env_val> <env_key> strings on the stack.\n");
             }
             // grab the key from the stack
             env_key = (char *)(DCLANG_PTR) POP;
@@ -1028,7 +1028,7 @@ void dclang_execute() {
         OP_ENVGET:
             if (data_stack_ptr < 1)
             {
-                printf("envget -- need <env_key> string on the stack.\n");
+                printf("envget -- needs <env_key> string on the stack.\n");
             }
             // grab the key
             env_key = (char *)(DCLANG_PTR) POP;
@@ -1054,7 +1054,7 @@ void dclang_execute() {
         OP_SORTNUMS:
             if (data_stack_ptr < 2)
             {
-                printf("sortnums -- need <arrstart_index> <size> on the stack.\n");
+                printf("sortnums -- needs <arrstart_index> <size> on the stack.\n");
                 return;
             }
             arrsize = (DCLANG_PTR) POP;
@@ -1064,7 +1064,7 @@ void dclang_execute() {
         OP_SORTSTRS:
             if (data_stack_ptr < 2)
             {
-                printf("sortstrs -- need <arrstart_index> <size> on the stack.\n");
+                printf("sortstrs -- needs <arrstart_index> <size> on the stack.\n");
             }
             arrsize = (DCLANG_PTR) POP;
             arrstart = (DCLANG_PTR) POP;
@@ -1074,7 +1074,7 @@ void dclang_execute() {
         OP_HASHSET:
             if (data_stack_ptr < 2)
             {
-                printf("h! -- stack underflow! ");
+                printf("h! -- stack underflow; needs <value> <key-string> on the stack! ");
                 return;
             }
             // grab the key
@@ -1102,7 +1102,7 @@ void dclang_execute() {
         OP_HASHGET:
             if (data_stack_ptr < 1)
             {
-                printf("h@ -- stack underflow! ");
+                printf("h@ -- stack underflow; needs a <key-string> on the stack! ");
                 return;
             }
             // grab the key
@@ -1125,7 +1125,7 @@ void dclang_execute() {
         OP_HASHKEYS:
             if (data_stack_ptr < 1)
             {
-                printf("hkeys -- need an integer index on stack. Stack underflow! ");
+                printf("hkeys -- stack underflow; needs an <key_idx> on stack! ");
                 return;
             }
             // grab the key index
@@ -1146,7 +1146,7 @@ void dclang_execute() {
         OP_TREEGET:
             if (data_stack_ptr < 2)
             {
-                printf("t@ -- stack underflow! Need <tree_root> <keystr> on the stack.\n");
+                printf("t@ -- stack underflow! needs <tree_root> <keystr> on the stack.\n");
                 printf("You can make a root node via 'tmake', and assign it to a variable ");
                 printf("so it can be referred to later.\n");
                 return;
@@ -1168,7 +1168,7 @@ void dclang_execute() {
         OP_TREESET:
             if (data_stack_ptr < 3)
             {
-                printf("t! -- stack underflow! Need <tree_root> <keystr> <val> on the stack.\n");
+                printf("t! -- stack underflow! needs <tree_root> <keystr> <val> on the stack.\n");
                 printf("You can make a root node via 'tmake', and assign it to a variable ");
                 printf("so it can be referred to later.\n");
                 return;
@@ -1185,7 +1185,7 @@ void dclang_execute() {
             NEXT;
         OP_TREEWALK:
             if (data_stack_ptr < 1) {
-                printf("twalk -- stack underflow! Need <tree_root> on the stack.\n");
+                printf("twalk -- stack underflow! needs <tree_root> on the stack.\n");
                 return;
             }
             tree_idx = (DCLANG_PTR) POP;
@@ -1193,7 +1193,7 @@ void dclang_execute() {
             NEXT;
         OP_TREEDELETE:
             if (data_stack_ptr < 2) {
-                printf("tdel -- stack underflow! Need <tree_root> <key> on the stack.\n");
+                printf("tdel -- stack underflow! needs <tree_root> <key> on the stack.\n");
                 return;
             }
             // Pop args
@@ -1206,7 +1206,7 @@ void dclang_execute() {
         #ifdef HAS_TREEDESTROY
         OP_TREEDESTROY:
             if (data_stack_ptr < 1) {
-                printf("tdestroy -- stack underflow! Need <tree_root> on the stack.\n");
+                printf("tdestroy -- stack underflow! needs <tree_root> on the stack.\n");
                 return;
             }
             tree_idx = (DCLANG_PTR) POP;
@@ -1226,7 +1226,7 @@ void dclang_execute() {
             NEXT;
         OP_LISTNEXT:
             if (data_stack_ptr < 1) {
-                printf("_lnext -- stack underflow; need <existing_list_node> on the stack! ");
+                printf("_lnext -- stack underflow; needs <existing_list_node> on the stack! ");
                 return;
             }
             list_ptr = (DCLANG_PTR)POP;
@@ -1237,7 +1237,7 @@ void dclang_execute() {
             NEXT;
         OP_LISTPUSH:
             if (data_stack_ptr < 2) {
-                printf("lpush -- stack underflow; need <list> <value> on the stack! ");
+                printf("lpush -- stack underflow; needs <list> <value> on the stack! ");
                 return;
             }
             // Pop args
@@ -1254,7 +1254,7 @@ void dclang_execute() {
             NEXT;
         OP_LISTPOP:
             if (data_stack_ptr < 1) {
-                printf("lpop -- stack underflow; need <list> on the stack! ");
+                printf("lpop -- stack underflow; needs <list> on the stack! ");
                 return;
             }
             // Pop arg
@@ -1277,7 +1277,7 @@ void dclang_execute() {
             NEXT;
         OP_LISTSET:
             if (data_stack_ptr < 3) {
-                printf("l! -- stack underflow; need <list> <slot> <value> on the stack! ");
+                printf("l! -- stack underflow; needs <list> <slot> <value> on the stack! ");
                 return;
             }
             // Pop args
@@ -1300,7 +1300,7 @@ void dclang_execute() {
             NEXT;
         OP_LISTGET:
             if (data_stack_ptr < 2) {
-                printf("l@ -- stack underflow; need <list> <slot> on the stack! ");
+                printf("l@ -- stack underflow; needs <list> <slot> on the stack! ");
                 return;
             }
             // Pop args
@@ -1323,7 +1323,7 @@ void dclang_execute() {
             NEXT;
         OP_LISTINSERT:
             if (data_stack_ptr < 3) {
-                printf("lins -- stack underflow; need <list> <slot> <value> on the stack! ");
+                printf("lins -- stack underflow; needs <list> <slot> <value> on the stack! ");
                 return;
             }
             // Pop args
@@ -1352,7 +1352,7 @@ void dclang_execute() {
             NEXT;
         OP_LISTREMOVE:
             if (data_stack_ptr < 2) {
-                printf("lrem -- stack underflow; need <list> <slot> on the stack! ");
+                printf("lrem -- stack underflow; needs <list> <slot> on the stack! ");
                 return;
             }
             // Pop the node slot and list pointer and node slot from the stack
@@ -1377,7 +1377,7 @@ void dclang_execute() {
             NEXT;
         OP_LISTSIZE:
             if (data_stack_ptr < 1) {
-                printf("lsize -- stack underflow; need <list> on the stack! ");
+                printf("lsize -- stack underflow; needs <list> on the stack! ");
                 return;
             }
             // Pop the list pointer from the stack
@@ -1397,7 +1397,7 @@ void dclang_execute() {
             NEXT;
         OP_LISTDELETE:
             if (data_stack_ptr < 1) {
-                printf("ldel -- stack underflow; need <list> on the stack! ");
+                printf("ldel -- stack underflow; needs <list> on the stack! ");
                 return;
             }
             // Pop the list pointer from the stack
@@ -1552,7 +1552,7 @@ void dclang_execute() {
         OP_EPOCH_TO_DT:
             if (data_stack_ptr < 1)
             {
-                printf("epoch->dt: need a <epoch_int> and an <output_format> on the stack.\n");
+                printf("epoch->dt -- needs <epoch_int> <output_format> on the stack.\n");
                 return;
             }
             // input string setup
@@ -1569,7 +1569,7 @@ void dclang_execute() {
             struct tm *loctime = localtime(&in_epoch);
             if (strftime(tmbuf, 256, (char *) fmt, loctime) == 0)
             {
-                printf("'strftime', a low-level call of 'epoch->dt', returned an error.\n");
+                printf("strftime, a low-level call of 'epoch->dt', returned an error.\n");
                 return;
             }
             bufaddr = (DCLANG_PTR) tmbuf;
@@ -1586,7 +1586,7 @@ void dclang_execute() {
         OP_DT_TO_EPOCH:
             if (data_stack_ptr < 2)
             {
-                printf("dt->epoch: need a <date> like \"2020-01-01 12:14:13\" and a <input_format> on the stack.\n");
+                printf("dt->epoch: need <date> (like \"2020-01-01 12:14:13\") and <input_format> on the stack.\n");
                 return;
             }
             // input string setup
@@ -1617,7 +1617,7 @@ void dclang_execute() {
             NEXT;
         OP_SLEEP:
             if (data_stack_ptr < 1) {
-                printf("sleep -- need a time amount in seconds on the stack!\n");
+                printf("sleep -- need a <time_in_secs> on the stack!\n");
                 return;
             }
             DCLANG_FLT sleeptime = POP;
@@ -1632,7 +1632,7 @@ void dclang_execute() {
         OP_PRINT:
             if (data_stack_ptr < 1)
             {
-                printf("print -- stack underflow!\n");
+                printf("print -- stack underflow; need a valid <str_pointer> on the stack!\n");
                 return;
             }
             str_ptr_addr = (DCLANG_PTR) POP;
@@ -1652,7 +1652,7 @@ void dclang_execute() {
         OP_EMIT:
             if (data_stack_ptr < 1)
             {
-                printf("emit -- stack underflow! ");
+                printf("emit -- stack underflow; need <char_num> between 0 and 127 on the stack! ");
                 return;
             }
             char char_code = (char) POP;
@@ -1662,7 +1662,7 @@ void dclang_execute() {
         OP_UEMIT:
             if (data_stack_ptr < 1)
             {
-                printf("uemit -- stack underflow! ");
+                printf("uemit -- stack underflow; need <char_num> between 0x00 and 0x10FFFF on the stack! ");
                 return;
             }
             long unsigned long uchar_code = (long unsigned long) POP;
@@ -1687,7 +1687,7 @@ void dclang_execute() {
         OP_ISALNUM:
             if (data_stack_ptr < 1)
             {
-                printf("isalnum -- stack underflow! ");
+                printf("isalnum -- stack underflow; need <string_char> on the stack! ");
                 return;
             }
             str_ptr_addr = (DCLANG_PTR) POP;
@@ -1706,7 +1706,7 @@ void dclang_execute() {
         OP_ISALPHA:
             if (data_stack_ptr < 1)
             {
-                printf("isalpha -- stack underflow! ");
+                printf("isalpha -- stack underflow; need <string_char> on the stack! ");
                 return;
             }
             str_ptr_addr = (DCLANG_PTR) POP;
@@ -1725,7 +1725,7 @@ void dclang_execute() {
         OP_ISCNTRL:
             if (data_stack_ptr < 1)
             {
-                printf("iscntrl -- stack underflow! ");
+                printf("iscntrl -- stack underflow; need a <string_char> on the stack! ");
                 return;
             }
             str_ptr_addr = (DCLANG_PTR) POP;
@@ -1744,7 +1744,7 @@ void dclang_execute() {
         OP_ISDIGIT:
             if (data_stack_ptr < 1)
             {
-                printf("isdigit -- stack underflow! ");
+                printf("isdigit -- stack underflow; need a <string_char> on the stack! ");
                 return;
             }
             str_ptr_addr = (DCLANG_PTR) POP;
@@ -1763,7 +1763,7 @@ void dclang_execute() {
         OP_ISGRAPH:
             if (data_stack_ptr < 1)
             {
-                printf("isgraph -- stack underflow! ");
+                printf("isgraph -- stack underflow; need a <string_char> on the stack! ");
                 return;
             }
             str_ptr_addr = (DCLANG_PTR) POP;
@@ -1782,7 +1782,7 @@ void dclang_execute() {
         OP_ISLOWER:
             if (data_stack_ptr < 1)
             {
-                printf("islower -- stack underflow! ");
+                printf("islower -- stack underflow; need a <string_char> on the stack! ");
                 return;
             }
             str_ptr_addr = (DCLANG_PTR) POP;
@@ -1801,7 +1801,7 @@ void dclang_execute() {
         OP_ISPRINT:
             if (data_stack_ptr < 1)
             {
-                printf("isprint -- stack underflow! ");
+                printf("isprint -- stack underflow; need a <string_char> on the stack! ");
                 return;
             }
             str_ptr_addr = (DCLANG_PTR) POP;
@@ -1820,7 +1820,7 @@ void dclang_execute() {
         OP_ISPUNCT:
             if (data_stack_ptr < 1)
             {
-                printf("ispunct -- stack underflow! ");
+                printf("ispunct -- stack underflow; need a <string_char> on the stack! ");
                 return;
             }
             str_ptr_addr = (DCLANG_PTR) POP;
@@ -1839,7 +1839,7 @@ void dclang_execute() {
         OP_ISSPACE:
             if (data_stack_ptr < 1)
             {
-                printf("isspace -- stack underflow! ");
+                printf("isspace -- stack underflow; need a <string_char> on the stack! ");
                 return;
             }
             str_ptr_addr = (DCLANG_PTR) POP;
@@ -1858,7 +1858,7 @@ void dclang_execute() {
         OP_ISUPPER:
             if (data_stack_ptr < 1)
             {
-                printf("isupper -- stack underflow! ");
+                printf("isupper -- stack underflow; need a <string_char> on the stack! ");
                 return;
             }
             str_ptr_addr = (DCLANG_PTR) POP;
@@ -1877,7 +1877,7 @@ void dclang_execute() {
         OP_ISXDIGIT:
             if (data_stack_ptr < 1)
             {
-                printf("isxdigit -- stack underflow! ");
+                printf("isxdigit -- stack underflow; need a <string_char> on the stack! ");
                 return;
             }
             str_ptr_addr = (DCLANG_PTR) POP;
@@ -1896,7 +1896,7 @@ void dclang_execute() {
         OP_TOHEX:
             if (data_stack_ptr < 1)
             {
-                printf("tohex -- stack underflow! Needs a number on the stack\n");
+                printf("tohex -- stack underflow! Needs a <number> on the stack\n");
                 return;
             }
             DCLANG_LONG val = (DCLANG_LONG) POP;
@@ -1917,7 +1917,7 @@ void dclang_execute() {
         OP_TOSTR:
             if (data_stack_ptr < 1)
             {
-                printf("tostr -- needs a number on stack!\n");
+                printf("tostr -- needs a <number> on stack!\n");
                 return;
             }
             DCLANG_FLT var = POP;
@@ -1954,7 +1954,7 @@ void dclang_execute() {
         OP_ORD:
             if (data_stack_ptr < 1)
             {
-                printf("ord -- stack underflow! Needs a single character in double-quotes on the stack.\n");
+                printf("ord -- stack underflow! Needs a <single-character-in-double-quotes> on the stack.\n");
                 return;
             }
             str_ptr_addr = (DCLANG_PTR) POP;
@@ -2035,7 +2035,7 @@ void dclang_execute() {
         OP_STRLEN:
             if (data_stack_ptr < 1)
             {
-                printf("strlen -- stack underflow!\n");
+                printf("strlen -- stack underflow; needs a <str> on the stack!\n");
                 return;
             }
             str_ptr_addr = (DCLANG_PTR) POP;
@@ -2050,7 +2050,7 @@ void dclang_execute() {
         OP_STREQ:
             if (data_stack_ptr < 2)
             {
-                printf("str= -- stack underflow!\n");
+                printf("str= -- stack underflow; need <str> <str> on the stack!\n");
                 return;
             }
             str_ptr_addr2 = (DCLANG_PTR) POP;
@@ -2072,7 +2072,7 @@ void dclang_execute() {
         OP_STRLT:
             if (data_stack_ptr < 2)
             {
-                printf("str< -- stack underflow!\n");
+                printf("str< -- stack underflow; need <str> <str> on the stack!\n");
                 return;
             }
             str_ptr_addr2 = (DCLANG_PTR) POP;
@@ -2094,7 +2094,7 @@ void dclang_execute() {
         OP_STRGT:
             if (data_stack_ptr < 2)
             {
-                printf("str> -- stack underflow!\n");
+                printf("str> -- stack underflow; need <str> <str> on the stack!\n");
                 return;
             }
             str_ptr_addr2 = (DCLANG_PTR) POP;
@@ -2246,7 +2246,7 @@ void dclang_execute() {
             if (data_stack_ptr < 1)
             {
                 printf("Stack_underflow!\n");
-                printf("'mkbuf' needs <size-as-integer> on the stack\n");
+                printf("mkbuf needs <size-as-integer> on the stack\n");
             }
             size = (DCLANG_PTR) POP;
             buf = (char *) dclang_malloc(size);
@@ -2282,7 +2282,7 @@ void dclang_execute() {
         OP_REGCOMP:
             if (data_stack_ptr < 2)
             {
-                printf("regcomp -- stack underflow: need <pattern> and <regex_flags> on the stack!\n");
+                printf("regcomp -- stack underflow: need <pattern> <regex_flags> on the stack!\n");
                 return;
             }
             // Pop the regex pattern from the stack
@@ -2362,11 +2362,12 @@ void dclang_execute() {
             }
             char *importfile = (char *)(unsigned long) POP;
             dclang_import(importfile);
+            NEXT;
         OP_FILEOPEN:
             if (data_stack_ptr < 2)
             {
                 printf("Stack underflow!\n");
-                printf("'fopen' needs <filename> <open-mode> on the stack\n");
+                printf("fopen needs <filename> <open-mode> on the stack\n");
                 return;
             }
             // file mode string
@@ -2388,7 +2389,7 @@ void dclang_execute() {
             if (data_stack_ptr < 3)
             {
                 printf("Stack underflow!\n");
-                printf("'fmemopen' needs <buf (can be 0)> <size> <open-mode> on the stack\n");
+                printf("fmemopen needs <buf (can be 0)> <size> <open-mode> on the stack\n");
                 return;
             }
             mode = (char *)(DCLANG_PTR) POP;
@@ -2401,7 +2402,7 @@ void dclang_execute() {
             if (data_stack_ptr < 1)
             {
                 printf("Stack underflow!\n");
-                printf("'fclose' needs <file_pointer> on the stack\n");
+                printf("fclose needs <file_pointer> on the stack\n");
                 return;
             }
             file = (FILE *)(DCLANG_PTR) POP;
@@ -2411,7 +2412,7 @@ void dclang_execute() {
             if (data_stack_ptr < 3)
             {
                 printf("Stack underflow!\n");
-                printf("'fread' needs <buf_pointer> <number-of-bytes> <file_pointer> on the stack\n");
+                printf("fread needs <buf_pointer> <number-of-bytes> <file_pointer> on the stack\n");
                 return;
             }
             file = (FILE *)(DCLANG_PTR) POP;
@@ -2434,7 +2435,7 @@ void dclang_execute() {
             if (data_stack_ptr < 1)
             {
                 printf("Stack underflow!\n");
-                printf("'freadline' needs <file_pointer> on the stack\n");
+                printf("freadline needs <file_pointer> on the stack\n");
                 return;
             }
             file = (FILE *)(DCLANG_PTR) POP;
@@ -2457,7 +2458,7 @@ void dclang_execute() {
             if (data_stack_ptr < 1)
             {
                 printf("Stack underflow!\n");
-                printf("'freadall' needs <file_pointer> on the stack\n");
+                printf("freadall needs <file_pointer> on the stack\n");
                 return;
             }
             DCLANG_PTR chr_cnt = 0;
@@ -2495,8 +2496,8 @@ void dclang_execute() {
             if (data_stack_ptr < 3)
             {
                 printf("Stack underflow!\n");
-                printf("'fseek' needs <file_pointer> <offset> <whence> on the stack\n");
-                printf("'Whence' must be 0 (SEEK_SET), 1 (SEEK_CUR), or 2 (SEEK_END).\n");
+                printf("fseek needs <file_pointer> <offset> <whence> on the stack\n");
+                printf("Whence must be 0 (SEEK_SET), 1 (SEEK_CUR), or 2 (SEEK_END).\n");
                 return;
             }
             DCLANG_PTR whence = (DCLANG_PTR) POP;
@@ -2513,7 +2514,7 @@ void dclang_execute() {
             if (data_stack_ptr < 1)
             {
                 printf("Stack underflow!\n");
-                printf("'ftell' needs a <file_pointer> on the stack\n");
+                printf("ftell needs a <file_pointer> on the stack\n");
                 return;
             }
             file = (FILE *)(DCLANG_PTR) POP;
@@ -2523,7 +2524,7 @@ void dclang_execute() {
         OP_FILEWRITE:
             if (data_stack_ptr < 3)
             {
-                printf("'fwrite' -- needs <string-address> <num_of_bytes> <file_pointer> on the stack\n");
+                printf("fwrite -- needs <string-address> <num_of_bytes> <file_pointer> on the stack\n");
                 return;
             }
             file = (FILE *)(DCLANG_PTR) POP;
@@ -2535,7 +2536,7 @@ void dclang_execute() {
         OP_FILEFLUSH:
             if (data_stack_ptr < 1)
             {
-                printf("'fflush' -- needs <file_pointer> on the stack\n");
+                printf("fflush -- needs <file_pointer> on the stack\n");
                 return;
             }
             file = (FILE *)(DCLANG_PTR) POP;
@@ -2543,7 +2544,7 @@ void dclang_execute() {
             NEXT;
         OP_REDIRECT:
             if (data_stack_ptr < 1) {
-                printf("Stack underflow! 'redirect' needs an output file pointer before being called\n");
+                printf("redirect -- stack underflow; needs an <output-file-pointer> on the stack\n");
                 return;
             }
             ofp = (FILE *)(DCLANG_PTR) POP;
@@ -2558,7 +2559,7 @@ void dclang_execute() {
             if (data_stack_ptr < 2)
             {
                 printf("Stack_underflow!\n");
-                printf("'open' needs <filestr> <flagint> on the stack\n");
+                printf("open -- needs <filestr> <flagint> on the stack\n");
                 return;
             }
             DCLANG_PTR flagint = (DCLANG_PTR) POP;
@@ -2570,7 +2571,7 @@ void dclang_execute() {
             if (data_stack_ptr < 1)
             {
                 printf("Stack_underflow!\n");
-                printf("'read' needs <file_pointer> <buffer-pointer> <num_bytes> on the stack\n");
+                printf("read -- needs <file_pointer> <buffer-pointer> <num_bytes> on the stack\n");
                 return;
             }
             num_bytes = (DCLANG_PTR) POP;
@@ -2583,7 +2584,7 @@ void dclang_execute() {
             if (data_stack_ptr < 3)
             {
                 printf("Stack_underflow!\n");
-                printf("'write' needs <file_pointer> <buffer-pointer> <num_bytes> on the stack\n");
+                printf("write needs <file_pointer> <buffer-pointer> <num_bytes> on the stack\n");
                 return;
             }
             num_bytes = (DCLANG_PTR) POP;
@@ -2596,7 +2597,7 @@ void dclang_execute() {
             if (data_stack_ptr < 1)
             {
                 printf("Stack_underflow!\n");
-                printf("'close' needs <file_pointer> on the stack\n");
+                printf("close -- needs <file_pointer> on the stack\n");
                 return;
             }
             int fp = (int) POP;
@@ -2762,7 +2763,7 @@ void dclang_execute() {
             NEXT;
         OP_EXIT:
             if (data_stack_ptr < 1) {
-                printf("exit -- need an integer exit code on the stack");
+                printf("exit -- stack underflow; need an <integer_exit_code> on the stack");
                 return;
             }
             DCLANG_INT code = (DCLANG_INT) POP;
@@ -2938,7 +2939,7 @@ OP_pm_list:
 OP_pm_openout:
     if (data_stack_ptr < 1)
     {
-        printf("'_pm_open_out' needs a device number on the stack!\n");
+        printf("_pm_open_out needs a device number on the stack!\n");
         return;
     }
     DCLANG_LONG device = (DCLANG_LONG) POP;
@@ -2948,7 +2949,7 @@ OP_pm_openout:
 OP_pm_ws:
     if (data_stack_ptr < 3)
     {
-        printf("'_pm_ws' needs 3 integers on the stack:\n");
+        printf("_pm_ws needs 3 integers on the stack:\n");
         printf("    <status> <data1> <data2>\n");
         return;
     }
@@ -2965,7 +2966,7 @@ OP_pm_ws:
 OP_pm_wsr:
     if (data_stack_ptr < 3)
     {
-        printf("'_pm_wsr' needs 3 integers on the stack:\n");
+        printf("_pm_wsr needs 3 integers on the stack:\n");
         printf("    <data2> <data1> <status>\n");
         return;
     }
