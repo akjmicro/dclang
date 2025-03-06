@@ -172,10 +172,10 @@ void dclang_execute() {
     sqlite3_stmt *stmt;
     void *hvalue, *confirm;
     FILE *file;
-    DCLANG_INT precision, width, bufsize, i, ch, regex_flags, fd, sockfd, portno, rc;
+    DCLANG_INT arrsize, precision, width, bufsize, i, ch, regex_flags, fd, sockfd, portno, rc;
     DCLANG_FLT value, val, val1, val2, a, b, c, tree_val;
     DCLANG_LONG slot, truth, result, midi_status, midi_data1, midi_data2;
-    DCLANG_PTR arrstart, arrsize, env_key_addr, key_addr, idx, next_var, size, tree_idx, \
+    DCLANG_PTR arrstart, env_key_addr, key_addr, idx, next_var, size, tree_idx, \
                list_ptr, str_ptr_addr, str_ptr_addr2, dest, delim, buflen, strpt, bufaddr, num_bytes;
     DCLANG_ULONG shift_amt, base, fmt;
 
@@ -387,7 +387,8 @@ void dclang_execute() {
         &&_OP_PM_WS,
         &&_OP_PM_WSR,
         &&_OP_PM_CLOSE,
-        &&_OP_PM_TERMINATE
+        &&_OP_PM_TERMINATE,
+        &&OP_EXEC
     };
 
     while (1) {
@@ -1084,9 +1085,9 @@ void dclang_execute() {
                 printf("sortnums -- needs <arrstart_index> <size> on the stack.\n");
                 return;
             }
-            arrsize = (DCLANG_PTR) POP;
+            arrsize = (DCLANG_INT) POP;
             arrstart = (DCLANG_PTR) POP;
-            qsort(vars+arrstart, size, sizeof(DCLANG_FLT), compare_doubles);
+            qsort((void *)(vars+arrstart), arrsize, sizeof(DCLANG_FLT), compare_doubles);
             NEXT;
         OP_SORTSTRS:
             if (data_stack_ptr < 2)
@@ -1095,7 +1096,7 @@ void dclang_execute() {
             }
             arrsize = (DCLANG_PTR) POP;
             arrstart = (DCLANG_PTR) POP;
-            qsort(vars+arrstart, size, sizeof(DCLANG_FLT), compare_strings);
+            qsort((void *)(vars+arrstart), arrsize, sizeof(DCLANG_FLT), compare_strings);
             NEXT;
         // global hash table
         OP_HASHSET:
@@ -2175,7 +2176,7 @@ void dclang_execute() {
                 perror("strspn -- <delim> string address out-of-range.\n");
                 return;
             }
-            if (str < MIN_STR || str > MAX_STR)
+            if (strpt < MIN_STR || strpt > MAX_STR)
             {
                 perror("strspn -- <str> string address out-of-range.\n");
                 return;
@@ -2195,7 +2196,7 @@ void dclang_execute() {
                 perror("strcspn -- <test_chars_str> string address out-of-range.\n");
                 return;
             }
-            if (str < MIN_STR || str > MAX_STR)
+            if (strpt < MIN_STR || strpt > MAX_STR)
             {
                 perror("strcspn -- <str> string address out-of-range.");
                 return;
@@ -2217,7 +2218,7 @@ void dclang_execute() {
             char **savepoint_ptr = (char **) &vars[savepoint];
             delim = (DCLANG_PTR) POP;
             strpt = (DCLANG_PTR) POP;
-            if ((str != 0) && (str < MIN_STR || str > MAX_STR))
+            if ((strpt != 0) && (strpt < MIN_STR || strpt > MAX_STR))
             {
                 perror("strtok -- <str> (first) string address out-of-range.\n");
                 return;
@@ -2227,7 +2228,7 @@ void dclang_execute() {
                 perror("strtok -- <delim> (second) string address out-of-range.\n");
                 return;
             }
-            push((DCLANG_LONG) strtok_r((char *)str, (char *)delim, savepoint_ptr));
+            push((DCLANG_LONG) strtok_r((char *)strpt, (char *)delim, savepoint_ptr));
             NEXT;
         OP_MEMPCPY:
             if (data_stack_ptr < 3)
@@ -2962,6 +2963,9 @@ void dclang_execute() {
             Pm_Terminate();
             printf("Portmidi process terminated.\n");
             NEXT;
+        OP_EXEC:
+            execfunc_ptr();
+            NEXT;
     }
 }
 
@@ -3213,6 +3217,8 @@ void add_all_primitives() {
     add_primitive("words", "Info", OP_SHOWWORDS);
     add_primitive("constants", "Info", OP_SHOWCONSTS);
     add_primitive("variables", "Info", OP_SHOWVARS);
+    // dynamic input
+    add_primitive("exec", "Dynamic Input", OP_EXEC);
     // SQLite3 interface
     add_primitive("_sqlite_open", "SQLite", _OP_SQLITEOPEN);
     add_primitive("_sqlite_prepare", "SQLite", _OP_SQLITEPREPARE);
@@ -3228,6 +3234,7 @@ void add_all_primitives() {
     add_primitive("_pm_wsr", "MIDI", _OP_PM_WSR);
     add_primitive("_pm_close", "MIDI", _OP_PM_CLOSE);
     add_primitive("_pm_terminate", "MIDI", _OP_PM_TERMINATE);
+    add_primitive(0, 0, 0);  // end of primitives 'barrier'
 };
 
 void show_primitives() {
@@ -3501,16 +3508,17 @@ OP_grabinput() {
 
 OP_input: {
     if (def_mode) {
-        prog[iptr++].function.without_param = grabinput;
+        prog[iptr++].opcode = OP_INPUT;
     } else {
         grabinput();
     }
 }
+*/
 
-OP_exec: {
+void execfunc() {
     if (data_stack_ptr < 1)
     {
-        printf("exec -- stack underflow! ");
+        printf("exec -- stack underflow; needs a string representing a word or primitive on the stack! ");
         return;
     }
     DCLANG_PTR string_uint_addr = (DCLANG_PTR) POP;
@@ -3519,58 +3527,61 @@ OP_exec: {
         perror("exec -- String address out-of-range.");
         return;
     }
-    char *argument = (char *)string_uint_addr;
+    char *token_arg = (char *)string_uint_addr;
     const struct primitive *pr = primitives;
 
-    // search user-defined functions (words)
-    DCLANG_LONG found = dclang_findword(argument);
-    if (found > -1) {
+    // Search user-defined functions (words)
+    DCLANG_LONG found = dclang_findword(token_arg);
+    if (found != -1) {
         if (def_mode) {
-            prog[iptr].opcode = OP_CALL;
-            prog[iptr++].param = found;
+            if (strcmp(user_words[num_user_words - 1].name, token_arg) == 0) {
+                prog[iptr].opcode = OP_JUMPU;  // don't overflow the return stack
+                prog[iptr++].param = found;
+            } else {
+                prog[iptr].opcode = OP_CALL;  // normal return stack save
+                prog[iptr++].param = found;
+            }
         } else {
             dclang_callword(found);
         }
         return;
     }
-
-    // search dictionary (list, not hash) entry
+    // Search for a primitive word
     while (pr->name != 0) {
-        if (strcmp(pr->name, argument) == 0) {
+        if (strcmp(pr->name, token_arg) == 0) {
             if ((def_mode) && (!is_special_form(pr->name))) {
-                prog[iptr++].function.without_param = pr->function;
+                prog[iptr++].opcode = pr->opcode;
             } else {
-                if (validate(argument)) {
-                    (*(pr->function)) ();
+                if (validate(token_arg)) {
+                    prog[iptr].opcode = pr->opcode;
+                    dclang_execute();
                 }
             }
             return;
         }
         pr++;
     }
-    printf("exec -- word not found: %s\n", argument);
+    printf("exec -- word not found: %s\n", token_arg);
     printf("If you call 'exec' repeatedly without using a string constant, "
            "it will result in the string memory getting into a bad state.\n"
            "HINT: try using a constant like: \n"
            "      \"foo\" const :foo \n"
            " and then calling 'exec' with the constant on the stack.\n");
 }
-*/
 
 // needed so we can add 'import' to primitives
-void load_extra_primitives() {
+//void load_extra_primitives() {
     //add_primitive("input", "Other", inputfunc);
     //add_primitive("exec", "Other", execfunc);
-    add_primitive(0, 0, 0);  // end of primitives 'barrier'
-}
+//}
 
 void dclang_initialize() {
     setinput(stdin);                       // start input in sane state
     ofp = stdout;                          // start output in sane state
+    execfunc_ptr = execfunc;               // assign the execfunc function to its pointer
     show_primitives_ptr = show_primitives; // assign the show_primtives function to its pointer
     repl_ptr = repl;                       // assign the repl function to its pointer
     add_all_primitives();                  // register most of the primitives
-    load_extra_primitives();               // register the tricky chicken-or-egg ones
     srand(time(NULL));                     // seed the random # generator
     global_hash_table = hcreate(1024*256); // create the global hash table
     hashwords = (char**)dclang_malloc(hashwords_size * sizeof(*hashwords));

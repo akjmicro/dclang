@@ -411,7 +411,8 @@ enum dclang_opcodes {
     _OP_PM_WS,
     _OP_PM_WSR,
     _OP_PM_CLOSE,
-    _OP_PM_TERMINATE
+    _OP_PM_TERMINATE,
+    OP_EXEC
 };
     /*
     // SQLite3 interface
@@ -460,6 +461,9 @@ PmStream *midi_stream;
 #define TIME_INFO NULL
 
 // Functions we want to define ahead of time
+// Helps us avoid chicken-or-egg problems
+void execfunc(void);
+void (*execfunc_ptr)(void);
 void show_primitives(void);
 void (*show_primitives_ptr)(void);
 void repl(void);
