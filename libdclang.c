@@ -3569,12 +3569,6 @@ void execfunc() {
            " and then calling 'exec' with the constant on the stack.\n");
 }
 
-// needed so we can add 'import' to primitives
-//void load_extra_primitives() {
-    //add_primitive("input", "Other", inputfunc);
-    //add_primitive("exec", "Other", execfunc);
-//}
-
 void dclang_initialize() {
     setinput(stdin);                       // start input in sane state
     ofp = stdout;                          // start output in sane state
