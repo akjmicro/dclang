@@ -397,6 +397,8 @@ enum dclang_opcodes {
     OP_SHOWWORDS,
     OP_SHOWCONSTS,
     OP_SHOWVARS,
+    OP_EXEC,
+    OP_INPUT,
     // sqlite3
     _OP_SQLITEOPEN,
     _OP_SQLITEPREPARE,
@@ -411,8 +413,7 @@ enum dclang_opcodes {
     _OP_PM_WS,
     _OP_PM_WSR,
     _OP_PM_CLOSE,
-    _OP_PM_TERMINATE,
-    OP_EXEC
+    _OP_PM_TERMINATE
 };
     /*
     // SQLite3 interface
@@ -439,6 +440,9 @@ DCLANG_LONG bufused;  // for tokens
 char line_buf[256] = {0};  // for fgets input
 char *line_ptr = line_buf; // for fgets input
 DCLANG_INT live_repl = 0;
+// a small buffer for use by `OP_INPUT`
+char input_pad[512];
+int input_here;
 // used by 'freadline' function, which calls 'getline'
 // must be global so it is accessible to the data stack:
 char *linebuf = NULL;

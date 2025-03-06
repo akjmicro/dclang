@@ -375,6 +375,8 @@ void dclang_execute() {
         &&OP_SHOWWORDS,
         &&OP_SHOWCONSTS,
         &&OP_SHOWVARS,
+        &&OP_EXEC,
+        &&OP_INPUT,
         &&_OP_SQLITEOPEN,
         &&_OP_SQLITEPREPARE,
         &&_OP_SQLITESTEP,
@@ -387,8 +389,7 @@ void dclang_execute() {
         &&_OP_PM_WS,
         &&_OP_PM_WSR,
         &&_OP_PM_CLOSE,
-        &&_OP_PM_TERMINATE,
-        &&OP_EXEC
+        &&_OP_PM_TERMINATE
     };
 
     while (1) {
@@ -2816,6 +2817,53 @@ void dclang_execute() {
                 printf("Variable %i: %s @ %li\n", x, var_keys[x], var_vals[x]);
             }
             NEXT;
+        OP_EXEC:
+            execfunc_ptr();
+            NEXT;
+        OP_INPUT:
+            setinput(stdin);
+            char input_ch;
+            // get a starting marker for length
+            unsigned long string_start = input_here;
+            // bypass leading whitespace
+            do {
+                if((input_ch = fgetc(ifp)) == EOF) {
+                    exit(0);
+                }
+            } while(isspace(input_ch));
+            while (! strchr("\n", input_ch)) {
+                if (strchr("\\", input_ch)) {
+                    // consume an extra char due to backslash
+                    if ((input_ch = fgetc(ifp)) == EOF) exit(0);
+                    // backspace
+                    if (strchr("b", input_ch)) {
+                        input_ch = 8;
+                    }
+                    if (strchr("n", input_ch)) {
+                        input_ch = 10;
+                    }
+                    if (strchr("t", input_ch)) {
+                        input_ch = 9;
+                    }
+                }
+                input_pad[input_here++] = input_ch;
+                if ((input_ch = getchar()) == EOF) exit(0);
+            }
+            DCLANG_PTR string_addr = (DCLANG_PTR) string_start;
+            DCLANG_PTR string_size = (DCLANG_PTR)(input_here - string_start);
+            char *string_dest = dclang_malloc(string_size + 1);
+            char nullstr[] = "\0";
+            memcpy(string_dest, (char *)((DCLANG_PTR)&input_pad[0] + string_addr), string_size);
+            str_ptr_addr = (DCLANG_PTR) string_dest;
+            if (str_ptr_addr < MIN_STR || MIN_STR == 0) {
+                MIN_STR = str_ptr_addr;
+            }
+            if (str_ptr_addr + string_size + 1 > MAX_STR || MAX_STR == 0) {
+                MAX_STR = str_ptr_addr + string_size + 1;
+            }
+            push(str_ptr_addr);
+            revertinput();
+            NEXT;
         _OP_SQLITEOPEN:
             const char* db_path = (const char*)(DCLANG_PTR)POP;
             rc = sqlite3_open(db_path, &db);
@@ -2962,9 +3010,6 @@ void dclang_execute() {
         _OP_PM_TERMINATE:
             Pm_Terminate();
             printf("Portmidi process terminated.\n");
-            NEXT;
-        OP_EXEC:
-            execfunc_ptr();
             NEXT;
     }
 }
@@ -3219,6 +3264,7 @@ void add_all_primitives() {
     add_primitive("variables", "Info", OP_SHOWVARS);
     // dynamic input
     add_primitive("exec", "Dynamic Input", OP_EXEC);
+    add_primitive("input", "Dynamic Input", OP_INPUT);
     // SQLite3 interface
     add_primitive("_sqlite_open", "SQLite", _OP_SQLITEOPEN);
     add_primitive("_sqlite_prepare", "SQLite", _OP_SQLITEPREPARE);
@@ -3455,65 +3501,6 @@ void repl() {
     }
     compile_or_interpret(0);
 }
-
-/*
-// a small buffer for use by `grabinput`
-char string_pad[512];
-int string_here;
-
-OP_grabinput() {
-    setinput(stdin);
-    char ch;
-    // get a starting marker for length
-    unsigned long string_start = string_here;
-    // bypass leading whitespace
-    do {
-        if((ch = fgetc(ifp)) == EOF) {
-            exit(0);
-        }
-    } while(isspace(ch));
-    while (! strchr("\n", ch)) {
-        if (strchr("\\", ch)) {
-            // consume an extra char due to backslash
-            if ((ch = getchar()) == EOF) exit(0);
-            // backspace
-            if (strchr("b", ch)) {
-                ch = 8;
-            }
-            if (strchr("n", ch)) {
-                ch = 10;
-            }
-            if (strchr("t", ch)) {
-                ch = 9;
-            }
-        }
-        string_pad[string_here++] = ch;
-        if ((ch = getchar()) == EOF) exit(0);
-    }
-    DCLANG_PTR string_addr = (DCLANG_PTR) string_start;
-    DCLANG_PTR string_size = (DCLANG_PTR)(string_here - string_start);
-    char *string_dest = dclang_malloc(string_size + 1);
-    char nullstr[] = "\0";
-    memcpy(string_dest, (char *)((DCLANG_PTR)&string_pad[0] + string_addr), string_size);
-    str_ptr_addr = (DCLANG_PTR) string_dest;
-    if (str_ptr_addr < MIN_STR || MIN_STR == 0) {
-        MIN_STR = str_ptr_addr;
-    }
-    if (str_ptr_addr + string_size + 1 > MAX_STR || MAX_STR == 0) {
-        MAX_STR = str_ptr_addr + string_size + 1;
-    }
-    push(str_ptr_addr);
-    revertinput();
-}
-
-OP_input: {
-    if (def_mode) {
-        prog[iptr++].opcode = OP_INPUT;
-    } else {
-        grabinput();
-    }
-}
-*/
 
 void execfunc() {
     if (data_stack_ptr < 1)
