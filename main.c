@@ -20,7 +20,7 @@ int main(int argc, char **argv) {
         printf("Make sure to peruse README.md to get your bearings!\n");
         printf("You can type 'primitives' to see a list of all the primitive (c-builtin) words.\n");
         printf("You can type 'words' to see a list of words defined within dclang.\n");
-        show_primitivesfunc();
+        show_primitives();
         repl();
     }
 }

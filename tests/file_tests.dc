@@ -5,7 +5,7 @@ var fp
   0 64 "w+" fmemopen fp !
   :hello dup strlen fp @ fwrite drop
   fp @ fflush
-  0 0 fp @ fseek
+  fp @ 0 0 fseek
   fp @ freadall drop
   :hello
   str= assert

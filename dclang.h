@@ -393,26 +393,29 @@ enum dclang_opcodes {
     OP_FORK,
     OP_EXIT,
     // info
+    OP_SHOWPRIMITIVES,
     OP_SHOWWORDS,
     OP_SHOWCONSTS,
-    OP_SHOWVARS
+    OP_SHOWVARS,
+    // sqlite3
+    _OP_SQLITEOPEN,
+    _OP_SQLITEPREPARE,
+    _OP_SQLITESTEP,
+    _OP_SQLITECOLUMN,
+    _OP_SQLITEFINALIZE,
+    _OP_SQLITEEXEC,
+    _OP_SQLITECLOSE,
+    // portmidi
+    _OP_PM_LIST,
+    _OP_PM_OPENOUT,
+    _OP_PM_WS,
+    _OP_PM_WSR,
+    _OP_PM_CLOSE,
+    _OP_PM_TERMINATE
 };
     /*
     // SQLite3 interface
-    OP_SQLITEOPEN,
-    OP_SQLITEPREPARE,
-    OP_SQLITESTEP,
-    OP_SQLITECOLUMN,
-    OP_SQLITEFINALIZE,
-    OP_SQLITEEXEC,
-    OP_SQLITECLOSE,
-    // portmidi
-    OP_PM_LIST,
-    OP_PM_OPENOUT,
-    OP_PM_WS,
-    OP_PM_WSR,
-    OP_PM_CLOSE,
-    OP_PM_TERMINATE,
+
     */
 
 // user words
@@ -451,8 +454,16 @@ struct sockaddr_in serv_addr, cli_addr;
 struct sockaddr_in udp_serv_addr, udp_cli_addr, dest_addr;
 sigset_t block_sigint;
 
+// will be the private pointer to the working MIDI stream
+PmStream *midi_stream;
+#define TIME_PROC ((int32_t (*)(void *)) Pt_Time)
+#define TIME_INFO NULL
+
+// Functions we want to define ahead of time
+void show_primitives(void);
+void (*show_primitives_ptr)(void);
 void repl(void);
-void (*repl_pnt)(void);
+void (*repl_ptr)(void);
 void dclang_execute(void);
 
 ///////////////

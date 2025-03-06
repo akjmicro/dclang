@@ -39,7 +39,7 @@ DCLANG_LONG dclang_import(char *infilestr) {
         FILE *infile;
         infile = fopen(infilestr, "r");
         setinput(infile);
-        repl_pnt();
+        repl_ptr();
         live_repl = saved_live_repl;
         return 0;
     }
@@ -52,7 +52,7 @@ DCLANG_LONG dclang_import(char *infilestr) {
     if (access(full_path, F_OK) == 0) {
         FILE *infile = fopen(full_path, "r");
         setinput(infile);
-        repl_pnt();
+        repl_ptr();
         live_repl = saved_live_repl;
         return 0;
     }
@@ -149,19 +149,32 @@ void reverse_array(DCLANG_PTR arr[], int n) {
 }
 // end locals helpers
 
+
+// sqlite3 API helper
+static int __sqlcallback(void *NotUsed, int argc, char **argv, char **azColName) {
+    int i;
+    for(i=0; i<argc; i++){
+      printf("%s = %s\n", azColName[i], argv[i] ? argv[i] : "NULL");
+    }
+    printf("\n");
+    return 0;
+}
+
 // END HELPERS
 
 void dclang_execute() {
-    char *char_ptr, *env_key, *env_val, *key, *search_key, *str, *str1, *str2, *buf, *mode, *path, *host;
+    char *char_ptr, *env_key, *env_val, *key, *search_key, *str, *str1, *str2, *buf, *mode, *path, *host, *sql;
     regex_t *regex;
     struct tree_entry *te, *te_del, *retval;
     struct Node *list, *next, *node_to_remove, *tail_node, *node, *new_node, *node_before;
     struct hostent *server;
+    sqlite3 *db;
+    sqlite3_stmt *stmt;
     void *hvalue, *confirm;
     FILE *file;
-    DCLANG_INT precision, width, bufsize, i, ch, regex_flags, fd, sockfd, portno;
+    DCLANG_INT precision, width, bufsize, i, ch, regex_flags, fd, sockfd, portno, rc;
     DCLANG_FLT value, val, val1, val2, a, b, c, tree_val;
-    DCLANG_LONG slot, truth, result;
+    DCLANG_LONG slot, truth, result, midi_status, midi_data1, midi_data2;
     DCLANG_PTR arrstart, arrsize, env_key_addr, key_addr, idx, next_var, size, tree_idx, \
                list_ptr, str_ptr_addr, str_ptr_addr2, dest, delim, buflen, strpt, bufaddr, num_bytes;
     DCLANG_ULONG shift_amt, base, fmt;
@@ -358,9 +371,23 @@ void dclang_execute() {
         &&OP_UNBLOCKSIGINT,
         &&OP_FORK,
         &&OP_EXIT,
+        &&OP_SHOWPRIMITIVES,
         &&OP_SHOWWORDS,
         &&OP_SHOWCONSTS,
-        &&OP_SHOWVARS
+        &&OP_SHOWVARS,
+        &&_OP_SQLITEOPEN,
+        &&_OP_SQLITEPREPARE,
+        &&_OP_SQLITESTEP,
+        &&_OP_SQLITECOLUMN,
+        &&_OP_SQLITEFINALIZE,
+        &&_OP_SQLITEEXEC,
+        &&_OP_SQLITECLOSE,
+        &&_OP_PM_LIST,
+        &&_OP_PM_OPENOUT,
+        &&_OP_PM_WS,
+        &&_OP_PM_WSR,
+        &&_OP_PM_CLOSE,
+        &&_OP_PM_TERMINATE
     };
 
     while (1) {
@@ -1059,7 +1086,7 @@ void dclang_execute() {
             }
             arrsize = (DCLANG_PTR) POP;
             arrstart = (DCLANG_PTR) POP;
-            qsort (vars+arrstart, size, sizeof(DCLANG_FLT), compare_doubles);
+            qsort(vars+arrstart, size, sizeof(DCLANG_FLT), compare_doubles);
             NEXT;
         OP_SORTSTRS:
             if (data_stack_ptr < 2)
@@ -1068,7 +1095,7 @@ void dclang_execute() {
             }
             arrsize = (DCLANG_PTR) POP;
             arrstart = (DCLANG_PTR) POP;
-            qsort (vars+arrstart, size, sizeof(DCLANG_FLT), compare_strings);
+            qsort(vars+arrstart, size, sizeof(DCLANG_FLT), compare_strings);
             NEXT;
         // global hash table
         OP_HASHSET:
@@ -2769,6 +2796,9 @@ void dclang_execute() {
             DCLANG_INT code = (DCLANG_INT) POP;
             exit(code);
             NEXT;
+        OP_SHOWPRIMITIVES:
+            show_primitives_ptr();
+            NEXT;
         OP_SHOWWORDS:
             for (int x=0; x < num_user_words; x++) {
                 printf("Word %i: %s @ %li\n", x, user_words[x].name,\
@@ -2784,6 +2814,153 @@ void dclang_execute() {
             for (int x=0; x < var_map_idx; x++) {
                 printf("Variable %i: %s @ %li\n", x, var_keys[x], var_vals[x]);
             }
+            NEXT;
+        _OP_SQLITEOPEN:
+            const char* db_path = (const char*)(DCLANG_PTR)POP;
+            rc = sqlite3_open(db_path, &db);
+            if (rc != SQLITE_OK) {
+                printf("SQLite3 error: %s\n", sqlite3_errmsg(db));
+                return;
+            }
+            push((DCLANG_PTR)db);
+            NEXT;
+        _OP_SQLITEPREPARE:
+            sql = (char *)(DCLANG_PTR)POP;
+            db = (sqlite3 *)(DCLANG_PTR)POP;
+            const char *sql_const = (const char *) sql;
+            rc = sqlite3_prepare_v2(db, sql_const, -1, &stmt, NULL);
+            if (rc != SQLITE_OK) {
+                printf("SQLite3 error: %s\n", sqlite3_errmsg(db));
+                return;
+            }
+            push((DCLANG_PTR)stmt);
+            NEXT;
+        _OP_SQLITESTEP:
+            stmt = (sqlite3_stmt *)(DCLANG_PTR)POP;
+            rc = sqlite3_step(stmt);
+            if (rc != SQLITE_DONE && rc != SQLITE_ROW) {
+                printf("SQLite3 error: %s\n", sqlite3_errmsg(sqlite3_db_handle(stmt)));
+                return;
+            }
+            push((DCLANG_PTR)rc);
+            NEXT;
+        _OP_SQLITECOLUMN:
+            int col_index = (int)POP;
+            stmt = (sqlite3_stmt *)(DCLANG_PTR)POP;
+            // Get the number of columns in the result set
+            int col_count = sqlite3_column_count(stmt);
+            // Check if the column index is within a valid range
+            if (col_index < 0 || col_index >= col_count) {
+                printf("Column index out of bounds! ");
+                return;
+            }
+            char *text = sqlite3_column_text(stmt, col_index);
+            DCLANG_PTR text_ptr = (DCLANG_PTR) text;
+            int charsize = strlen(text);
+            // update print safety:
+            if (text_ptr < MIN_STR || MIN_STR == 0)
+            {
+                MIN_STR = text_ptr;
+            }
+            if (text_ptr + charsize + 1 > MAX_STR || MAX_STR == 0)
+            {
+                MAX_STR = text_ptr + charsize + 1;
+            }
+            push(text_ptr);
+            NEXT;
+        _OP_SQLITEFINALIZE:
+            stmt = (sqlite3_stmt *)(DCLANG_PTR)POP;
+            rc = sqlite3_finalize(stmt);
+            if (rc != SQLITE_OK) {
+                printf("SQLite3 error: %s\n", sqlite3_errmsg(sqlite3_db_handle(stmt)));
+                return;
+            }
+            NEXT;
+        _OP_SQLITEEXEC:
+            char *zErrMsg = 0;
+            sql = (char *)(DCLANG_PTR)POP;
+            db = (sqlite3 *)(DCLANG_PTR)POP;
+            rc = sqlite3_exec(db, sql, __sqlcallback, 0, &zErrMsg);
+            if(rc != SQLITE_OK) {
+              fprintf(stderr, "SQL error: %s\n", zErrMsg);
+              sqlite3_free(zErrMsg);
+            }
+            NEXT;
+        _OP_SQLITECLOSE:
+            db = (sqlite3 *)(DCLANG_PTR)POP;
+            rc = sqlite3_close(db);
+            if (rc != SQLITE_OK) {
+                printf("SQLite3 error: %s\n", sqlite3_errmsg(db));
+                return;
+            }
+            NEXT;
+        _OP_PM_LIST:
+            // list midi_device information
+            int default_in = Pm_GetDefaultInputDeviceID();
+            int default_out = Pm_GetDefaultOutputDeviceID();
+            for (int i = 0; i < Pm_CountDevices(); i++) {
+                char *deflt;
+                const PmDeviceInfo *info = Pm_GetDeviceInfo(i);
+                printf("%d: %s, %s", i, info->interf, info->name);
+                if (info->input) {
+                    deflt = (i == default_in ? "default " : "");
+                    printf(" (%sinput)", deflt);
+                }
+                if (info->output) {
+                    deflt = (i == default_out ? "default " : "");
+                    printf(" (%soutput)", deflt);
+                }
+                printf("\n");
+            }
+            NEXT;
+        _OP_PM_OPENOUT:
+            if (data_stack_ptr < 1)
+            {
+                printf("_pm_open_out needs a midi_device number on the stack!\n");
+                return;
+            }
+            DCLANG_LONG midi_device = (DCLANG_LONG) POP;
+            Pm_OpenOutput(&midi_stream, midi_device, NULL, 0, NULL, NULL , 0);
+            NEXT;
+        _OP_PM_WS:
+            if (data_stack_ptr < 3)
+            {
+                printf("_pm_ws needs 3 integers on the stack:\n");
+                printf("    <status> <data1> <data2>\n");
+                return;
+            }
+            midi_data2 = (DCLANG_LONG) POP;
+            midi_data1 = (DCLANG_LONG) POP;
+            midi_status = (DCLANG_LONG) POP;
+            Pm_WriteShort(
+                midi_stream,
+                TIME_PROC(TIME_INFO),
+                Pm_Message(midi_status, midi_data1, midi_data2)
+            );
+            NEXT;
+        _OP_PM_WSR:
+            if (data_stack_ptr < 3)
+            {
+                printf("_pm_wsr needs 3 integers on the stack:\n");
+                printf("    <data2> <data1> <status>\n");
+                return;
+            }
+            midi_status = (DCLANG_LONG) POP;
+            midi_data1 = (DCLANG_LONG) POP;
+            midi_data2 = (DCLANG_LONG) POP;
+            Pm_WriteShort(
+                midi_stream,
+                0,
+                Pm_Message(midi_status, midi_data1, midi_data2)
+            );
+            NEXT;
+        _OP_PM_CLOSE:
+            Pm_Close(midi_stream);
+            printf("Portmidi port closed.\n");
+            NEXT;
+        _OP_PM_TERMINATE:
+            Pm_Terminate();
+            printf("Portmidi process terminated.\n");
             NEXT;
     }
 }
@@ -2806,191 +2983,6 @@ void dclang_callword(DCLANG_PTR where) {
     dclang_execute();
 }
 
-/*
-// Wrapper function for sqlite3_open
-OP_sqliteopen:
-    const char* db_path = (const char*)(DCLANG_PTR)POP;
-    sqlite3* db;
-    int rc = sqlite3_open(db_path, &db);
-    if (rc != SQLITE_OK) {
-        printf("SQLite3 error: %s\n", sqlite3_errmsg(db));
-        return;
-    }
-    push((DCLANG_PTR)db);
-}
-
-// Wrapper function for sqlite3_prepare
-OP_sqliteprepare: {
-    char *sql = (char *)(DCLANG_PTR)POP;
-    sqlite3* db = (sqlite3 *)(DCLANG_PTR)POP;
-    const char *sql_const = (const char *) sql;
-    sqlite3_stmt* stmt;
-    int rc = sqlite3_prepare_v2(db, sql_const, -1, &stmt, NULL);
-    if (rc != SQLITE_OK) {
-        printf("SQLite3 error: %s\n", sqlite3_errmsg(db));
-        return;
-    }
-    push((DCLANG_PTR)stmt);
-}
-
-// Wrapper function for sqlite3_step
-OP_sqlitestep: {
-    sqlite3_stmt* stmt = (sqlite3_stmt *)(DCLANG_PTR)POP;
-    int rc = sqlite3_step(stmt);
-    if (rc != SQLITE_DONE && rc != SQLITE_ROW) {
-        printf("SQLite3 error: %s\n", sqlite3_errmsg(sqlite3_db_handle(stmt)));
-        return;
-    }
-    push((DCLANG_PTR)rc);
-}
-
-// Wrapper function for sqlite3_column
-OP_sqlitecolumn: {
-    int col_index = (int)POP;
-    sqlite3_stmt* stmt = (sqlite3_stmt *)(DCLANG_PTR)POP;
-    // Get the number of columns in the result set
-    int col_count = sqlite3_column_count(stmt);
-    // Check if the column index is within a valid range
-    if (col_index < 0 || col_index >= col_count) {
-        printf("Column index out of bounds! ");
-        return;
-    }
-    char *text = sqlite3_column_text(stmt, col_index);
-    DCLANG_PTR text_ptr = (DCLANG_PTR) text;
-    int charsize = strlen(text);
-    // update print safety:
-    if (text_ptr < MIN_STR || MIN_STR == 0)
-    {
-        MIN_STR = text_ptr;
-    }
-    if (text_ptr + charsize + 1 > MAX_STR || MAX_STR == 0)
-    {
-        MAX_STR = text_ptr + charsize + 1;
-    }
-    push(text_ptr);
-}
-
-// Wrapper function for sqlite3_finalize
-OP_sqlitefinalize: {
-    sqlite3_stmt* stmt = (sqlite3_stmt *)(DCLANG_PTR)POP;
-    int rc = sqlite3_finalize(stmt);
-    if (rc != SQLITE_OK) {
-        printf("SQLite3 error: %s\n", sqlite3_errmsg(sqlite3_db_handle(stmt)));
-        return;
-    }
-}
-
-// _sqliteexecfunc is a convenience wrapper
-static int __sqlcallback(void *NotUsed, int argc, char **argv, char **azColName) {
-    int i;
-    for(i=0; i<argc; i++){
-      printf("%s = %s\n", azColName[i], argv[i] ? argv[i] : "NULL");
-    }
-    printf("\n");
-    return 0;
-}
-
-OP_sqliteexec: {
-    char *zErrMsg = 0;
-    char *sql = (char *)(DCLANG_PTR)POP;
-    sqlite3* db = (sqlite3 *)(DCLANG_PTR)POP;
-    int rc = sqlite3_exec(db, sql, __sqlcallback, 0, &zErrMsg);
-    if(rc != SQLITE_OK) {
-      fprintf(stderr, "SQL error: %s\n", zErrMsg);
-      sqlite3_free(zErrMsg);
-    }
-}
-
-// Wrapper function for sqlite3_close
-OP_sqliteclose: {
-    sqlite3* db = (sqlite3 *)(DCLANG_PTR)POP;
-    int rc = sqlite3_close(db);
-    if (rc != SQLITE_OK) {
-        printf("SQLite3 error: %s\n", sqlite3_errmsg(db));
-        return;
-    }
-}
-
-// will be the private pointer to the working MIDI stream
-PmStream *midi_stream;
-#define TIME_PROC ((int32_t (*)(void *)) Pt_Time)
-#define TIME_INFO NULL
-
-OP_pm_list:
-    // list device information
-    int default_in = Pm_GetDefaultInputDeviceID();
-    int default_out = Pm_GetDefaultOutputDeviceID();
-    for (int i = 0; i < Pm_CountDevices(); i++) {
-        char *deflt;
-        const PmDeviceInfo *info = Pm_GetDeviceInfo(i);
-        printf("%d: %s, %s", i, info->interf, info->name);
-        if (info->input) {
-            deflt = (i == default_in ? "default " : "");
-            printf(" (%sinput)", deflt);
-        }
-        if (info->output) {
-            deflt = (i == default_out ? "default " : "");
-            printf(" (%soutput)", deflt);
-        }
-        printf("\n");
-    }
-}
-
-OP_pm_openout:
-    if (data_stack_ptr < 1)
-    {
-        printf("_pm_open_out needs a device number on the stack!\n");
-        return;
-    }
-    DCLANG_LONG device = (DCLANG_LONG) POP;
-    Pm_OpenOutput(&midi_stream, device, NULL, 0, NULL, NULL , 0);
-}
-
-OP_pm_ws:
-    if (data_stack_ptr < 3)
-    {
-        printf("_pm_ws needs 3 integers on the stack:\n");
-        printf("    <status> <data1> <data2>\n");
-        return;
-    }
-    DCLANG_LONG data2 = (DCLANG_LONG) POP;
-    DCLANG_LONG data1 = (DCLANG_LONG) POP;
-    DCLANG_LONG status = (DCLANG_LONG) POP;
-    Pm_WriteShort(
-        midi_stream,
-        TIME_PROC(TIME_INFO),
-        Pm_Message(status, data1, data2)
-    );
-}
-
-OP_pm_wsr:
-    if (data_stack_ptr < 3)
-    {
-        printf("_pm_wsr needs 3 integers on the stack:\n");
-        printf("    <data2> <data1> <status>\n");
-        return;
-    }
-    DCLANG_LONG status = (DCLANG_LONG) POP;
-    DCLANG_LONG data1 = (DCLANG_LONG) POP;
-    DCLANG_LONG data2 = (DCLANG_LONG) POP;
-    Pm_WriteShort(
-        midi_stream,
-        0,
-        Pm_Message(status, data1, data2)
-    );
-}
-
-OP_pm_close:
-    Pm_Close(midi_stream);
-    printf("Portmidi port closed.\n");
-}
-
-OP_pm_terminate:
-    Pm_Terminate();
-    printf("Portmidi process terminated.\n");
-}
-
-*/
 ///////////////////////////////////////////
 // PRIMITIVES REGISTRATION (AKA opcodes) //
 ///////////////////////////////////////////
@@ -3217,10 +3209,10 @@ void add_all_primitives() {
     add_primitive("fork", "Operating System", OP_FORK);
     add_primitive("exit", "Operating System", OP_EXIT);
     // info primitives
+    add_primitive("primitives", "Info", OP_SHOWPRIMITIVES);
     add_primitive("words", "Info", OP_SHOWWORDS);
     add_primitive("constants", "Info", OP_SHOWCONSTS);
     add_primitive("variables", "Info", OP_SHOWVARS);
-    /*
     // SQLite3 interface
     add_primitive("_sqlite_open", "SQLite", _OP_SQLITEOPEN);
     add_primitive("_sqlite_prepare", "SQLite", _OP_SQLITEPREPARE);
@@ -3236,10 +3228,9 @@ void add_all_primitives() {
     add_primitive("_pm_wsr", "MIDI", _OP_PM_WSR);
     add_primitive("_pm_close", "MIDI", _OP_PM_CLOSE);
     add_primitive("_pm_terminate", "MIDI", _OP_PM_TERMINATE);
-    */
 };
 
-void show_primitivesfunc() {
+void show_primitives() {
     printf("\nThere are currently %i primitives implemented.\n", primitives_idx);
     printf("The following primitives are visible; invisible primitives start "
            "with '_' and are meant to be used privately by libraries:\n"
@@ -3260,7 +3251,7 @@ void show_primitivesfunc() {
         }
         old_category = new_category;
     }
-    //printf(": ; { }\n");
+    printf("\nWord Definitions   | : ; { } (see documentation)\n");
     printf("\nStrings are written by simply typing a string literal in double-quotes, e.g. \"Hello there!\".\n\n");
     fflush(ofp);
 }
@@ -3568,7 +3559,6 @@ OP_exec: {
 
 // needed so we can add 'import' to primitives
 void load_extra_primitives() {
-    //add_primitive("primitives", "Other", show_primitivesfunc);
     //add_primitive("input", "Other", inputfunc);
     //add_primitive("exec", "Other", execfunc);
     add_primitive(0, 0, 0);  // end of primitives 'barrier'
@@ -3577,7 +3567,8 @@ void load_extra_primitives() {
 void dclang_initialize() {
     setinput(stdin);                       // start input in sane state
     ofp = stdout;                          // start output in sane state
-    repl_pnt = repl;                       // assign the repl function to its pointer
+    show_primitives_ptr = show_primitives; // assign the show_primtives function to its pointer
+    repl_ptr = repl;                       // assign the repl function to its pointer
     add_all_primitives();                  // register most of the primitives
     load_extra_primitives();               // register the tricky chicken-or-egg ones
     srand(time(NULL));                     // seed the random # generator
