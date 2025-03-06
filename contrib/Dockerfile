@@ -1,4 +1,4 @@
-FROM debian:bullseye-slim
+FROM debian:bookworm-slim
 WORKDIR /dclang
 COPY . ./
 RUN apt update && \
