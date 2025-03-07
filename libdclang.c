@@ -1122,7 +1122,7 @@ void dclang_execute() {
                 if (hashwords_cnt > hashwords_size)
                 {
                     hashwords_size *= 2;
-                    hashwords = dclang_realloc(hashwords, hashwords_size * sizeof(*hashwords));
+                    hashwords = (char **)dclang_realloc(hashwords, hashwords_size * sizeof(*hashwords));
                 }
                 hashwords[hashwords_cnt] = key;
                 ++hashwords_cnt;
@@ -1226,9 +1226,9 @@ void dclang_execute() {
                 return;
             }
             // Pop args
-            key = (char *)(DCLANG_PTR) POP;
+            search_key = (char *)(DCLANG_PTR) POP;
             tree_idx = (DCLANG_PTR) POP;
-            te_del = make_tree_entry(dclang_strdup(key), 0);
+            te_del = make_tree_entry(dclang_strdup(search_key), 0);
             tdelete(te_del, &tree_roots[tree_idx], tree_compare_func);
             dclang_free(te_del);
             NEXT;
@@ -3400,7 +3400,7 @@ void compile_or_interpret(const char *token) {
                 prog[iptr++].param = locals_idx;
                 return;
             }
-            if ((strncmp(locals_keys[locals_idx], token, strlen(token)-1) == 0) && (strchr(token, '!') != NULL)) {
+            if ((strncmp((const char *)locals_keys[locals_idx], token, strlen(token)-1) == 0) && (strchr(token, '!') != NULL)) {
                 prog[iptr].opcode = OP_SET_LOCAL;
                 prog[iptr++].param = locals_idx;
                 return;
@@ -3474,7 +3474,7 @@ void repl() {
                 while (strcmp(token = get_token(), "}")) {
                     // Add key to ongoing array of keys
                     //printf("Token is: %s\n", token);
-                    locals_keys[locals_base_idx + locals_idx] = token;
+                    locals_keys[locals_base_idx + locals_idx] = (DCLANG_PTR)token;
                     locals_idx += 1;
                 }
                 reverse_array(locals_keys + locals_base_idx, locals_idx - 1);
