@@ -32,7 +32,6 @@ libtest: lib install
 install: lib dclang
 	cp -a $(HEADER) $(PREFIX)/include
 	cp -a $(LIBSOOBJ) $(PREFIX)/lib
-	ldconfig
 	cp -a $(EXECUTABLE) $(PREFIX)/bin
 
 clean:
