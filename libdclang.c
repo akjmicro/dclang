@@ -2182,7 +2182,7 @@ void dclang_execute() {
                 perror("strspn -- <str> string address out-of-range.\n");
                 return;
             }
-            push((DCLANG_LONG) strspn((char *)str, (char *)delim));
+            push((DCLANG_LONG) strspn((char *)strpt, (char *)delim));
             NEXT;
         OP_STRCSPN:
             if (data_stack_ptr < 2)
@@ -2202,7 +2202,7 @@ void dclang_execute() {
                 perror("strcspn -- <str> string address out-of-range.");
                 return;
             }
-            push((DCLANG_LONG) strcspn((char *)str, (char *)delim));
+            push((DCLANG_LONG) strcspn((char *)strpt, (char *)delim));
             NEXT;
         OP_STRTOK:
             if (data_stack_ptr < 3)
