@@ -22,6 +22,9 @@ const :STRBETWEEN_UNDERFLOW_ERROR
 "strreplace needs <haystack> <needle> <replacement_needle> on the stack"
 const :STRREPLACE_UNDERFLOW_ERROR
 
+"str_split needs <str_to_split> <split_char> on the stack"
+const :STRSPLIT_UNDERFLOW_ERROR
+
 : strdup
   # copies a string; leaves the new string's
   # beginning address on the stack
@@ -302,7 +305,7 @@ create hexchars 48 , 49 , 50 , 51 , 52 , 53 , 54 , 55 , 56 , 57 ,
 var _split_list
 var _strtok_state
 
-: str_split { in_str split_token }
+: _str_split_real { in_str split_token }
   lmake _split_list !
   in_str split_token _strtok_state strtok dup
   0 = if
@@ -322,4 +325,13 @@ var _strtok_state
       again
     endif
   endif
+;
+
+: str_split
+  depth 2 <
+  if
+    :STRSPLIT_UNDERFLOW_ERROR print cr
+    return
+  endif
+  _str_split_real
 ;

@@ -1,0 +1,93 @@
+# Currently, this script is limited to working with scales where the
+# assumption is a 2/1 (octave) period
+
+"string.dc" import
+
+"!" const :bang
+"/" const :slash
+
+# Get the filename
+var filename_to_open
+"SCALA_FILE" envget filename_to_open !
+# Open file and assign file pointer
+var myfile
+filename_to_open @ "r" fopen myfile !
+
+# data master array
+var master_array 128 allot
+var idx 0 idx !
+
+261 const HZ_BASE
+
+: is_bang_alone? { textline }
+    textline strlen 2 =
+    textline :bang strspn 1 =
+  and
+;
+
+: go_past_solo_bang
+  inf times
+    myfile @ freadline
+    0 = if
+      exittimes
+    else
+      is_bang_alone? if
+        exittimes
+      else
+        again
+      endif
+    endif
+;
+
+: write_and_advance
+  master_array idx @ + !
+  idx @ 1 + idx !
+;
+
+: calc_and_write_fraction
+  :slash str_split
+    dup  lpop tonum
+    swap lpop tonum
+  swap /
+  write_and_advance
+;
+
+: calc_and_write_cents
+  tonum 1200 / 2 swap pow
+  write_and_advance
+;
+
+var myline  # place to put line of text
+
+: read_data
+  inf times
+    myfile @ freadline
+    -1 = if
+      exittimes
+    else
+      myline !
+      myline @ :slash strfind
+      if
+        myline @ calc_and_write_fraction
+      else
+        myline @ calc_and_write_cents
+      endif
+  again
+    endif
+;
+
+: show_data
+  6 -5 1 for
+    idx @ times
+        master_array i + @
+        261 2 j pow *
+      * . cr
+    again
+  next
+;
+
+# The main event:
+go_past_solo_bang
+go_past_solo_bang
+read_data
+show_data
