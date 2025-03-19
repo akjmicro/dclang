@@ -1,0 +1,48 @@
+"fractions.dc" import
+
+var   numerators
+var   denominators
+lmake numerators !
+lmake denominators !
+
+"/" const :slash
+
+: _show_sb_tree
+  numerators @ lsize times
+    numerators   @ i l@ ..
+    :slash print
+    denominators @ i l@ .
+  again
+  cr
+;
+
+: _make_sb_tree_real { curidx loops n1 d1 n2 d2 }
+  numerators   @ ldel
+  denominators @ ldel
+  numerators   @ n1 lpush
+  numerators   @ n2 lpush
+  denominators @ d1 lpush
+  denominators @ d2 lpush
+  loops times
+    inf times
+      numerators @ lsize 1 - curidx = if
+        0 curidx!
+        exittimes
+      else
+        numerators   @ curidx l@
+        denominators @ curidx l@
+        numerators   @ curidx 1 + l@
+        denominators @ curidx 1 + l@
+        fracmediant
+        denominators @ swap curidx 1 + swap lins
+        numerators   @ swap curidx 1 + swap lins
+        curidx 2 + curidx!
+    again
+      endif
+  again
+;
+
+: make_sb_tree { loops n1 d1 n2 d2 }
+    0 loops n1 d1 n2 d2 _make_sb_tree_real
+  _show_sb_tree
+;
