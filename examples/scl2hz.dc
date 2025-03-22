@@ -80,7 +80,7 @@ var myline  # place to put line of text
   6 -5 1 for
     idx @ times
         master_array i + @
-        261 2 j pow *
+        HZ_BASE 2 j pow *
       * . cr
     again
   next
