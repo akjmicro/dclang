@@ -42,7 +42,12 @@ lmake denominators !
   again
 ;
 
-: make_sb_tree { loops n1 d1 n2 d2 }
+: make_sb_tree
+    depth 5 < if
+      "make_sb_tree: stack underflow; need <loops> <n1> <d1> <n2> <d2> on the stack!" print cr
+      return
+    endif
+    { loops n1 d1 n2 d2 }
     0 loops n1 d1 n2 d2 _make_sb_tree_real
   _show_sb_tree
 ;
