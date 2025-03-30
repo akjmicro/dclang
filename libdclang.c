@@ -12,19 +12,15 @@ Born on 2018-05-05 */
 // Input pointer handling
 
 void setinput(FILE *fp) {
-    printf("Running setinput. ifp currently is %d\n", (int)ifp);
     file_stack[fsp++] = ifp;
     ifp = fp;
-    printf("Setinput finished. ifp currently is %d\n", (int)ifp);
 }
 
 void _revertinput() {
-    printf("Running revertinput. ifp currently is %d\n", (int)ifp);
     if (fsp == 0) {
         exit(0);
     }
     ifp = file_stack[--fsp];
-    printf("revertinput finshed. ifp currently is %d\n", (int)ifp);
 }
 
 ////////////////////////////

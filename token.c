@@ -85,10 +85,6 @@ int get_char() {
         need_prompt = 0;  // Reset so we don't reprint it every call
     }
     int c = fgetc(ifp);
-    if (c == EOF || c == -1) {
-        printf("Detected EOF!\n");
-        return EOF;
-    }
     if (c == '\n') {
         need_prompt = 1;  // Set flag to show prompt on next call
     }
@@ -188,7 +184,6 @@ char *get_token() {
     // Read remaining characters until whitespace or EOF
     while ((ch = get_char()) != EOF) {
         if (isspace(ch)) {
-            ungetc(ch, ifp);  // Put back the whitespace
             return buf2str();
         }
         add_to_buf(ch);
