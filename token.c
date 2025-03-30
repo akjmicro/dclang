@@ -92,6 +92,9 @@ char get_char() {
     if (c == EOF) {
         fclose(ifp);
     };
+    if (c == 255) {
+        c = EOF;
+    };
     return c;
 }
 
