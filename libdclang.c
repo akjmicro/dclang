@@ -21,13 +21,6 @@ void _revertinput() {
         exit(0);
     }
     ifp = file_stack[--fsp];
-    if (ifp) {
-        printf("Returned ifp to %d\n", ifp);
-        printf("Using clearerr\n");
-        clearerr(ifp);  // Reset EOF flag on whatever input we switched to
-        printf("Setting vbuf\n");
-        setvbuf(ifp, NULL, _IONBF, 0);  // Force unbuffered mode
-    }
 }
 
 ////////////////////////////
