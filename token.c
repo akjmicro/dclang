@@ -85,6 +85,7 @@ char get_char() {
         need_prompt = 0;  // Reset so we don't reprint it every call
     }
     char c = fgetc(ifp);
+    printf("Character is %d\n", (int)c);
     if (c == '\n') {
         need_prompt = 1;  // Set flag to show prompt on next call
     }
