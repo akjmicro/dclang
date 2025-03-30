@@ -89,9 +89,6 @@ char get_char() {
     if (c == '\n') {
         need_prompt = 1;  // Set flag to show prompt on next call
     }
-    if (c == EOF) {
-        fclose(ifp);
-    };
     return c;
 }
 
@@ -166,7 +163,7 @@ char *buf2str() {
 // End helpers for `get_token()`
 
 char *get_token() {
-    DCLANG_LONG ch;
+    DCLANG_INT ch;
     bufused = 0;
     // Skip leading spaces and handle comments
     while ((ch = get_char()) != EOF) {
