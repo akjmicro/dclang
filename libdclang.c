@@ -16,11 +16,18 @@ void setinput(FILE *fp) {
     ifp = fp;
 }
 
-void revertinput() {
+void _revertinput() {
     if (fsp == 0) {
         exit(0);
     }
     ifp = file_stack[--fsp];
+    if (ifp) {
+        printf("Returned ifp to %d\n", ifp);
+        printf("Using clearerr\n");
+        clearerr(ifp);  // Reset EOF flag on whatever input we switched to
+        printf("Setting vbuf\n");
+        setvbuf(ifp, NULL, _IONBF, 0);  // Force unbuffered mode
+    }
 }
 
 ////////////////////////////
@@ -39,7 +46,7 @@ DCLANG_LONG dclang_import(char *infilestr) {
         FILE *infile;
         infile = fopen(infilestr, "r");
         setinput(infile);
-        repl_ptr();
+        repl();
         live_repl = saved_live_repl;
         return 0;
     }
@@ -52,7 +59,7 @@ DCLANG_LONG dclang_import(char *infilestr) {
     if (access(full_path, F_OK) == 0) {
         FILE *infile = fopen(full_path, "r");
         setinput(infile);
-        repl_ptr();
+        repl();
         live_repl = saved_live_repl;
         return 0;
     }
@@ -2799,7 +2806,7 @@ void dclang_execute() {
             exit(code);
             NEXT;
         OP_SHOWPRIMITIVES:
-            show_primitives_ptr();
+            show_primitives();
             NEXT;
         OP_SHOWWORDS:
             for (int x=0; x < num_user_words; x++) {
@@ -2818,7 +2825,7 @@ void dclang_execute() {
             }
             NEXT;
         OP_EXEC:
-            execfunc_ptr();
+            execfunc();
             NEXT;
         OP_INPUT:
             setinput(stdin);
@@ -3283,7 +3290,7 @@ void add_all_primitives() {
     add_primitive(0, 0, 0);  // end of primitives 'barrier'
 };
 
-void show_primitives() {
+void _show_primitives() {
     printf("\nThere are currently %i primitives implemented.\n", primitives_idx);
     printf("The following primitives are visible; invisible primitives start "
            "with '_' and are meant to be used privately by libraries:\n"
@@ -3451,7 +3458,7 @@ void compile_or_interpret(const char *token) {
     return;
 }
 
-void repl() {
+void _repl() {
     char *token;
     int locals_idx;
     while (strcmp(token = get_token(), "EOF")) {
@@ -3502,7 +3509,7 @@ void repl() {
     compile_or_interpret(0);
 }
 
-void execfunc() {
+void _execfunc() {
     if (data_stack_ptr < 1)
     {
         printf("exec -- stack underflow; needs a string representing a word or primitive on the stack! ");
@@ -3558,10 +3565,11 @@ void execfunc() {
 
 void dclang_initialize() {
     setinput(stdin);                       // start input in sane state
+    revertinput = _revertinput;
     ofp = stdout;                          // start output in sane state
-    execfunc_ptr = execfunc;               // assign the execfunc function to its pointer
-    show_primitives_ptr = show_primitives; // assign the show_primtives function to its pointer
-    repl_ptr = repl;                       // assign the repl function to its pointer
+    execfunc = _execfunc;                  // assign the execfunc function to its pointer
+    show_primitives = _show_primitives;    // assign the show_primtives function to its pointer
+    repl = _repl;                          // assign the repl function to its pointer
     add_all_primitives();                  // register most of the primitives
     srand(time(NULL));                     // seed the random # generator
     global_hash_table = hcreate(1024*256); // create the global hash table

@@ -40,7 +40,7 @@ PORTMIDI_DEVNUM is not set in your environment!
 MIDI functionality will not work. Please exit from dclang, set that value, and try again!
 ```
 
-So, notice the message that we haven't selected a device. Now taht we know what they are,
+So, notice the message that we haven't selected a device. Now that we know what they are,
 let's say I want to use `ALSA, VirMIDI 1-0 (output)`, a virtual port, to send data to.
 Simple, that's `PORTMIDI_DEVNUM=2`, so let's export that.
 

@@ -466,12 +466,12 @@ PmStream *midi_stream;
 
 // Functions we want to define ahead of time
 // Helps us avoid chicken-or-egg problems
-void execfunc(void);
-void (*execfunc_ptr)(void);
-void show_primitives(void);
-void (*show_primitives_ptr)(void);
-void repl(void);
-void (*repl_ptr)(void);
+void _execfunc(void);
+void (*execfunc)(void);
+void _show_primitives(void);
+void (*show_primitives)(void);
+void _repl(void);
+void (*repl)(void);
 void dclang_execute(void);
 
 ///////////////
