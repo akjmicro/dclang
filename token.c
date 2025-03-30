@@ -84,18 +84,13 @@ char get_char() {
         fflush(ofp);
         need_prompt = 0;  // Reset so we don't reprint it every call
     }
-    char c;
-    int result = read(fileno(ifp), &c, 1);
-    if (result == 0) {  // EOF detected
-        return EOF;
-    }
-    if (result < 0) {  // Read error
-        perror("Error reading input");
-        exit(1);
-    }
+    char c = fgetc(ifp);
     if (c == '\n') {
         need_prompt = 1;  // Set flag to show prompt on next call
     }
+    if (c == EOF) {
+        fclose(ifp);
+    };
     return c;
 }
 
