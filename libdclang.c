@@ -3358,6 +3358,7 @@ void compile_or_interpret(const char *token) {
     DCLANG_LONG var_search_idx = var_map_idx - 1;
 
     if (token == 0) {
+        revertinput();
         return;
     }
     // Search user-defined functions (words)

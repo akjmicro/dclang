@@ -187,8 +187,6 @@ char *get_token() {
                 goto read_token;
         }
     }
-    // Handle EOF case
-    revertinput();
     return "EOF";
   read_token:
     // Read remaining characters until whitespace or EOF
@@ -199,7 +197,5 @@ char *get_token() {
         }
         add_to_buf(ch);
     }
-    // Handle EOF case at the end
-    revertinput();
     return "EOF";
 }
