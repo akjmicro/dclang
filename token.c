@@ -78,19 +78,31 @@ int get_ascii(char *chbuf, int usize, char **line_ptr) {
 char get_char() {
     static char *rocket_prompt = "🚀dclang=> ";
     static char *continue_prompt = "🔗...=> ";
-    // If we're at the end of the buffer, read a new line
-    if (*line_ptr == '\0') {
-        if (live_repl) {
-            // Show the prompt in interactive mode
-            fprintf(ofp, "%s", (in_string || def_mode) ? continue_prompt : rocket_prompt);
-            fflush(ofp);
-        }
-        if (!fgets(line_buf, 256, ifp)) {
-            return EOF;  // End of input (CTRL+D or file EOF)
-        }
-        line_ptr = line_buf;
+    static int need_prompt = 1;  // Tracks when to print a prompt
+
+    if (need_prompt && live_repl) {
+        fprintf(ofp, "%s", (in_string || def_mode) ? continue_prompt : rocket_prompt);
+        fflush(ofp);
+        need_prompt = 0;  // Reset so we don't reprint it every call
     }
-    return (*line_ptr) ? *line_ptr++ : EOF;
+
+    char c;
+    int result = read(fileno(ifp), &c, 1);
+
+    if (result == 0) {  // EOF detected
+        printf("EOF detected, exiting cleanly.\n");
+        exit(0);
+    }
+    if (result < 0) {  // Read error
+        perror("Error reading input");
+        exit(1);
+    }
+
+    if (c == '\n') {
+        need_prompt = 1;  // Set flag to show prompt on next call
+    }
+
+    return c;
 }
 
 void stringfunc() {
