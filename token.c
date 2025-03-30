@@ -185,7 +185,7 @@ char *get_token() {
     // Read remaining characters until whitespace or EOF
     while ((ch = get_char()) != EOF) {
         if (isspace(ch)) {
-            //ungetc(ch, ifp);  // Put back the whitespace
+            ungetc(ch, ifp);  // Put back the whitespace
             return buf2str();
         }
         add_to_buf(ch);
