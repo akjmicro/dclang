@@ -84,16 +84,13 @@ char get_char() {
         fflush(ofp);
         need_prompt = 0;  // Reset so we don't reprint it every call
     }
-    char c = fgetc(ifp);
-    printf("Character is %d\n", (int)c);
+    int c = fgetc(ifp);
+    printf("Character is %d\n", c);
     if (c == '\n') {
         need_prompt = 1;  // Set flag to show prompt on next call
     }
     if (c == EOF) {
         fclose(ifp);
-    };
-    if (c == 255) {
-        c = EOF;
     };
     return c;
 }
