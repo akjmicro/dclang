@@ -75,7 +75,7 @@ int get_ascii(char *chbuf, int usize, char **line_ptr) {
     return 1;
 }
 
-char get_char() {
+int get_char() {
     static char *rocket_prompt = "🚀dclang=> ";
     static char *continue_prompt = "🔗...=> ";
     static int need_prompt = 1;  // Tracks when to print a prompt
