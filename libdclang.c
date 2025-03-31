@@ -16,7 +16,7 @@ void setinput(FILE *fp) {
     ifp = fp;
 }
 
-void _revertinput() {
+void revertinput() {
     if (fsp == 0) {
         exit(0);
     }
@@ -3559,7 +3559,6 @@ void _execfunc() {
 
 void dclang_initialize() {
     setinput(stdin);                       // start input in sane state
-    revertinput = _revertinput;
     ofp = stdout;                          // start output in sane state
     execfunc = _execfunc;                  // assign the execfunc function to its pointer
     show_primitives = _show_primitives;    // assign the show_primtives function to its pointer

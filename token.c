@@ -1,5 +1,3 @@
-void (*revertinput)(void);
-
 // utf-8 char buffer
 char utf8_buf[5];
 
