@@ -1,0 +1,85 @@
+"fractions.dc" import
+
+var char_n
+4 char_n !
+var char_d
+3 char_d !
+
+"/" const :slash
+
+: next_characteristic
+  char_n @ 1 + char_n !
+  char_d @ 1 + char_d !
+  "=== Characteristic ratio of " print
+  char_n @ .. :slash print char_d @ .
+  "===" print cr
+;
+
+: next_frac_to_split
+  4 3
+  char_n @
+  char_d @
+  fracdiv 2dup
+;
+
+: increment_fraction { n d }
+  n 1 +
+  d 1 +
+  simplify
+;
+
+: copy_and_divide { n1 d1 n2 d2 }
+  n1 d1 n2 d2
+  n1 d1 n2 d2 fracdiv
+;
+
+: check_bigger { n1 d1 n2 d2 }
+  n1 d1 n2 d2
+  n1 d2 *
+    n2 d1 *
+  <
+;
+
+: check_epimoric { n1 d1 n2 d2 }
+  n1 d1 n2 d2           # copy the stack so it stays after output
+  n1 d2 *
+    n2 d1 *
+  >                     # ensure the 1st fraction is bigger than the 2nd
+    n2 d2 - 1 =         # and, that the 2nd fraction is epimoric
+  and
+    char_n @ d1 *
+      n1 char_d @ *
+    >=                  # also, ensure the derived fraction is no bigger than
+                        # the characteristic
+  and
+;
+
+: output_tetrachord { n1 d1 n2 d2 }
+  n1 d1 n2 d2
+  n2 .. :slash print d2 .
+  n1 .. :slash print d1 .
+  char_n @ .. :slash print char_d @ .
+  cr
+;
+
+: find_tetrachords
+  6 times       # known in advance not to go beyond the midpoint we need
+    next_characteristic
+    next_frac_to_split
+    inf times
+      increment_fraction
+      copy_and_divide
+      check_bigger
+      if
+        clear
+        exittimes
+      else
+        check_epimoric
+        if
+          output_tetrachord
+        endif
+        2drop
+    again
+      endif
+  again
+;
