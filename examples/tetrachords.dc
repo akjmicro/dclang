@@ -83,3 +83,5 @@ var char_d
       endif
   again
 ;
+
+find_tetrachords
