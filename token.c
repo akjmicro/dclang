@@ -1,3 +1,19 @@
+int get_char() {
+    static char *rocket_prompt = "🚀dclang=> ";
+    static char *continue_prompt = "🔗...=> ";
+    static int need_prompt = 1;  // Tracks when to print a prompt
+    if (need_prompt && live_repl) {
+        fprintf(ofp, "%s", (in_string || def_mode) ? continue_prompt : rocket_prompt);
+        fflush(ofp);
+        need_prompt = 0;  // Reset so we don't reprint it every call
+    }
+    int c = fgetc(ifp);
+    if (c == '\n') {
+        need_prompt = 1;  // Set flag to show prompt on next call
+    }
+    return c;
+}
+
 // utf-8 char buffer
 char utf8_buf[5];
 
@@ -46,12 +62,10 @@ long utf8_encode(char *out, uint64_t utf) {
     }
 }
 
-int get_unicode_by_hex(char *chbuf, int usize, char **line_ptr) {
+int get_unicode_by_hex(char *chbuf, int usize) {
     char numstr[usize];
     for (int i = 0; i < usize - 1; i++) {
-        if (**line_ptr == '\0') return 0; // End of line reached unexpectedly
-        numstr[i] = **line_ptr;
-        (*line_ptr)++;
+        numstr[i] = get_char();
     }
     numstr[usize - 1] = '\0'; // Null terminate
     int ucode = strtol(numstr, NULL, 16);
@@ -59,34 +73,16 @@ int get_unicode_by_hex(char *chbuf, int usize, char **line_ptr) {
     return num_bytes_ret > 0 ? 1 : 0;
 }
 
-int get_ascii(char *chbuf, int usize, char **line_ptr) {
+int get_ascii(char *chbuf, int usize) {
     char numstr[usize];
     for (int i = 0; i < usize - 1; i++) {
-        if (**line_ptr == '\0') return 0; // End of line reached unexpectedly
-        numstr[i] = **line_ptr;
-        (*line_ptr)++;
+        numstr[i] = get_char();
     }
     numstr[usize - 1] = '\0'; // Null terminate
     int acode = strtol(numstr, NULL, 16);
     chbuf[0] = (char) acode;
     chbuf[1] = 0;
     return 1;
-}
-
-int get_char() {
-    static char *rocket_prompt = "🚀dclang=> ";
-    static char *continue_prompt = "🔗...=> ";
-    static int need_prompt = 1;  // Tracks when to print a prompt
-    if (need_prompt && live_repl) {
-        fprintf(ofp, "%s", (in_string || def_mode) ? continue_prompt : rocket_prompt);
-        fflush(ofp);
-        need_prompt = 0;  // Reset so we don't reprint it every call
-    }
-    int c = fgetc(ifp);
-    if (c == '\n') {
-        need_prompt = 1;  // Set flag to show prompt on next call
-    }
-    return c;
 }
 
 void stringfunc() {
@@ -106,9 +102,9 @@ void stringfunc() {
                 case 't': chbuf[0] = 9; break;   // Tab
                 case 'n': chbuf[0] = 10; break;  // Newline
                 case 'r': chbuf[0] = 13; break;  // Carriage return
-                case 'x': stat = get_ascii(chbuf, 3, &line_ptr); goto check_valid;
-                case 'u': stat = get_unicode_by_hex(chbuf, 5, &line_ptr); goto check_valid;
-                case 'U': stat = get_unicode_by_hex(chbuf, 9, &line_ptr); goto check_valid;
+                case 'x': stat = get_ascii(chbuf, 3); goto check_valid;
+                case 'u': stat = get_unicode_by_hex(chbuf, 5); goto check_valid;
+                case 'U': stat = get_unicode_by_hex(chbuf, 9); goto check_valid;
                 default:  chbuf[0] = escape_ch; break; // Literal char
             }
             chbuf[1] = 0;

@@ -95,6 +95,11 @@
   "\n" isxdigit not assert
 ;
 
+: test_encoding
+  "🌡" "\U0001f321" str= assert
+  "\x0a" "\n" str= assert
+;
+
 test_isalnum
 test_isalpha
 test_iscntrl
@@ -109,3 +114,4 @@ test_ispunct
 test_isspace
 test_isupper
 test_isxdigit
+test_encoding
