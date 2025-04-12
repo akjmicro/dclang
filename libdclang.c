@@ -1114,10 +1114,12 @@ void dclang_execute() {
                 perror("h! -- String address for hash key out-of-range.");
                 return;
             }
+            // check if we should increment a unique key count for later
+            void *existing_val = hget(global_hash_table, key);
             // grab the value
             hvalue = (void *)(DCLANG_PTR) POP;
             confirm = hset(global_hash_table, key, hvalue);
-            if (confirm != NULL)
+            if ((confirm != NULL) && (existing_val == NULL))
             {
                 if (hashwords_cnt > hashwords_size)
                 {

@@ -172,8 +172,14 @@ This allows nested loops up to three counters deep. Going any futher is a
 code-smell anyway, and you should refactor to a different implementation if
 you need something more.
 
+The user is encouraged to preuse the `examples/` and `tests/` directory to 
+get a feel for the style and syntax of `dclang`. When you first launch an
+interactive commandline session by typing `dclang` (or `rlwrap dclang` to
+enable comand history, if you have `rlwrap`), you will see a categorized
+listing of all the primitives. You can always see the list again by
+calling the `primitives` word, which will show the info listing again.
 
-Implemented thus far:
+A non-exhaustive notes on some of the things implemented thus far:
 
   * Math:
     * `+`, `-`, `*`, `/`, `%`, `<<`, `>>`
@@ -205,7 +211,7 @@ Implemented thus far:
     * convert integers to hex-string with `tohex`.
     * `isalnum`, `isalpha`, `iscntrl`, `isdigit`, `isgraph`, `islower`, `isprint`
       `ispunct`, `isspace`, `isupper`, `isxdigit` -- all of these can take the integer output
-      from `ord` and return `1` (true) or `0` (false) for determinng the class of a given character.
+      from `ord` and return `-1` (true) or `0` (false) for determining the class of a given character.
       (N.B.: If given a string of len > 1, `ord` uses the first character of the string by default.)
     * regex primitives: `regcomp`, `regexec`, and `regread`
   * Variables/Arrays:

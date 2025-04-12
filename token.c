@@ -1,9 +1,9 @@
 int get_char() {
-    static char *rocket_prompt = "🚀dclang=> ";
-    static char *continue_prompt = "🔗...=> ";
+    static char *normal_prompt   = "dclang=> ";
+    static char *continue_prompt = "   ...=> ";
     static int need_prompt = 1;  // Tracks when to print a prompt
     if (need_prompt && live_repl) {
-        fprintf(ofp, "%s", (in_string || def_mode) ? continue_prompt : rocket_prompt);
+        fprintf(ofp, "%s", (in_string || def_mode) ? continue_prompt : normal_prompt);
         fflush(ofp);
         need_prompt = 0;  // Reset so we don't reprint it every call
     }
