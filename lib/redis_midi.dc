@@ -1,4 +1,5 @@
 "redis.dc" import
+"clock_sleep.dc" import
 
 # make the redis connection
 redis_connect
@@ -50,6 +51,38 @@ var remainder 1 remainder !
 : redis_midi.get_off_gate
   _get_tempo
   1 _get_gate - *
+;
+
+###########################################################
+# Alternate timing API based on absolute wall clock (UTC) #
+# This helps avoid drift...                               #
+###########################################################
+
+var next_on_time
+var next_off_time
+
+: redis_midi.set_clock_start
+  clock next_on_time !
+;
+
+: _iterate_clock { length }
+    next_on_time @
+      dup
+        length _get_tempo *
+      +
+    next_on_time !
+      length _get_tempo * _get_gate *
+    +
+  next_off_time !
+;
+
+: redis_midi.get_on_gate_abs { length }
+  length _iterate_clock
+  next_off_time @ sleep_until
+;
+
+: redis_midi.get_off_gate_abs
+  next_on_time @ sleep_until
 ;
 
 ########################

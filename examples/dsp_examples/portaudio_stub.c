@@ -37,7 +37,7 @@
  */
 #include <stdio.h>
 #include <math.h>
-#include <dclang.h>
+#include "../../dclang.h"
 #include "portaudio.h"
 
 #define DEVICE_NUM             0

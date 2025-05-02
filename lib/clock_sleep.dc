@@ -1,0 +1,34 @@
+# This little library implements `sleep_until`, which is a word
+# designed to give a bit more deterministic, guaranteed accurate
+# timing behavior than using `sleep` alone. Better for e.g.
+# musical applications using MIDI, etc.
+#
+# Most of the MIDI-based examples will be ported to use this eventually.
+# As of 2025-05-01, only examples/midi/midi_fractions.dc is using it.
+
+: _tight_watch { clock_target }
+  inf times
+    clock_target clock -
+    0 <=
+    if
+      exittimes
+      return
+    else
+  again
+    endif
+;
+
+: sleep_until { clock_target }
+  inf times
+    # measure distance remaining
+    clock_target clock - dup
+    0.005 <=
+    if
+      drop
+      exittimes
+    else
+      2 / sleep
+  again
+    endif
+  clock_target _tight_watch
+;

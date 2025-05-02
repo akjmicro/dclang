@@ -170,23 +170,16 @@ var gen_struct 3 allot
 
 : _main
   block_sigint
-  # note on
-    _get_next_length dup svpush
-      100
-        _get_next_note
-        dup svpush
-          0
-    edo_degree_to_midi
-      redis_midi.get_on_gate
-    *
-  sleep
-  # note off
-        0 svpop 0
-  edo_degree_to_midi
-    redis_midi.get_off_gate
-      svpop
-    *
-  sleep
+  ###########
+  # note on #
+  ###########
+  100 _get_next_note dup svpush 0  edo_degree_to_midi
+  _get_next_length  redis_midi.get_on_gate_abs
+  ############
+  # note off #
+  ############
+  0 svpop 0  edo_degree_to_midi
+  redis_midi.get_off_gate_abs
   unblock_sigint
   _main
 ;
@@ -195,6 +188,7 @@ var gen_struct 3 allot
   "You are now entering an endless loop, hit CTRL-C to stop..." print cr
   "Notice that you won't be able to stop until a note off event hits." print cr
   "In this way, the notes end cleanly!" print cr
+  redis_midi.set_clock_start
   _main
 ;
 

@@ -28,10 +28,10 @@ Born on 2018-05-05 */
 #include <portmidi.h>
 #include <porttime.h>
 #include <sqlite3.h>
-#include "noheap/malloc.c"
-#include "noheap/ht.c"
-#include "noheap/trees.c"
-#include "noheap/llist.c"
+#include "./noheap/malloc.c"
+#include "./noheap/ht.c"
+#include "./noheap/trees.c"
+#include "./noheap/llist.c"
 
 /*
   These type macros should be changed based on architecture. For instance,
