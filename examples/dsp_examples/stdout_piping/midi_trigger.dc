@@ -1,0 +1,28 @@
+"dsp.dc" import
+"midi.dc" import
+
+# Open default MIDI output port
+0 _pm_open_out
+
+12 midi_edo !
+
+: midi_trigger
+  t
+    SAMPLE_RATE 60 96 / *
+  % dup 0 = if
+    100 0 0 edo_degree_to_midi
+  else
+    2000 = if
+      0 0 0 edo_degree_to_midi
+    endif
+  endif
+  # dummy values from lchan and rchan
+  # already 0 -- sent out anyway
+  # we're really only linking to
+  # aplay for audio sample timing
+  stereo_out
+  t+
+  midi_trigger
+;
+
+midi_trigger

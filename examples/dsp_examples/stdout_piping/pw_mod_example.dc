@@ -1,0 +1,37 @@
+"dsp.dc" import
+
+make_hc_filter mylp
+
+: pw_mod_example
+  inf times
+    #############
+    # top pitch #
+    #############
+    0.1 sine     # sine modulation of phase
+    0.5 * 0.5 +  # bring within 0-1 range
+    0.8 * 0.1 +  # squash
+      120        # pitch of pulse
+    pulse 0.8 *
+    mylp 800 0.1 hc_lowpass 0.17 *
+    # mix and output
+    0.15 panmix
+    ################
+    # bottom pitch #
+    ################
+    0.15 sine    # sine modulation of phase
+    0.5 * 0.5 +  # bring within 0-1 range
+    0.8 * 0.1 +  # squash
+      80.1       # pitch of pulse
+    pulse 0.8 *
+    mylp 800 0.1 hc_lowpass 0.17 *
+    # mix and output
+    0.85 panmix
+    ##########
+    # output #
+    ##########
+    stereo_out
+    t+
+  again
+;
+
+pw_mod_example

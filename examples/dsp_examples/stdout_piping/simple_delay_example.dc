@@ -1,0 +1,30 @@
+"dsp.dc" import
+
+# create a delay line
+1 make_delay_line mydelay
+
+0.03 0.6 make_port myport
+
+# example function
+: simple_delay_example
+  inf times
+    440 sine
+    0.4333 metro 0.8 *
+    myport port *
+    mydelay 0.4462 delay_read 0.75 *
+    2dup +
+    mydelay delay_write
+    0.5 * +
+    ##########
+    # OUTPUT #
+    ##########
+    # center pan
+    0.5 panmix
+    # output
+    stereo_out
+    # advance the clock
+    t+
+  again
+;
+
+simple_delay_example

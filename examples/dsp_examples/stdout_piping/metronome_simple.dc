@@ -1,0 +1,19 @@
+"dsp.dc" import
+
+0.09 1.00 make_port myport
+
+: metronome_simple
+    300 sine
+      96 60 / metro
+      4.2 *
+        myport
+      port
+    *
+      0.5
+  panmix
+  stereo_out
+  t+
+  metronome_simple
+;
+
+metronome_simple

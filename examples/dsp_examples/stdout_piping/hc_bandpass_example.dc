@@ -1,0 +1,38 @@
+"dsp.dc" import
+
+make_hc_filter mylp1
+make_hc_filter mylp2
+make_hc_filter mylp3
+make_hc_filter mylp4
+
+var modwave
+var res
+var slmem
+
+: hc_bandpass_example
+  inf times
+    # sweeping mod
+    # do from 0.08 - 0.02
+    0.2 sine 200 * 600 +
+    modwave !
+    0.1 res !
+    ### LEFT ###
+    247 phasor 2 * 1 - 0.5 *
+    mylp1 modwave @ res @ hc_bandpass
+    mylp2 modwave @ res @ hc_bandpass 0.1 *
+    # panning
+    0.1 panmix
+    ### RIGHT ###
+    247.31252 phasor 2 * 1 - 0.5 *
+    mylp3 modwave @ res @ hc_bandpass
+    mylp4 modwave @ res @ hc_bandpass 0.4 *
+    # panning
+    0.9 panmix
+    # output
+    stereo_out
+    # advance time
+    t+
+  again
+;
+
+hc_bandpass_example

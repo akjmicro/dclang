@@ -1,0 +1,13 @@
+"dsp.dc" import
+
+: noise_example
+  inf times
+      noise 0.5 *
+        0.5
+    panmix
+    stereo_out
+    t+
+  again
+;
+
+noise_example
