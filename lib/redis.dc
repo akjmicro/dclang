@@ -103,9 +103,12 @@ var redis_socket -1 redis_socket !
     "6379"
   endif
   tonum
-  2dup swap
-  "Connecting to redis using host: " print print
-  " and port " print . cr
+  "REDIS_SILENT_CONNECT" envget
+  0 = if
+    2dup swap
+    "Connecting to redis using host: " print print
+    " and port " print . cr
+  endif
   tcpconnect redis_socket !
   _redis_auth
 ;

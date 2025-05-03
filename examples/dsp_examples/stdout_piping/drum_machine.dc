@@ -1,4 +1,8 @@
 "dsp.dc" import
+"redis.dc" import
+
+"true" "REDIS_SILENT_CONNECT" envset
+redis_connect
 
 ############################
 # Make a 32-step sequencer #
@@ -14,15 +18,44 @@ var seq_bit       top_bit @ seq_bit !
 #################
 # Set the tempo #
 #################
-var tempo         120 4 * 60 / tempo !
+var tempo         110 4 * 60 / tempo !
+
+#####################################
+# String constants for redis lookup #
+#####################################
+"op_hihat"   const   :op_hihat
+"cl_hihat"   const   :cl_hihat
+"snare_drum" const :snare_drum
+"bass_drum"  const  :bass_drum
 
 ###########################
 # Bit patterns for beats! #
 ###########################
-var op_hihat      0x00000004   op_hihat !
-var cl_hihat      0x22423242   cl_hihat !
-var snare_drum    0x08080808 snare_drum !
-var bass_drum     0x80808080  bass_drum !
+var op_hihat
+var cl_hihat
+var snare_drum
+var bass_drum
+
+: _init_drum_parts
+  :op_hihat redis_get
+  0 = if
+    "0x00020002" :op_hihat redis_set
+  endif
+  :cl_hihat redis_get
+  0 = if
+    "0x41413513" :cl_hihat redis_set
+  endif
+  :snare_drum redis_get
+  0 = if
+    "0x0808080c" :snare_drum redis_set
+  endif
+  :bass_drum redis_get
+  0 = if
+    "0x80818082" :bass_drum redis_set
+  endif
+;
+
+_init_drum_parts
 
 ##################################
 # Masking volumes for each sound #
@@ -53,28 +86,40 @@ var lasttrig
 make_hc_filter  cl_hihat_flt
 make_hc_filter  op_hihat_flt
 
+########################################################
+# Every sequencer cycle, check redis for a new pattern #
+########################################################
+: _query_drum_parts
+  :op_hihat   redis_get tonum    op_hihat !
+  :cl_hihat   redis_get tonum    cl_hihat !
+  :snare_drum redis_get tonum  snare_drum !
+  :bass_drum  redis_get tonum   bass_drum !
+;
+
+_query_drum_parts
+
 #############################################################
-# `next_bit` r-shifts which bit in the hexbeat to inspect   #
+# `_next_bit` r-shifts which bit in the hexbeat to inspect   #
 # Also, conditionally resets back to the top bit if it      #
 # reaches the right most extreme (typically 0, but we could #
 # do different meters by resetting earlier)                 #
 #############################################################
-: next_bit
+: _next_bit
   seq_bit @ 1 >> dup
-  0 =
-  if
+  0 = if
     drop
     top_bit @ seq_bit !
+    _query_drum_parts
   else
     seq_bit !
   endif
 ;
 
 ###############################################################
-# `bit_on?` answers the question if the bit we are looking at #
+# `_bit_on?` answers the question if the bit we are looking at #
 # is "on" (or off) for the instrument line given on the stack #
 ###############################################################
-: bit_on? { this_var }
+: _bit_on? { this_var }
   seq_bit @
     dup
       this_var @
@@ -89,13 +134,12 @@ make_hc_filter  op_hihat_flt
 : drumbeat_example
   inf times
     tempo @ metro    curtrig !
-    curtrig @ lasttrig @ >
-    if
-      bass_drum  bit_on?   bass_drum_mask !
-      snare_drum bit_on?  snare_drum_mask !
-      cl_hihat   bit_on?    cl_hihat_mask !
-      op_hihat   bit_on?    op_hihat_mask !
-      next_bit
+    curtrig @ lasttrig @ > if
+      bass_drum  _bit_on?   bass_drum_mask !
+      snare_drum _bit_on?  snare_drum_mask !
+      cl_hihat   _bit_on?    cl_hihat_mask !
+      op_hihat   _bit_on?    op_hihat_mask !
+      _next_bit
     endif
     ###################
     # bass drum sound #
@@ -125,7 +169,7 @@ make_hc_filter  op_hihat_flt
     port
       noise 0.2 *
         cl_hihat_flt
-          2110 0.6
+          3610 0.6
       hc_bandpass
     *
     0.7 panmix
@@ -137,7 +181,7 @@ make_hc_filter  op_hihat_flt
     port
       noise 0.3 *
         op_hihat_flt
-          2300 0.7
+          3800 0.7
       hc_bandpass
     *
     0.7 panmix
