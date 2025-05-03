@@ -1,0 +1,154 @@
+"dsp.dc" import
+
+############################
+# Make a 32-step sequencer #
+############################
+var top_bit       1 31 << top_bit !
+############################################################
+# A variable to track which bit in the sequence we are on. #
+# As the sequence progresses, the bit slot gets smaller    #
+# by a factor of two, i.e. 1024, 512, 256, 128, ....       #
+############################################################
+var seq_bit       top_bit @ seq_bit !
+
+#################
+# Set the tempo #
+#################
+var tempo         120 4 * 60 / tempo !
+
+###########################
+# Bit patterns for beats! #
+###########################
+var op_hihat      0x00000004   op_hihat !
+var cl_hihat      0x22423242   cl_hihat !
+var snare_drum    0x08080808 snare_drum !
+var bass_drum     0x80808080  bass_drum !
+
+##################################
+# Masking volumes for each sound #
+##################################
+var   op_hihat_mask
+var   cl_hihat_mask
+var snare_drum_mask
+var  bass_drum_mask
+
+##########################################
+# Holding places for the trigger state   #
+# Allows us to detect upward signal edge #
+##########################################
+var curtrig
+var lasttrig
+
+########################
+# Portamento envelopes #
+########################
+0.001 0.18 make_port   op_hihat_port
+0.001 0.06 make_port   cl_hihat_port
+0.001 0.06 make_port snare_drum_port
+0.001 0.06 make_port  bass_drum_port
+
+##########################################
+# Hal Chamberlain filters for the hihats #
+##########################################
+make_hc_filter  cl_hihat_flt
+make_hc_filter  op_hihat_flt
+
+#############################################################
+# `next_bit` r-shifts which bit in the hexbeat to inspect   #
+# Also, conditionally resets back to the top bit if it      #
+# reaches the right most extreme (typically 0, but we could #
+# do different meters by resetting earlier)                 #
+#############################################################
+: next_bit
+  seq_bit @ 1 >> dup
+  0 =
+  if
+    drop
+    top_bit @ seq_bit !
+  else
+    seq_bit !
+  endif
+;
+
+###############################################################
+# `bit_on?` answers the question if the bit we are looking at #
+# is "on" (or off) for the instrument line given on the stack #
+###############################################################
+: bit_on? { this_var }
+  seq_bit @
+    dup
+      this_var @
+    and
+  = abs
+;
+
+########################################################################
+# All `dsp.dc` central words are an infinite loop that return a single #
+# sample per iteration.                                                #
+########################################################################
+: drumbeat_example
+  inf times
+    tempo @ metro    curtrig !
+    curtrig @ lasttrig @ >
+    if
+      bass_drum  bit_on?   bass_drum_mask !
+      snare_drum bit_on?  snare_drum_mask !
+      cl_hihat   bit_on?    cl_hihat_mask !
+      op_hihat   bit_on?    op_hihat_mask !
+      next_bit
+    endif
+    ###################
+    # bass drum sound #
+    ###################
+    curtrig @ bass_drum_mask @ *
+      bass_drum_port
+    port
+      dup 90 * 90 + sine
+    *
+    0.5 panmix
+    ####################
+    # snare drum sound #
+    ####################
+    curtrig @ snare_drum_mask @ *
+      snare_drum_port
+    port
+      noise 0.4 *
+        383 sine 0.3 *
+      +
+    *
+    0.3 panmix
+    ######################
+    # closed hihat sound #
+    ######################
+    curtrig @ cl_hihat_mask @ *
+      cl_hihat_port
+    port
+      noise 0.2 *
+      cl_hihat_flt 2110 0.6 hc_bandpass
+    *
+    0.7 panmix
+    ####################
+    # open hihat sound #
+    ####################
+    curtrig @ op_hihat_mask @ *
+      op_hihat_port
+    port
+      noise 0.3 *
+        op_hihat_flt
+          2300 0.7
+      hc_bandpass
+    *
+    0.7 panmix
+    ############################
+    # output & variable update #
+    ############################
+    stereo_out
+    curtrig @ lasttrig !
+    t+
+  again
+;
+
+###########
+# Run it! #
+###########
+drumbeat_example
