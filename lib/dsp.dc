@@ -577,46 +577,49 @@ create delay_lengths
   3209 INV_SAMPLE_RATE * ,
   2447 INV_SAMPLE_RATE * ,
   1511 INV_SAMPLE_RATE * ,
-make_hc_filter _revlp
+make_hc_filter _revlp1
+make_hc_filter _revlp2
+make_hc_filter _revlp3
+make_hc_filter _revlp4
 
 : reverb { sig ap_coef feedback cutoff wet_dry }
     sig
+      ##########################################
+      # First, 4 parallel feedback delay lines #
+      ##########################################
       dup
-      #################################
-      # Send thru 4 allpass in series #
-      #################################
-      _revap1 allpass_lengths 0 + @ ap_coef  allpass
-      _revap2 allpass_lengths 1 + @ ap_coef  allpass
-      _revap3 allpass_lengths 2 + @ ap_coef  allpass
-      _revap4 allpass_lengths 3 + @ ap_coef  allpass
-      ########################################
-      # Now, 4 parallel feedback delay lines #
-      ########################################
+        _revdl1 delay_lengths 0 + @ delay_read
+      +
         dup
-          _revdl1 delay_lengths 0 + @ delay_read
-        +
-          dup
-          feedback *
-        _revdl1 delay_write
-      svpush
+          _revlp1 cutoff 0.0
+        hc_lowpass
+        feedback *
+      _revdl1 delay_write
+    svpush
+      dup
+        _revdl2 delay_lengths 1 + @ delay_read
+      +
         dup
-          _revdl2 delay_lengths 1 + @ delay_read
-        +
-          dup
-          feedback *
-        _revdl2 delay_write
-      svpush
+          _revlp2 cutoff 0.0
+        hc_lowpass
+        feedback *
+      _revdl2 delay_write
+    svpush
+      dup
+        _revdl3 delay_lengths 2 + @ delay_read
+      +
         dup
-          _revdl3 delay_lengths 2 + @ delay_read
-        +
-          dup
-          feedback *
-        _revdl3 delay_write
-      svpush
-      # allpass sig here
+          _revlp3 cutoff 0.0
+        hc_lowpass
+        feedback *
+      _revdl3 delay_write
+    svpush
+      dup
         _revdl4 delay_lengths 3 + @ delay_read
       +
         dup
+          _revlp3 cutoff 0.0
+        hc_lowpass
         feedback *
       _revdl4 delay_write
         svpop
@@ -626,14 +629,17 @@ make_hc_filter _revlp
         +
       +
       0.125 *
+      #################################
+      # Send thru 4 allpass in series #
+      #################################
+      _revap1 allpass_lengths 0 + @ ap_coef  allpass
+      _revap2 allpass_lengths 1 + @ ap_coef  allpass
+      _revap3 allpass_lengths 2 + @ ap_coef  allpass
+      _revap4 allpass_lengths 3 + @ ap_coef  allpass
       ########################
       # wet-dry balance here #
       ########################
       wet_dry *
-        _revlp
-          cutoff
-            0.0
-      hc_lowpass
       swap
       1 wet_dry - *
     +
