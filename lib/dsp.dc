@@ -573,10 +573,10 @@ create allpass_lengths
   1237 INV_SAMPLE_RATE * ,
    971 INV_SAMPLE_RATE * ,
 create delay_lengths
-  4172 INV_SAMPLE_RATE * ,
-  3863 INV_SAMPLE_RATE * ,
-  3557 INV_SAMPLE_RATE * ,
-  3217 INV_SAMPLE_RATE * ,
+  3967 INV_SAMPLE_RATE * ,
+  3209 INV_SAMPLE_RATE * ,
+  2447 INV_SAMPLE_RATE * ,
+  1511 INV_SAMPLE_RATE * ,
 make_hc_filter _revlp
 
 : reverb { sig ap_coef feedback cutoff wet_dry }
@@ -592,7 +592,6 @@ make_hc_filter _revlp
       ########################################
       # Now, 4 parallel feedback delay lines #
       ########################################
-      # Line 1
         dup
           _revdl1 delay_lengths 0 + @ delay_read
         +
@@ -600,7 +599,6 @@ make_hc_filter _revlp
           feedback *
         _revdl1 delay_write
       svpush
-      # Line 2
         dup
           _revdl2 delay_lengths 1 + @ delay_read
         +
@@ -608,7 +606,6 @@ make_hc_filter _revlp
           feedback *
         _revdl2 delay_write
       svpush
-      # Line 3
         dup
           _revdl3 delay_lengths 2 + @ delay_read
         +
@@ -616,7 +613,7 @@ make_hc_filter _revlp
           feedback *
         _revdl3 delay_write
       svpush
-      # Line 4
+      # allpass sig here
         _revdl4 delay_lengths 3 + @ delay_read
       +
         dup
@@ -628,6 +625,10 @@ make_hc_filter _revlp
           +
         +
       +
+      0.125 *
+      ########################
+      # wet-dry balance here #
+      ########################
       wet_dry *
         _revlp
           cutoff
