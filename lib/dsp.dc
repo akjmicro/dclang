@@ -134,8 +134,7 @@ var _phasor_array 64 allot
 # Right now, it's using `rand()`, which has problems. However,
 # the randomness we were using here had its own problems, so...
 
-: noise
-  # ( -- sig )
+: noise  # ( -- sig )
   rand
     2
   *
@@ -143,7 +142,7 @@ var _phasor_array 64 allot
   -
 ;
 
-: randint { range }             # ( range -- int )
+: randint { range }  # ( range -- int )
   rand
     range
   *
@@ -537,43 +536,71 @@ var _phasor_array 64 allot
 ###########################
 # Hal Chamberlin's filter #
 ###########################
-: hc_del1 0 + ;
-: hc_del2 1 + ;
-: hc_hp 2 + ;
+0 const _hc_bpdel
+1 const _hc_lpdel
+2 const _hc_lpout # lowpass
+3 const _hc_bpout # bandpass
+4 const _hc_hpout # highpass
+5 const _hc_ntout # notch
 
-: make_hc_filter create 0 , 0 , 0 , ;
+: make_hc_filter var 6 allot ;
 
-: _hc_common                    # ( sig struct fc res -- out )
-  1.995 * 2 swap -              # ( sig struct fc qres )
-  swap 2PIDSR * swap            # ( sig struct fcf qres )
-  2 pick hc_del1 @ 2 pick *
-  3 pick hc_del2 @ +            # ( sig struct fcf qres hc_del1v*fc+hc_del2v )
-                                # ( sig struct fcf qres lpsig )
-  dup 5 pick swap - rot
-  4 pick hc_del1 @ * - 0.997 *  # ( sig struct fcf lpsig sig-lpsig-qres*hc_del1v )
-                                # ( sig struct fcf lpsig hpsig )
-  dup 4 pick hc_hp !            # ( sig struct fcf lpsig hpsig )
-  rot * 2 pick hc_del1 @ +      # ( sig struct lpsig hpsig*fc+hc_del1v )
-                                # ( sig struct lpsig bpsig )
-  1.0002 * 2 pick
-  hc_del1 !                     # ( sig struct lpsig )
-  1.0002 * dup 2 pick
-  hc_del2 !                     # ( sig struct lpsig )
+: _hc_common { sig struct fc res }  # ( sig struct fc res -- out )
+  ##################################
+  # First,  scale resonance and fc #
+  ##################################
+  2 res 1.995 * - res!
+  fc 2PIDSR * fc!
+    struct _hc_lpdel + @
+      struct _hc_bpdel + @
+        fc
+      *
+    +
+      dup
+    struct _hc_lpout + !
+      sig
+      swap
+    -
+      res
+        struct _hc_bpdel + @
+      *
+    -
+      dup
+    struct _hc_hpout + !
+      fc
+    *
+      struct _hc_bpdel + @
+    +
+  struct _hc_bpout + !
+    struct _hc_hpout + @
+      struct _hc_lpout + @
+    +
+  struct _hc_ntout + !
+  # store delays for next go-round
+    struct _hc_bpout + @
+  struct _hc_bpdel + !
+    struct _hc_lpout + @
+  struct _hc_lpdel + !
 ;
 
-: hc_lowpass
-  # ( sig struct lpsig )
-  _hc_common nip nip
+: hc_lowpass { sig struct fc res }   # ( sig struct fc res -- out )
+  sig struct fc res  _hc_common
+  struct _hc_lpout + @
 ;
 
-: hc_highpass
-  # ( sig struct lpsig )
-  _hc_common drop nip hc_hp @
+: hc_highpass { sig struct fc res }  # ( sig struct fc res -- out )
+  sig struct fc res  _hc_common
+  struct _hc_hpout + @
 ;
 
-: hc_bandpass
-  # ( sig struct lpsig )
-  _hc_common drop nip hc_del1 @
+: hc_bandpass { sig struct fc res }  # ( sig struct fc res -- out )
+  sig struct fc res  _hc_common
+  struct _hc_bpout + @
+;
+
+: hc_notch { sig struct fc res }     # ( sig struct fc res -- out )
+  sig struct fc res  _hc_common
+  struct _hc_ntout + @
 ;
 
 ##############
@@ -595,15 +622,14 @@ REV_DELAY_SIZE 2 +   const REV_MEM_SIZE
   var                            # `var` will consume the next token as a name
     9 allot                      # Junction, plus 8 delay line lpfilter states.
 
-    0.0560770975 ,               # The delay read times, inspired/taken from csound's
-    0.0627437642 ,               # `reverbsc` code and UDO. In general, some primes
-    0.0729478458 ,               # expressed as p/sr (where p is the prime # of samples
-    0.0806575964 ,               # and sr is sample_rate) will work if they create a nice
-    0.0885941043 ,               # spectral spread. The number here work at any sample rate
-    0.0935827664 ,               # because the delay lines are expressed in seconds, not
-    0.0485941043 ,               # samples. But, they were take form `reverbsc` and p was
-    0.0438321995 ,               # p/44100, b/c the original code was hardcoded for 44.1k sr.
-
+    2473 INV_SAMPLE_RATE * ,     # The delay read times, taken from csound's
+    2767 INV_SAMPLE_RATE * ,     # `reverbsc` code and UDO. Other primes can
+    3217 INV_SAMPLE_RATE * ,     # certainly be experimented with...N.B. these
+    3557 INV_SAMPLE_RATE * ,     # are designed for sr=44100.
+    3907 INV_SAMPLE_RATE * ,
+    4127 INV_SAMPLE_RATE * ,
+    2143 INV_SAMPLE_RATE * ,
+    1933 INV_SAMPLE_RATE * ,
     8 times                      # The delay lines proper, 8 of them
       REV_DELAY_SIZE ,
       0 ,

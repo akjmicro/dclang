@@ -1,5 +1,5 @@
-#define DSP_FILE "simple_delay_example.dc"
-#define DSP_WORD "simple_delay_example"
+#define DSP_FILE "intergalactic_wanderer_example.dc"
+#define DSP_WORD "intergalactic_wanderer_example"
 /*
  * $Id$
  *
@@ -39,12 +39,12 @@
  */
 #include <stdio.h>
 #include <math.h>
-#include "../../dclang.h"
+#include "../../../dclang.h"
 #include "portaudio.h"
 
 #define DEVICE_NUM             0
 #define NUM_SECONDS           60
-#define SAMPLE_RATE        48000
+#define SAMPLE_RATE        44100
 #define FRAMES_PER_BUFFER    256
 
 typedef struct
