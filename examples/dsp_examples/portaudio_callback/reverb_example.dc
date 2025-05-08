@@ -1,0 +1,25 @@
+"dsp.dc" import
+
+var lpmem1
+0.01 0.1 make_port myport
+make_reverb_struct my_reverb
+
+: reverb_example
+    noise 0.87 *
+      lpmem1 0.25
+    lowpass
+      0.01 0.34 rand 0.14 * 0.14 + - gate
+        myport
+      port
+    *
+    0.5 *
+  0.5 panmix
+    lchan @ rchan @
+      my_reverb
+        0.8 0.97
+      reverb
+    1.0 panmix
+  0.0 panmix
+  stereo_stack
+  t+
+;
