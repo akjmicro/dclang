@@ -317,18 +317,18 @@ var _phasor_array 64 allot
   !                             # ( )
 ;
 
-: allpass { sig del dltm coef } # ( sig del dltm coef -- sig_out )
+: allpass { sig ap_struct dltm coef } # ( sig ap_struct dltm coef -- sig_out )
   # Based on the equation:
   # y = coef*x + x_del - coef*y_del
   # same as:
-  # ( x del dltm c -- y )
-  del dup                       # ( del del )
-  @ 2 +                         # ( del delsize+2 )
-  +                             # ( del+delsize+2 )
-  dltm                          # ( del+delsize+2 dltm )
+  # ( x ap_struct dltm c -- y )
+  ap_struct dup                 # ( ap_struct ap_struct )
+  @ 2 +                         # ( ap_struct delsize+2 )
+  +                             # ( ap_struct+delsize+2 )
+  dltm                          # ( ap_struct+delsize+2 dltm )
   delay_read                    # ( y_del )
   coef *                        # ( coef*y_del )
-  del dltm                      # ( coef*ydel del dltm )
+  ap_struct dltm                # ( coef*ydel ap_struct dltm )
   delay_read                    # ( coef*y_del x_del )
   sig coef *                    # ( coef*y_del x_del coef*sig )
   +                             # ( coef*y_del  coef*sig+x_del )
@@ -336,12 +336,12 @@ var _phasor_array 64 allot
   -                             # ( coef*sig+x_del-coef*y_del )
                                 # ( y )
   dup                           # ( y y )
-  del                           # ( y y del )
-  dup @                         # ( y y del delsize )
-  2 +                           # ( y y del delsize+2 )
-  +                             # ( y y del+delsize+2 )
+  ap_struct                     # ( y y ap_struct )
+  dup @                         # ( y y ap_struct delsize )
+  2 +                           # ( y y ap_struct delsize+2 )
+  +                             # ( y y ap_struct+delsize+2 )
   delay_write                   # ( y )
-  sig del                       # ( y sig del )
+  sig ap_struct                 # ( y sig ap_struct )
   delay_write                   # ( y )
 ;
 
@@ -576,189 +576,51 @@ var _phasor_array 64 allot
   _hc_common drop nip hc_del1 @
 ;
 
-################################################################
-# Reverb (allpass-based) - four parallel feedback delay lines, #
-# fed to four allpass filters in series.                       #
-# What can I say? Reverb is complicated, and this isn't even   #
-# the best one I could implement. It's a good start, though.   #
-################################################################
-0.15 make_delay_line  _revdl1
-0.15 make_delay_line  _revdl2
-0.15 make_delay_line  _revdl3
-0.15 make_delay_line  _revdl4
-0.15 make_allpass     _revap1
-0.15 make_allpass     _revap2
-0.15 make_allpass     _revap3
-0.15 make_allpass     _revap4
-# TODO: vary these lengths as the sample rate changes
-create delay_lengths
-  3967 INV_SAMPLE_RATE * ,
-  3209 INV_SAMPLE_RATE * ,
-  2447 INV_SAMPLE_RATE * ,
-  1511 INV_SAMPLE_RATE * ,
-create allpass_lengths
-  1031 INV_SAMPLE_RATE * ,   # ~23.4 ms
-   839 INV_SAMPLE_RATE * ,   # ~19.0 ms
-   673 INV_SAMPLE_RATE * ,   # ~15.3 ms
-   479 INV_SAMPLE_RATE * ,   # ~10.9 ms
-var _revlp1
-var _revlp2
-var _revlp3
-var _revlp4
-0.1 0.1 make_port del_jit_port1
-0.1 0.1 make_port del_jit_port2
-0.1 0.1 make_port del_jit_port3
-0.1 0.1 make_port del_jit_port4
-0.1 0.1 make_port del_jit_port5
-0.1 0.1 make_port del_jit_port6
-0.1 0.1 make_port del_jit_port7
-0.1 0.1 make_port del_jit_port8
-
-#########################################
-# TODO: make this possibly more elegant #
-# and DRY                               #
-#########################################
-: _delay_jitter1
-  0.5 sin INV_SAMPLE_RATE * 2 *
-  del_jit_port1 port
-  +
-;
-
-: _delay_jitter2
-  0.5 sin INV_SAMPLE_RATE * 2 *
-  del_jit_port2 port
-  +
-;
-
-: _delay_jitter3
-  0.5 sin INV_SAMPLE_RATE * 2 *
-  del_jit_port3 port
-  +
-;
-
-: _delay_jitter4
-  0.5 sin INV_SAMPLE_RATE * 2 *
-  del_jit_port4 port
-  +
-;
-
-: _delay_jitter5
-  0.5 sin INV_SAMPLE_RATE * 2 *
-  del_jit_port5 port
-  +
-;
-
-: _delay_jitter6
-  0.5 sin INV_SAMPLE_RATE * 2 *
-  del_jit_port6 port
-  +
-;
-
-: _delay_jitter7
-  0.5 sin INV_SAMPLE_RATE * 2 *
-  del_jit_port7 port
-  +
-;
-
-: _delay_jitter8
-  0.5 sin INV_SAMPLE_RATE * 2 *
-  del_jit_port8 port
-  +
-;
-
-: reverb { sig lp_pole feedback ap_coef }
-    ##########################################
-    # First, 4 parallel feedback delay lines #
-    ##########################################
-    sig
-      _revdl1 delay_lengths 0 + @  _delay_jitter1
-      delay_read
-    +
-      dup
-        _revlp1 lp_pole
-      lowpass
-      feedback *
-    _revdl1 delay_write
-  svpush
-    sig
-      _revdl2 delay_lengths 1 + @   _delay_jitter2
-      delay_read
-    +
-      dup
-        _revlp2 lp_pole
-      lowpass
-      feedback *
-    _revdl2 delay_write
-  svpush
-    sig
-      _revdl3 delay_lengths 2 + @   _delay_jitter3
-       delay_read
-    +
-      dup
-        _revlp3 lp_pole
-      lowpass
-      feedback *
-    _revdl3 delay_write
-  svpush
-    sig
-      _revdl4 delay_lengths 3 + @   _delay_jitter4
-      delay_read
-    +
-      dup
-        _revlp3 lp_pole
-      lowpass
-      feedback *
-    _revdl4 delay_write
-      svpop
-        svpop
-          svpop
-        +
-      +
-    +
-    0.25 *
-    #################################
-    # Send thru 4 allpass in series #
-    #################################
-    _revap1 allpass_lengths 0 + @  _delay_jitter5   ap_coef  allpass
-    _revap2 allpass_lengths 1 + @  _delay_jitter6   ap_coef  allpass
-    _revap3 allpass_lengths 2 + @  _delay_jitter7   ap_coef  allpass
-    _revap4 allpass_lengths 3 + @  _delay_jitter8   ap_coef  allpass
-;
-
 ##############
 # FDN Reverb #
 ##############
 
-# The fdn_struct layout:
+# The reverb_struct layout:
 # --------------------------------------------------------------------
 # |junction|lpf0|lpf1...|lpf8|deltime0|...|deltime7|delay0|...|delay7|
 # --------------------------------------------------------------------
 
-0.1 seconds2samples round const FDN_DELAY_SIZE
-FDN_DELAY_SIZE 2 +        const FDN_MEM_SIZE
-17                        const FDN_HEADER_SIZE
-9                         const FDN_DELAY_LENGTHS
-1                         const FDN_FILTERS
+0.1 seconds2samples  const REV_DELAY_SIZE
+REV_DELAY_SIZE 2 +   const REV_MEM_SIZE
+17                   const REV_HEADER_SIZE
+9                    const REV_DELAY_LENGTHS
+1                    const REV_FILTERS
 
-: make_fdn_struct
-  var
-    9 allot                   # Junction, plus 8 delay line lpfilter states.
-    2473 INV_SAMPLE_RATE * ,  # The delay read times, taken from csound's
-    2767 INV_SAMPLE_RATE * ,  # `reverbsc` code and UDO. Other primes can
-    3217 INV_SAMPLE_RATE * ,  # certainly be experimented with...
-    3557 INV_SAMPLE_RATE * ,
-    3907 INV_SAMPLE_RATE * ,
-    4127 INV_SAMPLE_RATE * ,
-    2143 INV_SAMPLE_RATE * ,
-    1933 INV_SAMPLE_RATE * ,
-    8 times
-      FDN_DELAY_SIZE ,
+: make_reverb_struct
+  var                            # `var` will consume the next token as a name
+    9 allot                      # Junction, plus 8 delay line lpfilter states.
+
+    0.0560770975 ,               # The delay read times, inspired/taken from csound's
+    0.0627437642 ,               # `reverbsc` code and UDO. In general, some primes
+    0.0729478458 ,               # expressed as p/sr (where p is the prime # of samples
+    0.0806575964 ,               # and sr is sample_rate) will work if they create a nice
+    0.0885941043 ,               # spectral spread. The number here work at any sample rate
+    0.0935827664 ,               # because the delay lines are expressed in seconds, not
+    0.0485941043 ,               # samples. But, they were take form `reverbsc` and p was
+    0.0438321995 ,               # p/44100, b/c the original code was hardcoded for 44.1k sr.
+
+    8 times                      # The delay lines proper, 8 of them
+      REV_DELAY_SIZE ,
       0 ,
-      FDN_DELAY_SIZE allot
+      REV_DELAY_SIZE 1 + allot   # added 1 to `allot` because it's normally designed to subtract 1.
     again
 ;
 
-: fdn_reverb { sigL sigR fdn_struct cutoff feedback wet_dry }
+# cutoff and feedback are in the 0-1 range
+: reverb { sigL sigR reverb_struct cutoff feedback }
+  ######################################################################
+  # First, normalize and adjust cutoff.                                #
+  # Map 0 -> 1 and 1 -> 0.5 so that our input is 0 for dark (total     #
+  # filtering) and 1 is bright (half-filtering). This is b/c `lowpass` #
+  # uses a pole as input, so 0 would be no filtering and 1 would be    #
+  # total filtering....                                                #
+  ######################################################################
+  1 cutoff - 0.5 * 0.5 + cutoff!
   ###############################################################
   # For each delay line, add the alternating sigL/sigR input    #
   # together with the junction signal (which starts as 0)       #
@@ -767,133 +629,133 @@ FDN_DELAY_SIZE 2 +        const FDN_MEM_SIZE
   # expressive, a bit of old fashioned loop-unrolling is called #
   # for here, for performance reasons.                          #
   ###############################################################
-    fdn_struct FDN_MEM_SIZE 0 * FDN_HEADER_SIZE + +
-      fdn_struct FDN_DELAY_LENGTHS 0 + + @
+    reverb_struct REV_MEM_SIZE 0 * REV_HEADER_SIZE + +
+      reverb_struct REV_DELAY_LENGTHS 0 + + @
     delay_read
     feedback *
-      fdn_struct FDN_FILTERS 0 + +
+      reverb_struct REV_FILTERS 0 + +
         cutoff
     lowpass
       dup
     svpush
     -1 *
-      fdn_struct @
+      reverb_struct @
         sigL
       +
     +
-      fdn_struct FDN_MEM_SIZE 0 * FDN_HEADER_SIZE + +
+      reverb_struct REV_MEM_SIZE 0 * REV_HEADER_SIZE + +
   delay_write
-    fdn_struct FDN_MEM_SIZE 1 * FDN_HEADER_SIZE + +
-      fdn_struct FDN_DELAY_LENGTHS 1 + + @
+    reverb_struct REV_MEM_SIZE 1 * REV_HEADER_SIZE + +
+      reverb_struct REV_DELAY_LENGTHS 1 + + @
     delay_read
     feedback *
-      fdn_struct FDN_FILTERS 1 + +
+      reverb_struct REV_FILTERS 1 + +
         cutoff
     lowpass
       dup
     svpush
     -1 *
-      fdn_struct @
+      reverb_struct @
         sigR
       +
     +
-      fdn_struct FDN_MEM_SIZE 1 * FDN_HEADER_SIZE + +
+      reverb_struct REV_MEM_SIZE 1 * REV_HEADER_SIZE + +
   delay_write
-    fdn_struct FDN_MEM_SIZE 2 * FDN_HEADER_SIZE + +
-      fdn_struct FDN_DELAY_LENGTHS 2 + + @
+    reverb_struct REV_MEM_SIZE 2 * REV_HEADER_SIZE + +
+      reverb_struct REV_DELAY_LENGTHS 2 + + @
     delay_read
     feedback *
-      fdn_struct FDN_FILTERS 2 + +
+      reverb_struct REV_FILTERS 2 + +
         cutoff
     lowpass
       dup
     svpush
     -1 *
-      fdn_struct @
+      reverb_struct @
         sigL
       +
     +
-      fdn_struct FDN_MEM_SIZE 2 * FDN_HEADER_SIZE + +
+      reverb_struct REV_MEM_SIZE 2 * REV_HEADER_SIZE + +
   delay_write
-    fdn_struct FDN_MEM_SIZE 3 * FDN_HEADER_SIZE + +
-      fdn_struct FDN_DELAY_LENGTHS 3 + + @
+    reverb_struct REV_MEM_SIZE 3 * REV_HEADER_SIZE + +
+      reverb_struct REV_DELAY_LENGTHS 3 + + @
     delay_read
     feedback *
-      fdn_struct FDN_FILTERS 3 + +
+      reverb_struct REV_FILTERS 3 + +
         cutoff
     lowpass
       dup
     svpush
     -1 *
-      fdn_struct @
+      reverb_struct @
         sigR
       +
     +
-      fdn_struct FDN_MEM_SIZE 3 * FDN_HEADER_SIZE + +
+      reverb_struct REV_MEM_SIZE 3 * REV_HEADER_SIZE + +
   delay_write
-    fdn_struct FDN_MEM_SIZE 4 * FDN_HEADER_SIZE + +
-      fdn_struct FDN_DELAY_LENGTHS 4 + + @
+    reverb_struct REV_MEM_SIZE 4 * REV_HEADER_SIZE + +
+      reverb_struct REV_DELAY_LENGTHS 4 + + @
     delay_read
     feedback *
-      fdn_struct FDN_FILTERS 4 + +
+      reverb_struct REV_FILTERS 4 + +
         cutoff
     lowpass
       dup
     svpush
     -1 *
-      fdn_struct @
+      reverb_struct @
         sigL
       +
     +
-      fdn_struct FDN_MEM_SIZE 4 * FDN_HEADER_SIZE + +
+      reverb_struct REV_MEM_SIZE 4 * REV_HEADER_SIZE + +
   delay_write
-    fdn_struct FDN_MEM_SIZE 5 * FDN_HEADER_SIZE + +
-      fdn_struct FDN_DELAY_LENGTHS 5 + + @
+    reverb_struct REV_MEM_SIZE 5 * REV_HEADER_SIZE + +
+      reverb_struct REV_DELAY_LENGTHS 5 + + @
     delay_read
     feedback *
-      fdn_struct FDN_FILTERS 5 + +
+      reverb_struct REV_FILTERS 5 + +
         cutoff
     lowpass
       dup
     svpush
     -1 *
-      fdn_struct @
+      reverb_struct @
         sigR
       +
     +
-      fdn_struct FDN_MEM_SIZE 5 * FDN_HEADER_SIZE + +
+      reverb_struct REV_MEM_SIZE 5 * REV_HEADER_SIZE + +
   delay_write
-    fdn_struct FDN_MEM_SIZE 6 * FDN_HEADER_SIZE + +
-      fdn_struct FDN_DELAY_LENGTHS 6 + + @
+    reverb_struct REV_MEM_SIZE 6 * REV_HEADER_SIZE + +
+      reverb_struct REV_DELAY_LENGTHS 6 + + @
     delay_read
     feedback *
-      fdn_struct FDN_FILTERS 6 + +
+      reverb_struct REV_FILTERS 6 + +
         cutoff
     lowpass
       dup
     svpush
     -1 *
-      fdn_struct @
+      reverb_struct @
         sigL
       +
     +
-      fdn_struct FDN_MEM_SIZE 6 * FDN_HEADER_SIZE + +
+      reverb_struct REV_MEM_SIZE 6 * REV_HEADER_SIZE + +
   delay_write
-    fdn_struct FDN_MEM_SIZE 7 * FDN_HEADER_SIZE + +
-      fdn_struct FDN_DELAY_LENGTHS 7 + + @
+    reverb_struct REV_MEM_SIZE 7 * REV_HEADER_SIZE + +
+      reverb_struct REV_DELAY_LENGTHS 7 + + @
     delay_read
     feedback *
-      fdn_struct FDN_FILTERS 7 + +
+      reverb_struct REV_FILTERS 7 + +
         cutoff
     lowpass
       dup
     svpush
     -1 *
-      fdn_struct @
+      reverb_struct @
         sigR
       +
     +
-      fdn_struct FDN_MEM_SIZE 7 * FDN_HEADER_SIZE + +
+      reverb_struct REV_MEM_SIZE 7 * REV_HEADER_SIZE + +
   delay_write
   ##################################################################
   # Set the saved lowpass signals onto the stack.                  #
@@ -904,12 +766,8 @@ FDN_DELAY_SIZE 2 +        const FDN_MEM_SIZE
   # mixing them both center, or adding them and mixing them center #
   # Or whatever...                                                 #
   ##################################################################
-    1 svpick 3 svpick 5 svpick 7 svpick + + + 0.35 * wet_dry *
-      sigL  1 wet_dry -  *
-    +
-      0 svpick 2 svpick 4 svpick 6 svpick + + + 0.35 * wet_dry *
-        sigR  1 wet_dry -   *
-      +
+    1 svpick 3 svpick 5 svpick 7 svpick + + + 0.25 *
+      0 svpick 2 svpick 4 svpick 6 svpick + + + 0.25 *
         ###################################################################
         # Now, pop the save stack all off, add together and scale for the #
         # next iteration of the scattering juncture.                      #
@@ -917,7 +775,7 @@ FDN_DELAY_SIZE 2 +        const FDN_MEM_SIZE
         svpop svpop svpop svpop svpop svpop svpop svpop
         + + + + + + +
         0.25 *
-      fdn_struct !
+      reverb_struct !
 ;
 
 ##########
