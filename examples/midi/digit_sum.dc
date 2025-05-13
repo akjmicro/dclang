@@ -2,7 +2,7 @@
 
 "math.dc" import
 "midi.dc" import
-"redis_midi.dc" import
+"redis_music.dc" import
 
 # our EDO var
 41 midi_edo !
@@ -58,16 +58,16 @@ var y
 ;
 
 : _get_next_note
-  x @ redis_midi.get_mul *
-    redis_midi.get_base
+  x @ redis_music.get_mul *
+    redis_music.get_base
   digit_sum
-    redis_midi.get_mode
+    redis_music.get_mode
   +
     scale_size @
   absmod
     scale
   + @
-    redis_midi.get_transpose
+    redis_music.get_transpose
   +
   x++
 ;
@@ -90,13 +90,13 @@ var y
         0
   edo_degree_to_midi
   ###
-    redis_midi.get_on_gate
+    redis_music.get_on_gate
   _get_next_rhythm dup svpush
   *
   sleep
           svpop 0 svpop 0
   edo_degree_to_midi
-    redis_midi.get_off_gate
+    redis_music.get_off_gate
   *
   sleep
   unblock_sigint

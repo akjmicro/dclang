@@ -1,6 +1,6 @@
 "math.dc" import
 "string.dc" import
-"redis_midi.dc" import
+"redis_music.dc" import
 
 ###########################################################################
 # To use the two functions here, `chaos_stats` and `draw_chaos_infinite`, #
@@ -78,13 +78,13 @@ var drawchars
 ;
 
 : _draw_chaos_infinite
-  x @ 1 + redis_midi.get_chaos * 1 %
+  x @ 1 + redis_music.get_chaos * 1 %
   dup x !
-  redis_midi.get_wrap
+  redis_music.get_wrap
   *
   floor
   _draw_row
-  redis_midi.get_on_gate sleep
+  redis_music.get_on_gate sleep
   _draw_chaos_infinite
 ;
 

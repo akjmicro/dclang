@@ -26,6 +26,9 @@ pi 2 / const PI_DIV_2
 # 32-bit audio sample depth
 0x7fffffff const BIT_DEPTH
 
+# useful for correcting phase drift (see `phasor`)
+1 BIT_DEPTH / const INV_BIT_DEPTH
+
 # setup timestamp; unit will be samples.
 var sample_clock
 0 sample_clock !
@@ -47,8 +50,6 @@ var rchan
 : rcset rchan ! ;
 : _clear_channels  0.0 lcset 0.0 rcset ;
 
-: freq2sample_phase INV_SAMPLE_RATE * ;
-
 #######################
 # PHASORS/OSCILLATORS #
 #######################
@@ -63,17 +64,32 @@ var _phasor_array 64 allot
 
 : phasor_pointer _phasor_array _phasor_count @ + ;
 
-: phasor
-  # get current phase; wrap around 0-1:
-  freq2sample_phase               # (smp_phase)
-  # grab the accumulator value:
-  phasor_pointer @ swap over      # (old_val smp_phase old_val)
-  # add, wrap-around from 0.0-1.0
-  + 1.0 %                         # (old_val mod1sum)
-  # write back current value:
-  phasor_pointer !                # (old_val)
-  # update count reference (this will be reset by the clock advance) :
-  _phasor_count dup @ 1 + swap !  # (old_val)
+: phasor { freq }
+    phasor_pointer @
+      dup
+        freq INV_SAMPLE_RATE *
+      +
+      1.0 %
+      #########################
+      # FP drift checks/reset #
+      #########################
+      dup INV_BIT_DEPTH <=
+      if
+        drop
+        0
+      endif
+      1 over - INV_BIT_DEPTH <=
+      if
+        drop
+        0
+      endif
+      ##########################
+      # End drift checks/reset #
+      ##########################
+    # increment phasor_pointer's value
+    phasor_pointer !
+    # increment _phasor_count by 1
+    _phasor_count dup @ 1 + swap !
 ;
 
 # a simple metronome trigger:

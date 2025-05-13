@@ -126,8 +126,8 @@ DCLANG_FLT   vars[NUMVARS];
 DCLANG_PTR   vars_idx;
 // global constants
 // track constants - mapping from name to index
-char        *const_keys[64];
-DCLANG_FLT   const_vals[64];
+char        *const_keys[1024];
+DCLANG_FLT   const_vals[1024];
 DCLANG_PTR   const_idx;
 
 // hashwords

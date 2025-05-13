@@ -46,6 +46,12 @@
   _digit_sum_helper
 ;
 
+###################
+# Digit expansion #
+###################
+
+: make_digit_expansion_struct var 3 allot ;
+
 : _get_base @ ;
 : _set_base ! ;
 : _get_div 1 + @ ;

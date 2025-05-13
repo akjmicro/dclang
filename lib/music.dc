@@ -1,0 +1,253 @@
+"math.dc" import
+"redis_music.dc" import
+
+var base_pitch  redis_music.get_base_pitch  base_pitch !
+var edo         redis_music.get_edo                edo !
+
+##########################################################
+# TODO: right now, the EDO is evaluated once, on import. #
+# At some point, refactoring this scheme to be possibly  #
+# more dynamic, or irrelevant, would be nice             #
+#                                                        #
+# Another thing to note: this library assumes all sorts  #
+# about a global 'context', like EDO, base-pitch, etc.   #
+# If more instruments come into play, eventually they    #
+# may want their own redis context, for instance, and    #
+# current assumptions here won't be as useful and thus,  #
+# this API is subject to change. You have been warned!   #
+##########################################################
+
+: generate_interval
+  / log2 edo @ * round
+;
+
+: O- edo @ - ;
+: O+ edo @ + ;
+
+64 63  generate_interval const 64_63
+28 27  generate_interval const 28_27
+21 20  generate_interval const 21_20
+16 15  generate_interval const 16_15
+10  9  generate_interval const 10_9
+11 10  generate_interval const 11_10
+ 9  8  generate_interval const  9_8
+ 7  6  generate_interval const  7_6
+ 6  5  generate_interval const  6_5
+ 5  4  generate_interval const  5_4
+ 4  3  generate_interval const  4_3
+11  8  generate_interval const 11_8
+ 3  2  generate_interval const  3_2
+32 21  generate_interval const 32_21
+ 8  5  generate_interval const  8_5
+ 5  3  generate_interval const  5_3
+ 7  4  generate_interval const  7_4
+16  9  generate_interval const 16_9
+ 9  5  generate_interval const  9_5
+11  6  generate_interval const 11_6
+15  8  generate_interval const 15_8
+
+#######################
+# Scales defined here #
+#######################
+
+create otonal 0 O- O- ,
+              0 O- ,                              3_2 O- ,
+              0    ,          5_4    ,            3_2    , 7_4 ,
+              0 O+ , 9_8 O+ , 5_4 O+ , 11_8 O+ ,  3_2 O+ ,
+var otonal_size
+  here 1 - otonal -
+otonal_size !
+
+create pentatonic 0 O- , 9_8 O- , 4_3 O- , 3_2 O- , 16_9 O- ,
+                  0    , 9_8    , 4_3    , 3_2    , 16_9    ,
+                  0 O+ ,
+var pentatonic_size
+  here 1 - pentatonic -
+pentatonic_size !
+
+create s4679 0 O- , 3_2 O- , 7_4 O- , 0 , 9_8 ,
+var s4679_size
+  here 1 - s4679 -
+s4679_size !
+
+create dorian   0 O-    ,                          4_3 O-    , 3_2 O-     ,
+                0       ,  9_8       , 7_6       , 4_3       , 3_2        , 5_3       , 16_9       ,
+                0 O+    ,  9_8 O+    , 7_6 O+    , 4_3 O+    , 3_2 O+     , 5_3 O+    , 16_9 O+    ,
+                0 O+ O+ ,  9_8 O+ O+ , 7_6 O+ O+ , 4_3 O+ O+ , 3_2 O+ O+  , 5_3 O+ O+ , 16_9 O+ O+ ,
+                0 O+ O+ O+ ,
+var dorian_size
+  here 1 - dorian -
+dorian_size !
+
+create archytas  0 O- ,                      4_3 O- , 3_2 O- ,
+                 0    , 28_27     , 7_6    , 4_3    , 3_2    , 14_9 , 7_4 ,
+                 0 O+ , 28_27 O+  , 7_6 O+ , 4_3 O+ , 3_2 O+ ,
+var archytas_size
+  here 1 - archytas -
+archytas_size !
+
+# Serre's enharmonic
+create enharmonic 4_3 O- O- ,
+                    0 O-    ,
+                  4_3 O-    ,
+                    0       , 64_63    , 16_15    , 4_3    , 3_2 , 32_21 , 8_5 ,
+                    0 O+    , 64_63 O+ , 16_15 O+ , 4_3 O+ ,
+var enharmonic_size
+  here 1 - enharmonic -
+enharmonic_size !
+
+create equable 0 O-    ,                     4_3 O- , 3_2 O- ,
+               0       , 10_9    , 11_9    , 4_3    , 3_2    , 5_3    , 11_6    ,
+               0 O+    , 10_9 O+ , 11_9 O+ , 4_3 O+ , 3_2 O+ , 5_3 O+ , 11_6 O+ ,
+               0 O+ O+ ,
+var equable_size
+  here 1 - equable -
+equable_size !
+
+var scale
+var scale_size
+
+: set_scale
+  redis_music.get_scale
+  dup "otonal"     str= if otonal     scale ! otonal_size     scale_size ! endif
+  dup "pentatonic" str= if pentatonic scale ! pentatonic_size scale_size ! endif
+  dup "4679"       str= if s4679      scale ! s4679_size      scale_size ! endif
+  dup "dorian"     str= if dorian     scale ! dorian_size     scale_size ! endif
+  dup "archytas"   str= if archytas   scale ! archytas_size   scale_size ! endif
+  dup "enharmonic" str= if enharmonic scale ! enharmonic_size scale_size ! endif
+      "equable"    str= if equable    scale ! equable_size    scale_size ! endif
+;
+
+set_scale
+
+##########################
+# END SCALES DEFINITIONS #
+##########################
+
+#####################################################
+# Translation routines for dsp.dc stuff             #
+# We already have `edo_degree_to_midi` in `midi.dc` #
+#####################################################
+
+: edo_degree_to_hz { degree }
+  2
+    degree
+      edo @
+    /
+  pow
+  base_pitch @ *
+;
+
+########################
+# Rhythms defined here #
+########################
+
+create primes 3 , 5 , 7 , 11 ,
+var primes_size   here 1 - primes -   primes_size !
+
+create simple 1 , 1 ,
+var simple_size   here 1 - simple -   simple_size !
+
+var lengths
+var lengths_size
+
+##############################
+# Euclidean rhythm algorithm #
+##############################
+var cur_euclid_numerator
+var cur_euclid_denominator
+var cur_euclid_count
+1 cur_euclid_count !
+var prev_euclid_int
+
+: euclidean_rhythm
+    redis_music.get_euclid_numerator
+      redis_music.get_euclid_denominator
+    /
+      cur_euclid_count @
+    *
+    round
+      prev_euclid_int @
+          2dup
+        -
+      svpush
+    drop
+  prev_euclid_int !
+  cur_euclid_count @ 1 + cur_euclid_count !
+    svpop
+      dup
+      1 <
+        over
+        redis_music.get_euclid_numerator >
+      or
+      if
+        drop
+        euclidean_rhythm
+      endif
+;
+
+: euclidean_test_loop
+  euclidean_rhythm .
+  0.5 sleep
+  euclidean_test_loop
+;
+
+##################################
+# End Euclidean rhythm algorithm #
+##################################
+
+"euclidean" const :euclidean
+
+: set_rhythm
+  redis_music.get_rhythm
+  dup "primes"    str= if primes lengths !  primes_size  lengths_size ! endif
+  dup "simple"    str= if simple lengths !  simple_size  lengths_size ! endif
+      :euclidean  str= if simple lengths !  simple_size  lengths_size ! endif  # dummy, caller will use `euclidean` word
+;
+
+set_rhythm
+
+###############
+# END RHYTHMS #
+###############
+
+##########################
+# Some algorithmic stuff #
+##########################
+
+: data_player #( number -- out_edo_degree ) 
+  ######################################################
+  # Feed it a number, go ahead. It knows how to return #
+  # the current scale, indexed off that number, and    #
+  # return the appropriate edo degree. What you do     #
+  # with it is up to you, typically, you'd use it for  #
+  # input to `edo_degree_to_hz` (for dsp work), or its #
+  # compadre `edo_degree_to_midi` (for midi work).     #
+  ######################################################
+      redis_music.get_mode
+    +
+      scale_size @ @
+    absmod
+      scale @
+    +
+    @
+      redis_music.get_transpose
+    +
+;
+
+: rhythm_generator
+  redis_music.get_rhythm :euclidean str=
+  if
+    euclidean_rhythm
+  else
+    rand lengths_size @ @ * floor
+    lengths @ + @
+  endif
+;
+
+: fraction_music { expansion_struct }
+  redis_music.get_base expansion_struct _set_base
+  redis_music.get_div  expansion_struct _set_div
+    expansion_struct gen_digit_expansion
+  data_player
+;

@@ -1,0 +1,139 @@
+#############################################################################
+# Ok, it's nothing musically spectacular, but it does demonstrate triggers  #
+# and is a good sounding board for the development of the `reverb` word.    #
+# Oh, and it's boring and relxing enough to be a good sleep aid.            #
+#############################################################################
+
+"dsp.dc"  import
+"music.dc" import
+
+"drone_vol"     const :DRONE_VOL
+"lead_rev_vol"  const :LEAD_REV_VOL
+"lead_rev_cf"   const :LEAD_REV_CF
+"lead_rev_fb"   const :LEAD_REV_FB
+
+var tempo          :LEAD_TEMPO redis_music.get_x_tempo          tempo !
+var gatevar              :GATE redis_get tonum                gatevar !
+var bass_pitch                 redis_music.get_base_pitch  bass_pitch !
+var pitch                      bass_pitch @  4 *                pitch !
+var lead_vol                   redis_music.get_lead_vol      lead_vol !
+var drone_vol       :DRONE_VOL redis_get tonum              drone_vol !
+var lead_rev_vol :LEAD_REV_VOL redis_get tonum           lead_rev_vol !
+var lead_rev_cf   :LEAD_REV_CF redis_get tonum            lead_rev_cf !
+var lead_rev_fb   :LEAD_REV_FB redis_get tonum            lead_rev_fb !
+
+var curtrig
+var lasttrig
+var trigcount
+var current_euclid  euclidean_rhythm  current_euclid !
+var trigmask
+
+0.01  0.01 make_port  pitch_port1
+0.01  0.01 make_port  pitch_port2
+0.001 6    make_port     amp_port
+
+var slmem1
+var slmem2
+var slmem3
+var slmem4
+
+make_digit_expansion_struct gen_struct
+make_reverb_struct          my_reverb
+
+: intergalactic_wanderer
+  inf times
+    ####################################################################
+    # check control changes (at a decent k-rate) that are not rhythmic #
+    ####################################################################
+    t 256 % 0 =
+    if
+      # has lead vol changed?
+      :LEAD_VOL     lead_vol     true  update_from_redis
+      # has drone vol changed?
+      :DRONE_VOL    drone_vol    true  update_from_redis
+      # has reverb stuff changed?
+      :LEAD_REV_VOL lead_rev_vol true  update_from_redis
+      :LEAD_REV_CF  lead_rev_cf  true  update_from_redis
+      :LEAD_REV_FB  lead_rev_fb  true  update_from_redis
+    endif
+    ############################
+    # Our main metronome pulse #
+    ############################
+    gatevar @ tempo @ gate  curtrig !
+    curtrig @ lasttrig @ > if  # rising edge detection
+      # has tempo changed?
+      :LEAD_TEMPO redis_music.get_x_tempo dup tempo @ <>
+      if tempo ! else drop endif
+      # has the gate value changed?
+      :GATE gatevar true update_from_redis
+      # has bass pitch changed?
+      redis_music.get_base_pitch dup base_pitch @ <>
+      if bass_pitch ! else drop endif
+      # possibly alter rhythm
+      trigcount @  current_euclid @ =
+      if
+        0 trigcount !
+        euclidean_rhythm current_euclid !
+      endif
+      trigcount @ current_euclid @ % 0 =
+      if
+        1 trigmask !
+        # change pitch per algorithm
+        gen_struct fraction_music
+          edo_degree_to_hz
+        pitch !
+      else
+        0 trigmask !
+      endif
+      trigcount @ 1 + trigcount !
+    endif
+    ################
+    # melody voice #
+    ################
+      curtrig @ trigmask @ lead_vol @ * *
+        amp_port
+      port
+        dup
+          slmem1
+            pitch @ pitch_port1 port
+              0.37
+          sineloop
+        *
+      0.1 panmix
+        slmem2
+          pitch @ 1.004 * pitch_port2 port
+            0.37
+        sineloop
+      *
+    0.9 panmix
+    ##############
+    # bass drone #
+    ##############
+      slmem3
+        bass_pitch @
+          0.29
+      sineloop drone_vol @ *
+    0.3 panmix
+      slmem4
+        bass_pitch @ 1.5024 *
+          0.29
+      sineloop drone_vol @ *
+    0.7 panmix
+    ##########
+    # output #
+    ##########
+      lchan @ lead_rev_vol @ *
+        rchan @ lead_rev_vol @ *
+          my_reverb
+            lead_rev_cf @
+              lead_rev_fb @
+        reverb
+      1.0 panmix
+    0.0 panmix
+    stereo_out
+    curtrig @ lasttrig !
+    t+
+  again
+;
+
+intergalactic_wanderer

@@ -26,7 +26,7 @@
 
 "math.dc" import
 "string.dc" import
-"redis_midi.dc" import
+"redis_music.dc" import
 
 32 const FIGURE_STORAGE_SIZE
 var figures FIGURE_STORAGE_SIZE allot
@@ -125,13 +125,13 @@ var drawchars
 ;
 
 : _draw_sample_infinite
-  redis_midi.get_mul x @ * redis_midi.get_base digit_sum
-  redis_midi.get_wrap absmod
-    redis_midi.get_mode
+  redis_music.get_mul x @ * redis_music.get_base digit_sum
+  redis_music.get_wrap absmod
+    redis_music.get_mode
   +
   14 absmod
   _draw_row
-  redis_midi.get_on_gate sleep
+  redis_music.get_on_gate sleep
   x dup @ 1 + swap !
   _draw_sample_infinite
 ;

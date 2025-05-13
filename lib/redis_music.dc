@@ -1,0 +1,263 @@
+"redis.dc" import
+"clock_sleep.dc" import
+
+# make the redis connection
+redis_connect
+
+var remainder 1 remainder !
+
+# some common symbols
+"\n"                 const :NL
+# timing stuff
+"start_timestamp"    const :START_TIMESTAMP
+"bpm"                const :BPM
+"beat_period"        const :BEAT_PERIOD
+"tempo"              const :TEMPO
+"drum_tempo"         const :DRUM_TEMPO
+"bass_tempo"         const :BASS_TEMPO
+"lead_tempo"         const :LEAD_TEMPO
+"gate"               const :GATE
+# mixing stuff
+"drum_vol"           const :DRUM_VOL
+"bass_vol"           const :BASS_VOL
+"lead_vol"           const :LEAD_VOL
+# pitch stuff
+"base_pitch"         const :BASE_PITCH
+"edo"                const :EDO
+"scale"              const :SCALE
+"mode"               const :MODE
+"transp"             const :TRANSPOSE
+# rhythm stuff
+"euclid_numerator"   const :EUCLID_NUMERATOR
+"euclid_denominator" const :EUCLID_DENOMINATOR
+"rhythm"             const :RHYTHM
+# used for keeping a value within a certain range:
+"wrap"               const :WRAP
+# common for things like "gen_digit_expansion" and "digit_sum" algorithms:
+"base"               const :BASE
+# for "gen_digit_expansion" based algorithms:
+"div"                const :DIV
+# for "digit_sum" fractal algorithms:
+"mul"                const :MUL
+# for chaos-based randomness:
+"chaos"              const :CHAOS
+
+#######################################
+# Synchronization for network jamming #
+#######################################
+
+: synchronized_start
+    60.0
+      :BEAT_PERIOD redis_get tonum
+    *
+      :BPM redis_get tonum
+    /
+      dup
+        clock
+        swap
+      %
+    -
+    0.0 -  # empirical adjustment
+  sleep
+;
+
+#################
+# Tempo and BPM #
+# Synonymous?   #
+#################
+
+: redis_music.get_tempo
+  :TEMPO redis_get tonum 60  /
+;
+
+: redis_music.get_bpm
+  :BPM redis_get tonum 60 /
+;
+
+# This one allows for various instruments to drift
+: redis_music.get_x_tempo { which_str }
+  which_str redis_get tonum 60 /
+;
+
+##################
+# Mixing volumes #
+##################
+
+: redis_music.get_drum_vol
+  :DRUM_VOL redis_get tonum
+;
+
+: redis_music.get_bass_vol
+  :BASS_VOL redis_get tonum
+;
+
+: redis_music.get_lead_vol
+  :LEAD_VOL redis_get tonum
+;
+
+##########################################
+# Private word for dealing with duration #
+##########################################
+
+: _get_duration
+  # N.B.: notice this is the inverse of actual tempo,
+  # since it's a number of seconds (for sleep) rather
+  # than BPM
+  :TEMPO redis_get tonum 60 swap /
+;
+
+###############################################################
+# public API "duration" words to be used in calling code.     #
+# The idea is to just call on/off durations directly          #
+# and let the tempo and gate do the work in the background... #
+###############################################################
+
+: redis_music.get_on_gate
+  _get_duration
+    :GATE redis_get tonum
+  *
+;
+
+: redis_music.get_off_gate
+  _get_duration
+    1
+      :GATE redis_get tonum
+    -
+  *
+;
+
+###########################################################
+# Alternate timing API based on absolute wall clock (UTC) #
+# This helps avoid drift...                               #
+###########################################################
+
+var next_on_time
+var next_off_time
+
+: redis_music.set_clock_start
+  clock next_on_time !
+;
+
+: _iterate_clock { length }
+    next_on_time @
+      dup
+        length _get_duration *
+      +
+    next_on_time !
+      length _get_duration *
+        :GATE redis_get tonum
+      *
+    +
+  next_off_time !
+;
+
+: redis_music.get_on_gate_abs { length }
+  length _iterate_clock
+  next_off_time @ sleep_until
+;
+
+: redis_music.get_off_gate_abs
+  next_on_time @ sleep_until
+;
+
+########################
+# mode & transposition #
+########################
+
+: redis_music.get_mode
+  :MODE redis_get tonum round
+;
+
+: redis_music.get_transpose
+  :TRANSPOSE redis_get tonum round
+;
+
+#################
+# EDO and scale #
+#################
+
+: redis_music.get_base_pitch
+  :BASE_PITCH redis_get
+  dup 0 =
+  if
+    drop
+    "261.625"
+  endif
+  tonum
+;
+
+# TODO: make EDOs dynamic
+: redis_music.get_edo
+  :EDO redis_get
+  dup 0 =
+  if
+    drop
+    "31"
+  endif
+  tonum
+;
+
+: redis_music.get_scale
+  :SCALE redis_get
+;
+
+: redis_music.get_rhythm
+  :RHYTHM redis_get
+;
+
+#############################################################
+# Helpers for algorithmic MIDI processes...                 #
+# At the moment, there are two: fraction-based sequences    #
+# that use digit expansion to a certain base, and a "chaos" #
+# factor concept.                                           #
+#############################################################
+
+: get_remainder remainder @ dup 0 = if drop 1 endif ;
+: set_remainder remainder ! ;
+
+: redis_music.get_base
+  :BASE redis_get tonum round
+  dup 2 < if drop 2 endif
+;
+
+: redis_music.get_div
+  :DIV redis_get tonum round
+  dup 0 = if drop 1 endif
+;
+
+: redis_music.get_mul
+  :MUL redis_get tonum round
+  dup 1 < if drop 1 endif
+;
+
+: redis_music.get_chaos
+  :CHAOS redis_get tonum
+;
+
+: redis_music.get_wrap
+  :WRAP redis_get tonum round
+  dup 1 < if drop 1 endif
+;
+
+: redis_music.get_euclid_numerator
+  :EUCLID_NUMERATOR redis_get tonum
+  dup 1 < if drop 1 endif
+;
+
+: redis_music.get_euclid_denominator
+  :EUCLID_DENOMINATOR redis_get tonum
+  dup 1 < if drop 1 endif
+;
+
+######################################
+# Generalized update from redis word #
+######################################
+: update_from_redis { redis_key varname cast_to_num? }
+    redis_key redis_get
+      cast_to_num?
+    if
+      tonum
+    endif
+    dup varname @ <>
+  if varname ! else drop endif
+;

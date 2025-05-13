@@ -1,6 +1,12 @@
-# Simple Sequencer API
+########################
+# Simple Sequencer API #
+########################
 
-: seq_ptr_incr { seq }
+#################################################################
+# These are helpers, user should only call `seq_signal` (below) #
+#################################################################
+
+: _seq_ptr_incr { seq }
   seq 1 + @ 1 +
     seq @
   %
@@ -8,23 +14,31 @@
   !
 ;
 
-: seq_cur_val { seq }
+: _seq_cur_val { seq }
   seq 1 + @ 3 + seq + @
 ;
 
 : seq_cnt_incr { seq }
   seq 2 + @ 1 +
     dup
-      seq seq_cur_val
+      seq _seq_cur_val
     <
     if
       seq 2 + !
     else
       drop
       0 seq 2 + !
-      seq seq_ptr_incr
+      seq _seq_ptr_incr
     endif
 ;
+
+###############
+# End helpers #
+###############
+
+######################################
+# The actual word a user should call #
+######################################
 
 : seq_signal { seq }
   seq 2 + @ 0 =
@@ -42,3 +56,22 @@ create example_seq  4 , 0 , 0 ,      # length, pointer, counter
 
 # In the example above `example_seq seq_signal .`, called repeatedly, would return:
 # 1 0 0 0 1 0 1 0 1 0 0 .... b/c 4 2 2 3 is the data.
+
+#####################
+# An array iterator #
+#####################
+
+: iterator { iter_array }
+  # `iter_array` should have: length, pointer, <data> ...
+    iter_array 1 + @           # see where we're pointing now
+      iter_array @             # grab the length
+    %                          # wrap by the length for an index
+      # deal with update first
+      dup                      # duplicate for updating next iteration
+      1 +                      # increment
+        iter_array 1 +         # pointer slot
+      !                        # pointer updated for next go 'round
+      # back to business
+      iter_array 2 +           # use previous `absmod` result on stack to index in
+    + @                        # dereference; this is the data left on stack
+;

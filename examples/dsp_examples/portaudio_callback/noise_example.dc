@@ -1,9 +1,0 @@
-"dsp.dc" import
-
-: noise_example
-    noise 0.5 *
-      0.5
-  panmix
-  stereo_stack
-  t+
-;

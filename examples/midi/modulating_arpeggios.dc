@@ -1,5 +1,5 @@
 "midi.dc" import
-"redis_midi.dc" import
+"redis_music.dc" import
 
 17 midi_edo !
 
@@ -78,10 +78,10 @@ var modulations_pointer
   block_sigint
         _get_edo_note dup svpush 0
   edo_degree_to_midi
-  redis_midi.get_on_gate sleep
+  redis_music.get_on_gate sleep
         0 svpop 0
   edo_degree_to_midi
-  redis_midi.get_off_gate sleep
+  redis_music.get_off_gate sleep
   unblock_sigint
   _advance_step
   _do_transposition

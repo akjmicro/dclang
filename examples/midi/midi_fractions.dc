@@ -4,182 +4,28 @@
 # First, follow the more general MIDI/Redis setup instructions in this directory's README.md
 #
 # Shell command should be:
-#   PORTMIDI_DEVNUM=<some#> EDO=<some#> scale=<scale_choice> rhythm=<rhythm_choice> dclang midi_fractions.dc
-#
-# The various values for these environment variables:
-#
-# EDO can be 16384 for a 'virtual Just Intonation' sound. Otherwise, choose a lower-valued EDO of interest.
-# scale can be one of the scales defined below after each 'create' statement.
-# rhythm can be one of 'primes', 'simple', or 'euclidean' (euclidean rhythm would be controlled via redis varaiables)
-#                                                         (The variables are 'euclid_numerator' and 'euclid_denominator')
+#   PORTMIDI_DEVNUM=<some#> dclang midi_fractions.dc
 
-"math.dc" import
 "midi.dc" import
-"euclidean_rhythm.dc" import
+"music.dc" import
 
-# our edo var
-"EDO" envget tonum midi_edo !
-# our scale choice
-var scale_choice
-"scale" envget scale_choice !
-# our rhythm-type choice
-var rhythm_choice
-"rhythm" envget rhythm_choice !
-
-"euclidean" const :euclidean
-
-: generate_interval
-  / log2 midi_edo @ * round
-;
-
-: O- midi_edo @ - ;
-: O+ midi_edo @ + ;
-
-64 63  generate_interval const 64_63
-28 27  generate_interval const 28_27
-21 20  generate_interval const 21_20
-10  9  generate_interval const 10_9
-11 10  generate_interval const 11_10
- 9  8  generate_interval const  9_8
- 7  6  generate_interval const  7_6
- 6  5  generate_interval const  6_5
- 5  4  generate_interval const  5_4
- 4  3  generate_interval const  4_3
-11  8  generate_interval const 11_8
- 3  2  generate_interval const  3_2
-14  9  generate_interval const 14_9
- 8  5  generate_interval const  8_5
- 5  3  generate_interval const  5_3
- 7  4  generate_interval const  7_4
-16  9  generate_interval const 16_9
- 9  5  generate_interval const  9_5
-11  6  generate_interval const 11_6
-15  8  generate_interval const 15_8
-
-#######################
-# Scales defined here #
-#######################
-
-create otonal 0 O- O- ,
-              0 O- ,                              3_2 O- ,
-              0    ,          5_4    ,            3_2    , 7_4 ,
-              0 O+ , 9_8 O+ , 5_4 O+ , 11_8 O+ , 3_2 O+ ,
-var otonal_size here 1 - otonal - otonal_size !
-
-create pentatonic 0 O- , 9_8 O- , 4_3 O- , 3_2 O- , 16_9 O- ,
-                  0    , 9_8    , 4_3    , 3_2    , 16_9    ,
-                  0 O+ ,
-var pentatonic_size here 1 - pentatonic - pentatonic_size !
-
-create s4679 0 O- , 3_2 O- , 7_4 O- , 0 , 9_8 ,
-var s4679_size here 1 - s4679 - s4679_size !
-
-create archytas 0 0- ,                      4_3 O- , 3_2 O- ,
-                0    , 28_27     , 7_6    , 4_3    , 3_2    , 14_9 , 7_4 ,
-                0 O+ , 28_27 O+  , 7_6 O+ , 4_3 O+ , 3_2 O+ ,
-var archytas_size here 1 - archytas - archytas_size !
-
-create dorian17 0 O- ,                7 O- , 10 O- ,
-                0    ,  3    , 4    , 7    , 10    , 13    , 14    ,
-                0 O+ ,  3 O+ , 4 O+ , 7 O+ , 10 O+ , 13 O+ , 14 O+ ,
-                0 O+ O+ ,
-var dorian17_size here 1 - dorian17 - dorian17_size !
-
-create equable 0 O-    ,                     4_3 O- , 3_2 O- ,
-               0       , 10_9    , 11_9    , 4_3    , 3_2    , 5_3    , 11_6    ,
-               0 O+    , 10_9 O+ , 11_9 O+ , 4_3 O+ , 3_2 O+ , 5_3 O+ , 11_6 O+ ,
-               0 O+ O+ ,
-var equable_size here 1 - equable - equable_size !
-
-var scale
-var scale_size
-
-: _setup_scale
-  scale_choice @   # will stay on stack for comparison until we drop it
-  dup "otonal"     str= if otonal     scale !   otonal_size     scale_size ! endif
-  dup "pentatonic" str= if pentatonic scale !   pentatonic_size scale_size ! endif
-  dup "4679"       str= if s4679      scale !   s4679_size      scale_size ! endif
-  dup "archytas1"  str= if archytas   scale !   archytas_size   scale_size ! endif
-  # for 17-edo diatonic dorian, EDO should be 17
-  dup "dorian17"   str= if dorian17   scale !   dorian17_size   scale_size ! endif
-  dup "equable"    str= if equable    scale !   equable_size    scale_size ! endif
-  drop  # (drop the scale_choice original comparison)
-;
-
-"about to make scale" print cr
-_setup_scale
-"finished" print cr
-
-##########################
-# END SCALES DEFINITIONS #
-##########################
-
-########################
-# Rhythms defined here #
-########################
-
-create primes 3 , 5 , 7 , 11 ,
-var primes_size here 1 - primes - primes_size !
-
-create simple 1 , 1 ,
-var simple_size here 1 - simple - simple_size !
-
-var lengths
-var lengths_size
-: _setup_rhythm
-  rhythm_choice @
-  dup "primes"    str= if primes lengths !  primes_size  lengths_size ! endif
-  dup "simple"    str= if simple lengths !  simple_size  lengths_size ! endif
-  dup "euclidean" str= if simple lengths !  simple_size  lengths_size ! endif
-  drop
-;
-
-_setup_rhythm
-
-###############
-# END RHYTHMS #
-###############
-
-var gen_struct 3 allot
-
-: _get_next_length
-  rhythm_choice @ :euclidean str=
-  if
-    euclidean_rhythm
-  else
-    rand lengths_size @ @ * floor
-    lengths @ + @
-  endif
-;
-
-: _get_next_note
-  # update the dynamic variables based on redis
-  redis_midi.get_base gen_struct _set_base
-  redis_midi.get_div  gen_struct _set_div
-    gen_struct gen_digit_expansion
-      redis_midi.get_mode
-    +
-      scale_size @ @
-    absmod
-      scale @
-    +
-    @
-      redis_midi.get_transpose
-    +
-;
+make_digit_expansion_struct  gen_struct
 
 : _main
   block_sigint
   ###########
   # note on #
   ###########
-  100 _get_next_note dup svpush 0  edo_degree_to_midi
-  _get_next_length  redis_midi.get_on_gate_abs
+  100
+    gen_struct fraction_music dup svpush
+      0
+  edo_degree_to_midi
+  rhythm_generator redis_music.get_on_gate_abs
   ############
   # note off #
   ############
   0 svpop 0  edo_degree_to_midi
-  redis_midi.get_off_gate_abs
+  redis_music.get_off_gate_abs
   unblock_sigint
   _main
 ;
@@ -188,7 +34,7 @@ var gen_struct 3 allot
   "You are now entering an endless loop, hit CTRL-C to stop..." print cr
   "Notice that you won't be able to stop until a note off event hits." print cr
   "In this way, the notes end cleanly!" print cr
-  redis_midi.set_clock_start
+  redis_music.set_clock_start
   _main
 ;
 
