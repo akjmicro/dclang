@@ -2,7 +2,6 @@
   "scopeName": "source.dclang",
   "name": "dclang",
   "patterns": [
-    // Comments (white on black)
     {
       "name": "comment.line.dclang",
       "match": "#.*$",
@@ -11,7 +10,6 @@
         "background": "#000000"
       }
     },
-    // General constants (magenta)
     {
       "name": "constant.other.dclang",
       "match": "(^|\\s)([_:A-Z0-9]+)(?=\\s|$)",
@@ -19,7 +17,6 @@
         "foreground": "#FF00FF"
       }
     },
-    // Primitive constants (bright magenta: null, false, true, pi, e)
     {
       "name": "constant.language.dclang",
       "match": "(^|\\s)(null|false|true|pi|e)(?=\\s|$)",
@@ -27,7 +24,6 @@
         "foreground": "#FF80FF"
       }
     },
-    // Numbers (white on black)
     {
       "name": "constant.numeric.dclang",
       "match": "(^|\\s)(-?[0-9]+\\.?[0-9]*|0[xX][0-9a-fA-F]+)(?=\\s|$)",
@@ -36,7 +32,6 @@
         "background": "#000000"
       }
     },
-    // Strings (yellow)
     {
       "name": "string.quoted.dclang",
       "begin": "\"",
@@ -45,7 +40,6 @@
         "foreground": "#FFFF00"
       }
     },
-    // Math/operators (bright yellow)
     {
       "name": "keyword.operator.dclang",
       "match": "(^|\\s)(\\+|-|\\*|/|%|abs|min|max|<<|>>|=|<>|<|>|<=|>=|assert|and|or|not|xor|round|ceil|floor|pow|sqrt|log|log2|log10|sin|cos|tan|rand)(?=\\s|$)",
@@ -53,7 +47,6 @@
         "foreground": "#FFFF80"
       }
     },
-    // Stack manipulation (bright blue)
     {
       "name": "support.function.stack.dclang",
       "match": "(^|\\s)(drop|dup|over|pick|swap|2drop|2dup|2over|depth|clear|\\.|\\.\\.|\\.rj|\\.s|svpush|svpop|svdrop|svpick|svdepth|svclear)(?=\\s|$)",
@@ -61,7 +54,6 @@
         "foreground": "#0080FF"
       }
     },
-    // Memory words (bright red)
     {
       "name": "support.function.memory.dclang",
       "match": "(^|\\s)(!|@|const|var|allot|create|,|h@|h!|hkeys|sortnums|sortstrs|t!|t@|tmake|twalk|tdel|tdestroy|l!|l@|lmake|lpush|lpop|lins|lrem|ldel)(?=\\s|$)",
@@ -69,7 +61,6 @@
         "foreground": "#FF0000"
       }
     },
-    // Control words (bright green)
     {
       "name": "keyword.control.dclang",
       "match": "(^|\\s)(times|again|exittimes|for|next|exitfor|i|j|k|if|else|endif|return)(?=\\\\s|$)",
@@ -77,7 +68,6 @@
         "foreground": "#80FF00"
       }
     },
-    // Other words (cyan)
     {
       "name": "support.function.other.dclang",
       "match": "(^|\\s)(cr|print|emit|uemit|ord|tohex|bytes32|strlen|str=|str<|str>|strfind|strspn|strcspn|strtok|mempcpy|memset|mkbuf|free|isalnum|isalpha|iscntrl|isdigit|isgraph|islower|isprint|ispunct|isspace|isupper|isxdigit|tolower|toupper|regcomp|regexec|regread|fopen|fmemopen|fread|freadline|freadall|fseek|ftell|fwrite|fflush|fclose|redirect|resetout|open|read|write|flush|close|tcplisten|tcpaccept|tcpconnect|clock|sleep|epoch|dt->epoch|epoch->dt|block_sigint|unblock_sigint)(?=\\s|$)",
@@ -85,7 +75,6 @@
         "foreground": "#00FFFF"
       }
     },
-    // Definition delimiters (bright red: : ;)
     {
       "name": "punctuation.definition.dclang",
       "match": "(^|\\s)(:|;)(?=\\s|$)",
@@ -93,7 +82,6 @@
         "foreground": "#FF0000"
       }
     },
-    // General names (green)
     {
       "name": "entity.name.function.dclang",
       "match": "(^|\\s)([^\\s]+)(?=\\s|$)",
