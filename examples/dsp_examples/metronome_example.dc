@@ -1,13 +1,13 @@
 "dsp.dc" import
 
-0.09 1.00 make_port myport
+var myport
 
 : metronome_example
   inf times
       400 sine
         2.01 metro
         1.2 *
-          myport
+          myport 0.09 1.0
         port
       *
         0.4
@@ -15,7 +15,7 @@
       467 sine
         2.51 metro
         1.2 *
-          myport
+          myport 0.09 1.0
         port
       *
         0.3 sine
@@ -25,7 +25,7 @@
       600 sine
         3.01 metro
         1.2 *
-          myport
+          myport 0.09 1.0
         port
       *
         0.6

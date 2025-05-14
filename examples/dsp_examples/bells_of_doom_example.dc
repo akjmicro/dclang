@@ -1,8 +1,8 @@
 "dsp.dc" import
 
 # portamento vars
-0.04 2.5 make_port myport
-0.05 1.3 make_port myport_two
+var myport
+var myport_two
 
 : mod_ratio_wobble
   6.37 sine 0.015 * 0.5723 +
@@ -12,14 +12,14 @@
   # trigger for portamento envelope
   0.2 metro 0.35 *
   # reference array for port and portamento call
-  myport port
+  myport 0.04 2.5 port
 ;
 
 : trigger_env-2
   # trigger for 2nd portamento envelope
   0.5 metro 0.4 *
   # reference array for port and portamento call
-  myport_two port
+  myport_two 0.05 1.3 port
 ;
 
 : bells_of_doom_example

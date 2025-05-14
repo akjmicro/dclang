@@ -4,9 +4,9 @@
 0.7575 1.333333 * const CHANGE_FREQ
 
 # amp envelope stuff:
-0.04 0.9 make_port env_port
-var ampenv 0 ampenv !
-0.02 0.03 make_port pitch_port
+var env_port
+var ampenv
+var pitch_port
 
 # a sineloop variable
 var mysl
@@ -33,10 +33,9 @@ var rntrg
     # random trigger
     0.01 trigval randtrig dup curtrig !
     # reference array for port and portamento call
-    env_port port
+    env_port 0.04 0.9 port
     # route to 'ampenv' variable:
     ampenv !
-
     # change the pitch variable randomly, in sync with the trigger:
     curtrig @ lasttrig @ >
     if
@@ -46,6 +45,7 @@ var rntrg
     # sineloop oscillator:
     mysl
     current_pitch @ octfac 256 *
+    pitch_port 0.02 0.03 port
     ampenv @ 0.89 * 0.4 + sineloop ampenv @ *
     # boost amplitude
     2.3 *

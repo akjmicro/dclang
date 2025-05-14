@@ -77,10 +77,10 @@ var lasttrig
 ########################
 # Portamento envelopes #
 ########################
-0.001 0.18 make_port   op_hihat_port
-0.001 0.06 make_port   cl_hihat_port
-0.001 0.06 make_port snare_drum_port
-0.001 0.06 make_port  bass_drum_port
+var op_hihat_port
+var cl_hihat_port
+var snare_drum_port
+var bass_drum_port
 
 ##########################################
 # Hal Chamberlain filters for the hihats #
@@ -159,7 +159,7 @@ _query_drum_parts
     # bass drum sound #
     ###################
     curtrig @ bass_drum_mask @ *
-      bass_drum_port
+      bass_drum_port 0.001 0.06
     port
       dup 90 * 90 + sine
     *
@@ -169,7 +169,7 @@ _query_drum_parts
     # snare drum sound #
     ####################
     curtrig @ snare_drum_mask @ *
-      snare_drum_port
+      snare_drum_port 0.001 0.06
     port
       noise 0.4 *
         383 sine 0.3 *
@@ -181,7 +181,7 @@ _query_drum_parts
     # closed hihat sound #
     ######################
     curtrig @ cl_hihat_mask @ *
-      cl_hihat_port
+      cl_hihat_port 0.001 0.06
     port
       noise 0.2 *
         cl_hihat_flt
@@ -194,7 +194,7 @@ _query_drum_parts
     # open hihat sound #
     ####################
     curtrig @ op_hihat_mask @ *
-      op_hihat_port
+      op_hihat_port 0.001 0.18
     port
       noise 0.3 *
         op_hihat_flt

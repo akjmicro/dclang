@@ -2,9 +2,9 @@
 "music.dc" import
 "sequencer.dc" import
 
-0.002  0.55  make_port   my_ampport
-0.0005 0.01  make_port my_pitchport
-0.0001  0.3  make_port    my_fbport
+var my_ampport
+var my_pitchport
+var my_fbport
 
 var tempo  :BASS_TEMPO redis_music.get_x_tempo     tempo !
 var myvol              redis_music.get_bass_vol    myvol !
@@ -37,14 +37,14 @@ create my_iter 16 , 0 ,
       pitch !
     endif
     curtrig @
-      my_ampport
+      my_ampport 0.002 0.55
     port
       sl
         pitch @
-          my_pitchport
+          my_pitchport 0.0005 0.01
         port
           curtrig @
-            my_fbport
+            my_fbport 0.0001 0.3
           port
           0.47 0.2 rand * + *
           0.2  0.1 rand * + +

@@ -1,7 +1,7 @@
 "dsp.dc" import
 
-0.01 0.6  make_port myampport
-0.01 0.01 make_port mypchport
+var myampport
+var mypchport
 var trigval
 var curtrig
 var lasttrig
@@ -19,12 +19,13 @@ create choices
       choices 6 randint + @ 50 *  # calculate a new pitch if so
       pitch !                     # and set it
     endif
-    pitch @ mypchport port        # get the pitch, portamento it
+    pitch @
+    mypchport 0.01 0.01 port      # get the pitch, portamento it
     sine                          # assign the portamento-pitch to a sine wave
     curtrig @ 0.7 *               # grab the same trigger signal
-    myampport port *              # envelope it
+    myampport 0.01 0.6 port *     # envelope it
     0.5 panmix                    # center pan
-    stereo_out                  # send out
+    stereo_out                    # send out
     curtrig @ lasttrig !          # lasttrig = curtrig
     t+                            # update sample clock
   again

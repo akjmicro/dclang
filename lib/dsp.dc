@@ -277,27 +277,21 @@ var _phasor_array 64 allot
 # Neat bonus: this 'port' ugen can be used to make envelopes!
 # See the example file 'bell_of_doom.fs' for an example.
 
-: _port_factor  1 swap 0.5 * SAMPLE_RATE * / ;
-
-: make_port     # ( rise-sec fall-sec -- struct )
-  create swap   # ( fall-sec rise-sec )
-  0.0 , _port_factor , _port_factor ,
-;
-
-: port { sig port_struct }      # ( sig port_struct -- out_sig )
-  sig port_struct @ -
-    dup                         # ( sig-ps sig-ps )
-  0 >                           # ( sig-ps boolup )
-  if                            # ( sig-ps )
-      port_struct 1 + @         # ( sig-ps rising_factor )
-    *                           # ( portsig )
-  else                          # ( sig-ps )
-      port_struct 2 + @         # ( sig-ps falling_factor )
-    *                           # ( portsig )
-  endif
-  port_struct @                 # ( portsig oldsig )
-  + dup                         # ( portsig+oldsig portsig+oldsig )
-  port_struct !                 # ( portsig+oldsig )
+: port { sig mem rise_time fall_time }
+    sig mem @ -
+      dup
+      0 >
+        1
+        swap
+        if rise_time else fall_time endif
+        0.5 *
+        SAMPLE_RATE *
+      /
+    *
+      mem @
+    +
+      dup
+    mem !
 ;
 
 #################################

@@ -1,8 +1,7 @@
-#############################################################################
-# Ok, it's nothing musically spectacular, but it does demonstrate triggers  #
-# and is a good sounding board for the development of the `reverb` word.    #
-# Oh, and it's boring and relxing enough to be a good sleep aid.            #
-#############################################################################
+######################################################################
+# Lead portamento synth using `sineloop`, sent through reverb.       #
+# Also demonstrates the use of fraction_music and `euclidean_rhythm` #
+######################################################################
 
 "dsp.dc"  import
 "music.dc" import
@@ -28,9 +27,9 @@ var trigcount
 var current_euclid  euclidean_rhythm  current_euclid !
 var trigmask
 
-0.01  0.01 make_port  pitch_port1
-0.01  0.01 make_port  pitch_port2
-0.001 6    make_port     amp_port
+var pitch_port1
+var pitch_port2
+var amp_port
 
 var slmem1
 var slmem2
@@ -40,7 +39,7 @@ var slmem4
 make_digit_expansion_struct gen_struct
 make_reverb_struct          my_reverb
 
-: intergalactic_wanderer
+: portamento_lead
   inf times
     ####################################################################
     # check control changes (at a decent k-rate) that are not rhythmic #
@@ -60,7 +59,8 @@ make_reverb_struct          my_reverb
     # Our main metronome pulse #
     ############################
     gatevar @ tempo @ gate  curtrig !
-    curtrig @ lasttrig @ > if  # rising edge detection
+    curtrig @ lasttrig @ >  # rising edge detection
+    if
       # has tempo changed?
       :LEAD_TEMPO redis_music.get_x_tempo dup tempo @ <>
       if tempo ! else drop endif
@@ -70,13 +70,10 @@ make_reverb_struct          my_reverb
       redis_music.get_base_pitch dup base_pitch @ <>
       if bass_pitch ! else drop endif
       # possibly alter rhythm
-      trigcount @  current_euclid @ =
+      trigcount @ current_euclid @ % 0 =
       if
         0 trigcount !
         euclidean_rhythm current_euclid !
-      endif
-      trigcount @ current_euclid @ % 0 =
-      if
         1 trigmask !
         # change pitch per algorithm
         gen_struct fraction_music
@@ -91,17 +88,17 @@ make_reverb_struct          my_reverb
     # melody voice #
     ################
       curtrig @ trigmask @ lead_vol @ * *
-        amp_port
+        amp_port 0.001 6.0
       port
         dup
           slmem1
-            pitch @ pitch_port1 port
+            pitch @ pitch_port1 0.01 0.01 port
               0.37
           sineloop
         *
       0.1 panmix
         slmem2
-          pitch @ 1.004 * pitch_port2 port
+          pitch @ 1.004 * pitch_port2 0.01 0.01 port
             0.37
         sineloop
       *
@@ -136,4 +133,4 @@ make_reverb_struct          my_reverb
   again
 ;
 
-intergalactic_wanderer
+portamento_lead

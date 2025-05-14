@@ -1,7 +1,7 @@
 "dsp.dc" import
 
 var lpmem1
-0.01 0.1 make_port myport
+var myport
 make_reverb_struct my_reverb
 
 : reverb_example
@@ -10,7 +10,7 @@ make_reverb_struct my_reverb
         lpmem1 0.25
       lowpass
         0.01 0.34 rand 0.14 * 0.14 + - gate
-          myport
+          myport 0.01 0.1
         port
       *
       0.5 *
