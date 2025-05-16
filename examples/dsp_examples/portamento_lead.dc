@@ -54,6 +54,8 @@ make_reverb_struct          my_reverb
       :LEAD_REV_VOL lead_rev_vol true  update_from_redis
       :LEAD_REV_CF  lead_rev_cf  true  update_from_redis
       :LEAD_REV_FB  lead_rev_fb  true  update_from_redis
+      # has the gate value changed?
+      :GATE gatevar true update_from_redis
     endif
     ############################
     # Our main metronome pulse #
@@ -64,8 +66,6 @@ make_reverb_struct          my_reverb
       # has tempo changed?
       :LEAD_TEMPO redis_music.get_x_tempo dup tempo @ <>
       if tempo ! else drop endif
-      # has the gate value changed?
-      :GATE gatevar true update_from_redis
       # has bass pitch changed?
       redis_music.get_base_pitch dup base_pitch @ <>
       if bass_pitch ! else drop endif

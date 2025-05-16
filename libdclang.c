@@ -1981,6 +1981,7 @@ void dclang_execute() {
             str = (char *) str_ptr_addr;
             DCLANG_FLT num = strtod(str, NULL);
             push(num);
+            dclang_free(str);
             NEXT;
         OP_ORD:
             if (data_stack_ptr < 1)
@@ -2300,7 +2301,8 @@ void dclang_execute() {
         OP_FREE:
             if (data_stack_ptr < 1)
             {
-                printf("free -- stack underflow! N.B. This word is actually a no-op, kept for backwards compatibility\n");
+                printf("free -- stack underflow! N.B. `free` will only act on an allocated item in reverse stack order.\n");
+                printf("This means that you can free memory in reverse order, starting from most recently allocated.\n");
                 return;
             }
             DCLANG_PTR loc_PTR = (DCLANG_PTR) POP;
