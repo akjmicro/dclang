@@ -5,4 +5,4 @@ portaudio_example:
 	$(CC) portaudio_example.c -o $@ $(LDFLAGS)
 
 clean:
-	rm portaudio_example portaudio_example.c
+	rm _tmp_portaudio.dc portaudio_example.c portaudio_example

@@ -1,4 +1,5 @@
 "dsp.dc" import
+"midi.dc" import
 
 var sl1
 var sl2
@@ -8,13 +9,18 @@ make_hc_filter mylp2
 
 : sineloop_example
   inf times
-    0.1 sine 0.5 * 0.5 + 0.5 * 0.6 + modwave !
+    t 0x8f and 0 = if
+        refresh_midictl
+    endif
+      0.1 21 midictl 127 / 6 * +
+      sine
+    0.5 * 0.5 + 0.5 * 0.5 + modwave !
     # left channel
-    sl1 60 modwave @ sineloop 0.99 *
+    sl1 120 modwave @ sineloop 0.99 *
     mylp 1200 0.1 hc_lowpass 0.3 *
     0.02 panmix
     # right channel
-    sl2 89.751 modwave @ sineloop 0.99 *
+    sl2 89.751 2 * modwave @ sineloop 0.99 *
     mylp2 1205 0.1 hc_lowpass 0.3 *
     0.98 panmix
     # output

@@ -1,4 +1,5 @@
-"PORTMIDI_DEVNUM" const :PORTMIDI_DEVNUM
+"PORTMIDI_IN_DEVNUM"  const :PORTMIDI_IN_DEVNUM
+"PORTMIDI_OUT_DEVNUM" const :PORTMIDI_OUT_DEVNUM
 
 # These will be used again (unused ATM) once MIDI read functionality
 # is re-implemented via `portmidi`
@@ -9,23 +10,59 @@ var midi_channel_last_note 16 allot
 var midi_edo
 31 midi_edo !
 
+: midi_shutdown
+  _pm_close
+  _pm_terminate
+;
+
 : check_mididev
+  # Set to stderr printing
+  seterr
+  # First, list MIDI devices found:
   cr "Here are your available MIDI devices:" print cr
   _pm_list cr
-  :PORTMIDI_DEVNUM envget dup
+  # Try to set output device
+  :PORTMIDI_OUT_DEVNUM envget dup
   0 =
   if
-    :PORTMIDI_DEVNUM print " is not set in your environment!" print cr
-    "MIDI functionality will not work. Please exit from dclang, set that value, and try again!" print cr
+    :PORTMIDI_OUT_DEVNUM print " is not set in your environment!" print cr
+    "MIDI output functionality will not work." print cr
+    "If you need this, please exit from dclang, set that value, and try again!" print cr
     drop
-    return
   else
-    tonum dup _pm_open_out
-    "Opening device number: " print . cr
+      tonum
+        "Opening output device number: " print dup . cr
+    _pm_open_out
   endif
+  # Try to set input device
+  :PORTMIDI_IN_DEVNUM envget dup
+  0 =
+  if
+    :PORTMIDI_IN_DEVNUM print " is not set in your environment!" print cr
+    "MIDI input functionality will not work." print cr
+    "If you need this, please exit from dclang, set that value, and try again!" print cr
+    drop
+  else
+      tonum
+        "Opening input device number: " print dup . cr
+    _pm_open_in
+  endif
+  # Reset to stdout printing
+  setout
 ;
 
 check_mididev
+
+# update midictl state by polling for incoming messages
+: refresh_midictl
+  _pm_read
+  0xff and 0xb0 =
+  if
+    midi_ctl_slots + !
+  else
+    2drop
+  endif
+;
 
 # This is the main API for grabbing a controller variable
 # ( ctrlnum -- sig )
@@ -35,11 +72,6 @@ check_mididev
 : send_midi _pm_ws ;
 
 : send_midi_reverse _pm_wsr ;
-
-: midi_shutdown
-  _pm_close
-  _pm_terminate
-;
 
 # useful for when things go nuts!
 : panic

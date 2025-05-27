@@ -4,7 +4,7 @@
 # First, follow the more general MIDI/Redis setup instructions in this directory's README.md
 #
 # Shell command should be:
-#   PORTMIDI_DEVNUM=<some#> dclang midi_fractions.dc
+#   PORTMIDI_OUT_DEVNUM=<some#> dclang midi_fractions.dc
 
 "midi.dc" import
 "music.dc" import

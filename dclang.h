@@ -373,8 +373,9 @@ enum dclang_opcodes {
     OP_FILEFLUSH,
     OP_FILECLOSE,
     OP_REDIRECT,
-    OP_RESETOUT,
-    OP_FLUSHOUT,
+    OP_SETERR,
+    OP_SETOUT,
+    OP_FLUSH,
     // low-level (OS) file ops:
     OP_OPEN,
     OP_READ,
@@ -412,13 +413,11 @@ enum dclang_opcodes {
     _OP_PM_OPENOUT,
     _OP_PM_WS,
     _OP_PM_WSR,
+    _OP_PM_OPENIN,
+    _OP_PM_READ,
     _OP_PM_CLOSE,
     _OP_PM_TERMINATE
 };
-    /*
-    // SQLite3 interface
-
-    */
 
 // user words
 typedef struct {
@@ -460,7 +459,7 @@ struct sockaddr_in udp_serv_addr, udp_cli_addr, dest_addr;
 sigset_t block_sigint;
 
 // will be the private pointer to the working MIDI stream
-PmStream *midi_stream;
+PmStream *midi_out_stream, *midi_in_stream;
 #define TIME_PROC ((int32_t (*)(void *)) Pt_Time)
 #define TIME_INFO NULL
 

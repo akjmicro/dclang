@@ -36,16 +36,20 @@ Here are your available MIDI devices:
 8: ALSA, VirMIDI 1-3 (output)
 9: ALSA, VirMIDI 1-3 (input)
 
-PORTMIDI_DEVNUM is not set in your environment!
-MIDI functionality will not work. Please exit from dclang, set that value, and try again!
+PORTMIDI_IN_DEVNUM is not set in your environment!
+MIDI input functionality will not work.
+If you need this, please exit from dclang, set that value, and try again!
+PORTMIDI_OUT_DEVNUM is not set in your environment!
+MIDI output functionality will not work.
+If you need this, please exit from dclang, set that value, and try again!
 ```
 
 So, notice the message that we haven't selected a device. Now that we know what they are,
 let's say I want to use `ALSA, VirMIDI 1-0 (output)`, a virtual port, to send data to.
-Simple, that's `PORTMIDI_DEVNUM=2`, so let's export that.
+Simple, that's `PORTMIDI_OUT_DEVNUM=2`, so let's export that.
 
 ```
-aaron@aaron-XPS-13-9350:~/programs/dclang/examples/midi$ export PORTMIDI_DEVNUM=2
+aaron@aaron-XPS-13-9350:~/programs/dclang/examples/midi$ export PORTMIDI_OUT_DEVNUM=2
 ```
 
 And, let's check again in `dclang` that it picks up:
@@ -73,12 +77,16 @@ Here are your available MIDI devices:
 8: ALSA, VirMIDI 1-3 (output)
 9: ALSA, VirMIDI 1-3 (input)
 
+PORTMIDI_IN_DEVNUM is not set in your environment!
+MIDI input functionality will not work.
+If you need this, please exit from dclang, set that value, and try again!
 Opening device number: 2 
 
 ```
 
 Great, it's now registered, via an environment variable, that we want to open
-`PORTMIDI_DEVNUM` number `2`.
+`PORTMIDI_OUT_DEVNUM` number `2`. (ATM, we don't have to worry about the fact
+taht `PORTMIDI_IN_DEVNUM` is unset.
 
 Now, many of these scripts use parameters set in the key/value store `redis`
 to communicate variables to a live MIDI process. We can control these variables

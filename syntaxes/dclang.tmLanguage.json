@@ -70,7 +70,7 @@
     },
     {
       "name": "support.function.other.dclang",
-      "match": "(^|\\s)(cr|print|emit|uemit|ord|tohex|bytes32|strlen|str=|str<|str>|strfind|strspn|strcspn|strtok|mempcpy|memset|mkbuf|free|isalnum|isalpha|iscntrl|isdigit|isgraph|islower|isprint|ispunct|isspace|isupper|isxdigit|tolower|toupper|regcomp|regexec|regread|fopen|fmemopen|fread|freadline|freadall|fseek|ftell|fwrite|fflush|fclose|redirect|resetout|open|read|write|flush|close|tcplisten|tcpaccept|tcpconnect|clock|sleep|epoch|dt->epoch|epoch->dt|block_sigint|unblock_sigint)(?=\\s|$)",
+      "match": "(^|\\s)(cr|print|emit|uemit|ord|tohex|bytes32|strlen|str=|str<|str>|strfind|strspn|strcspn|strtok|mempcpy|memset|mkbuf|free|isalnum|isalpha|iscntrl|isdigit|isgraph|islower|isprint|ispunct|isspace|isupper|isxdigit|tolower|toupper|regcomp|regexec|regread|fopen|fmemopen|fread|freadline|freadall|fseek|ftell|fwrite|fflush|fclose|redirect|seterr|setout|flush|open|read|write|close|tcplisten|tcpaccept|tcpconnect|clock|sleep|epoch|dt->epoch|epoch->dt|block_sigint|unblock_sigint)(?=\\s|$)",
       "settings": {
         "foreground": "#00FFFF"
       }

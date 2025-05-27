@@ -20,4 +20,4 @@ echo "#define DSP_WORD \"${exampleword}\""     >> portaudio_example.c
 cat portaudio_stub.c                           >> portaudio_example.c
 
 make
-nice -19 ./portaudio_example
+./portaudio_example

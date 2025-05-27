@@ -306,6 +306,28 @@ var _phasor_array 64 allot
 ;
 
 ##################
+# dcblock filter #
+##################
+
+: make_dcblock create 0 , 0 , ;
+
+: dcblock { sig dc_struct }
+    # sig - sig_del:
+    sig
+      dc_struct @
+    -
+    # save sig for later:
+    sig dc_struct !
+    # 0.995 * ydel:
+      0.995
+        dc_struct 1 + @
+      *
+    +
+    # save outsig (y) for later
+    dup dc_struct 1 + !
+;
+
+##################
 # Allpass filter #
 ##################
 # Two delay comb-filters (feed-forward and feedback using)

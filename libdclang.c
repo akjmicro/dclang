@@ -356,8 +356,9 @@ void dclang_execute() {
         &&OP_FILEFLUSH,
         &&OP_FILECLOSE,
         &&OP_REDIRECT,
-        &&OP_RESETOUT,
-        &&OP_FLUSHOUT,
+        &&OP_SETERR,
+        &&OP_SETOUT,
+        &&OP_FLUSH,
         &&OP_OPEN,
         &&OP_READ,
         &&OP_WRITE,
@@ -388,6 +389,8 @@ void dclang_execute() {
         &&_OP_PM_OPENOUT,
         &&_OP_PM_WS,
         &&_OP_PM_WSR,
+        &&_OP_PM_OPENIN,
+        &&_OP_PM_READ,
         &&_OP_PM_CLOSE,
         &&_OP_PM_TERMINATE
     };
@@ -2582,10 +2585,13 @@ void dclang_execute() {
             }
             ofp = (FILE *)(DCLANG_PTR) POP;
             NEXT;
-        OP_RESETOUT:
+        OP_SETERR:
+            ofp = stderr;
+            NEXT;
+        OP_SETOUT:
             ofp = stdout;
             NEXT;
-        OP_FLUSHOUT:
+        OP_FLUSH:
             fflush(ofp);
             NEXT;
         OP_OPEN:
@@ -2954,62 +2960,71 @@ void dclang_execute() {
             for (int i = 0; i < Pm_CountDevices(); i++) {
                 char *deflt;
                 const PmDeviceInfo *info = Pm_GetDeviceInfo(i);
-                printf("%d: %s, %s", i, info->interf, info->name);
+                fprintf(stderr, "%d: %s, %s", i, info->interf, info->name);
                 if (info->input) {
                     deflt = (i == default_in ? "default " : "");
-                    printf(" (%sinput)", deflt);
+                    fprintf(stderr, " (%sinput)", deflt);
                 }
                 if (info->output) {
                     deflt = (i == default_out ? "default " : "");
-                    printf(" (%soutput)", deflt);
+                    fprintf(stderr, " (%soutput)", deflt);
                 }
-                printf("\n");
+                fprintf(stderr, "\n");
             }
             NEXT;
         _OP_PM_OPENOUT:
-            if (data_stack_ptr < 1)
-            {
-                printf("_pm_open_out needs a midi_device number on the stack!\n");
-                return;
-            }
-            DCLANG_LONG midi_device = (DCLANG_LONG) POP;
-            Pm_OpenOutput(&midi_stream, midi_device, NULL, 0, NULL, NULL , 0);
+            Pm_GetDefaultOutputDeviceID();
+            DCLANG_INT midi_out_device = (DCLANG_LONG) POP;
+            Pm_OpenOutput(&midi_in_stream, midi_out_device, NULL, 0, NULL, NULL , 0);
             NEXT;
         _OP_PM_WS:
-            if (data_stack_ptr < 3)
-            {
-                printf("_pm_ws needs 3 integers on the stack:\n");
-                printf("    <status> <data1> <data2>\n");
-                return;
-            }
             midi_data2 = (DCLANG_LONG) POP;
             midi_data1 = (DCLANG_LONG) POP;
             midi_status = (DCLANG_LONG) POP;
             Pm_WriteShort(
-                midi_stream,
+                midi_in_stream,
                 TIME_PROC(TIME_INFO),
                 Pm_Message(midi_status, midi_data1, midi_data2)
             );
             NEXT;
         _OP_PM_WSR:
-            if (data_stack_ptr < 3)
-            {
-                printf("_pm_wsr needs 3 integers on the stack:\n");
-                printf("    <data2> <data1> <status>\n");
-                return;
-            }
             midi_status = (DCLANG_LONG) POP;
             midi_data1 = (DCLANG_LONG) POP;
             midi_data2 = (DCLANG_LONG) POP;
             Pm_WriteShort(
-                midi_stream,
+                midi_in_stream,
                 0,
                 Pm_Message(midi_status, midi_data1, midi_data2)
             );
             NEXT;
+        _OP_PM_OPENIN:
+            Pm_GetDefaultInputDeviceID();
+            DCLANG_INT midi_in_device = (DCLANG_LONG) POP;
+            PmError open_status;
+            open_status = Pm_OpenInput(&midi_in_stream, midi_in_device, NULL, 1, NULL, NULL);
+            if (open_status != 0) fprintf(stderr, "Error opening MIDI input: %i\n", open_status);
+            Pm_SetFilter(midi_in_stream, PM_FILT_ACTIVE | PM_FILT_SYSEX);
+            NEXT;
+        _OP_PM_READ:
+            PmError event_status;
+            PmEvent event[1];
+            event_status = Pm_Read(midi_in_stream, event, 1);
+            //if (event_status < 0) fprintf(stderr, "Error receiving MIDI event: %i\n", event_status);
+            if (event_status > 0) {
+                push((DCLANG_LONG) Pm_MessageData2(event[0].message));
+                push((DCLANG_LONG) Pm_MessageData1(event[0].message));
+                push((DCLANG_LONG) Pm_MessageStatus(event[0].message));
+            } else {
+                // Nothing there, or read error, push -1
+                push((DCLANG_LONG) -1);
+                push((DCLANG_LONG) -1);
+                push((DCLANG_LONG) -1);
+            }
+            NEXT;
         _OP_PM_CLOSE:
-            Pm_Close(midi_stream);
-            printf("Portmidi port closed.\n");
+            if (midi_out_stream) Pm_Close(midi_out_stream);
+            if (midi_in_stream)  Pm_Close(midi_in_stream);
+            printf("Portmidi ports closed.\n");
             NEXT;
         _OP_PM_TERMINATE:
             Pm_Terminate();
@@ -3242,8 +3257,9 @@ void add_all_primitives() {
     add_primitive("fflush", "Files", OP_FILEFLUSH);
     add_primitive("fclose", "Files", OP_FILECLOSE);
     add_primitive("redirect", "Files", OP_REDIRECT);
-    add_primitive("resetout", "Files", OP_RESETOUT);
-    add_primitive("flush", "Files", OP_FLUSHOUT);
+    add_primitive("seterr", "Files", OP_SETERR);
+    add_primitive("setout", "Files", OP_SETOUT);
+    add_primitive("flush", "Files", OP_FLUSH);
     // low-level (OS) file ops:
     add_primitive("open", "Files (no buffer)", OP_OPEN);
     add_primitive("read", "Files (no buffer)", OP_READ);
@@ -3282,6 +3298,8 @@ void add_all_primitives() {
     add_primitive("_pm_open_out", "MIDI", _OP_PM_OPENOUT);
     add_primitive("_pm_ws", "MIDI", _OP_PM_WS);
     add_primitive("_pm_wsr", "MIDI", _OP_PM_WSR);
+    add_primitive("_pm_open_in", "MIDI", _OP_PM_OPENIN);
+    add_primitive("_pm_read", "MIDI", _OP_PM_READ);
     add_primitive("_pm_close", "MIDI", _OP_PM_CLOSE);
     add_primitive("_pm_terminate", "MIDI", _OP_PM_TERMINATE);
     add_primitive(0, 0, 0);  // end of primitives 'barrier'
