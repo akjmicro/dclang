@@ -1,0 +1,133 @@
+"dsp.dc" import
+"midi.dc" import
+
+1 127 / const MIDINORM
+60 const BASE
+
+var sl1
+var sl2
+var sl3
+var sl4
+
+var port1pch
+var port1brt
+var port1vol
+var port2pch
+var port2brt
+var port2vol
+var port3pch
+var port3brt
+var port3vol
+var port4pch
+var port4brt
+var port4vol
+
+make_dcblock lchan_dcfilt
+make_dcblock rchan_dcfilt
+
+make_reverb_struct rev_struct
+
+create commas  15  16 / ,  39  41 / ,
+               24  25 / ,  59  61 / ,
+               35  36 / ,  83  85 / ,
+               48  49 / , 111 113 / ,
+               63  64 / , 143 145 / ,
+               80  81 / , 179 181 / ,
+               99 100 / , 219 221 / ,
+              120 121 / , 263 265 / ,
+              143 144 / , 311 313 / ,
+              168 169 / , 363 365 / ,
+              195 196 / , 419 421 / ,
+              224 225 / , 479 481 / ,
+              255 256 / , 543 545 / ,
+                1   1 / ,
+              545 543 / , 256 255 / ,
+              481 479 / , 225 224 / ,
+              421 419 / , 196 195 / ,
+              365 363 / , 169 168 / ,
+              313 311 / , 144 143 / ,
+              265 263 / , 121 120 / ,
+              221 219 / , 100  99 / ,
+              181 179 / ,  81  80 / ,
+              145 143 / ,  64  63 / ,
+              113 111 / ,  49  48 / ,
+               85  83 / ,  36  35 / ,
+               61  59 / ,  25  24 / ,
+               41  39 / ,  16  15 / ,
+
+: overtone_ctl midictl MIDINORM * 15 * round 1 + BASE * ;
+
+: beat_ctl midictl MIDINORM * 52 * round commas + @ ;
+
+: bright_ctl midictl MIDINORM * pi * ;
+
+: vol_ctl midictl MIDINORM * 0.47 * ;
+
+: midi_beating
+  # get a midi control signal every 128 samples
+  t 0x3f and 0 =
+  if
+    refresh_midictl
+  endif
+    sl1
+      21 overtone_ctl 41 beat_ctl *
+      port1pch 1.0 1.0 port
+        25 bright_ctl
+        port1brt 2.0 2.0 port
+    sineloop
+      45 vol_ctl
+      port1vol 2.0 2.0 port
+    *
+  0.4 panmix
+    sl2
+      22 overtone_ctl 42 beat_ctl *
+      port2pch 1.0 1.0 port
+        26 bright_ctl
+        port2brt 2.0 2.0 port
+    sineloop
+      46 vol_ctl
+      port2vol 2.0 2.0 port
+    *
+  0.6 panmix
+    sl3
+      23 overtone_ctl 43 beat_ctl *
+      port3pch 1.0 1.0 port
+        27 bright_ctl
+        port3brt 2.0 2.0 port
+    sineloop
+      47 vol_ctl
+      port3vol 2.0 2.0 port
+    *
+  0.05 panmix
+    sl4
+      24 overtone_ctl 44 beat_ctl *
+      port4pch 1.0 1.0 port
+        28 bright_ctl
+        port4brt 2.0 2.0 port
+    sineloop
+      48 vol_ctl
+      port4vol 2.0 2.0 port
+    *
+  0.95 panmix
+  # reverb
+    lcget 0.5 * rcget 0.5 *
+      rev_struct 0.9 0.97
+        reverb
+      0.2 panmix
+    0.8 panmix
+  # dcblock what's currently in each channel:
+    lchan @
+      lchan_dcfilt
+    dcblock
+  lchan !
+    rchan @
+      rchan_dcfilt
+    dcblock
+  rchan !
+  # output
+  stereo_out
+  t+
+  midi_beating
+;
+
+midi_beating
