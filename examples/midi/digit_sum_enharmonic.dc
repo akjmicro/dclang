@@ -82,6 +82,7 @@ var x
   "You are now entering an endless loop, hit CTRL-C to stop..." print cr
   "Notice that you won't be able to stop until a note off event hits." print cr
   "In this way, the notes end cleanly!" print cr
+  seterr
   _main
 ;
 

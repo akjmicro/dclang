@@ -2975,14 +2975,14 @@ void dclang_execute() {
         _OP_PM_OPENOUT:
             Pm_GetDefaultOutputDeviceID();
             DCLANG_INT midi_out_device = (DCLANG_LONG) POP;
-            Pm_OpenOutput(&midi_in_stream, midi_out_device, NULL, 0, NULL, NULL , 0);
+            Pm_OpenOutput(&midi_out_stream, midi_out_device, NULL, 0, NULL, NULL , 0);
             NEXT;
         _OP_PM_WS:
             midi_data2 = (DCLANG_LONG) POP;
             midi_data1 = (DCLANG_LONG) POP;
             midi_status = (DCLANG_LONG) POP;
             Pm_WriteShort(
-                midi_in_stream,
+                midi_out_stream,
                 TIME_PROC(TIME_INFO),
                 Pm_Message(midi_status, midi_data1, midi_data2)
             );
@@ -2992,7 +2992,7 @@ void dclang_execute() {
             midi_data1 = (DCLANG_LONG) POP;
             midi_data2 = (DCLANG_LONG) POP;
             Pm_WriteShort(
-                midi_in_stream,
+                midi_out_stream,
                 0,
                 Pm_Message(midi_status, midi_data1, midi_data2)
             );
