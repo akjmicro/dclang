@@ -6,7 +6,6 @@
 # Shell command should be:
 #   PORTMIDI_OUT_DEVNUM=<some#> dclang midi_fractions.dc
 
-"midi.dc" import
 "music.dc" import
 
 make_digit_expansion_struct  gen_struct

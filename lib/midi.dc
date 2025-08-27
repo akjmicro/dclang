@@ -6,10 +6,6 @@
 var midi_ctl_slots 128 allot
 var midi_channel_last_note 16 allot
 
-# Set the default variable 'midi_edo' to 31. Can be changed by the user later...
-var midi_edo
-31 midi_edo !
-
 : midi_shutdown
   _pm_close
   _pm_terminate
@@ -84,8 +80,6 @@ check_mididev
   next
 ;
 
-# words for microtonal/alternate tuning musical applications
-
 : _bend_to_MSB_LSB_bytes
   # a helper function. Given a top-of-stack 14-byte integer MIDI
   # pitch-bend amount, replace the top-of-stack with two bytes,
@@ -93,44 +87,4 @@ check_mididev
   # being the most significant byte
   dup 7 >>
   swap 0x7f and
-;
-
-: edo_degree_to_midi
-  # input stack (rightmost is "top":
-  # ( volume, edo_degree, midi_channel )
-  #
-  # Take an input edo degree, calculate the octave fraction against the global
-  # EDO constant, which must be declared ahead-of-time, and emit midi bytes
-  # to the configured MIDI output device which will sound the correct pitch
-  # Middle-C is assumed to be "0" in all EDOs, so use negative numbers to go
-  # below middle-C.
-  svpush              # sequester the channel number away
-  midi_edo @ / 12 *   # scale to 12-EDO with fractional remainder
-  60.5 +              # shift to middle-C in MIDI, also overshoot fractional
-  dup floor swap      # part on purpose so we can fetch the floor closest
-                      # to the proper midi number; set aside by swap
-  over - 0.5 -        # grab fractional part and cancel previous 0.5 shift
-  4096 *              # scale by positive half step of bend
-  8192 +              # center zero at halfway for +/-
-  # stack now looks like:
-  # ( volume midi_note_number midi_bend ) ( midi_channel )
-  _bend_to_MSB_LSB_bytes
-  # now we have
-  # ( volume midi_note_number bend_MSB bend_LSB ) ( midi_channel )
-  # choose what to do based on if there is volume, i.e.: if the volume
-  # is 0, we don't need to worry about bemd, etc. and just send the
-  # simple note info
-  3 pick 0 =
-  if
-    2drop  # drop the bend
-    svpop 0x90 +
-    send_midi_reverse
-  else
-    # send the bend
-    0 svpick 0xE0 +
-    send_midi_reverse
-    # send the note
-    svpop 0x90 +
-    send_midi_reverse
-  endif
 ;
