@@ -1,5 +1,4 @@
-"midi.dc" import
-"redis_music.dc" import
+"music.dc" import
 "permutations.dc" import
 
 var perm_obj
@@ -10,10 +9,10 @@ create lengths 1 , 2 , 1 , 2 , 1 , 2 , 2 ,
 var len_idx
 0 len_idx !
 len_idx lengths - const RHYTHM_CYCLE
-41 midi_edo !
+41 edo !
 
 : generate_interval
-  / log2 midi_edo @ * round
+  / log2 edo @ * round
 ;
 
 1 2 generate_interval const 1_2

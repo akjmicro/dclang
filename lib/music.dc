@@ -5,6 +5,27 @@
 var base_pitch  redis_music.get_base_pitch  base_pitch !
 var edo         redis_music.get_edo                edo !
 
+##########################################################################
+# Came across a situation with the Behringer Proton where it wasn't by   #
+# default set to a whole step for default pitch bend, but an octave. If  #
+# you happen to be using such a synth, and you alter the default pitch   #
+# bend via setting an envvar, BEND_RANGE, to the number corresponding to #
+# the semitone range. For the out-of-box Proton, that would be 12.       #
+##########################################################################
+var bend_depth
+
+: set_bend_depth
+  "BEND_RANGE" envget
+  dup 0 = if
+    drop
+    4096 bend_depth !
+  else
+    tonum 8192 swap / round bend_depth !
+  endif
+;
+
+set_bend_depth
+
 ##########################################################
 # TODO: right now, the EDO is evaluated once, on import. #
 # At some point, refactoring this scheme to be possibly  #
@@ -144,7 +165,7 @@ set_scale
   dup floor swap      # part on purpose so we can fetch the floor closest
                       # to the proper midi number; set aside by swap
   over - 0.5 -        # grab fractional part and cancel previous 0.5 shift
-  4096 *              # scale by positive half step of bend
+  bend_depth @ *      # scale by positive half step of bend
   8192 +              # center zero at halfway for +/-
   # stack now looks like:
   # ( volume midi_note_number midi_bend ) ( midi_channel )

@@ -1,19 +1,18 @@
 # Makes MIDI music via `digit_sum`
 
 "math.dc" import
-"midi.dc" import
-"redis_music.dc" import
+"music.dc" import
 
 # our EDO var
-41 midi_edo !
+41 edo !
 
 : generate_interval
-  / log2 midi_edo @ * round
+  / log2 edo @ * round
 ;
 
-: O- midi_edo @ - ;
+: O- edo @ - ;
 
-: O+ midi_edo @ + ;
+: O+ edo @ + ;
 
 9 8 generate_interval const  2ND
 5 4 generate_interval const  3RD

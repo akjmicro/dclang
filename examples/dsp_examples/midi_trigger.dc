@@ -1,10 +1,10 @@
 "dsp.dc" import
-"midi.dc" import
+"music.dc" import
 
 # Open default MIDI output port
 0 _pm_open_out
 
-12 midi_edo !
+12 edo !
 
 : midi_trigger
   t
