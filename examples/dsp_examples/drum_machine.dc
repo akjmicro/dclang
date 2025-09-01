@@ -101,7 +101,7 @@ make_hc_filter  op_hihat_flt
 _query_drum_parts
 
 #############################################################
-# `_next_bit` r-shifts which bit in the hexbeat to inspect   #
+# `_next_bit` r-shifts which bit in the hexbeat to inspect  #
 # Also, conditionally resets back to the top bit if it      #
 # reaches the right most extreme (typically 0, but we could #
 # do different meters by resetting earlier)                 #
@@ -117,10 +117,10 @@ _query_drum_parts
   endif
 ;
 
-###############################################################
+################################################################
 # `_bit_on?` answers the question if the bit we are looking at #
-# is "on" (or off) for the instrument line given on the stack #
-###############################################################
+# is "on" (or off) for the instrument line given on the stack  #
+################################################################
 : _bit_on? { this_var }
   seq_bit @
     dup

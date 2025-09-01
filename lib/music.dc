@@ -310,5 +310,7 @@ set_rhythm
   redis_music.get_base expansion_struct _set_base
   redis_music.get_div  expansion_struct _set_div
     expansion_struct gen_digit_expansion
+      redis_music.get_mul
+    *
   data_player
 ;
