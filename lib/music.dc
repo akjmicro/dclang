@@ -331,8 +331,6 @@ var prev_euclid_int
 midi_channel @ tostr str+
 drop svpop                const :rhythm_string
 
-"Rhythm string is :" print :rhythm_string print cr
-
 make_lgen_struct _rhythm_lgen
 var cur_rhythm_str   "" cur_rhythm_str !
 
