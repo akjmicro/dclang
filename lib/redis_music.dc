@@ -7,40 +7,40 @@ redis_connect
 var remainder 1 remainder !
 
 # some common symbols
-"\n"                 const :NL
+"\n"               const :NL
 # timing stuff
-"start_timestamp"    const :START_TIMESTAMP
-"bpm"                const :BPM
-"beat_period"        const :BEAT_PERIOD
-"tempo"              const :TEMPO
-"drum_tempo"         const :DRUM_TEMPO
-"bass_tempo"         const :BASS_TEMPO
-"lead_tempo"         const :LEAD_TEMPO
-"gate"               const :GATE
+"start_timestamp"  const :START_TIMESTAMP
+"bpm"              const :BPM
+"beat_period"      const :BEAT_PERIOD
+"tempo"            const :TEMPO
+"drum_tempo"       const :DRUM_TEMPO
+"bass_tempo"       const :BASS_TEMPO
+"lead_tempo"       const :LEAD_TEMPO
+"gate"             const :GATE
 # mixing stuff
-"drum_vol"           const :DRUM_VOL
-"bass_vol"           const :BASS_VOL
-"lead_vol"           const :LEAD_VOL
+"drum_vol"         const :DRUM_VOL
+"bass_vol"         const :BASS_VOL
+"lead_vol"         const :LEAD_VOL
 # pitch stuff
-"base_pitch"         const :BASE_PITCH
-"edo"                const :EDO
-"scale"              const :SCALE
-"mode"               const :MODE
-"transp"             const :TRANSPOSE
+"base_pitch"       const :BASE_PITCH
+"edo"              const :EDO
+"scale"            const :SCALE
+"mode"             const :MODE
+"transp"           const :TRANSPOSE
 # rhythm stuff
-"euclid_numerator"   const :EUCLID_NUMERATOR
-"euclid_denominator" const :EUCLID_DENOMINATOR
-"rhythm"             const :RHYTHM
+"euclid_n"         const :EUCLID_N
+"euclid_d"         const :EUCLID_D
+"rhythm_type"      const :RHYTHM_TYPE
 # used for keeping a value within a certain range:
-"wrap"               const :WRAP
+"wrap"             const :WRAP
 # common for things like "gen_digit_expansion" and "digit_sum" algorithms:
-"base"               const :BASE
+"base"             const :BASE
 # for "gen_digit_expansion" based algorithms:
-"div"                const :DIV
+"div"              const :DIV
 # for "digit_sum" fractal algorithms:
-"mul"                const :MUL
+"mul"              const :MUL
 # for chaos-based randomness:
-"chaos"              const :CHAOS
+"chaos"            const :CHAOS
 
 #######################################
 # Synchronization for network jamming #
@@ -201,8 +201,8 @@ var next_off_time
   :SCALE redis_get
 ;
 
-: redis_music.get_rhythm
-  :RHYTHM redis_get
+: redis_music.get_rhythm_type
+  :RHYTHM_TYPE redis_get
 ;
 
 #############################################################
@@ -239,13 +239,13 @@ var next_off_time
   dup 1 < if drop 1 endif
 ;
 
-: redis_music.get_euclid_numerator
-  :EUCLID_NUMERATOR redis_get tonum
+: redis_music.get_euclid_n
+  :EUCLID_N redis_get tonum
   dup 1 < if drop 1 endif
 ;
 
-: redis_music.get_euclid_denominator
-  :EUCLID_DENOMINATOR redis_get tonum
+: redis_music.get_euclid_d
+  :EUCLID_D redis_get tonum
   dup 1 < if drop 1 endif
 ;
 

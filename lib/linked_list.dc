@@ -87,3 +87,45 @@ var __private_ll_token_holder__
   dup
   _lshow_helper
 ;
+
+: make_lgen_struct  # (name_for_struct -- struct)
+  # Usage: `make_lgen_struct mynew_lgen`
+  # `mynew_lgen` will now be a list generator in memory
+  # The structure is 2 cells: <list_addr>, <current_node>
+  create 0 , 0 ,
+;
+
+: lgen { lgen_struct infinite? }
+  # Iterate over the list's items (data). The list should be given
+  # as part of a 2-cell 'struct' that will also hold a current
+  # node iteration that can be saved between calls.
+  # If `infinite?` is non-zero, repeat indefinitely.
+
+  # If the 'current node' slot is 0, copy the head slot to it
+  lgen_struct 1 + @ 0 = if
+    lgen_struct @
+      lgen_struct 1 +
+    !
+  endif
+  # Check for if we've looped around
+  lgen_struct @
+    lgen_struct 1 + @ _lnext
+  = if
+    infinite? 0 = if
+      return
+    else
+      lgen_struct @
+        lgen_struct 1 +
+      !
+    endif
+  endif
+  # Examine the current node slot, grab its data via `0 l@`
+  lgen_struct 1 + @
+    dup
+    0 l@
+    # Advance the current node to 'next'
+    swap
+    _lnext
+      lgen_struct 1 +
+    !
+;

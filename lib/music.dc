@@ -1,6 +1,20 @@
-"math.dc" import
+"math.dc"        import
 "redis_music.dc" import
-"midi.dc" import
+"midi.dc"        import
+"linked_list.dc" import
+
+# Adding the ability to have multiple instances running with different
+# MIDI channels. Code will later subtract 1 to get 0-based indices.
+
+var midi_channel
+
+: populate_midi_channel
+  "MIDI_CHANNEL" envget dup 0 = if drop 1 else tonum endif midi_channel !
+;
+
+populate_midi_channel
+
+# END adding MIDI CHANNEL
 
 var base_pitch  redis_music.get_base_pitch  base_pitch !
 var edo         redis_music.get_edo                edo !
@@ -267,31 +281,16 @@ set_scale
   base_pitch @ *
 ;
 
-########################
-# Rhythms defined here #
-########################
-
-create primes 3 , 5 , 7 , 11 ,
-var primes_size   here 1 - primes -   primes_size !
-
-create simple 1 , 1 ,
-var simple_size   here 1 - simple -   simple_size !
-
-var lengths
-var lengths_size
-
 ##############################
 # Euclidean rhythm algorithm #
 ##############################
-var cur_euclid_numerator
-var cur_euclid_denominator
 var cur_euclid_count
 1 cur_euclid_count !
 var prev_euclid_int
 
 : euclidean_rhythm
-    redis_music.get_euclid_numerator
-      redis_music.get_euclid_denominator
+    redis_music.get_euclid_n
+      redis_music.get_euclid_d
     /
       cur_euclid_count @
     *
@@ -307,7 +306,7 @@ var prev_euclid_int
       dup
       1 <
         over
-        redis_music.get_euclid_numerator >
+        redis_music.get_euclid_n >
       or
       if
         drop
@@ -325,26 +324,46 @@ var prev_euclid_int
 # End Euclidean rhythm algorithm #
 ##################################
 
-"simple"    const :simple
-"primes"    const :primes
-"euclidean" const :euclidean
+"euclidean"               const :euclidean
+"string"                  const :string
+32 mkbuf dup svpush
+"rhythm_" str+
+midi_channel @ tostr str+
+drop svpop                const :rhythm_string
 
-var cur_rhythm_str  "" cur_rhythm_str !
+"Rhythm string is :" print :rhythm_string print cr
 
-: set_rhythm
-  redis_music.get_rhythm
+make_lgen_struct _rhythm_lgen
+var cur_rhythm_str   "" cur_rhythm_str !
+
+: string_rhythm
+  :rhythm_string redis_get
     dup
       cur_rhythm_str @
-    str= if
-      drop
-      return
-    endif
-  dup :primes     str= if :primes    cur_rhythm_str !  primes lengths !  primes_size  lengths_size ! endif
-  dup :simple     str= if :simple    cur_rhythm_str !  simple lengths !  simple_size  lengths_size ! endif
-      :euclidean  str= if :euclidean cur_rhythm_str !  simple lengths !  simple_size  lengths_size ! endif  # dummy, caller will use `euclidean` word
+    str= not
+  if
+    dup
+    strdup cur_rhythm_str !
+    linit_nums _rhythm_lgen !
+    0 _rhythm_lgen 1 + !
+  else
+    drop
+  endif
+  _rhythm_lgen 1 lgen
+  dup 0 = if drop 1 endif
 ;
 
-set_rhythm
+: rhythm_generator
+  redis_music.get_rhythm_type
+  dup :euclidean str= if
+    drop euclidean_rhythm
+  else
+    dup :string str= if
+      drop string_rhythm
+  else
+    1
+  endif endif
+;
 
 ###############
 # END RHYTHMS #
@@ -378,16 +397,6 @@ set_rhythm
       redis_music.get_edo
     *
     round      # integer EDO value now on stack, ready for `edo_degree_to_[midi|hz]`
-;
-
-: rhythm_generator
-  redis_music.get_rhythm :euclidean str=
-  if
-    euclidean_rhythm
-  else
-    rand lengths_size @ @ * floor
-    lengths @ + @
-  endif
 ;
 
 : fraction_music { expansion_struct }

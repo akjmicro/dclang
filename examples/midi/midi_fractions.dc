@@ -17,13 +17,16 @@ make_digit_expansion_struct  gen_struct
   ###########
   100
     gen_struct fraction_music dup svpush
-      0
+      midi_channel 1 -
   edo_degree_to_midi
   rhythm_generator redis_music.get_on_gate_abs
   ############
   # note off #
   ############
-  0 svpop 0  edo_degree_to_midi
+  0
+    svpop
+      midi_channel 1 -
+  edo_degree_to_midi
   redis_music.get_off_gate_abs
   unblock_sigint
   _main
