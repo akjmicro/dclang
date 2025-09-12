@@ -1,5 +1,4 @@
 "math.dc"        import
-"redis_music.dc" import
 "midi.dc"        import
 "linked_list.dc" import
 
@@ -15,6 +14,8 @@ var midi_channel
 populate_midi_channel
 
 # END adding MIDI CHANNEL
+
+"redis_music.dc" import
 
 var base_pitch  redis_music.get_base_pitch  base_pitch !
 var edo         redis_music.get_edo                edo !
@@ -334,7 +335,7 @@ drop svpop                const :rhythm_string
 make_lgen_struct _rhythm_lgen
 var cur_rhythm_str   "" cur_rhythm_str !
 
-: string_rhythm
+: do_rhythm_string
   :rhythm_string redis_get
     dup
       cur_rhythm_str @
@@ -357,7 +358,7 @@ var cur_rhythm_str   "" cur_rhythm_str !
     drop euclidean_rhythm
   else
     dup :string str= if
-      drop string_rhythm
+      drop do_rhythm_string
   else
     1
   endif endif
@@ -381,6 +382,11 @@ var cur_rhythm_str   "" cur_rhythm_str !
   # compadre `edo_degree_to_midi` (for midi work).     #
   ######################################################
     set_scale
+      redis_music.get_wrap
+        dup 0 = if drop
+        else
+    absmod
+        endif
       redis_music.get_mode
     +
       scale_size @ @
@@ -403,5 +409,30 @@ var cur_rhythm_str   "" cur_rhythm_str !
     expansion_struct gen_digit_expansion
       redis_music.get_mul
     *
+  data_player
+;
+
+32 mkbuf dup svpush
+"pitch_" str+
+midi_channel @ tostr str+
+drop svpop                const :pitch_string
+
+make_lgen_struct _pitch_lgen
+var cur_pitch_str   "" cur_pitch_str !
+
+: do_pitch_string
+  :pitch_string redis_get
+    dup
+      cur_pitch_str @
+    str= not
+  if
+    dup
+    strdup cur_pitch_str !
+    linit_nums _pitch_lgen !
+    0 _pitch_lgen 1 + !
+  else
+    drop
+  endif
+  _pitch_lgen 1 lgen
   data_player
 ;

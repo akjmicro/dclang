@@ -2,19 +2,20 @@
 "permutations.dc" import
 
 var perm_obj
-8 setup_permutation
+9 setup_permutation
 perm_obj !
 
-create lengths 1 , 2 , 1 , 2 , 1 , 2 , 2 ,
+create lengths 3 , 1 , 2 , 1 , 2 , 1 , 2 , 2 ,
 var len_idx
 0 len_idx !
 len_idx lengths - const RHYTHM_CYCLE
-41 edo !
 
-: generate_interval
-  / log2 edo @ * round
-;
+var local_edo
+redis_music.get_edo local_edo !
 
+: generate_interval / log2 local_edo @ * round ;
+
+1 4 generate_interval const 1_4
 1 2 generate_interval const 1_2
 9 8 generate_interval const 9_8
 4 3 generate_interval const 4_3
@@ -23,7 +24,7 @@ len_idx lengths - const RHYTHM_CYCLE
 2 1 generate_interval const 2_1
 9 4 generate_interval const 9_4
 
-create scale 1_2 , 0 , 9_8 , 4_3 , 3_2 , 7_4 , 2_1 , 9_4 ,
+create scale 1_4 , 1_2 , 0 , 9_8 , 4_3 , 3_2 , 7_4 , 2_1 , 9_4 ,
 
 : _get_len
   lengths len_idx @ RHYTHM_CYCLE % + @
@@ -47,16 +48,13 @@ create scale 1_2 , 0 , 9_8 , 4_3 , 3_2 , 7_4 , 2_1 , 9_4 ,
     100
       scale
         perm_obj @ next_permutation_item
-      +
-      @
-        redis_music.get_transpose
-      +
+      + @
       dup svpush
-    0
+    midi_channel @ 1 -
   edo_degree_to_midi
   ###
   _get_local_on_len sleep
-  0 svpop 0 edo_degree_to_midi
+  0 svpop midi_channel @ 1 - edo_degree_to_midi
   _get_local_off_len sleep
   _advance_len_idx
   unblock_sigint

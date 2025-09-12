@@ -26,13 +26,19 @@ var remainder 1 remainder !
 "edo"              const :EDO
 "scale"            const :SCALE
 "mode"             const :MODE
-"transp"           const :TRANSPOSE
+32 mkbuf dup svpush
+"transp_" str+
+midi_channel @ tostr str+
+drop svpop         const :TRANSPOSE
 # rhythm stuff
 "euclid_n"         const :EUCLID_N
 "euclid_d"         const :EUCLID_D
 "rhythm_type"      const :RHYTHM_TYPE
 # used for keeping a value within a certain range:
-"wrap"             const :WRAP
+32 mkbuf dup svpush
+"wrap_" str+
+midi_channel @ tostr str+
+drop svpop         const :WRAP
 # common for things like "gen_digit_expansion" and "digit_sum" algorithms:
 "base"             const :BASE
 # for "gen_digit_expansion" based algorithms:
@@ -236,7 +242,6 @@ var next_off_time
 
 : redis_music.get_wrap
   :WRAP redis_get tonum round
-  dup 1 < if drop 1 endif
 ;
 
 : redis_music.get_euclid_n

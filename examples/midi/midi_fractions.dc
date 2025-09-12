@@ -40,6 +40,7 @@ make_digit_expansion_struct  gen_struct
   _main
 ;
 
+synchronized_start
 main
 
 panic
