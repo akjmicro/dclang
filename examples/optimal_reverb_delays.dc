@@ -1,0 +1,56 @@
+# Mathematically figure out optimal sample-count
+# values for reverb delay lengths, based on number-theory
+# like phi and prime numbers.
+#
+# The idea is: we'll make a 16-value array, setting a desired
+# minimum and maximum, figure the ratio between them, and
+# crawl through the distribution via the golden ratio (phi)
+# Once established, we'll scale those values based on the
+# original minimum and maximum, then snap them to their
+# nearest prime-# value vai `closest-prime`.
+
+"math.dc" import
+
+var phi_array 16 allot
+
+5 sqrt 2 / 0.5 + const PHI
+
+PHI log const LOGPHI
+
+: populate_phi_array
+  15 times
+    LOGPHI i * 1 %
+      phi_array i +
+    !
+  again
+  1.0
+    phi_array 15 +
+  !
+;
+
+populate_phi_array
+
+phi_array @ 16 sortnums
+
+: show_phi_array
+  16 times
+    phi_array i + @ .
+  again
+  cr
+;
+
+: scale_and_snap_phi_array { lowval highval }
+  16 times
+    highval lowval / log
+      phi_array i + @
+    *
+    exp lowval * round
+    closest-prime
+      phi_array i +
+    !
+  again
+;
+
+2048 4096 scale_and_snap_phi_array
+
+show_phi_array

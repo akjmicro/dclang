@@ -72,3 +72,93 @@
   svpop           # ( quot new_rem ds ) ( )
   _set_remainder  # ( quot )
 ;
+
+######################
+# Prime number words #
+######################
+
+: is-2-3-5-7?
+    dup dup         # n n n
+    2 =             # n n bool
+    swap dup        # n bool n n
+    3 =             # n bool n bool
+    swap dup        # n bool bool n n
+    5 =             # n bool bool n bool
+    swap            # n bool bool bool n
+    7 =             # n bool bool bool bool
+    or or or        # n bool
+;
+
+: check-higher-than-49
+  dup                             # n n
+  sqrt ceil 1 +  6 /              # n n
+  ceil 6 * 12 6 for
+    dup i 1 - % 0 =
+    over i 1 + % 0 =
+    or if
+      drop 0 exitfor
+    else
+      next drop 1
+    endif
+;
+
+: is-not-div-otherwise?
+  dup                         # n n
+  49 < if                     # n bool
+    drop 1
+  else
+    check-higher-than-49
+  endif
+;
+
+: is-not-div-by-2-3-5-7?
+    dup             # n n
+    2 % 0 =         # n bool
+    over            # n bool n
+    3 % 0 =         # n bool bool
+    or over         # n bool n
+    5 % 0 =         # n bool bool
+    or over         # n bool n
+    7 % 0 =         # n bool bool
+    or
+    if
+      drop 0
+    else
+      is-not-div-otherwise?
+    endif
+;
+
+: is-prime
+    is-2-3-5-7?
+    if
+      drop 1
+    else
+      is-not-div-by-2-3-5-7?
+    endif
+;
+
+: find-next-prime { direction x }
+  inf times
+    x direction + dup is-prime if
+      exittimes return
+    else
+      x! again
+    endif
+;
+
+: closest-prime { x }
+  x is-prime if
+    x return
+  endif
+    x
+      -1 x find-next-prime dup svpush
+    - abs
+      x
+        1 x find-next-prime dup svpush
+      - abs
+    > if
+      svpop svclear
+    else
+      1 svpick svclear
+    endif
+;
