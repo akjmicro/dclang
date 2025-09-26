@@ -11,46 +11,54 @@
 
 "math.dc" import
 
+######################################
+# can be manually changed as desired #
+######################################
+16   const SLOTS
+1362 const MIN_DELAY  # delay in samples at some SR
+2205 const MAX_DELAY
+
+
 var phi_array 16 allot
 
-5 sqrt 2 / 0.5 + const PHI
-
-PHI log const LOGPHI
+5 sqrt 2 / 0.5 - const PHI_M1
 
 : populate_phi_array
-  15 times
-    LOGPHI i * 1 %
+  SLOTS 1 - times
+    PHI_M1 i * 1 %
       phi_array i +
     !
   again
   1.0
-    phi_array 15 +
+    phi_array SLOTS 1 - +
   !
 ;
 
 populate_phi_array
 
-phi_array @ 16 sortnums
+phi_array @ SLOTS sortnums
 
 : show_phi_array
-  16 times
+  SLOTS times
     phi_array i + @ .
   again
   cr
 ;
 
 : scale_and_snap_phi_array { lowval highval }
-  16 times
-    highval lowval / log
+  SLOTS times
+    highval lowval -
       phi_array i + @
     *
-    exp lowval * round
+      lowval
+    +
+    round
     closest-prime
       phi_array i +
     !
   again
 ;
 
-2048 4096 scale_and_snap_phi_array
+MIN_DELAY MAX_DELAY scale_and_snap_phi_array
 
 show_phi_array

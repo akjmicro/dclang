@@ -1,5 +1,5 @@
 "dsp.dc" import
-"redis_music.dc" import
+"music.dc" import
 
 ############################
 # Make a 32-step sequencer #

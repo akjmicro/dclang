@@ -1,6 +1,6 @@
 "math.dc" import
 "string.dc" import
-"redis_music.dc" import
+"music.dc" import
 
 ###########################################################################
 # To use the two functions here, `chaos_stats` and `draw_chaos_infinite`, #

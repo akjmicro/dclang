@@ -1,4 +1,4 @@
-"redis_music.dc" import
+"music.dc" import
 
 "Start timestamp is:" print cr
 

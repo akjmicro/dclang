@@ -1,3 +1,8 @@
+#######################################################################
+# This is really a helper library and should NOT be imported directly #
+# into your code. Instead use `"music.dc" import`                     #
+#######################################################################
+
 "redis.dc" import
 "clock_sleep.dc" import
 
