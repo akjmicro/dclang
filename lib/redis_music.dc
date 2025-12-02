@@ -30,20 +30,17 @@ var remainder 1 remainder !
 "base_pitch"       const :BASE_PITCH
 "edo"              const :EDO
 "scale"            const :SCALE
-"mode"             const :MODE
-32 mkbuf dup svpush
-"transp_" str+
-midi_channel @ tostr str+
-drop svpop         const :TRANSPOSE
+"mode_"   make_channel_string
+                   const :MODE
+"transp_" make_channel_string
+                   const :TRANSPOSE
 # rhythm stuff
 "euclid_n"         const :EUCLID_N
 "euclid_d"         const :EUCLID_D
 "rhythm_type"      const :RHYTHM_TYPE
 # used for keeping a value within a certain range:
-32 mkbuf dup svpush
-"wrap_" str+
-midi_channel @ tostr str+
-drop svpop         const :WRAP
+"wrap_"   make_channel_string
+                   const :WRAP
 # common for things like "gen_digit_expansion" and "digit_sum" algorithms:
 "base"             const :BASE
 # for "gen_digit_expansion" based algorithms:

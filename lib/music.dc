@@ -1,6 +1,7 @@
 "math.dc"        import
 "midi.dc"        import
 "linked_list.dc" import
+"string.dc"      import
 
 # Adding the ability to have multiple instances running with different
 # MIDI channels. Code will later subtract 1 to get 0-based indices.
@@ -14,6 +15,13 @@ var midi_channel
 populate_midi_channel
 
 # END adding MIDI CHANNEL
+
+: make_channel_string { prefix }
+  32 mkbuf dup svpush
+  prefix str+
+  midi_channel @ tostr str+
+  drop svpop
+;
 
 "redis_music.dc" import
 
@@ -325,12 +333,9 @@ var prev_euclid_int
 # End Euclidean rhythm algorithm #
 ##################################
 
-"euclidean"               const :euclidean
-"string"                  const :string
-32 mkbuf dup svpush
-"rhythm_" str+
-midi_channel @ tostr str+
-drop svpop                const :rhythm_string
+"euclidean"                    const :euclidean
+"string"                       const :string
+"rhythm_" make_channel_string  const :rhythm_string
 
 make_lgen_struct _rhythm_lgen
 var cur_rhythm_str   "" cur_rhythm_str !
@@ -412,10 +417,7 @@ var cur_rhythm_str   "" cur_rhythm_str !
   data_player
 ;
 
-32 mkbuf dup svpush
-"pitch_" str+
-midi_channel @ tostr str+
-drop svpop                const :pitch_string
+"pitch_" make_channel_string  const :pitch_string
 
 make_lgen_struct _pitch_lgen
 var cur_pitch_str   "" cur_pitch_str !
