@@ -1,0 +1,15 @@
+"math.dc" import
+
+make_digit_expansion_struct  digits
+
+: digit_expansion { base div wrap cols }
+  base digits _set_base
+  div  digits _set_div
+  0  digits 2 +  !  # reset remainder
+  16 times
+    cols times
+      digits gen_digit_expansion wrap %  3 0 .rj
+    again
+    cr
+  again
+;
