@@ -8,8 +8,63 @@ make_digit_expansion_struct  digits
   0  digits 2 +  !  # reset remainder
   16 times
     cols times
-      digits gen_digit_expansion wrap %  3 0 .rj
+      digits gen_digit_expansion wrap % 3 0 .rj
     again
     cr
   again
+;
+
+var digit_data 256 allot
+
+: load_digit_data { base div }
+  base digits _set_base
+  div  digits _set_div
+  0    digits 2 + !
+  256 times
+    digits gen_digit_expansion
+      digit_data i +
+    !
+  again
+;
+
+var four_digits 4 allot
+
+: check_period
+  digit_data 16 + @  four_digits 0 + !
+  digit_data 17 + @  four_digits 1 + !
+  digit_data 18 + @  four_digits 2 + !
+  digit_data 19 + @  four_digits 3 + !
+  256 17 1 for
+    digit_data i + 0 + @
+      four_digits 0 + @
+    =
+    digit_data i + 1 + @
+      four_digits 1 + @
+    =
+    digit_data i + 2 + @
+      four_digits 2 + @
+    =
+    digit_data i + 3 + @
+      four_digits 3 + @
+    =
+    and and and
+    if
+      i 16 -
+      exitfor return
+    else
+  next
+    endif
+  0
+;
+
+: create_digits_database
+  33 5 1 for
+    312 5 1 for
+      j i load_digit_data
+      "base:" print j .
+      "div:"  print i .
+      "has a length of: " print
+      check_period . cr
+    next
+  next
 ;
