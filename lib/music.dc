@@ -333,27 +333,43 @@ var prev_euclid_int
 # End Euclidean rhythm algorithm #
 ##################################
 
-"euclidean"                    const :euclidean
-"string"                       const :string
-"rhythm_" make_channel_string  const :rhythm_string
+#######################################################################
+# A general string-to-lgen generator, private. The idea is it be used #
+# By the `do_*` words as below. TODO: a gate iterator.                #
+#######################################################################
 
-make_lgen_struct _rhythm_lgen
-var cur_rhythm_str   "" cur_rhythm_str !
-
-: do_rhythm_string
-  :rhythm_string redis_get
+: _string_to_lgen { str_to_check cur_str lgen_struct }
+  str_to_check redis_get
     dup
-      cur_rhythm_str @
+      cur_str @
     str= not
   if
     dup
-    strdup cur_rhythm_str !
-    linit_nums _rhythm_lgen !
-    0 _rhythm_lgen 1 + !
+    strdup cur_str !
+    linit_nums lgen_struct !
+    0 lgen_struct 1 + !
   else
     drop
   endif
-  _rhythm_lgen 1 lgen
+  lgen_struct true lgen
+;
+
+####################################################
+# Using the above generator for `rhythm_generator` #
+####################################################
+
+"euclidean"                const :euclidean
+"string"                   const :string
+"rh." make_channel_string  const :rhythm_string
+
+make_lgen_struct     _rhythm_lgen
+var _cur_rhythm_str  "" _cur_rhythm_str !
+
+: _do_rhythm_string
+  :rhythm_string
+    _cur_rhythm_str
+      _rhythm_lgen
+  _string_to_lgen
   dup 0 = if drop 1 endif
 ;
 
@@ -363,7 +379,7 @@ var cur_rhythm_str   "" cur_rhythm_str !
     drop euclidean_rhythm
   else
     dup :string str= if
-      drop do_rhythm_string
+      drop _do_rhythm_string
   else
     1
   endif endif
@@ -432,24 +448,19 @@ var digit_sum_counter
   digit_sum_counter !
 ;
 
+#############################################
+# Future manual pitch-string sequencer work #
+#############################################
+
 "pitch_" make_channel_string  const :pitch_string
 
-make_lgen_struct _pitch_lgen
-var cur_pitch_str   "" cur_pitch_str !
+make_lgen_struct    _pitch_lgen
+var _cur_pitch_str  "" _cur_pitch_str !
 
-: do_pitch_string
-  :pitch_string redis_get
-    dup
-      cur_pitch_str @
-    str= not
-  if
-    dup
-    strdup cur_pitch_str !
-    linit_nums _pitch_lgen !
-    0 _pitch_lgen 1 + !
-  else
-    drop
-  endif
-  _pitch_lgen 1 lgen
+: _do_pitch_string
+  :pitch_string
+    _cur_pitch_str
+      _pitch_lgen
+  _string_to_lgen
   data_player
 ;

@@ -17,12 +17,13 @@ var remainder 1 remainder !
 "start_timestamp"  const :START_TIMESTAMP
 "bpm"              const :BPM
 "beat_period"      const :BEAT_PERIOD
-"tempo"            const :TEMPO
+"gt." make_channel_string
+                   const :GATE
+# DSP example tempo stuff
 "drum_tempo"       const :DRUM_TEMPO
 "bass_tempo"       const :BASS_TEMPO
 "lead_tempo"       const :LEAD_TEMPO
-"gate"             const :GATE
-# mixing stuff
+# DSP example mixing stuff
 "drum_vol"         const :DRUM_VOL
 "bass_vol"         const :BASS_VOL
 "lead_vol"         const :LEAD_VOL
@@ -30,36 +31,44 @@ var remainder 1 remainder !
 "base_pitch"       const :BASE_PITCH
 "edo"              const :EDO
 "scale"            const :SCALE
-"mode_"   make_channel_string
+"md." make_channel_string
                    const :MODE
-"transp_" make_channel_string
+"tr." make_channel_string
                    const :TRANSPOSE
 # rhythm stuff
 "euclid_n"         const :EUCLID_N
 "euclid_d"         const :EUCLID_D
 "rhythm_type"      const :RHYTHM_TYPE
 # used for keeping a value within a certain range:
-"wrap_"   make_channel_string
+"wr." make_channel_string
                    const :WRAP
-# common for things like "gen_digit_expansion" and "digit_sum" algorithms:
+###########################################################################
+# common for things like "gen_digit_expansion" and "digit_sum" algorithms #
+###########################################################################
 "base"             const :BASE
 # for "gen_digit_expansion" based algorithms:
 "div"              const :DIV
-# for "digit_sum" fractal algorithms:
+# for "digit_sum" fractal algorithms as well as gen_digit_expansion:
 "mul"              const :MUL
 # for chaos-based randomness:
 "chaos"            const :CHAOS
 
-#######################################
-# Synchronization for network jamming #
-#######################################
+##########################################
+# Private word for dealing with duration #
+##########################################
+
+: _get_duration
+  60 :BPM redis_get tonum /
+;
+
+#############################################
+# Synchronization for network jamming, etc. #
+#############################################
 
 : synchronized_start
-    60.0
+    _get_duration
       :BEAT_PERIOD redis_get tonum
     *
-      :BPM redis_get tonum
-    /
       dup
         clock
         swap
@@ -67,19 +76,6 @@ var remainder 1 remainder !
     -
     0.0 -  # empirical adjustment
   sleep
-;
-
-#################
-# Tempo and BPM #
-# Synonymous?   #
-#################
-
-: redis_music.get_tempo
-  :TEMPO redis_get tonum 60  /
-;
-
-: redis_music.get_bpm
-  :BPM redis_get tonum 60 /
 ;
 
 # This one allows for various instruments to drift
@@ -101,17 +97,6 @@ var remainder 1 remainder !
 
 : redis_music.get_lead_vol
   :LEAD_VOL redis_get tonum
-;
-
-##########################################
-# Private word for dealing with duration #
-##########################################
-
-: _get_duration
-  # N.B.: notice this is the inverse of actual tempo,
-  # since it's a number of seconds (for sleep) rather
-  # than BPM
-  :TEMPO redis_get tonum 60 swap /
 ;
 
 ###############################################################
