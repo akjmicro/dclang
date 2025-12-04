@@ -128,9 +128,9 @@ var dorian_size
 dorian_size !
 
 create phrygian   0 O-       ,                            4_3 O-    , 3_2 O-     ,
-                  0          ,  16_15       , 6_5       , 4_3       , 3_2        , 5_3       , 9_5       ,
-                  0 O+       ,  16_15 O+    , 6_5 O+    , 4_3 O+    , 3_2 O+     , 5_3 O+    , 9_5 O+    ,
-                  0 O+ O+    ,  16_15 O+ O+ , 6_5 O+ O+ , 4_3 O+ O+ , 3_2 O+ O+  , 5_3 O+ O+ , 9_5 O+ O+ ,
+                  0          ,  16_15       , 6_5       , 4_3       , 3_2        , 8_5       , 9_5       ,
+                  0 O+       ,  16_15 O+    , 6_5 O+    , 4_3 O+    , 3_2 O+     , 8_5 O+    , 9_5 O+    ,
+                  0 O+ O+    ,  16_15 O+ O+ , 6_5 O+ O+ , 4_3 O+ O+ , 3_2 O+ O+  , 8_5 O+ O+ , 9_5 O+ O+ ,
                   0 O+ O+ O+ ,
 var phrygian_size
   here 1 - phrygian -
