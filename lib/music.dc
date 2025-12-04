@@ -417,6 +417,21 @@ var cur_rhythm_str   "" cur_rhythm_str !
   data_player
 ;
 
+var digit_sum_counter
+
+: digit_sum_music
+  digit_sum_counter @
+    redis_music.get_mul
+  *
+    redis_music.get_base
+  digit_sum
+  data_player
+  # increment the counter
+  digit_sum_counter @
+    1 +
+  digit_sum_counter !
+;
+
 "pitch_" make_channel_string  const :pitch_string
 
 make_lgen_struct _pitch_lgen

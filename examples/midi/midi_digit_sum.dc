@@ -1,0 +1,43 @@
+# Makes MIDI music via `digit_sum`
+#
+# First, follow the more general MIDI/Redis setup instructions in this directory's README.md
+#
+# Shell command should be:
+#   PORTMIDI_OUT_DEVNUM=<some#> dclang midi_digit_sum.dc
+
+"music.dc" import
+
+: _main
+  block_sigint
+  ###########
+  # note on #
+  ###########
+  100
+    digit_sum_music dup svpush
+      midi_channel @ 1 -
+  edo_degree_to_midi
+  rhythm_generator redis_music.get_on_gate_abs
+  ############
+  # note off #
+  ############
+  0
+    svpop
+      midi_channel @ 1 -
+  edo_degree_to_midi
+  redis_music.get_off_gate_abs
+  unblock_sigint
+  _main
+;
+
+: main
+  "You are now entering an endless loop, hit CTRL-C to stop..." print cr
+  "Notice that you won't be able to stop until a note off event hits." print cr
+  "In this way, the notes end cleanly!" print cr
+  redis_music.set_clock_start
+  _main
+;
+
+synchronized_start
+main
+
+panic
