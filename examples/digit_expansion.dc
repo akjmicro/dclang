@@ -57,14 +57,47 @@ var four_digits 4 allot
   0
 ;
 
+: _number_present? { num }
+  256 16 1 for
+    digit_data i + @
+      num
+    =
+    if
+      true
+  exitfor return
+    endif
+  next
+  false
+;
+
+: check_coverage { num }
+  # checks if all numbers from 0 to num-1 are present in data
+  num 1 - num!  # decrement first
+  num -1 = if
+    true return
+  endif
+  num _number_present?
+  not if
+    false return
+  else
+    num check_coverage
+  endif
+;
+
+"|" const :PIPE
+"t" const :TRUE_STR
+"f" const :FALSE_STR
+
 : create_digits_database
+  # This will write-out a CSV. Can be imported into sqlite3, etc.
+  "base|div|period|coverage" print cr
   33 5 1 for
     312 5 1 for
       j i load_digit_data
-      "base:" print j .
-      "div:"  print i .
-      "has a length of: " print
-      check_period . cr
+      j .. :PIPE print
+      i .. :PIPE print
+      check_period .. :PIPE print
+      j check_coverage if :TRUE_STR else :FALSE_STR endif print cr
     next
   next
 ;
