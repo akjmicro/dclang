@@ -1,0 +1,66 @@
+"music.dc" import
+
+"drone_vol" const :drone_vol
+var cur_drone_vol
+var cur_transpose
+var vol_changed
+var transpose_changed
+
+: _main
+  block_sigint
+  # check if drone volume changed
+  :drone_vol redis_get tonum 127 * round
+  dup
+    cur_drone_vol @
+  <> if
+      cur_drone_vol
+    !
+    true vol_changed !
+  else
+    drop
+    false vol_changed !
+  endif
+  # check if transpose changed
+  redis_music.get_transpose
+  dup
+    cur_transpose @
+  <> if
+      cur_transpose
+    !
+    true transpose_changed !
+  else
+    drop
+    false transpose_changed !
+  endif
+  #.s
+  vol_changed @
+    transpose_changed @
+  or if
+    cur_drone_vol @
+      redis_music.get_transpose
+        12
+      /
+        redis_music.get_edo
+      *
+      round
+        midi_channel @ 1 -
+    edo_degree_to_midi
+  endif
+  false vol_changed !
+  false transpose_changed !
+  rhythm_generator redis_music.get_on_gate_abs
+  redis_music.get_off_gate_abs
+  unblock_sigint
+  _main
+;
+
+: main
+  "You are now entering an endless loop, hit CTRL-C to stop..." print cr
+  "Notice that you won't be able to stop until a note off event hits." print cr
+  "In this way, the notes end cleanly!" print cr
+  redis_music.set_clock_start
+  _main
+;
+
+synchronized_start
+main
