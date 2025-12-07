@@ -45,13 +45,17 @@ var remainder 1 remainder !
 ###########################################################################
 # common for things like "gen_digit_expansion" and "digit_sum" algorithms #
 ###########################################################################
-"base"             const :BASE
+"base."  make_channel_string
+                   const :BASE
 # for "gen_digit_expansion" based algorithms:
-"div"              const :DIV
+"div."   make_channel_string
+                   const :DIV
 # for "digit_sum" fractal algorithms as well as gen_digit_expansion:
-"mul"              const :MUL
+"mul."   make_channel_string
+                   const :MUL
 # for chaos-based randomness:
-"chaos"            const :CHAOS
+"chaos." make_channel_string
+                   const :CHAOS
 
 ##########################################
 # Private word for dealing with duration #

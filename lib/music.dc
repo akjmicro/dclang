@@ -62,6 +62,7 @@ set_bend_depth
  7  6 / log2 const  7_6
 32 27 / log2 const 32_27
  6  5 / log2 const  6_5
+11  9 / log2 const 11_9
  5  4 / log2 const  5_4
 81 64 / log2 const 81_64
  4  3 / log2 const  4_3
@@ -70,6 +71,7 @@ set_bend_depth
  3  2 / log2 const  3_2
 32 21 / log2 const 32_21
  8  5 / log2 const  8_5
+13  8 / log2 const 13_8
  5  3 / log2 const  5_3
 27 16 / log2 const 27_16
  7  4 / log2 const  7_4
@@ -77,6 +79,23 @@ set_bend_depth
  9  5 / log2 const  9_5
 11  6 / log2 const 11_6
 15  8 / log2 const 15_8
+# higher overtones
+17      log2 const 17_1
+18      log2 const 18_1
+19      log2 const 19_1
+20      log2 const 20_1
+21      log2 const 21_1
+22      log2 const 22_1
+23      log2 const 23_1
+24      log2 const 24_1
+25      log2 const 25_1
+26      log2 const 26_1
+27      log2 const 27_1
+28      log2 const 28_1
+29      log2 const 29_1
+30      log2 const 30_1
+31      log2 const 31_1
+32      log2 const 32_1
 
 #######################################################################
 # Scales defined here. N.B. scales are measured in octaves (via log2) #
@@ -85,9 +104,12 @@ set_bend_depth
 #######################################################################
 
 create otonal 0 O- O- ,
-              0 O- ,                              3_2 O- ,
-              0    ,          5_4    ,            3_2    , 7_4 ,
-              0 O+ , 9_8 O+ , 5_4 O+ , 11_8 O+ ,  3_2 O+ ,
+              0 O-    ,                               3_2 O- ,
+              0       ,            5_4    ,            3_2    ,  7_4 ,
+              0 O+    ,  9_8  O+ , 5_4 O+ , 11_8 O+ ,  3_2 O+ , 13_8 O+ , 7_4 O+ , 15_8 O+ ,
+              0 O+ O+ , 17_1 , 18_1 , 19_1 , 20_1 , 21_1 , 22_1 , 23_1 , 24_1 , 25_1 ,
+                        26_1 , 27_1 , 28_1 , 29_1 , 30_1 , 31_1 ,
+              32_1 ,
 var otonal_size
   here 1 - otonal -
 otonal_size !

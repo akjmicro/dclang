@@ -3,7 +3,7 @@
 # First, follow the more general MIDI/Redis setup instructions in this directory's README.md
 #
 # Shell command should be:
-#   PORTMIDI_OUT_DEVNUM=<some#> dclang midi_digit_sum.dc
+#   PM_OUT=<some#> dclang midi_digit_sum.dc
 
 "music.dc" import
 

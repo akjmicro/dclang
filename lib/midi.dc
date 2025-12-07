@@ -1,5 +1,5 @@
-"PORTMIDI_IN_DEVNUM"  const :PORTMIDI_IN_DEVNUM
-"PORTMIDI_OUT_DEVNUM" const :PORTMIDI_OUT_DEVNUM
+"PM_IN"  const :PM_IN
+"PM_OUT" const :PM_OUT
 
 # These will be used again (unused ATM) once MIDI read functionality
 # is re-implemented via `portmidi`
@@ -18,10 +18,10 @@ var midi_channel_last_note 16 allot
   cr "Here are your available MIDI devices:" print cr
   _pm_list cr
   # Try to set output device
-  :PORTMIDI_OUT_DEVNUM envget dup
+  :PM_OUT envget dup
   0 =
   if
-    :PORTMIDI_OUT_DEVNUM print " is not set in your environment!" print cr
+    :PM_OUT print " is not set in your environment!" print cr
     "MIDI output functionality will not work." print cr
     "If you need this, please exit from dclang, set that value, and try again!" print cr
     drop
@@ -31,10 +31,10 @@ var midi_channel_last_note 16 allot
     _pm_open_out
   endif
   # Try to set input device
-  :PORTMIDI_IN_DEVNUM envget dup
+  :PM_IN envget dup
   0 =
   if
-    :PORTMIDI_IN_DEVNUM print " is not set in your environment!" print cr
+    :PM_IN print " is not set in your environment!" print cr
     "MIDI input functionality will not work." print cr
     "If you need this, please exit from dclang, set that value, and try again!" print cr
     drop
