@@ -382,7 +382,7 @@ var prev_euclid_int
 
 "euclidean"                const :euclidean
 "string"                   const :string
-"rh." make_channel_string  const :rhythm_string
+"rh"  make_channel_string  const :rhythm_string
 
 make_lgen_struct     _rhythm_lgen
 var _cur_rhythm_str  "" _cur_rhythm_str !
@@ -440,6 +440,8 @@ var _cur_rhythm_str  "" _cur_rhythm_str !
       redis_music.get_transpose
         12     # transposition should be in terms of 12-edo standard
       /
+      # below are extra steps to round the 12-edo transpose in terms of the current EDO:
+      redis_music.get_edo swap over * round swap /
     +          # value in octaves, now offset by transposition in octaves (which can be a float)
       redis_music.get_edo
     *
@@ -474,7 +476,7 @@ var digit_sum_counter
 # Future manual pitch-string sequencer work #
 #############################################
 
-"pitch_" make_channel_string  const :pitch_string
+"pch" make_channel_string  const :pitch_string
 
 make_lgen_struct    _pitch_lgen
 var _cur_pitch_str  "" _cur_pitch_str !

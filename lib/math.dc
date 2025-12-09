@@ -65,27 +65,41 @@
 # Digit expansion #
 ###################
 
-: make_digit_expansion_struct var 3 allot ;
+: make_digit_expansion_struct var 5 allot ;
 
-: _get_base @ ;
-: _set_base ! ;
-: _get_div 1 + @ ;
-: _set_div 1 + ! ;
-: _get_remainder 2 + @ dup 0 = if drop 1 endif ;
-: _set_remainder 2 + ! ;
+: _get_base          @ ;
+: _set_base          ! ;
+: _get_div       1 + @ ;
+: _set_div       1 + ! ;
+: _get_old_base  2 + @ ;
+: _set_old_base  2 + ! ;
+: _get_old_div   3 + @ ;
+: _set_old_div   3 + ! ;
+: _get_remainder 4 + @ ;
+: _set_remainder 4 + ! ;
+: _base_changed?   dup _get_base swap _get_old_base <> ;
+: _reset_old_base  dup _get_base swap _set_old_base    ;
+: _div_changed?    dup _get_div  swap _get_old_div  <> ;
+: _reset_old_div   dup _get_div  swap _set_old_div     ;
 
-: gen_digit_expansion
-  # ( data_struct )
-  dup svpush      # ( ds )      ( ds )
-  _get_remainder  # ( rem )     ( ds )
-  0 svpick        # ( rem ds )  ( ds )
-  _get_base       # ( rem base ) ( ds )
-  *               # ( rem*base ) ( ds )
-  0 svpick        # ( rem*base ds )  ( ds )
-  _get_div        # ( rem*base div )  ( ds )
-  divmod          # ( quot new_rem )  ( ds )
-  svpop           # ( quot new_rem ds ) ( )
-  _set_remainder  # ( quot )
+: gen_digit_expansion { exp_struct }
+  # first check if the base or div have changed
+  # if so, we reset the remainder to 0
+  exp_struct _base_changed?
+    exp_struct _div_changed?
+  or if
+    exp_struct _reset_old_base
+    exp_struct _reset_old_div
+    1 exp_struct _set_remainder
+  endif
+  # now figure out the next generated digit
+  exp_struct _get_remainder
+    exp_struct _get_base
+  *
+    exp_struct _get_div
+  divmod
+    exp_struct _set_remainder
+  # now only the dividend is on the stack
 ;
 
 ######################

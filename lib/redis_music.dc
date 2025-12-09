@@ -17,7 +17,7 @@ var remainder 1 remainder !
 "start_timestamp"  const :START_TIMESTAMP
 "bpm"              const :BPM
 "beat_period"      const :BEAT_PERIOD
-"gt." make_channel_string
+"gt" make_channel_string
                    const :GATE
 # DSP example tempo stuff
 "drum_tempo"       const :DRUM_TEMPO
@@ -31,30 +31,30 @@ var remainder 1 remainder !
 "base_pitch"       const :BASE_PITCH
 "edo"              const :EDO
 "scale"            const :SCALE
-"md." make_channel_string
+"md" make_channel_string
                    const :MODE
-"tr." make_channel_string
+"tr" make_channel_string
                    const :TRANSPOSE
 # rhythm stuff
 "euclid_n"         const :EUCLID_N
 "euclid_d"         const :EUCLID_D
 "rhythm_type"      const :RHYTHM_TYPE
 # used for keeping a value within a certain range:
-"wr." make_channel_string
+"wr" make_channel_string
                    const :WRAP
 ###########################################################################
 # common for things like "gen_digit_expansion" and "digit_sum" algorithms #
 ###########################################################################
-"base."  make_channel_string
+"base"  make_channel_string
                    const :BASE
 # for "gen_digit_expansion" based algorithms:
-"div."   make_channel_string
+"div"   make_channel_string
                    const :DIV
 # for "digit_sum" fractal algorithms as well as gen_digit_expansion:
-"mul."   make_channel_string
+"mul"   make_channel_string
                    const :MUL
 # for chaos-based randomness:
-"chaos." make_channel_string
+"chaos" make_channel_string
                    const :CHAOS
 
 ##########################################
