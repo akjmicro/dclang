@@ -14,9 +14,9 @@
 ######################################
 # can be manually changed as desired #
 ######################################
-16   const SLOTS
-1362 const MIN_DELAY  # delay in samples at some SR
-2205 const MAX_DELAY
+8   const SLOTS
+1933 const MIN_DELAY  # delay in samples at some SR
+4170 const MAX_DELAY
 
 
 var phi_array 16 allot
