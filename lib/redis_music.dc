@@ -36,8 +36,10 @@ var remainder 1 remainder !
 "tr" make_channel_string
                    const :TRANSPOSE
 # rhythm stuff
-"euclid_n"         const :EUCLID_N
-"euclid_d"         const :EUCLID_D
+"eun" make_channel_string
+                   const :EUCLID_N
+"eud" make_channel_string
+                   const :EUCLID_D
 "rhythm_type"      const :RHYTHM_TYPE
 # used for keeping a value within a certain range:
 "wr" make_channel_string
@@ -103,30 +105,15 @@ var remainder 1 remainder !
   :LEAD_VOL redis_get tonum
 ;
 
-###############################################################
-# public API "duration" words to be used in calling code.     #
-# The idea is to just call on/off durations directly          #
-# and let the tempo and gate do the work in the background... #
-###############################################################
-
-: redis_music.get_on_gate
-  _get_duration
-    :GATE redis_get tonum
-  *
-;
-
-: redis_music.get_off_gate
-  _get_duration
-    1
-      :GATE redis_get tonum
-    -
-  *
-;
-
-###########################################################
-# Alternate timing API based on absolute wall clock (UTC) #
-# This helps avoid drift...                               #
-###########################################################
+#########################################################################
+# Timing API based on absolute wall clock (UTC). This helps avoid       #
+# drift... Code should start a clock for their midi channel via         #
+# `set_clock_start`, and call `get_on_gate` after a note_on event and   #
+# `get_off_gate` after a note_off event. All the details of timing are  #
+# handled for the user under-the-hood. `get_on_gate` can typically be   #
+# paired with a prior call to `rhythm_generator` which returns a length #
+# value and a gate value.                                               #
+#########################################################################
 
 var next_on_time
 var next_off_time
@@ -135,25 +122,25 @@ var next_off_time
   clock next_on_time !
 ;
 
-: _iterate_clock { length }
+: _iterate_clock { length gate }
     next_on_time @
       dup
         length _get_duration *
       +
     next_on_time !
       length _get_duration *
-        :GATE redis_get tonum
+        gate
       *
     +
   next_off_time !
 ;
 
-: redis_music.get_on_gate_abs { length }
-  length _iterate_clock
+: redis_music.get_on_gate { length gate }
+  length gate _iterate_clock
   next_off_time @ sleep_until
 ;
 
-: redis_music.get_off_gate_abs
+: redis_music.get_off_gate
   next_on_time @ sleep_until
 ;
 

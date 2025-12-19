@@ -7,16 +7,16 @@ redis_connect
 freadall drop const SLIDER_HTML fclose
 
 # string constants
-"base"  const :base
-"mul"   const :mul
-"wrap"  const :wrap
-"div"   const :div
-"chaos" const :chaos
-"mode"  const :mode
-"gate"  const :gate
+"base1"  const :base
+"mul1"   const :mul
+"wr1"    const :wrap
+"div1"   const :div
+"chaos1" const :chaos
+"md1"    const :mode
+"gt1"    const :gate
 # Euclidean rhythm
-"euclid_numerator"   const :euclid_numerator
-"euclid_denominator" const :euclid_denominator
+"eun1"   const :euclid_numerator
+"eud1"   const :euclid_denominator
 # OK status
 "<html><body>OK<br>\n</body></html>\n" const :OK
 # setup vars

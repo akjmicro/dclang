@@ -1,28 +1,6 @@
 "math.dc"        import
 "midi.dc"        import
 "linked_list.dc" import
-"string.dc"      import
-
-# Adding the ability to have multiple instances running with different
-# MIDI channels. Code will later subtract 1 to get 0-based indices.
-
-var midi_channel
-
-: populate_midi_channel
-  "MIDI_CHANNEL" envget dup 0 = if drop 1 else tonum endif midi_channel !
-;
-
-populate_midi_channel
-
-# END adding MIDI CHANNEL
-
-: make_channel_string { prefix }
-  32 mkbuf dup svpush
-  prefix str+
-  midi_channel @ tostr str+
-  drop svpop
-;
-
 "redis_music.dc" import
 
 var base_pitch  redis_music.get_base_pitch  base_pitch !
@@ -382,10 +360,14 @@ var prev_euclid_int
 
 "euclidean"                const :euclidean
 "string"                   const :string
+# Deal with rhythm string setup
 "rh"  make_channel_string  const :rhythm_string
-
 make_lgen_struct     _rhythm_lgen
 var _cur_rhythm_str  "" _cur_rhythm_str !
+# Deal with gate string setup
+"gt"  make_channel_string  const :gate_string
+make_lgen_struct     _gate_lgen
+var _cur_gate_str    "" _cur_gate_str   !
 
 : _do_rhythm_string
   :rhythm_string
@@ -393,6 +375,15 @@ var _cur_rhythm_str  "" _cur_rhythm_str !
       _rhythm_lgen
   _string_to_lgen
   dup 0 = if drop 1 endif
+;
+
+: _do_gate_string
+  :gate_string
+    _cur_gate_str
+      _gate_lgen
+  _string_to_lgen
+  dup 0 < if drop 0 endif
+  dup 1 > if drop 1 endif
 ;
 
 : rhythm_generator
@@ -405,6 +396,7 @@ var _cur_rhythm_str  "" _cur_rhythm_str !
   else
     1
   endif endif
+  _do_gate_string
 ;
 
 ###############

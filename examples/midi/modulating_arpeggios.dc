@@ -1,9 +1,10 @@
 "music.dc" import
 
-17 edo !
+var local_edo
+17 local_edo !
 
 : generate_interval
-  / log2 edo @ * round
+  / log2 local_edo @ * round
 ;
 
 9 8 generate_interval const STEP
@@ -73,20 +74,32 @@ var modulations_pointer
   arpeggio + @
 ;
 
-: main
+: _main
   block_sigint
-        _get_edo_note dup svpush 0
+      _get_edo_note dup svpush
+        midi_channel @ 1 -
   edo_degree_to_midi
-  redis_music.get_on_gate sleep
-        0 svpop 0
+  rhythm_generator redis_music.get_on_gate
+    0
+      svpop
+        midi_channel @ 1 -
   edo_degree_to_midi
-  redis_music.get_off_gate sleep
+  redis_music.get_off_gate
   unblock_sigint
   _advance_step
   _do_transposition
-  main
+  _main
 ;
 
+: main
+  "You are now entering an endless loop, hit CTRL-C to stop..." print cr
+  "Notice that you won't be able to stop until a note off event hits." print cr
+  "In this way, the notes end cleanly!" print cr
+  redis_music.set_clock_start
+  _main
+;
+
+synchronized_start
 main
 
-8192 0 0xE0 send_midi_reverse
+panic

@@ -1,5 +1,27 @@
+"string.dc" import
+
 "PM_IN"  const :PM_IN
 "PM_OUT" const :PM_OUT
+
+# Adding the ability to have multiple instances running with different
+# MIDI channels. Code will later subtract 1 to get 0-based indices.
+
+var midi_channel
+
+: populate_midi_channel
+  "MIDI_CHANNEL" envget dup 0 = if drop 1 else tonum endif midi_channel !
+;
+
+populate_midi_channel
+
+: make_channel_string { prefix }  # used by e.g. `redis_music.dc` and `music.dc` libs
+  32 mkbuf dup svpush
+  prefix str+
+  midi_channel @ tostr str+
+  drop svpop
+;
+
+# END adding MIDI CHANNEL
 
 # These will be used again (unused ATM) once MIDI read functionality
 # is re-implemented via `portmidi`
@@ -71,13 +93,22 @@ check_mididev
 
 # useful for when things go nuts!
 : panic
-        128 0 1
+  128 0 1
   for
-      0x80 i 0
+      0x80
+        midi_channel @ 1 -
+      +
+        i
+          0
     send_midi
-      0.01
-    sleep
+    0.01 sleep
   next
+  8192
+    0
+      0xE0
+        midi_channel @ 1 -
+      +
+  send_midi_reverse
 ;
 
 : _bend_to_MSB_LSB_bytes

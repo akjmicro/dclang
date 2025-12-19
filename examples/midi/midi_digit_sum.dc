@@ -16,7 +16,7 @@
     digit_sum_music dup svpush
       midi_channel @ 1 -
   edo_degree_to_midi
-  rhythm_generator redis_music.get_on_gate_abs
+  rhythm_generator redis_music.get_on_gate
   ############
   # note off #
   ############
@@ -24,7 +24,7 @@
     svpop
       midi_channel @ 1 -
   edo_degree_to_midi
-  redis_music.get_off_gate_abs
+  redis_music.get_off_gate
   unblock_sigint
   _main
 ;

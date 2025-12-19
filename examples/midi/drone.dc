@@ -48,8 +48,8 @@ var transpose_changed
   endif
   false vol_changed !
   false transpose_changed !
-  rhythm_generator redis_music.get_on_gate_abs
-  redis_music.get_off_gate_abs
+  rhythm_generator redis_music.get_on_gate
+  redis_music.get_off_gate
   unblock_sigint
   _main
 ;
