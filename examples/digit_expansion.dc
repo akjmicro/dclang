@@ -89,8 +89,8 @@ var four_digits 4 allot
 : create_digits_database
   # This will write-out a CSV. Can be imported into sqlite3, etc.
   "base|div|period|coverage" print cr
-  33 5 1 for
-    312 5 1 for
+  33 2 1 for
+    312 2 1 for
       j i load_digit_data
       j .. :PIPE print
       i .. :PIPE print
