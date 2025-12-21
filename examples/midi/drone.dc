@@ -1,24 +1,38 @@
 "music.dc" import
 
 "drone_vol" const :drone_vol
-var cur_drone_vol
+var cur_vol
+var cur_mode
 var cur_transpose
 var vol_changed
+var mode_changed
 var transpose_changed
 
 : _main
   block_sigint
   # check if drone volume changed
-  :drone_vol redis_get tonum 127 * round
+  :drone_vol keyval_get tonum_free 127 * round
   dup
-    cur_drone_vol @
+    cur_vol @
   <> if
-      cur_drone_vol
+      cur_vol
     !
     true vol_changed !
   else
     drop
     false vol_changed !
+  endif
+  # check if mode changed
+  get_mode
+  dup
+    cur_mode @
+  <> if
+      cur_mode
+    !
+    true mode_changed !
+  else
+    drop
+    false mode_changed !
   endif
   # check if transpose changed
   get_transpose
@@ -34,19 +48,16 @@ var transpose_changed
   endif
   #.s
   vol_changed @
-    transpose_changed @
-  or if
-    cur_drone_vol @
-      get_transpose
-        12
-      /
-        get_edo
-      *
-      round
+    mode_changed @
+      transpose_changed @
+  or or if
+    cur_vol @
+      0 data_player
         midi_channel @ 1 -
     edo_degree_to_midi
   endif
   false vol_changed !
+  false mode_changed !
   false transpose_changed !
   rhythm_generator get_on_gate
   get_off_gate
@@ -64,3 +75,5 @@ var transpose_changed
 
 synchronized_start
 main
+
+panic
