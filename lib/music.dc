@@ -339,7 +339,7 @@ var prev_euclid_int
 #######################################################################
 
 : _string_to_lgen { str_to_check cur_str lgen_struct }
-  str_to_check redis_get
+  str_to_check keyval_get
     dup
       cur_str @
     str= not

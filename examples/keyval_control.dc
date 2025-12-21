@@ -1,9 +1,7 @@
-"http_server.dc" import
-"redis.dc" import
+"http_server.dc"  import
+"music_keyval.dc" import
 
-redis_connect
-
-"redis_control.html" "r" fopen dup
+"keyval_control.html" "r" fopen dup
 freadall drop const SLIDER_HTML fclose
 
 # string constants
@@ -33,7 +31,7 @@ dummy keys_to_check - const LEN_KEYS
       2dup
     strfind
     if
-      dup h@ swap redis_set
+      dup h@ swap keyval_set
       drop
       exitfor
     else

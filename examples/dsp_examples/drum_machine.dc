@@ -41,19 +41,19 @@ var bass_drum
 : _init_drum_parts
   :op_hihat redis_get
   0 = if
-    "0x00020002" :op_hihat redis_set
+    "0x00020002" :op_hihat   keyval_set
   endif
   :cl_hihat redis_get
   0 = if
-    "0x41413513" :cl_hihat redis_set
+    "0x41413513" :cl_hihat   keyval_set
   endif
   :snare_drum redis_get
   0 = if
-    "0x0808080c" :snare_drum redis_set
+    "0x0808080c" :snare_drum keyval_set
   endif
   :bass_drum redis_get
   0 = if
-    "0x80818082" :bass_drum redis_set
+    "0x80818082" :bass_drum  keyval_set
   endif
 ;
 

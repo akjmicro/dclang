@@ -21,7 +21,8 @@ populate_midi_channel
   drop svpop
 ;
 
-# END adding MIDI CHANNEL
+# END adding MIDI CHANNEL strings
+
 
 # These will be used again (unused ATM) once MIDI read functionality
 # is re-implemented via `portmidi`

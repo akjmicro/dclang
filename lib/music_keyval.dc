@@ -3,24 +3,46 @@
 # into your code. Instead use `"music.dc" import`                     #
 #######################################################################
 
+"string.dc"      import
 "clock_sleep.dc" import
 
 # for file-based reading
 "r"          const :read
+"w"          const :write
 "/tmp/keys/" const :tmpdir
-var tmpbuf
-32 mkbuf tmpbuf !
+"\n"         const :newline
+var getbuf
+32 mkbuf getbuf !
+var setbuf
+32 mkbuf setbuf !
+var setvalbuf
+128 mkbuf setvalbuf !
 
-: _file_get { key }
-  tmpbuf @ 0 32 memset
+: keyval_get { key }
+  getbuf @ 0 32 memset
   :tmpdir str+ key str+ drop  # done building path string
-  tmpbuf @ :read fopen
+  getbuf @ :read fopen
   dup -1 = if
     drop "0" return
   endif
   dup freadall drop
   # cleanup
   swap fclose
+  key free
+;
+
+: keyval_set { val key }
+  setbuf @ 0 32 memset
+  :tmpdir str+ key str+ drop  # done building path string
+  setvalbuf @ 0 128 memset
+  val str+ newline str+ drop  # done building val string
+    setvalbuf @
+      dup strlen
+        setbuf @ :write fopen dup svpush
+    fwrite
+  drop
+  # cleanup
+  svpop fclose
   key free
 ;
 
@@ -83,7 +105,7 @@ var remainder 1 remainder !
 ##########################################
 
 : _get_duration
-  60 :BPM _file_get tonum_free /
+  60 :BPM keyval_get tonum_free /
 ;
 
 #############################################
@@ -92,7 +114,7 @@ var remainder 1 remainder !
 
 : synchronized_start
     _get_duration
-      :BEAT_PERIOD _file_get tonum_free
+      :BEAT_PERIOD keyval_get tonum_free
     *
       dup
         clock
@@ -105,7 +127,7 @@ var remainder 1 remainder !
 
 # This one allows for various instruments to drift
 : get_x_tempo { which_str }
-  which_str _file_get tonum_free 60 /
+  which_str keyval_get tonum_free 60 /
 ;
 
 ##################
@@ -113,15 +135,15 @@ var remainder 1 remainder !
 ##################
 
 : get_drum_vol
-  :DRUM_VOL _file_get tonum_free
+  :DRUM_VOL keyval_get tonum_free
 ;
 
 : get_bass_vol
-  :BASS_VOL _file_get tonum_free
+  :BASS_VOL keyval_get tonum_free
 ;
 
 : get_lead_vol
-  :LEAD_VOL _file_get tonum_free
+  :LEAD_VOL keyval_get tonum_free
 ;
 
 #########################################################################
@@ -168,11 +190,11 @@ var next_off_time
 ########################
 
 : get_mode
-  :MODE _file_get tonum_free round
+  :MODE keyval_get tonum_free round
 ;
 
 : get_transpose
-  :TRANSPOSE _file_get tonum_free round
+  :TRANSPOSE keyval_get tonum_free round
 ;
 
 #################
@@ -180,7 +202,7 @@ var next_off_time
 #################
 
 : get_base_pitch
-  :BASE_PITCH _file_get
+  :BASE_PITCH keyval_get
   dup 0 =
   if
     drop
@@ -191,7 +213,7 @@ var next_off_time
 
 # TODO: make EDOs dynamic
 : get_edo
-  :EDO _file_get
+  :EDO keyval_get
   dup 0 =
   if
     drop
@@ -201,11 +223,11 @@ var next_off_time
 ;
 
 : get_scale
-  :SCALE _file_get "\n" "" strreplace
+  :SCALE keyval_get "\n" "" strreplace
 ;
 
 : get_rhythm_type
-  :RHYTHM_TYPE _file_get "\n" "" strreplace
+  :RHYTHM_TYPE keyval_get "\n" "" strreplace
 ;
 
 #############################################################
@@ -219,35 +241,35 @@ var next_off_time
 : set_remainder remainder ! ;
 
 : get_base
-  :BASE _file_get tonum_free round
+  :BASE keyval_get tonum_free round
   dup 2 < if drop 2 endif
 ;
 
 : get_div
-  :DIV _file_get tonum_free round
+  :DIV keyval_get tonum_free round
   dup 0 = if drop 1 endif
 ;
 
 : get_mul
-  :MUL _file_get tonum_free round
+  :MUL keyval_get tonum_free round
   dup 1 < if drop 1 endif
 ;
 
 : get_chaos
-  :CHAOS _file_get tonum_free
+  :CHAOS keyval_get tonum_free
 ;
 
 : get_wrap
-  :WRAP _file_get tonum_free round
+  :WRAP keyval_get tonum_free round
 ;
 
 : get_euclid_n
-  :EUCLID_N _file_get tonum_free
+  :EUCLID_N keyval_get tonum_free
   dup 1 < if drop 1 endif
 ;
 
 : get_euclid_d
-  :EUCLID_D _file_get tonum_free
+  :EUCLID_D keyval_get tonum_free
   dup 1 < if drop 1 endif
 ;
 
@@ -255,7 +277,7 @@ var next_off_time
 # Generalized update from redis word #
 ######################################
 : update_from_redis { redis_key varname cast_to_num? }
-    redis_key _file_get
+    redis_key keyval_get
       cast_to_num?
     if
       tonum_free
