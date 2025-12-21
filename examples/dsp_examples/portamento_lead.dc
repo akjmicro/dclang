@@ -11,11 +11,11 @@
 "lead_rev_cf"   const :LEAD_REV_CF
 "lead_rev_fb"   const :LEAD_REV_FB
 
-var tempo          :LEAD_TEMPO redis_music.get_x_tempo          tempo !
+var tempo          :LEAD_TEMPO get_x_tempo          tempo !
 var gatevar              :GATE redis_get tonum                gatevar !
-var bass_pitch                 redis_music.get_base_pitch  bass_pitch !
+var bass_pitch                 get_base_pitch  bass_pitch !
 var pitch                      bass_pitch @  4 *                pitch !
-var lead_vol                   redis_music.get_lead_vol      lead_vol !
+var lead_vol                   get_lead_vol      lead_vol !
 var drone_vol       :DRONE_VOL redis_get tonum              drone_vol !
 var lead_rev_vol :LEAD_REV_VOL redis_get tonum           lead_rev_vol !
 var lead_rev_cf   :LEAD_REV_CF redis_get tonum            lead_rev_cf !
@@ -64,10 +64,10 @@ make_reverb_struct          my_reverb
     curtrig @ lasttrig @ >  # rising edge detection
     if
       # has tempo changed?
-      :LEAD_TEMPO redis_music.get_x_tempo dup tempo @ <>
+      :LEAD_TEMPO get_x_tempo dup tempo @ <>
       if tempo ! else drop endif
       # has bass pitch changed?
-      redis_music.get_base_pitch dup base_pitch @ <>
+      get_base_pitch dup base_pitch @ <>
       if bass_pitch ! else drop endif
       # possibly alter rhythm
       trigcount @ current_euclid @ % 0 =

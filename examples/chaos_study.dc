@@ -78,13 +78,13 @@ var drawchars
 ;
 
 : _draw_chaos_infinite
-  x @ 1 + redis_music.get_chaos * 1 %
+  x @ 1 + get_chaos * 1 %
   dup x !
-  redis_music.get_wrap
+  get_wrap
   *
   floor
   _draw_row
-  redis_music.get_on_gate sleep
+  get_on_gate sleep
   _draw_chaos_infinite
 ;
 

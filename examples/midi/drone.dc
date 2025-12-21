@@ -21,7 +21,7 @@ var transpose_changed
     false vol_changed !
   endif
   # check if transpose changed
-  redis_music.get_transpose
+  get_transpose
   dup
     cur_transpose @
   <> if
@@ -37,10 +37,10 @@ var transpose_changed
     transpose_changed @
   or if
     cur_drone_vol @
-      redis_music.get_transpose
+      get_transpose
         12
       /
-        redis_music.get_edo
+        get_edo
       *
       round
         midi_channel @ 1 -
@@ -48,8 +48,8 @@ var transpose_changed
   endif
   false vol_changed !
   false transpose_changed !
-  rhythm_generator redis_music.get_on_gate
-  redis_music.get_off_gate
+  rhythm_generator get_on_gate
+  get_off_gate
   unblock_sigint
   _main
 ;
@@ -58,7 +58,7 @@ var transpose_changed
   "You are now entering an endless loop, hit CTRL-C to stop..." print cr
   "Notice that you won't be able to stop until a note off event hits." print cr
   "In this way, the notes end cleanly!" print cr
-  redis_music.set_clock_start
+  set_clock_start
   _main
 ;
 

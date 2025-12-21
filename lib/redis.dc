@@ -28,13 +28,6 @@ REDIS_BUFSIZE mkbuf const REDIS_BUFFER
 var token_save
 var redis_socket -1 redis_socket !
 
-# for file-based reading
-var use_file  1 use_file !
-"r"          const :read
-"/tmp/keys/" const :tmpdir
-var tmpbuf
-32 mkbuf tmpbuf !
-
 # various redis function API string 'headers'
 "\r\n" const :RN
 "\r\n$" const :RN$
@@ -143,21 +136,12 @@ var tmpbuf
   drop
 ;
 
-
-: _file_get { key }
-  tmpbuf @ 0 32 memset
-  :tmpdir str+ key str+ drop  # done building path string
-  tmpbuf @ :read fopen
-  dup -1 = if
-    drop "0" return
+: redis_get # ( key_str )
+  depth 1 <
+  if
+    "redis_get needs <key_str> on the stack!" print cr
+    return
   endif
-  dup freadall drop
-  # cleanup
-  swap fclose
-  key free
-;
-
-: _redis_get
   svpush
   _zero_redis_buffer
   :REDIS_GET_HEADER str+
@@ -171,19 +155,6 @@ var tmpbuf
   # second line.
   _redis_write_read :RN token_save strtok drop
   null :RN token_save strtok
-;
-
-: redis_get # ( key_str )
-  depth 1 <
-  if
-    "redis_get needs <key_str> on the stack!" print cr
-    return
-  endif
-  use_file @ if
-    _file_get
-  else
-    _redis_get
-  endif
 ;
 
 : redis_keys

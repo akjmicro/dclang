@@ -79,12 +79,12 @@ var modulations_pointer
       _get_edo_note dup svpush
         midi_channel @ 1 -
   edo_degree_to_midi
-  rhythm_generator redis_music.get_on_gate
+  rhythm_generator get_on_gate
     0
       svpop
         midi_channel @ 1 -
   edo_degree_to_midi
-  redis_music.get_off_gate
+  get_off_gate
   unblock_sigint
   _advance_step
   _do_transposition
@@ -95,7 +95,7 @@ var modulations_pointer
   "You are now entering an endless loop, hit CTRL-C to stop..." print cr
   "Notice that you won't be able to stop until a note off event hits." print cr
   "In this way, the notes end cleanly!" print cr
-  redis_music.set_clock_start
+  set_clock_start
   _main
 ;
 

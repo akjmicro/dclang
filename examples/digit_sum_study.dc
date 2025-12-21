@@ -125,13 +125,13 @@ var drawchars
 ;
 
 : _draw_sample_infinite
-  redis_music.get_mul x @ * redis_music.get_base digit_sum
-  redis_music.get_wrap absmod
-    redis_music.get_mode
+  get_mul x @ * get_base digit_sum
+  get_wrap absmod
+    get_mode
   +
   14 absmod
   _draw_row
-  redis_music.get_on_gate sleep
+  get_on_gate sleep
   x dup @ 1 + swap !
   _draw_sample_infinite
 ;

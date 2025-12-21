@@ -15,12 +15,12 @@ var seq_bit       top_bit @ seq_bit !
 #################
 # Set the tempo #
 #################
-var tempo  :DRUM_TEMPO redis_music.get_x_tempo  tempo !
+var tempo  :DRUM_TEMPO get_x_tempo  tempo !
 
 ###############
 # Drum Volume #
 ###############
-var drum_vol redis_music.get_drum_vol  drum_vol !
+var drum_vol get_drum_vol  drum_vol !
 
 #####################################
 # String constants for redis lookup #
@@ -137,13 +137,13 @@ _query_drum_parts
   inf times
     tempo @ metro    curtrig !
     curtrig @ lasttrig @ > if
-      :DRUM_TEMPO redis_music.get_x_tempo dup tempo @ <>
+      :DRUM_TEMPO get_x_tempo dup tempo @ <>
       if
         tempo !
       else
         drop
       endif
-      redis_music.get_drum_vol dup drum_vol @ <>
+      get_drum_vol dup drum_vol @ <>
       if
         drum_vol !
       else

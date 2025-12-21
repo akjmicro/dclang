@@ -1,10 +1,10 @@
-"math.dc"        import
-"midi.dc"        import
-"linked_list.dc" import
-"redis_music.dc" import
+"math.dc"         import
+"midi.dc"         import
+"linked_list.dc"  import
+"music_keyval.dc" import
 
-var base_pitch  redis_music.get_base_pitch  base_pitch !
-var edo         redis_music.get_edo                edo !
+var base_pitch  get_base_pitch  base_pitch !
+var edo         get_edo                edo !
 
 ##########################################################################
 # Came across a situation with the Behringer Proton where it wasn't by   #
@@ -210,7 +210,7 @@ var cur_scl_str  "" cur_scl_str !
 "equable"    const :equable
 
 : set_scale
-  redis_music.get_scale
+  get_scale
     dup
       cur_scl_str @
     str= if
@@ -251,7 +251,7 @@ set_scale
   # Middle-C is assumed to be "0" in all EDOs, so use negative numbers to go
   # below middle-C.
   svpush                      # sequester the channel number away
-  redis_music.get_edo / 12 *  # scale to 12-EDO with fractional remainder
+  get_edo / 12 *  # scale to 12-EDO with fractional remainder
   60.5 +                      # shift to middle-C in MIDI, also overshoot fractional
   dup floor swap              # part on purpose so we can fetch the floor closest
                               # to the proper midi number; set aside by swap
@@ -284,7 +284,7 @@ set_scale
 : edo_degree_to_hz { degree }
   2
     degree
-      redis_music.get_edo
+      get_edo
     /
   pow
   base_pitch @ *
@@ -298,8 +298,8 @@ var cur_euclid_count
 var prev_euclid_int
 
 : euclidean_rhythm
-    redis_music.get_euclid_n
-      redis_music.get_euclid_d
+    get_euclid_n
+      get_euclid_d
     /
       cur_euclid_count @
     *
@@ -315,7 +315,7 @@ var prev_euclid_int
       dup
       1 <
         over
-        redis_music.get_euclid_n >
+        get_euclid_n >
       or
       if
         drop
@@ -387,7 +387,7 @@ var _cur_gate_str    "" _cur_gate_str   !
 ;
 
 : rhythm_generator
-  redis_music.get_rhythm_type
+  get_rhythm_type
   dup :euclidean str= if
     drop euclidean_rhythm
   else
@@ -417,34 +417,34 @@ var _cur_gate_str    "" _cur_gate_str   !
   # compadre `edo_degree_to_midi` (for midi work).     #
   ######################################################
     set_scale
-      redis_music.get_wrap
+      get_wrap
         dup 0 = if drop
         else
     absmod
         endif
-      redis_music.get_mode
+      get_mode
     +
       scale_size @ @
     absmod
       scale @
     +
     @          # value in log2 (octaves) now on stack
-      redis_music.get_transpose
+      get_transpose
         12     # transposition should be in terms of 12-edo standard
       /
       # below are extra steps to round the 12-edo transpose in terms of the current EDO:
-      redis_music.get_edo swap over * round swap /
+      get_edo swap over * round swap /
     +          # value in octaves, now offset by transposition in octaves (which can be a float)
-      redis_music.get_edo
+      get_edo
     *
     round      # integer EDO value now on stack, ready for `edo_degree_to_[midi|hz]`
 ;
 
 : fraction_music { expansion_struct }
-  redis_music.get_base expansion_struct _set_base
-  redis_music.get_div  expansion_struct _set_div
+  get_base expansion_struct _set_base
+  get_div  expansion_struct _set_div
     expansion_struct gen_digit_expansion
-      redis_music.get_mul
+      get_mul
     *
   data_player
 ;
@@ -453,9 +453,9 @@ var digit_sum_counter
 
 : digit_sum_music
   digit_sum_counter @
-    redis_music.get_mul
+    get_mul
   *
-    redis_music.get_base
+    get_base
   digit_sum
   data_player
   # increment the counter

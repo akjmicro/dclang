@@ -6,9 +6,9 @@ var my_ampport
 var my_pitchport
 var my_fbport
 
-var tempo  :BASS_TEMPO redis_music.get_x_tempo     tempo !
-var myvol              redis_music.get_bass_vol    myvol !
-var pitch              redis_music.get_base_pitch  pitch !
+var tempo  :BASS_TEMPO get_x_tempo     tempo !
+var myvol              get_bass_vol    myvol !
+var pitch              get_base_pitch  pitch !
 var curtrig
 var lasttrig
 var sl
@@ -25,13 +25,13 @@ create my_iter 16 , 0 ,
     curtrig @ lasttrig @ >
     if
       # check if tempo changed
-      :BASS_TEMPO redis_music.get_x_tempo  dup tempo @ <>
+      :BASS_TEMPO get_x_tempo  dup tempo @ <>
       if tempo ! else drop endif
       # check if vol changed
-      redis_music.get_bass_vol dup myvol @ <>
+      get_bass_vol dup myvol @ <>
       if myvol ! else drop endif
       # simple pitch sequence using `iterator`
-        redis_music.get_base_pitch
+        get_base_pitch
           my_iter iterator
         *
       pitch !

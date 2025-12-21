@@ -19,7 +19,7 @@ make_digit_expansion_struct  gen_struct
     gen_struct fraction_music dup svpush
       midi_channel @ 1 -
   edo_degree_to_midi
-  rhythm_generator redis_music.get_on_gate
+  rhythm_generator get_on_gate
   ############
   # note off #
   ############
@@ -27,7 +27,7 @@ make_digit_expansion_struct  gen_struct
     svpop
       midi_channel @ 1 -
   edo_degree_to_midi
-  redis_music.get_off_gate
+  get_off_gate
   unblock_sigint
   _main
 ;
@@ -36,7 +36,7 @@ make_digit_expansion_struct  gen_struct
   "You are now entering an endless loop, hit CTRL-C to stop..." print cr
   "Notice that you won't be able to stop until a note off event hits." print cr
   "In this way, the notes end cleanly!" print cr
-  redis_music.set_clock_start
+  set_clock_start
   _main
 ;
 

@@ -14,7 +14,7 @@ var midi_channel
 
 populate_midi_channel
 
-: make_channel_string { prefix }  # used by e.g. `redis_music.dc` and `music.dc` libs
+: make_channel_string { prefix }  # used by e.g. `music_keyval.dc` and `music.dc` libs
   32 mkbuf dup svpush
   prefix str+
   midi_channel @ tostr str+
