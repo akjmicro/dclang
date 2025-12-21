@@ -2416,10 +2416,11 @@ void dclang_execute() {
             {
                 printf("The file named %s doesn't appear to exist, " \
                        "or cannot be accessed.\n", path);
-                return;
+                push((DCLANG_INT) -1);
+            } else {
+                file = fopen(path, mode);
+                push((DCLANG_PTR)file);
             }
-            file = fopen(path, mode);
-            push((DCLANG_PTR)file);
             NEXT;
         OP_FILEMEMOPEN:
             if (data_stack_ptr < 3)
@@ -3521,6 +3522,7 @@ void _repl() {
         }
         // Ok, finaly 'compile' the token, or interpret it on-the-fly
         compile_or_interpret(token);
+        dclang_free(token);
     }
     compile_or_interpret(0);
 }

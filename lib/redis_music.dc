@@ -6,6 +6,10 @@
 "redis.dc" import
 "clock_sleep.dc" import
 
+# grab a string, turn it into a number,
+# and free up the string memory
+: tonum_free dup tonum swap free ;
+
 # make the redis connection
 redis_connect
 
@@ -64,7 +68,7 @@ var remainder 1 remainder !
 ##########################################
 
 : _get_duration
-  60 :BPM redis_get tonum /
+  60 :BPM redis_get tonum_free /
 ;
 
 #############################################
@@ -73,7 +77,7 @@ var remainder 1 remainder !
 
 : synchronized_start
     _get_duration
-      :BEAT_PERIOD redis_get tonum
+      :BEAT_PERIOD redis_get tonum_free
     *
       dup
         clock
@@ -86,7 +90,7 @@ var remainder 1 remainder !
 
 # This one allows for various instruments to drift
 : redis_music.get_x_tempo { which_str }
-  which_str redis_get tonum 60 /
+  which_str redis_get tonum_free 60 /
 ;
 
 ##################
@@ -94,15 +98,15 @@ var remainder 1 remainder !
 ##################
 
 : redis_music.get_drum_vol
-  :DRUM_VOL redis_get tonum
+  :DRUM_VOL redis_get tonum_free
 ;
 
 : redis_music.get_bass_vol
-  :BASS_VOL redis_get tonum
+  :BASS_VOL redis_get tonum_free
 ;
 
 : redis_music.get_lead_vol
-  :LEAD_VOL redis_get tonum
+  :LEAD_VOL redis_get tonum_free
 ;
 
 #########################################################################
@@ -149,11 +153,11 @@ var next_off_time
 ########################
 
 : redis_music.get_mode
-  :MODE redis_get tonum round
+  :MODE redis_get tonum_free round
 ;
 
 : redis_music.get_transpose
-  :TRANSPOSE redis_get tonum round
+  :TRANSPOSE redis_get tonum_free round
 ;
 
 #################
@@ -167,7 +171,7 @@ var next_off_time
     drop
     "261.625"
   endif
-  tonum
+  tonum_free
 ;
 
 # TODO: make EDOs dynamic
@@ -178,15 +182,15 @@ var next_off_time
     drop
     "31"
   endif
-  tonum
+  tonum_free
 ;
 
 : redis_music.get_scale
-  :SCALE redis_get
+  :SCALE redis_get "\n" "" strreplace
 ;
 
 : redis_music.get_rhythm_type
-  :RHYTHM_TYPE redis_get
+  :RHYTHM_TYPE redis_get "\n" "" strreplace
 ;
 
 #############################################################
@@ -200,35 +204,35 @@ var next_off_time
 : set_remainder remainder ! ;
 
 : redis_music.get_base
-  :BASE redis_get tonum round
+  :BASE redis_get tonum_free round
   dup 2 < if drop 2 endif
 ;
 
 : redis_music.get_div
-  :DIV redis_get tonum round
+  :DIV redis_get tonum_free round
   dup 0 = if drop 1 endif
 ;
 
 : redis_music.get_mul
-  :MUL redis_get tonum round
+  :MUL redis_get tonum_free round
   dup 1 < if drop 1 endif
 ;
 
 : redis_music.get_chaos
-  :CHAOS redis_get tonum
+  :CHAOS redis_get tonum_free
 ;
 
 : redis_music.get_wrap
-  :WRAP redis_get tonum round
+  :WRAP redis_get tonum_free round
 ;
 
 : redis_music.get_euclid_n
-  :EUCLID_N redis_get tonum
+  :EUCLID_N redis_get tonum_free
   dup 1 < if drop 1 endif
 ;
 
 : redis_music.get_euclid_d
-  :EUCLID_D redis_get tonum
+  :EUCLID_D redis_get tonum_free
   dup 1 < if drop 1 endif
 ;
 
@@ -239,7 +243,7 @@ var next_off_time
     redis_key redis_get
       cast_to_num?
     if
-      tonum
+      tonum_free
     endif
     dup varname @ <>
   if varname ! else drop endif

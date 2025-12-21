@@ -84,7 +84,7 @@
 
 : gen_digit_expansion { exp_struct }
   # first check if the base or div have changed
-  # if so, we reset the remainder to 0
+  # if so, we reset the remainder to 1
   exp_struct _base_changed?
     exp_struct _div_changed?
   or if
