@@ -3520,9 +3520,9 @@ void _repl() {
             def_mode = 0;
             continue; // goto top of loop
         }
-        // Ok, finaly 'compile' the token, or interpret it on-the-fly
+        // Ok, finally 'compile' the token, or interpret it on-the-fly
         compile_or_interpret(token);
-        dclang_free(token);
+        dclang_free(token);  // save memory!
     }
     compile_or_interpret(0);
 }
