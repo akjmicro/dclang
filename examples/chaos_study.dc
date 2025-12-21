@@ -84,11 +84,13 @@ var drawchars
   *
   floor
   _draw_row
-  get_on_gate sleep
+  1 0.99 get_on_gate
+  get_off_gate
   _draw_chaos_infinite
 ;
 
 : draw_chaos_infinite
+  set_clock_start
   0 x !
   _draw_chaos_infinite
 ;

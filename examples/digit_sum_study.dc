@@ -131,8 +131,9 @@ var drawchars
   +
   14 absmod
   _draw_row
-  get_on_gate sleep
+  1 0.99 get_on_gate
   x dup @ 1 + swap !
+  get_off_gate
   _draw_sample_infinite
 ;
 
@@ -181,6 +182,7 @@ var drawchars
 ;
 
 : draw_sample_infinite
+  set_clock_start
   0 x !
   _clear_figures
   _draw_sample_infinite

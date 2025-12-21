@@ -35,7 +35,7 @@ var setvalbuf
   setbuf @ 0 32 memset
   :tmpdir str+ key str+ drop  # done building path string
   setvalbuf @ 0 128 memset
-  val str+ newline str+ drop  # done building val string
+  val str+ :newline str+ drop  # done building val string
     setvalbuf @
       dup strlen
         setbuf @ :write fopen dup svpush
