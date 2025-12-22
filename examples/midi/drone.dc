@@ -10,6 +10,21 @@ var transpose_changed
 
 : _main
   block_sigint
+  #.s
+  vol_changed @
+    mode_changed @
+      transpose_changed @
+  or or if
+    cur_vol @
+      0 data_player
+        midi_channel @ 1 -
+    edo_degree_to_midi
+  endif
+  false vol_changed !
+  false mode_changed !
+  false transpose_changed !
+  rhythm_generator get_on_gate
+
   # check if drone volume changed
   :drone_vol keyval_get tonum_free 127 * round
   dup
@@ -46,20 +61,7 @@ var transpose_changed
     drop
     false transpose_changed !
   endif
-  #.s
-  vol_changed @
-    mode_changed @
-      transpose_changed @
-  or or if
-    cur_vol @
-      0 data_player
-        midi_channel @ 1 -
-    edo_degree_to_midi
-  endif
-  false vol_changed !
-  false mode_changed !
-  false transpose_changed !
-  rhythm_generator get_on_gate
+
   get_off_gate
   unblock_sigint
   _main
