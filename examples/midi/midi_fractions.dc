@@ -1,10 +1,14 @@
 # This illustrates using decimal expansions of a fraction division in any base
 # being used to make music via MIDI
 #
-# First, follow the more general MIDI/Redis setup instructions in this directory's README.md
+# First, follow the more general MIDI setup instructions in this
+# directory's README.md
 #
 # Shell command should be:
 #   PM_OUT=<some#> dclang midi_fractions.dc
+# If you desired midi channel isn't 1 (default), set it via:
+#
+# PM_OUT=<some#> MIDI_CHANNEL=<some#> dclang midi_fractions.dc
 
 "music.dc" import
 

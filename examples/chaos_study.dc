@@ -59,9 +59,9 @@ var wrap
   next
 ;
 
-######################################################
-# redis-value driven 'animation' of a chaos equation #
-######################################################
+#################################################
+# keyval driven 'animation' of a chaos equation #
+#################################################
 var drawchars
 "0123456789abcdefghijklmnopqrstuvwxyz" drawchars !
 

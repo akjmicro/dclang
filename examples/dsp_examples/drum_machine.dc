@@ -22,9 +22,9 @@ var tempo  :DRUM_TEMPO get_x_tempo  tempo !
 ###############
 var drum_vol get_drum_vol  drum_vol !
 
-#####################################
-# String constants for redis lookup #
-#####################################
+###################################
+# String constants for key lookup #
+###################################
 "op_hihat"   const   :op_hihat
 "cl_hihat"   const   :cl_hihat
 "snare_drum" const :snare_drum
@@ -39,19 +39,19 @@ var snare_drum
 var bass_drum
 
 : _init_drum_parts
-  :op_hihat redis_get
+  :op_hihat keyval_get
   0 = if
     "0x00020002" :op_hihat   keyval_set
   endif
-  :cl_hihat redis_get
+  :cl_hihat keyval_get
   0 = if
     "0x41413513" :cl_hihat   keyval_set
   endif
-  :snare_drum redis_get
+  :snare_drum keyval_get
   0 = if
     "0x0808080c" :snare_drum keyval_set
   endif
-  :bass_drum redis_get
+  :bass_drum keyval_get
   0 = if
     "0x80818082" :bass_drum  keyval_set
   endif
@@ -88,14 +88,14 @@ var bass_drum_port
 make_hc_filter  cl_hihat_flt
 make_hc_filter  op_hihat_flt
 
-########################################################
-# Every sequencer cycle, check redis for a new pattern #
-########################################################
+######################################################
+# Every sequencer cycle, check key for a new pattern #
+######################################################
 : _query_drum_parts
-  :op_hihat   redis_get tonum    op_hihat !
-  :cl_hihat   redis_get tonum    cl_hihat !
-  :snare_drum redis_get tonum  snare_drum !
-  :bass_drum  redis_get tonum   bass_drum !
+  :op_hihat   keyval_get tonum    op_hihat !
+  :cl_hihat   keyval_get tonum    cl_hihat !
+  :snare_drum keyval_get tonum  snare_drum !
+  :bass_drum  keyval_get tonum   bass_drum !
 ;
 
 _query_drum_parts

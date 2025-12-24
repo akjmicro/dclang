@@ -242,7 +242,7 @@ var next_off_time
 
 : get_base
   :BASE keyval_get tonum_free round
-  dup 2 < if drop 2 endif
+  dup 0 < if drop 0 endif
 ;
 
 : get_div
@@ -273,11 +273,11 @@ var next_off_time
   dup 1 < if drop 1 endif
 ;
 
-######################################
-# Generalized update from redis word #
-######################################
-: update_from_redis { redis_key varname cast_to_num? }
-    redis_key keyval_get
+###########################################
+# Generalized update from stored key word #
+###########################################
+: update_from_key { key varname cast_to_num? }
+    key keyval_get
       cast_to_num?
     if
       tonum_free

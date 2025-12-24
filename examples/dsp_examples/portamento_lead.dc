@@ -12,14 +12,14 @@
 "lead_rev_fb"   const :LEAD_REV_FB
 
 var tempo          :LEAD_TEMPO get_x_tempo          tempo !
-var gatevar              :GATE redis_get tonum                gatevar !
+var gatevar              :GATE keyval_get tonum                gatevar !
 var bass_pitch                 get_base_pitch  bass_pitch !
 var pitch                      bass_pitch @  4 *                pitch !
 var lead_vol                   get_lead_vol      lead_vol !
-var drone_vol       :DRONE_VOL redis_get tonum              drone_vol !
-var lead_rev_vol :LEAD_REV_VOL redis_get tonum           lead_rev_vol !
-var lead_rev_cf   :LEAD_REV_CF redis_get tonum            lead_rev_cf !
-var lead_rev_fb   :LEAD_REV_FB redis_get tonum            lead_rev_fb !
+var drone_vol       :DRONE_VOL keyval_get tonum              drone_vol !
+var lead_rev_vol :LEAD_REV_VOL keyval_get tonum           lead_rev_vol !
+var lead_rev_cf   :LEAD_REV_CF keyval_get tonum            lead_rev_cf !
+var lead_rev_fb   :LEAD_REV_FB keyval_get tonum            lead_rev_fb !
 
 var curtrig
 var lasttrig
@@ -47,15 +47,15 @@ make_reverb_struct          my_reverb
     t 256 % 0 =
     if
       # has lead vol changed?
-      :LEAD_VOL     lead_vol     true  update_from_redis
+      :LEAD_VOL     lead_vol     true  update_from_key
       # has drone vol changed?
-      :DRONE_VOL    drone_vol    true  update_from_redis
+      :DRONE_VOL    drone_vol    true  update_from_key
       # has reverb stuff changed?
-      :LEAD_REV_VOL lead_rev_vol true  update_from_redis
-      :LEAD_REV_CF  lead_rev_cf  true  update_from_redis
-      :LEAD_REV_FB  lead_rev_fb  true  update_from_redis
+      :LEAD_REV_VOL lead_rev_vol true  update_from_key
+      :LEAD_REV_CF  lead_rev_cf  true  update_from_key
+      :LEAD_REV_FB  lead_rev_fb  true  update_from_key
       # has the gate value changed?
-      :GATE gatevar true update_from_redis
+      :GATE gatevar true update_from_key
     endif
     ############################
     # Our main metronome pulse #
