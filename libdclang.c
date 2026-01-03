@@ -26,7 +26,21 @@ void revertinput() {
 ////////////////////////////
 // Dealing with importing //
 ////////////////////////////
+char *imports[128];
+char **import_pnt;
 DCLANG_LONG dclang_import(char *infilestr) {
+    // check if we've imported already:
+    import_pnt = imports;
+    while (*import_pnt != NULL) {
+        if (strcmp(infilestr, *import_pnt) == 0) {
+            return 0;
+        } else {
+            import_pnt++;
+        }
+    }
+    // we now know it's a new import, register it
+    *import_pnt = infilestr;
+    // continue with the rest of import process
     DCLANG_INT saved_live_repl = live_repl;
     live_repl = 0;
     char *prefix = getenv("DCLANG_LIBS");
@@ -437,7 +451,7 @@ void dclang_execute() {
                  printf("pick -- stack underflow!\n");
                  return;
             }
-            DCLANG_PTR pick_idx = (DCLANG_PTR) POP;
+            DCLANG_PTR pick_idx = (DCLANG_PTR)POP;
             if (data_stack_ptr < (pick_idx + 1)) {
                 printf("pick -- stack not deep enough!\n");
                 return;
@@ -518,7 +532,7 @@ void dclang_execute() {
                  printf("svpick -- stack underflow!\n");
                  return;
             }
-            DCLANG_PTR svpick_idx = (DCLANG_PTR) POP;
+            DCLANG_PTR svpick_idx = (DCLANG_PTR)POP;
             if (save_data_stack_ptr < (svpick_idx + 1)) {
                 printf("svpick -- stack not deep enough!\n");
                 return;
@@ -559,8 +573,8 @@ void dclang_execute() {
                 return;
             }
             // right-justified for pretty printing!
-            precision = (DCLANG_LONG) POP;
-            width = (DCLANG_LONG) POP;
+            precision = (DCLANG_LONG)POP;
+            width = (DCLANG_LONG)POP;
             fprintf(ofp, "%*.*f ", width, precision, POP);
             fflush(ofp);
             NEXT;
@@ -570,8 +584,8 @@ void dclang_execute() {
                 printf("Stack underflow! '.pz' needs: value, width, precision on the stack\n");
                 return;
             }
-            precision = (DCLANG_LONG) POP;
-            width = (DCLANG_LONG) POP;
+            precision = (DCLANG_LONG)POP;
+            width = (DCLANG_LONG)POP;
             fprintf(ofp, "%0*.*f ", width, precision, POP);
             fflush(ofp);
             NEXT;
@@ -618,7 +632,7 @@ void dclang_execute() {
                 printf("= -- stack underflow; needs <val1> <val2> on the stack!\n");
                 return;
             }
-            push(((DCLANG_FLT) POP == (DCLANG_FLT) POP) * -1);
+            push(((DCLANG_FLT)POP == (DCLANG_FLT)POP) * -1);
             NEXT;
         OP_NOTEQ:
             if (data_stack_ptr < 2)
@@ -626,7 +640,7 @@ void dclang_execute() {
                 printf("!= -- stack underflow; needs <val1> <val2> on the stack!\n");
                 return;
             }
-            push(((DCLANG_FLT) POP != (DCLANG_FLT) POP) * -1);
+            push(((DCLANG_FLT)POP != (DCLANG_FLT)POP) * -1);
             NEXT;
         OP_GT:
             if (data_stack_ptr < 2)
@@ -634,7 +648,7 @@ void dclang_execute() {
                 printf("> -- stack underflow; needs <val1> <val2> on the stack!\n");
                 return;
             }
-            push(((DCLANG_FLT) POP < (DCLANG_FLT) POP) * -1);
+            push(((DCLANG_FLT)POP < (DCLANG_FLT)POP) * -1);
             NEXT;
         OP_LT:
             if (data_stack_ptr < 2)
@@ -642,7 +656,7 @@ void dclang_execute() {
                 printf("< -- stack underflow; needs <val1> <val2> on the stack!\n");
                 return;
             }
-            push(((DCLANG_FLT) POP > (DCLANG_FLT) POP) * -1);
+            push(((DCLANG_FLT)POP > (DCLANG_FLT)POP) * -1);
             NEXT;
         OP_GTE:
             if (data_stack_ptr < 2)
@@ -650,7 +664,7 @@ void dclang_execute() {
                 printf(">= -- stack underflow; needs <val1> <val2> on the stack!\n");
                 return;
             }
-            push(((DCLANG_FLT) POP <= (DCLANG_FLT) POP) * -1);
+            push(((DCLANG_FLT)POP <= (DCLANG_FLT)POP) * -1);
             NEXT;
         OP_LTE:
             if (data_stack_ptr < 2)
@@ -658,7 +672,7 @@ void dclang_execute() {
                 printf("<= -- stack underflow; needs <val1> <val2> on the stack!\n");
                 return;
             }
-            push(((DCLANG_FLT) POP >= (DCLANG_FLT) POP) * -1);
+            push(((DCLANG_FLT)POP >= (DCLANG_FLT)POP) * -1);
             NEXT;
         // assertions
         OP_ASSERT:
@@ -679,7 +693,7 @@ void dclang_execute() {
                 printf("and -- stack underflow; needs <int1> <int2> on the stack!\n");
                 return;
             }
-            push((DCLANG_LONG) POP & (DCLANG_LONG) POP);
+            push((DCLANG_LONG)POP & (DCLANG_LONG)POP);
             NEXT;
         OP_OR:
             if (data_stack_ptr < 2)
@@ -687,7 +701,7 @@ void dclang_execute() {
                 printf("or -- stack underflow; needs <int1> <int2> on the stack!\n");
                 return;
             }
-            push((DCLANG_LONG) POP | (DCLANG_LONG) POP);
+            push((DCLANG_LONG)POP | (DCLANG_LONG)POP);
             NEXT;
         OP_XOR:
             if (data_stack_ptr < 2)
@@ -695,7 +709,7 @@ void dclang_execute() {
                 printf("xor -- stack underflow; needs <int1> <int2> on the stack!\n");
                 return;
             }
-            push((DCLANG_LONG) POP ^ (DCLANG_LONG) POP);
+            push((DCLANG_LONG)POP ^ (DCLANG_LONG)POP);
             NEXT;
         OP_NOT:
             if (data_stack_ptr < 1)
@@ -703,7 +717,7 @@ void dclang_execute() {
                 printf("not -- stack underflow; needs <int> on the stack!\n");
                 return;
             }
-            push(~(DCLANG_LONG) POP);
+            push(~(DCLANG_LONG)POP);
             NEXT;
         OP_LSHIFT:
             if (data_stack_ptr < 2)
@@ -711,9 +725,9 @@ void dclang_execute() {
                 printf("<< -- stack underflow; needs <int1> <int2> on the stack!\n");
                 return;
             }
-            shift_amt = (DCLANG_ULONG) POP;
-            base = (DCLANG_ULONG) POP;
-            push((DCLANG_ULONG) base << shift_amt);
+            shift_amt = (DCLANG_ULONG)POP;
+            base = (DCLANG_ULONG)POP;
+            push((DCLANG_ULONG)base << shift_amt);
             NEXT;
         OP_RSHIFT:
             if (data_stack_ptr < 2)
@@ -721,9 +735,9 @@ void dclang_execute() {
                 printf(">> -- stack underflow; needs <int1> <int2> on the stack!\n");
                 return;
             }
-            shift_amt = (DCLANG_ULONG) POP;
-            base = (DCLANG_ULONG) POP;
-            push((DCLANG_ULONG) base >> shift_amt);
+            shift_amt = (DCLANG_ULONG)POP;
+            base = (DCLANG_ULONG)POP;
+            push((DCLANG_ULONG)base >> shift_amt);
             NEXT;
         // math
         OP_ADD:
@@ -805,7 +819,7 @@ void dclang_execute() {
                 printf("round needs a number on the stack!\n");
                 return;
             }
-            push((DCLANG_LONG) round(POP));
+            push((DCLANG_LONG)round(POP));
             NEXT;
         OP_FLOOR:
             if (data_stack_ptr < 1)
@@ -813,7 +827,7 @@ void dclang_execute() {
                 printf("floor needs a number on the stack!\n");
                 return;
             }
-            push((DCLANG_LONG) floor(POP));
+            push((DCLANG_LONG)floor(POP));
             NEXT;
         OP_CEIL:
             if (data_stack_ptr < 1)
@@ -821,7 +835,7 @@ void dclang_execute() {
                 printf("ceil needs a number on the stack!\n");
                 return;
             }
-            push((DCLANG_LONG) ceil(POP));
+            push((DCLANG_LONG)ceil(POP));
             NEXT;
         // scientific math words
         OP_POWER:
@@ -978,7 +992,7 @@ void dclang_execute() {
                 printf("! -- stack underflow; needs <val> <variable> on the stack! ");
                 return;
             }
-            idx = (DCLANG_PTR) POP;
+            idx = (DCLANG_PTR)POP;
             if (idx < 0 || idx > NUMVARS)
             {
                 printf("! -- variable slot number out-of-range!\n");
@@ -993,7 +1007,7 @@ void dclang_execute() {
                 printf("@ -- stack underflow; needs <variable> on the stack! ");
                 return;
             }
-            idx = (DCLANG_PTR) POP;
+            idx = (DCLANG_PTR)POP;
             if (idx < 0 || idx > NUMVARS)
             {
                 printf("@ -- variable slot number %lu is out-of-range!\n", idx);
@@ -1007,7 +1021,7 @@ void dclang_execute() {
                 printf("allot -- stack underflow; needs <num-of-slots> value on the stack! ");
                 return;
             }
-            vars_idx += (DCLANG_PTR) POP - 1;
+            vars_idx += (DCLANG_PTR)POP - 1;
             NEXT;
         OP_CREATE:
             next_var = vars_idx++;
@@ -1025,7 +1039,7 @@ void dclang_execute() {
             vars[vars_idx++] = val;
             NEXT;
         OP_HERE:
-            push((DCLANG_PTR) vars_idx);
+            push((DCLANG_PTR)vars_idx);
             NEXT;
         OP_CONSTANT:
             const_keys[const_idx] = get_token();
@@ -1038,16 +1052,16 @@ void dclang_execute() {
                 printf("envset -- needs <env_val> <env_key> strings on the stack.\n");
             }
             // grab the key from the stack
-            env_key = (char *)(DCLANG_PTR) POP;
-            env_key_addr = (DCLANG_PTR) env_key;
+            env_key = (char *)(DCLANG_PTR)POP;
+            env_key_addr = (DCLANG_PTR)env_key;
             if (env_key_addr < MIN_STR || env_key_addr > MAX_STR)
             {
                 perror("envset -- String address for environment key out-of-range.");
                 return;
             }
             // grab the value from the stack
-            env_val = (char *)(DCLANG_PTR) POP;
-            DCLANG_PTR env_val_addr = (DCLANG_PTR) env_val;
+            env_val = (char *)(DCLANG_PTR)POP;
+            DCLANG_PTR env_val_addr = (DCLANG_PTR)env_val;
             if (env_val_addr < MIN_STR || env_val_addr > MAX_STR)
             {
                 perror("envset -- String address for environment value out-of-range.");
@@ -1063,15 +1077,15 @@ void dclang_execute() {
                 printf("envget -- needs <env_key> string on the stack.\n");
             }
             // grab the key
-            env_key = (char *)(DCLANG_PTR) POP;
-            env_key_addr = (DCLANG_PTR) env_key;
+            env_key = (char *)(DCLANG_PTR)POP;
+            env_key_addr = (DCLANG_PTR)env_key;
             if (env_key_addr < MIN_STR || env_key_addr > MAX_STR)
             {
                 perror("envget -- String address for hash key out-of-range.");
                 return;
             }
             env_val = getenv(env_key);
-            DCLANG_PTR val_addr = (DCLANG_PTR) env_val;
+            DCLANG_PTR val_addr = (DCLANG_PTR)env_val;
             if (val_addr > MAX_STR || MAX_STR == 0)
             {
                 MAX_STR = val_addr;
@@ -1089,8 +1103,8 @@ void dclang_execute() {
                 printf("sortnums -- needs <arrstart_index> <size> on the stack.\n");
                 return;
             }
-            arrsize = (DCLANG_INT) POP;
-            arrstart = (DCLANG_PTR) POP;
+            arrsize = (DCLANG_INT)POP;
+            arrstart = (DCLANG_PTR)POP;
             qsort((void *)(vars+arrstart), arrsize, sizeof(DCLANG_FLT), compare_doubles);
             NEXT;
         OP_SORTSTRS:
@@ -1098,8 +1112,8 @@ void dclang_execute() {
             {
                 printf("sortstrs -- needs <arrstart_index> <size> on the stack.\n");
             }
-            arrsize = (DCLANG_PTR) POP;
-            arrstart = (DCLANG_PTR) POP;
+            arrsize = (DCLANG_PTR)POP;
+            arrstart = (DCLANG_PTR)POP;
             qsort((void *)(vars+arrstart), arrsize, sizeof(DCLANG_FLT), compare_strings);
             NEXT;
         // global hash table
@@ -1110,8 +1124,8 @@ void dclang_execute() {
                 return;
             }
             // grab the key
-            key = (const char *)(DCLANG_PTR) POP;
-            key_addr = (DCLANG_PTR) key;
+            key = (const char *)(DCLANG_PTR)POP;
+            key_addr = (DCLANG_PTR)key;
             if (key_addr < MIN_STR || key_addr > MAX_STR)
             {
                 perror("h! -- String address for hash key out-of-range.");
@@ -1120,7 +1134,7 @@ void dclang_execute() {
             // check if we should increment a unique key count for later
             void *existing_val = hget(global_hash_table, key);
             // grab the value
-            hvalue = (void *)(DCLANG_PTR) POP;
+            hvalue = (void *)(DCLANG_PTR)POP;
             confirm = hset(global_hash_table, key, hvalue);
             if ((confirm != NULL) && (existing_val == NULL))
             {
@@ -1140,8 +1154,8 @@ void dclang_execute() {
                 return;
             }
             // grab the key
-            key = (char *)(DCLANG_PTR) POP;
-            key_addr = (DCLANG_PTR) key;
+            key = (char *)(DCLANG_PTR)POP;
+            key_addr = (DCLANG_PTR)key;
             if (key_addr < MIN_STR || key_addr > MAX_STR)
             {
                 perror("h@ -- String address for hash key out-of-range.");
@@ -1163,8 +1177,8 @@ void dclang_execute() {
                 return;
             }
             // grab the key index
-            DCLANG_PTR keyidx = (DCLANG_PTR) POP;
-            push((DCLANG_PTR) hashwords[keyidx]);
+            DCLANG_PTR keyidx = (DCLANG_PTR)POP;
+            push((DCLANG_PTR)hashwords[keyidx]);
             NEXT;
         // trees
         OP_TREEMAKE:
@@ -1175,7 +1189,7 @@ void dclang_execute() {
                 printf("You can change the limit when compiling via the NUM_TREE_ROOTS variable\n");
                 return;
             }
-            push((DCLANG_PTR) tree_roots_idx);
+            push((DCLANG_PTR)tree_roots_idx);
             NEXT;
         OP_TREEGET:
             if (data_stack_ptr < 2)
@@ -1186,15 +1200,15 @@ void dclang_execute() {
                 return;
             }
             // Pop args
-            search_key = (char *)(DCLANG_PTR) POP;
-            tree_idx = (DCLANG_PTR) POP;
+            search_key = (char *)(DCLANG_PTR)POP;
+            tree_idx = (DCLANG_PTR)POP;
             struct tree_entry dummy_tree;
             dummy_tree.key = search_key;
             dummy_tree.value = 0;
             retval = tfind(&dummy_tree, &tree_roots[tree_idx], tree_compare_func);
             if (retval == NULL)
             {
-                push((DCLANG_PTR) 0);
+                push((DCLANG_PTR)0);
                 return;
             }
             push((DCLANG_FLT)((*(struct tree_entry **)retval)->value));
@@ -1208,9 +1222,9 @@ void dclang_execute() {
                 return;
             }
             // Pop args
-            tree_val = (DCLANG_FLT) POP;
-            search_key = (char *)(DCLANG_PTR) POP;
-            tree_idx = (DCLANG_PTR) POP;
+            tree_val = (DCLANG_FLT)POP;
+            search_key = (char *)(DCLANG_PTR)POP;
+            tree_idx = (DCLANG_PTR)POP;
             te_del = make_tree_entry(dclang_strdup(search_key), tree_val);
             tdelete(te_del, &tree_roots[tree_idx], tree_compare_func);
             te = make_tree_entry(dclang_strdup(search_key), tree_val);
@@ -1222,7 +1236,7 @@ void dclang_execute() {
                 printf("twalk -- stack underflow! needs <tree_root> on the stack.\n");
                 return;
             }
-            tree_idx = (DCLANG_PTR) POP;
+            tree_idx = (DCLANG_PTR)POP;
             twalk(tree_roots[tree_idx], print_node);
             NEXT;
         OP_TREEDELETE:
@@ -1231,8 +1245,8 @@ void dclang_execute() {
                 return;
             }
             // Pop args
-            search_key = (char *)(DCLANG_PTR) POP;
-            tree_idx = (DCLANG_PTR) POP;
+            search_key = (char *)(DCLANG_PTR)POP;
+            tree_idx = (DCLANG_PTR)POP;
             te_del = make_tree_entry(dclang_strdup(search_key), 0);
             tdelete(te_del, &tree_roots[tree_idx], tree_compare_func);
             dclang_free(te_del);
@@ -1243,7 +1257,7 @@ void dclang_execute() {
                 printf("tdestroy -- stack underflow! needs <tree_root> on the stack.\n");
                 return;
             }
-            tree_idx = (DCLANG_PTR) POP;
+            tree_idx = (DCLANG_PTR)POP;
             tdestroy(tree_roots[tree_idx], dclang_free);
             tree_roots[tree_idx] = NULL;
             NEXT;
@@ -1267,7 +1281,7 @@ void dclang_execute() {
             // Convert pointers to the actual node structure
             list = (struct Node *)list_ptr;
             next = list->next;
-            push((DCLANG_PTR) next);
+            push((DCLANG_PTR)next);
             NEXT;
         OP_LISTPUSH:
             if (data_stack_ptr < 2) {
@@ -1453,7 +1467,7 @@ void dclang_execute() {
         // looping
         OP_TIMES:
             return_stack[return_stack_ptr++] = iptr;
-            times_info[times_ptr++] = (DCLANG_LONG) POP;
+            times_info[times_ptr++] = (DCLANG_LONG)POP;
             loop_counter[loop_counter_ptr++] = 0;
             NEXT;
         OP_EXITTIMES:
@@ -1473,9 +1487,9 @@ void dclang_execute() {
             NEXT;
         OP_FOR:
             return_stack[return_stack_ptr++] = iptr;
-            fl_stack[fl_ptr].step = (DCLANG_LONG) POP;
-            loop_counter[loop_counter_ptr++] = (DCLANG_LONG) POP;
-            fl_stack[fl_ptr++].limit = (DCLANG_LONG) POP;
+            fl_stack[fl_ptr].step = (DCLANG_LONG)POP;
+            loop_counter[loop_counter_ptr++] = (DCLANG_LONG)POP;
+            fl_stack[fl_ptr++].limit = (DCLANG_LONG)POP;
             NEXT;
         OP_EXITFOR:
             --fl_ptr;
@@ -1518,15 +1532,15 @@ void dclang_execute() {
             NEXT;
         // jump if zero (false)
         OP_JUMPZ:
-            truth = (DCLANG_LONG) POP;
+            truth = (DCLANG_LONG)POP;
             if (!truth) {
-                iptr = (DCLANG_PTR) prog[iptr].param;
+                iptr = (DCLANG_PTR)prog[iptr].param;
                 goto *dispatch_table[prog[iptr].opcode];
             }
             NEXT;
         // unconditional jump
         OP_JUMPU:
-            iptr = (DCLANG_PTR) prog[iptr].param;
+            iptr = (DCLANG_PTR)prog[iptr].param;
             goto *dispatch_table[prog[iptr].opcode];
         // if-else-endif
         OP_IF:
@@ -1558,14 +1572,14 @@ void dclang_execute() {
             // mark where we are for restoration later
             return_stack[return_stack_ptr++] = iptr;
             // set word target; execute word target
-            iptr = (DCLANG_PTR) prog[iptr].param;
+            iptr = (DCLANG_PTR)prog[iptr].param;
             goto *dispatch_table[prog[iptr].opcode];
         OP_SET_LOCAL:
-            idx = (DCLANG_PTR) prog[iptr].param;
+            idx = (DCLANG_PTR)prog[iptr].param;
             locals_vals[locals_base_idx + idx] = POP;
             NEXT;
         OP_GET_LOCAL:
-            idx = (DCLANG_PTR) prog[iptr].param;
+            idx = (DCLANG_PTR)prog[iptr].param;
             push(locals_vals[locals_base_idx + idx]);
             NEXT;
         OP_RETURN:
@@ -1577,7 +1591,7 @@ void dclang_execute() {
         // time and date
         OP_CLOCK:
             gettimeofday(&tval, NULL);
-            push( ((DCLANG_FLT) tval.tv_sec) + (((DCLANG_FLT) tval.tv_usec) / 1000000) );
+            push( ((DCLANG_FLT)tval.tv_sec) + (((DCLANG_FLT)tval.tv_usec) / 1000000) );
             NEXT;
         OP_EPOCH:
             gettimeofday(&tval, NULL);
@@ -1590,13 +1604,13 @@ void dclang_execute() {
                 return;
             }
             // input string setup
-            fmt = (DCLANG_ULONG) POP;
+            fmt = (DCLANG_ULONG)POP;
             if (fmt < MIN_STR || fmt > MAX_STR)
             {
                 printf("epoch->dt -- <output_format> string address out-of-range.\n");
                 return;
             }
-            DCLANG_ULONG in_epoch_uint = (DCLANG_ULONG) POP;
+            DCLANG_ULONG in_epoch_uint = (DCLANG_ULONG)POP;
             time_t in_epoch = (time_t) in_epoch_uint;
             char tmbuf[256];
             memset(&tmbuf[0], 0, 256);
@@ -1606,7 +1620,7 @@ void dclang_execute() {
                 printf("strftime, a low-level call of 'epoch->dt', returned an error.\n");
                 return;
             }
-            bufaddr = (DCLANG_PTR) tmbuf;
+            bufaddr = (DCLANG_PTR)tmbuf;
             if (bufaddr > MAX_STR || MAX_STR == 0)
             {
                 MAX_STR = bufaddr;
@@ -1624,8 +1638,8 @@ void dclang_execute() {
                 return;
             }
             // input string setup
-            fmt = (DCLANG_ULONG) POP;
-            DCLANG_ULONG to_conv = (DCLANG_ULONG) POP;
+            fmt = (DCLANG_ULONG)POP;
+            DCLANG_ULONG to_conv = (DCLANG_ULONG)POP;
             if (fmt < MIN_STR || fmt > MAX_STR)
             {
                 printf("dt->epoch -- <input_format> string address out-of-range.\n");
@@ -1647,7 +1661,7 @@ void dclang_execute() {
             }
             // do the conversion to seconds since epoch
             time_t res_time = mktime(&dt_epoch_tm);
-            push((DCLANG_ULONG) res_time);
+            push((DCLANG_ULONG)res_time);
             NEXT;
         OP_SLEEP:
             if (data_stack_ptr < 1) {
@@ -1669,7 +1683,7 @@ void dclang_execute() {
                 printf("print -- stack underflow; need a valid <str_pointer> on the stack!\n");
                 return;
             }
-            str_ptr_addr = (DCLANG_PTR) POP;
+            str_ptr_addr = (DCLANG_PTR)POP;
             if (str_ptr_addr == 0)
             {
                 printf("print -- Nothing to print.\n");
@@ -1705,7 +1719,7 @@ void dclang_execute() {
             fflush(ofp);
             NEXT;
         OP_BYTES32:
-            DCLANG_INT byteval = (DCLANG_INT) POP;
+            DCLANG_INT byteval = (DCLANG_INT)POP;
             char low = (char) byteval & 0xff;
             byteval >>= 8;
             char lowmid = (char) byteval & 0xff;
@@ -1724,7 +1738,7 @@ void dclang_execute() {
                 printf("isalnum -- stack underflow; need <string_char> on the stack! ");
                 return;
             }
-            str_ptr_addr = (DCLANG_PTR) POP;
+            str_ptr_addr = (DCLANG_PTR)POP;
             if (str_ptr_addr < MIN_STR || str_ptr_addr > MAX_STR)
             {
                 perror("isalnum -- String address out-of-range.");
@@ -1732,9 +1746,9 @@ void dclang_execute() {
             }
             char_ptr = (char *) str_ptr_addr;
             if (isalnum(char_ptr[0])) {
-                push((DCLANG_LONG) -1);
+                push((DCLANG_LONG)-1);
             } else {
-                push((DCLANG_LONG) 0);
+                push((DCLANG_LONG)0);
             }
             NEXT;
         OP_ISALPHA:
@@ -1743,7 +1757,7 @@ void dclang_execute() {
                 printf("isalpha -- stack underflow; need <string_char> on the stack! ");
                 return;
             }
-            str_ptr_addr = (DCLANG_PTR) POP;
+            str_ptr_addr = (DCLANG_PTR)POP;
             if (str_ptr_addr < MIN_STR || str_ptr_addr > MAX_STR)
             {
                 perror("isalpha -- String address out-of-range.");
@@ -1751,9 +1765,9 @@ void dclang_execute() {
             }
             char_ptr = (char *) str_ptr_addr;
             if (isalpha(char_ptr[0])) {
-                push((DCLANG_LONG) -1);
+                push((DCLANG_LONG)-1);
             } else {
-                push((DCLANG_LONG) 0);
+                push((DCLANG_LONG)0);
             }
             NEXT;
         OP_ISCNTRL:
@@ -1762,7 +1776,7 @@ void dclang_execute() {
                 printf("iscntrl -- stack underflow; need a <string_char> on the stack! ");
                 return;
             }
-            str_ptr_addr = (DCLANG_PTR) POP;
+            str_ptr_addr = (DCLANG_PTR)POP;
             if (str_ptr_addr < MIN_STR || str_ptr_addr > MAX_STR)
             {
                 perror("iscntrl -- String address out-of-range.");
@@ -1770,9 +1784,9 @@ void dclang_execute() {
             }
             char_ptr = (char *) str_ptr_addr;
             if (iscntrl(char_ptr[0])) {
-                push((DCLANG_LONG) -1);
+                push((DCLANG_LONG)-1);
             } else {
-                push((DCLANG_LONG) 0);
+                push((DCLANG_LONG)0);
             }
             NEXT;
         OP_ISDIGIT:
@@ -1781,7 +1795,7 @@ void dclang_execute() {
                 printf("isdigit -- stack underflow; need a <string_char> on the stack! ");
                 return;
             }
-            str_ptr_addr = (DCLANG_PTR) POP;
+            str_ptr_addr = (DCLANG_PTR)POP;
             if (str_ptr_addr < MIN_STR || str_ptr_addr > MAX_STR)
             {
                 perror("isdigit -- String address out-of-range.");
@@ -1789,9 +1803,9 @@ void dclang_execute() {
             }
             char_ptr = (char *) str_ptr_addr;
             if (isdigit(char_ptr[0])) {
-                push((DCLANG_LONG) -1);
+                push((DCLANG_LONG)-1);
             } else {
-                push((DCLANG_LONG) 0);
+                push((DCLANG_LONG)0);
             }
             NEXT;
         OP_ISGRAPH:
@@ -1800,7 +1814,7 @@ void dclang_execute() {
                 printf("isgraph -- stack underflow; need a <string_char> on the stack! ");
                 return;
             }
-            str_ptr_addr = (DCLANG_PTR) POP;
+            str_ptr_addr = (DCLANG_PTR)POP;
             if (str_ptr_addr < MIN_STR || str_ptr_addr > MAX_STR)
             {
                 perror("isgraph -- String address out-of-range.");
@@ -1808,9 +1822,9 @@ void dclang_execute() {
             }
             char_ptr = (char *) str_ptr_addr;
             if (isgraph(char_ptr[0])) {
-                push((DCLANG_LONG) -1);
+                push((DCLANG_LONG)-1);
             } else {
-                push((DCLANG_LONG) 0);
+                push((DCLANG_LONG)0);
             }
             NEXT;
         OP_ISLOWER:
@@ -1819,7 +1833,7 @@ void dclang_execute() {
                 printf("islower -- stack underflow; need a <string_char> on the stack! ");
                 return;
             }
-            str_ptr_addr = (DCLANG_PTR) POP;
+            str_ptr_addr = (DCLANG_PTR)POP;
             if (str_ptr_addr < MIN_STR || str_ptr_addr > MAX_STR)
             {
                 perror("islower -- String address out-of-range.");
@@ -1827,9 +1841,9 @@ void dclang_execute() {
             }
             char_ptr = (char *) str_ptr_addr;
             if (islower(char_ptr[0])) {
-                push((DCLANG_LONG) -1);
+                push((DCLANG_LONG)-1);
             } else {
-                push((DCLANG_LONG) 0);
+                push((DCLANG_LONG)0);
             }
             NEXT;
         OP_ISPRINT:
@@ -1838,7 +1852,7 @@ void dclang_execute() {
                 printf("isprint -- stack underflow; need a <string_char> on the stack! ");
                 return;
             }
-            str_ptr_addr = (DCLANG_PTR) POP;
+            str_ptr_addr = (DCLANG_PTR)POP;
             if (str_ptr_addr < MIN_STR || str_ptr_addr > MAX_STR)
             {
                 perror("isprint -- String address out-of-range.");
@@ -1846,9 +1860,9 @@ void dclang_execute() {
             }
             char_ptr = (char *) str_ptr_addr;
             if (isprint(char_ptr[0])) {
-                push((DCLANG_LONG) -1);
+                push((DCLANG_LONG)-1);
             } else {
-                push((DCLANG_LONG) 0);
+                push((DCLANG_LONG)0);
             }
             NEXT;
         OP_ISPUNCT:
@@ -1857,7 +1871,7 @@ void dclang_execute() {
                 printf("ispunct -- stack underflow; need a <string_char> on the stack! ");
                 return;
             }
-            str_ptr_addr = (DCLANG_PTR) POP;
+            str_ptr_addr = (DCLANG_PTR)POP;
             if (str_ptr_addr < MIN_STR || str_ptr_addr > MAX_STR)
             {
                 perror("ispunct -- String address out-of-range.");
@@ -1865,9 +1879,9 @@ void dclang_execute() {
             }
             char_ptr = (char *) str_ptr_addr;
             if (ispunct(char_ptr[0])) {
-                push((DCLANG_LONG) -1);
+                push((DCLANG_LONG)-1);
             } else {
-                push((DCLANG_LONG) 0);
+                push((DCLANG_LONG)0);
             }
             NEXT;
         OP_ISSPACE:
@@ -1876,7 +1890,7 @@ void dclang_execute() {
                 printf("isspace -- stack underflow; need a <string_char> on the stack! ");
                 return;
             }
-            str_ptr_addr = (DCLANG_PTR) POP;
+            str_ptr_addr = (DCLANG_PTR)POP;
             if (str_ptr_addr < MIN_STR || str_ptr_addr > MAX_STR)
             {
                 perror("isspace -- String address out-of-range.");
@@ -1884,9 +1898,9 @@ void dclang_execute() {
             }
             char_ptr = (char *) str_ptr_addr;
             if (isspace(char_ptr[0])) {
-                push((DCLANG_LONG) -1);
+                push((DCLANG_LONG)-1);
             } else {
-                push((DCLANG_LONG) 0);
+                push((DCLANG_LONG)0);
             }
             NEXT;
         OP_ISUPPER:
@@ -1895,7 +1909,7 @@ void dclang_execute() {
                 printf("isupper -- stack underflow; need a <string_char> on the stack! ");
                 return;
             }
-            str_ptr_addr = (DCLANG_PTR) POP;
+            str_ptr_addr = (DCLANG_PTR)POP;
             if (str_ptr_addr < MIN_STR || str_ptr_addr > MAX_STR)
             {
                 perror("isupper -- String address out-of-range.");
@@ -1903,9 +1917,9 @@ void dclang_execute() {
             }
             char_ptr = (char *) str_ptr_addr;
             if (isupper(char_ptr[0])) {
-                push((DCLANG_LONG) -1);
+                push((DCLANG_LONG)-1);
             } else {
-                push((DCLANG_LONG) 0);
+                push((DCLANG_LONG)0);
             }
             NEXT;
         OP_ISXDIGIT:
@@ -1914,7 +1928,7 @@ void dclang_execute() {
                 printf("isxdigit -- stack underflow; need a <string_char> on the stack! ");
                 return;
             }
-            str_ptr_addr = (DCLANG_PTR) POP;
+            str_ptr_addr = (DCLANG_PTR)POP;
             if (str_ptr_addr < MIN_STR || str_ptr_addr > MAX_STR)
             {
                 perror("isxdigit -- String address out-of-range.");
@@ -1922,9 +1936,9 @@ void dclang_execute() {
             }
             char_ptr = (char *) str_ptr_addr;
             if (isxdigit(char_ptr[0])) {
-                push((DCLANG_LONG) -1);
+                push((DCLANG_LONG)-1);
             } else {
-                push((DCLANG_LONG) 0);
+                push((DCLANG_LONG)0);
             }
             NEXT;
         OP_TOHEX:
@@ -1933,11 +1947,11 @@ void dclang_execute() {
                 printf("tohex -- stack underflow! Needs a <number> on the stack\n");
                 return;
             }
-            DCLANG_LONG val = (DCLANG_LONG) POP;
+            DCLANG_LONG val = (DCLANG_LONG)POP;
             bufsize = snprintf(NULL, 0, "0x%.2lx", val);
             str = dclang_malloc(bufsize + 1);
             snprintf(str, bufsize + 1, "0x%.2lx", val);
-            str_ptr_addr = (DCLANG_PTR) str;
+            str_ptr_addr = (DCLANG_PTR)str;
             if (str_ptr_addr < MIN_STR || MIN_STR == 0)
             {
                 MIN_STR = str_ptr_addr;
@@ -1946,7 +1960,7 @@ void dclang_execute() {
             {
                 MAX_STR = str_ptr_addr + bufsize + 1;
             }
-            push((DCLANG_PTR) str_ptr_addr);
+            push((DCLANG_PTR)str_ptr_addr);
             NEXT;
         OP_TOSTR:
             if (data_stack_ptr < 1)
@@ -1958,7 +1972,7 @@ void dclang_execute() {
             bufsize = snprintf(NULL, 0, "%g", var);
             str = dclang_malloc(bufsize + 1);
             snprintf(str, bufsize + 1, "%g", var);
-            str_ptr_addr = (DCLANG_PTR) str;
+            str_ptr_addr = (DCLANG_PTR)str;
             if (str_ptr_addr < MIN_STR || MIN_STR == 0)
             {
                 MIN_STR = str_ptr_addr;
@@ -1967,7 +1981,7 @@ void dclang_execute() {
             {
                 MAX_STR = str_ptr_addr + bufsize + 1;
             }
-            push((DCLANG_PTR) str_ptr_addr);
+            push((DCLANG_PTR)str_ptr_addr);
             NEXT;
         OP_TONUM:
             if (data_stack_ptr < 1)
@@ -1975,7 +1989,7 @@ void dclang_execute() {
                 printf("tonum -- needs a <str-pointer> on stack!\n");
                 return;
             }
-            str_ptr_addr = (DCLANG_PTR) POP;
+            str_ptr_addr = (DCLANG_PTR)POP;
             if (str_ptr_addr < MIN_STR || str_ptr_addr > MAX_STR)
             {
                 perror("tonum -- String address out-of-range.\n");
@@ -1992,8 +2006,8 @@ void dclang_execute() {
                 printf("ord -- stack underflow! Needs a <single-character-in-double-quotes> on the stack.\n");
                 return;
             }
-            str_ptr_addr = (DCLANG_PTR) POP;
-            if (str_ptr_addr < (DCLANG_PTR) &memory_pool)
+            str_ptr_addr = (DCLANG_PTR)POP;
+            if (str_ptr_addr < (DCLANG_PTR)&memory_pool)
             {
                 perror("ord -- String address out-of-range.\n");
                 return;
@@ -2007,16 +2021,16 @@ void dclang_execute() {
                 printf("tolower -- needs a <source_str> pointer on the stack!\n");
                 return;
             }
-            str_ptr_addr = (DCLANG_PTR) POP;
+            str_ptr_addr = (DCLANG_PTR)POP;
             if (str_ptr_addr < MIN_STR || str_ptr_addr > MAX_STR)
             {
                 perror("tolower -- String address out-of-range.\n");
                 return;
             }
             str = (char *) str_ptr_addr;
-            buflen = (DCLANG_PTR) strlen(str);
+            buflen = (DCLANG_PTR)strlen(str);
             buf = (char *) dclang_malloc(buflen);
-            str_ptr_addr = (DCLANG_PTR) buf;
+            str_ptr_addr = (DCLANG_PTR)buf;
             i = 0;
             ch = 0;
             while(*(str + i)) {
@@ -2032,7 +2046,7 @@ void dclang_execute() {
             {
                 MAX_STR = str_ptr_addr + buflen;
             }
-            push((DCLANG_PTR) buf);
+            push((DCLANG_PTR)buf);
             NEXT;
         OP_TOUPPER:
             if (data_stack_ptr < 1)
@@ -2040,16 +2054,16 @@ void dclang_execute() {
                 printf("toupper -- needs a <source_str> pointer on the stack!\n");
                 return;
             }
-            str_ptr_addr = (DCLANG_PTR) POP;
+            str_ptr_addr = (DCLANG_PTR)POP;
             if (str_ptr_addr < MIN_STR || str_ptr_addr > MAX_STR)
             {
                 perror("toupper -- String address out-of-range.\n");
                 return;
             }
             str = (char *) str_ptr_addr;
-            buflen = (DCLANG_PTR) strlen(str);
+            buflen = (DCLANG_PTR)strlen(str);
             buf = (char *) dclang_malloc(buflen);
-            str_ptr_addr = (DCLANG_PTR) buf;
+            str_ptr_addr = (DCLANG_PTR)buf;
             i = 0;
             ch = 0;
             while(*(str + i)) {
@@ -2065,7 +2079,7 @@ void dclang_execute() {
             {
                 MAX_STR = str_ptr_addr + buflen;
             }
-            push((DCLANG_PTR) buf);
+            push((DCLANG_PTR)buf);
             NEXT;
         OP_STRLEN:
             if (data_stack_ptr < 1)
@@ -2073,14 +2087,14 @@ void dclang_execute() {
                 printf("strlen -- stack underflow; needs a <str> on the stack!\n");
                 return;
             }
-            str_ptr_addr = (DCLANG_PTR) POP;
+            str_ptr_addr = (DCLANG_PTR)POP;
             if (str_ptr_addr < MIN_STR || str_ptr_addr > MAX_STR)
             {
                 perror("strlen -- String address out-of-range.\n");
                 return;
             }
             str = (char *) str_ptr_addr;
-            push((DCLANG_PTR) strlen(str));
+            push((DCLANG_PTR)strlen(str));
             NEXT;
         OP_STREQ:
             if (data_stack_ptr < 2)
@@ -2088,8 +2102,8 @@ void dclang_execute() {
                 printf("str= -- stack underflow; need <str> <str> on the stack!\n");
                 return;
             }
-            str_ptr_addr2 = (DCLANG_PTR) POP;
-            str_ptr_addr = (DCLANG_PTR) POP;
+            str_ptr_addr2 = (DCLANG_PTR)POP;
+            str_ptr_addr = (DCLANG_PTR)POP;
             if (str_ptr_addr < MIN_STR || str_ptr_addr > MAX_STR)
             {
                 perror("strlen -- First given string address out-of-range.\n");
@@ -2102,7 +2116,7 @@ void dclang_execute() {
             }
             str1 = (char *) str_ptr_addr;
             str2 = (char *) str_ptr_addr2;
-            push(((DCLANG_LONG) strcmp(str1, str2) == 0) * -1);
+            push(((DCLANG_LONG)strcmp(str1, str2) == 0) * -1);
             NEXT;
         OP_STRLT:
             if (data_stack_ptr < 2)
@@ -2110,8 +2124,8 @@ void dclang_execute() {
                 printf("str< -- stack underflow; need <str> <str> on the stack!\n");
                 return;
             }
-            str_ptr_addr2 = (DCLANG_PTR) POP;
-            str_ptr_addr = (DCLANG_PTR) POP;
+            str_ptr_addr2 = (DCLANG_PTR)POP;
+            str_ptr_addr = (DCLANG_PTR)POP;
             if (str_ptr_addr < MIN_STR || str_ptr_addr > MAX_STR)
             {
                 perror("str< -- First given string address out-of-range.\n");
@@ -2124,7 +2138,7 @@ void dclang_execute() {
             }
             str1 = (char *) str_ptr_addr;
             str2 = (char *) str_ptr_addr2;
-            push(((DCLANG_LONG) strcmp(str1, str2) < 0) * -1);
+            push(((DCLANG_LONG)strcmp(str1, str2) < 0) * -1);
             NEXT;
         OP_STRGT:
             if (data_stack_ptr < 2)
@@ -2132,8 +2146,8 @@ void dclang_execute() {
                 printf("str> -- stack underflow; need <str> <str> on the stack!\n");
                 return;
             }
-            str_ptr_addr2 = (DCLANG_PTR) POP;
-            str_ptr_addr = (DCLANG_PTR) POP;
+            str_ptr_addr2 = (DCLANG_PTR)POP;
+            str_ptr_addr = (DCLANG_PTR)POP;
             if (str_ptr_addr < MIN_STR || str_ptr_addr > MAX_STR)
             {
                 perror("str> -- First given string address out-of-range\n");
@@ -2146,7 +2160,7 @@ void dclang_execute() {
             }
             str1 = (char *) str_ptr_addr;
             str2 = (char *) str_ptr_addr2;
-            push(((DCLANG_LONG) strcmp(str1, str2) > 0) * -1);
+            push(((DCLANG_LONG)strcmp(str1, str2) > 0) * -1);
             NEXT;
         OP_STRFIND:
             if (data_stack_ptr < 2)
@@ -2154,8 +2168,8 @@ void dclang_execute() {
                 printf("strfind -- needs <haystack> <needle> string pointers on stack!\n");
                 return;
             }
-            str_ptr_addr2 = (DCLANG_PTR) POP;
-            str_ptr_addr = (DCLANG_PTR) POP;
+            str_ptr_addr2 = (DCLANG_PTR)POP;
+            str_ptr_addr = (DCLANG_PTR)POP;
             if (str_ptr_addr < MIN_STR || str_ptr_addr > MAX_STR)
             {
                 perror("strfind -- 'haystack' (first) string address out-of-range.\n");
@@ -2168,7 +2182,7 @@ void dclang_execute() {
             }
             str1 = (char *) str_ptr_addr;
             str2 = (char *) str_ptr_addr2;
-            push((DCLANG_LONG) strstr(str1, str2));
+            push((DCLANG_LONG)strstr(str1, str2));
             NEXT;
         OP_STRSPN:
             if (data_stack_ptr < 2)
@@ -2176,8 +2190,8 @@ void dclang_execute() {
                 printf("strspn -- needs <str> <test_chars_str> pointers on the stack!\n");
                 return;
             }
-            delim = (DCLANG_PTR) POP;
-            strpt = (DCLANG_PTR) POP;
+            delim = (DCLANG_PTR)POP;
+            strpt = (DCLANG_PTR)POP;
             if ((delim != 0) && (delim < MIN_STR || delim > MAX_STR))
             {
                 perror("strspn -- <delim> string address out-of-range.\n");
@@ -2188,7 +2202,7 @@ void dclang_execute() {
                 perror("strspn -- <str> string address out-of-range.\n");
                 return;
             }
-            push((DCLANG_LONG) strspn((char *)strpt, (char *)delim));
+            push((DCLANG_LONG)strspn((char *)strpt, (char *)delim));
             NEXT;
         OP_STRCSPN:
             if (data_stack_ptr < 2)
@@ -2196,8 +2210,8 @@ void dclang_execute() {
                 printf("strcspn -- needs <str> <test_chars_str> pointers on the stack!\n");
                 return;
             }
-            delim = (DCLANG_PTR) POP;
-            strpt = (DCLANG_PTR) POP;
+            delim = (DCLANG_PTR)POP;
+            strpt = (DCLANG_PTR)POP;
             if ((delim != 0) && (delim < MIN_STR || delim > MAX_STR))
             {
                 perror("strcspn -- <test_chars_str> string address out-of-range.\n");
@@ -2208,7 +2222,7 @@ void dclang_execute() {
                 perror("strcspn -- <str> string address out-of-range.");
                 return;
             }
-            push((DCLANG_LONG) strcspn((char *)strpt, (char *)delim));
+            push((DCLANG_LONG)strcspn((char *)strpt, (char *)delim));
             NEXT;
         OP_STRTOK:
             if (data_stack_ptr < 3)
@@ -2221,10 +2235,10 @@ void dclang_execute() {
                 printf("string!\n\n");
                 return;
             }
-            DCLANG_PTR savepoint = (DCLANG_PTR) POP;
+            DCLANG_PTR savepoint = (DCLANG_PTR)POP;
             char **savepoint_ptr = (char **) &vars[savepoint];
-            delim = (DCLANG_PTR) POP;
-            strpt = (DCLANG_PTR) POP;
+            delim = (DCLANG_PTR)POP;
+            strpt = (DCLANG_PTR)POP;
             if ((strpt != 0) && (strpt < MIN_STR || strpt > MAX_STR))
             {
                 perror("strtok -- <str> (first) string address out-of-range.\n");
@@ -2235,7 +2249,7 @@ void dclang_execute() {
                 perror("strtok -- <delim> (second) string address out-of-range.\n");
                 return;
             }
-            push((DCLANG_LONG) strtok_r((char *)strpt, (char *)delim, savepoint_ptr));
+            push((DCLANG_LONG)strtok_r((char *)strpt, (char *)delim, savepoint_ptr));
             NEXT;
         OP_MEMPCPY:
             if (data_stack_ptr < 3)
@@ -2243,9 +2257,9 @@ void dclang_execute() {
                 printf("mempcpy -- needs <dest> <source> <size> on stack!\n");
                 return;
             }
-            size = (DCLANG_PTR) POP;
-            DCLANG_PTR source = (DCLANG_PTR) POP;
-            dest = (DCLANG_PTR) POP;
+            size = (DCLANG_PTR)POP;
+            DCLANG_PTR source = (DCLANG_PTR)POP;
+            dest = (DCLANG_PTR)POP;
             if ((dest != 0) && (dest < MIN_STR || dest > MAX_STR))
             {
                 perror("mempcpy -- <dest> string address out-of-range.\n");
@@ -2257,8 +2271,8 @@ void dclang_execute() {
                 return;
             }
             push(
-                (DCLANG_PTR) memcpy(
-                (char *)dest, (char *)source, (DCLANG_PTR) size) + size
+                (DCLANG_PTR)memcpy(
+                (char *)dest, (char *)source, (DCLANG_PTR)size) + size
             );
             NEXT;
         OP_MEMSET:
@@ -2267,9 +2281,9 @@ void dclang_execute() {
                 printf("memset -- needs <dest_str> <char-int> <times-int> on stack!\n");
                 return;
             }
-            DCLANG_PTR times = (DCLANG_PTR) POP;
-            DCLANG_PTR chr = (DCLANG_PTR) POP;
-            dest = (DCLANG_PTR) POP;
+            DCLANG_PTR times = (DCLANG_PTR)POP;
+            DCLANG_PTR chr = (DCLANG_PTR)POP;
+            dest = (DCLANG_PTR)POP;
             if ((dest != 0) && (dest < MIN_STR || dest > MAX_STR))
             {
                 perror("memset -- <dest> string address out-of-range.\n");
@@ -2283,11 +2297,11 @@ void dclang_execute() {
                 printf("Stack_underflow!\n");
                 printf("mkbuf needs <size-as-integer> on the stack\n");
             }
-            size = (DCLANG_PTR) POP;
+            size = (DCLANG_PTR)POP;
             buf = (char *) dclang_malloc(size);
             memset(buf, 0, size);
-            DCLANG_PTR advance = (DCLANG_PTR) strlen(buf);
-            bufaddr = (DCLANG_PTR) buf;
+            DCLANG_PTR advance = (DCLANG_PTR)strlen(buf);
+            bufaddr = (DCLANG_PTR)buf;
             bufaddr += advance;
             // update print safety:
             if (bufaddr < MIN_STR || MIN_STR == 0)
@@ -2308,11 +2322,11 @@ void dclang_execute() {
                 printf("This means that you can free memory in reverse order, starting from most recently allocated.\n");
                 return;
             }
-            DCLANG_PTR loc_PTR = (DCLANG_PTR) POP;
+            DCLANG_PTR loc_PTR = (DCLANG_PTR)POP;
             dclang_free((char *) loc_PTR);
             NEXT;
         OP_MEMUSED:
-            DCLANG_FLT memused = (DCLANG_FLT) (((float) unused_mem_idx) / ((float) MEMSIZE));
+            DCLANG_FLT memused = (DCLANG_FLT)(((float) unused_mem_idx) / ((float) MEMSIZE));
             push(memused);
             NEXT;
         OP_REGCOMP:
@@ -2322,7 +2336,7 @@ void dclang_execute() {
                 return;
             }
             // Pop the regex pattern from the stack
-            regex_flags = (DCLANG_INT) POP;
+            regex_flags = (DCLANG_INT)POP;
             DCLANG_PTR pattern_ptr_addr = (DCLANG_PTR)POP;
             if (pattern_ptr_addr < MIN_STR || pattern_ptr_addr > MAX_STR)
             {
@@ -2332,7 +2346,7 @@ void dclang_execute() {
             char *pattern = (char *)pattern_ptr_addr;
             // Compile the regex pattern
             regex= (regex_t *)dclang_malloc(sizeof(regex_t));
-            if (regcomp(regex, pattern, (DCLANG_INT)regex_flags) != 0)
+            if (regcomp(regex, pattern, (DCLANG_INT)regex_flags)!= 0)
             {
                 perror("regcomp -- Error compiling regex pattern\n");
                 dclang_free(regex);
@@ -2348,7 +2362,7 @@ void dclang_execute() {
                 return;
             }
             // Pop the input string and the compiled regex object from the stack
-            regex_flags = (DCLANG_INT) POP;
+            regex_flags = (DCLANG_INT)POP;
             DCLANG_PTR input_str_ptr_addr = (DCLANG_PTR)POP;
             DCLANG_PTR regex_obj_PTR = (DCLANG_PTR)POP;
             if (regex_obj_PTR < 0 || input_str_ptr_addr < MIN_STR || input_str_ptr_addr > MAX_STR)
@@ -2407,16 +2421,16 @@ void dclang_execute() {
                 return;
             }
             // file mode string
-            mode = (char *)(DCLANG_PTR) POP;
+            mode = (char *)(DCLANG_PTR)POP;
             // file path
-            path = (char *)(DCLANG_PTR) POP;
+            path = (char *)(DCLANG_PTR)POP;
             // if mode is read or append, file must exist:
             if ( (access(path, F_OK) == -1)
                  && ( !strcmp("r", mode) || !strcmp("r+", mode) ) )
             {
                 printf("The file named %s doesn't appear to exist, " \
                        "or cannot be accessed.\n", path);
-                push((DCLANG_INT) -1);
+                push((DCLANG_INT)-1);
             } else {
                 file = fopen(path, mode);
                 push((DCLANG_PTR)file);
@@ -2429,9 +2443,9 @@ void dclang_execute() {
                 printf("fmemopen needs <buf (can be 0)> <size> <open-mode> on the stack\n");
                 return;
             }
-            mode = (char *)(DCLANG_PTR) POP;
-            size = (DCLANG_PTR) POP;
-            bufaddr = (DCLANG_PTR) POP;
+            mode = (char *)(DCLANG_PTR)POP;
+            size = (DCLANG_PTR)POP;
+            bufaddr = (DCLANG_PTR)POP;
             file = fmemopen((void *)bufaddr, size, mode);
             push((DCLANG_PTR)file);
             NEXT;
@@ -2442,7 +2456,7 @@ void dclang_execute() {
                 printf("fclose needs <file_pointer> on the stack\n");
                 return;
             }
-            file = (FILE *)(DCLANG_PTR) POP;
+            file = (FILE *)(DCLANG_PTR)POP;
             fclose(file);
             NEXT;
         OP_FILEREAD:
@@ -2452,9 +2466,9 @@ void dclang_execute() {
                 printf("fread needs <buf_pointer> <number-of-bytes> <file_pointer> on the stack\n");
                 return;
             }
-            file = (FILE *)(DCLANG_PTR) POP;
-            DCLANG_PTR num_bytes_in = (DCLANG_PTR) POP;
-            buf = (char *)(DCLANG_PTR) POP;
+            file = (FILE *)(DCLANG_PTR)POP;
+            DCLANG_PTR num_bytes_in = (DCLANG_PTR)POP;
+            buf = (char *)(DCLANG_PTR)POP;
             num_bytes = fread(buf, 1, num_bytes_in, file);
             // update print safety:
             if ((DCLANG_PTR)buf < MIN_STR || MIN_STR == 0)
@@ -2466,7 +2480,7 @@ void dclang_execute() {
                 MAX_STR = (DCLANG_PTR)buf + num_bytes + 1;
             }
             // push the number of bytes read
-            push((DCLANG_LONG) num_bytes);
+            push((DCLANG_LONG)num_bytes);
             NEXT;
         OP_FILEREADLINE:
             if (data_stack_ptr < 1)
@@ -2475,21 +2489,21 @@ void dclang_execute() {
                 printf("freadline needs <file_pointer> on the stack\n");
                 return;
             }
-            file = (FILE *)(DCLANG_PTR) POP;
+            file = (FILE *)(DCLANG_PTR)POP;
             num_bytes = getline(&linebuf, &linelen, file);
             // update print safety:
-            if ((DCLANG_PTR) linebuf < MIN_STR || MIN_STR == 0)
+            if ((DCLANG_PTR)linebuf < MIN_STR || MIN_STR == 0)
             {
-                MIN_STR = (DCLANG_PTR) linebuf;
+                MIN_STR = (DCLANG_PTR)linebuf;
             }
-            if ((DCLANG_PTR) linebuf + num_bytes + 1 > MAX_STR || MAX_STR == 0)
+            if ((DCLANG_PTR)linebuf + num_bytes + 1 > MAX_STR || MAX_STR == 0)
             {
-                MAX_STR = (DCLANG_PTR) linebuf + num_bytes + 1;
+                MAX_STR = (DCLANG_PTR)linebuf + num_bytes + 1;
             }
             // push the address of our new string and length
-            push((DCLANG_PTR) linebuf);
+            push((DCLANG_PTR)linebuf);
             // push the number of bytes read
-            push((DCLANG_LONG) num_bytes);
+            push((DCLANG_LONG)num_bytes);
             NEXT;
         OP_FILEREADALL:
             if (data_stack_ptr < 1)
@@ -2503,7 +2517,7 @@ void dclang_execute() {
             DCLANG_LONG ch;
             char *allbuf = (char *) dclang_malloc(req_bufsize);
             memset(allbuf, 0, req_bufsize);
-            file = (FILE *)(DCLANG_PTR) POP;
+            file = (FILE *)(DCLANG_PTR)POP;
             while ((ch = fgetc(file)) != EOF)
             {
                 chr_cnt += 1;
@@ -2516,18 +2530,18 @@ void dclang_execute() {
             }
             memset(allbuf + chr_cnt, 0, 1);
             // update print safety:
-            if ((DCLANG_PTR) allbuf < MIN_STR || MIN_STR == 0)
+            if ((DCLANG_PTR)allbuf < MIN_STR || MIN_STR == 0)
             {
-                MIN_STR = (DCLANG_PTR) allbuf;
+                MIN_STR = (DCLANG_PTR)allbuf;
             }
-            if ((DCLANG_PTR) allbuf + chr_cnt + 1 > MAX_STR || MAX_STR == 0)
+            if ((DCLANG_PTR)allbuf + chr_cnt + 1 > MAX_STR || MAX_STR == 0)
             {
-                MAX_STR = (DCLANG_PTR) allbuf + chr_cnt + 1;
+                MAX_STR = (DCLANG_PTR)allbuf + chr_cnt + 1;
             }
             // push the address of our new string and length
-            push((DCLANG_PTR) allbuf);
+            push((DCLANG_PTR)allbuf);
             // push the number of bytes read
-            push((DCLANG_LONG) chr_cnt);
+            push((DCLANG_LONG)chr_cnt);
             NEXT;
         OP_FILESEEK:
             if (data_stack_ptr < 3)
@@ -2537,14 +2551,14 @@ void dclang_execute() {
                 printf("Whence must be 0 (SEEK_SET), 1 (SEEK_CUR), or 2 (SEEK_END).\n");
                 return;
             }
-            DCLANG_PTR whence = (DCLANG_PTR) POP;
+            DCLANG_PTR whence = (DCLANG_PTR)POP;
             if (!(whence >= 0 && whence <= 2))
             {
                 printf("Whence parameter must be between 0 and 2 inclusive!\n");
                 return;
             }
-            DCLANG_LONG offset = (DCLANG_LONG) POP;
-            file = (FILE *)(DCLANG_PTR) POP;
+            DCLANG_LONG offset = (DCLANG_LONG)POP;
+            file = (FILE *)(DCLANG_PTR)POP;
             fseek(file, offset, whence);
             NEXT;
         OP_FILETELL:
@@ -2554,9 +2568,9 @@ void dclang_execute() {
                 printf("ftell needs a <file_pointer> on the stack\n");
                 return;
             }
-            file = (FILE *)(DCLANG_PTR) POP;
+            file = (FILE *)(DCLANG_PTR)POP;
             DCLANG_PTR mylen = ftell(file);
-            push((DCLANG_PTR) mylen);
+            push((DCLANG_PTR)mylen);
             NEXT;
         OP_FILEWRITE:
             if (data_stack_ptr < 3)
@@ -2564,9 +2578,9 @@ void dclang_execute() {
                 printf("fwrite -- needs <string-address> <num_of_bytes> <file_pointer> on the stack\n");
                 return;
             }
-            file = (FILE *)(DCLANG_PTR) POP;
-            num_bytes = (DCLANG_PTR) POP;
-            str = (char *)(DCLANG_PTR) POP;
+            file = (FILE *)(DCLANG_PTR)POP;
+            num_bytes = (DCLANG_PTR)POP;
+            str = (char *)(DCLANG_PTR)POP;
             result = fwrite(str, 1, num_bytes, file);
             push(result);
             NEXT;
@@ -2576,7 +2590,7 @@ void dclang_execute() {
                 printf("fflush -- needs <file_pointer> on the stack\n");
                 return;
             }
-            file = (FILE *)(DCLANG_PTR) POP;
+            file = (FILE *)(DCLANG_PTR)POP;
             fflush(file);
             NEXT;
         OP_REDIRECT:
@@ -2584,7 +2598,7 @@ void dclang_execute() {
                 printf("redirect -- stack underflow; needs an <output-file-pointer> on the stack\n");
                 return;
             }
-            ofp = (FILE *)(DCLANG_PTR) POP;
+            ofp = (FILE *)(DCLANG_PTR)POP;
             NEXT;
         OP_SETERR:
             ofp = stderr;
@@ -2602,10 +2616,10 @@ void dclang_execute() {
                 printf("open -- needs <filestr> <flagint> on the stack\n");
                 return;
             }
-            DCLANG_PTR flagint = (DCLANG_PTR) POP;
+            DCLANG_PTR flagint = (DCLANG_PTR)POP;
             path = (char *)(DCLANG_PTR)POP;
             fd = open(path, flagint);
-            push((DCLANG_PTR) fd);
+            push((DCLANG_PTR)fd);
             NEXT;
         OP_READ:
             if (data_stack_ptr < 1)
@@ -2614,7 +2628,7 @@ void dclang_execute() {
                 printf("read -- needs <file_pointer> <buffer-pointer> <num_bytes> on the stack\n");
                 return;
             }
-            num_bytes = (DCLANG_PTR) POP;
+            num_bytes = (DCLANG_PTR)POP;
             buf = (void *)(DCLANG_PTR)POP;
             fd = (int) POP;
             result = read(fd, buf, num_bytes);
@@ -2627,7 +2641,7 @@ void dclang_execute() {
                 printf("write needs <file_pointer> <buffer-pointer> <num_bytes> on the stack\n");
                 return;
             }
-            num_bytes = (DCLANG_PTR) POP;
+            num_bytes = (DCLANG_PTR)POP;
             buf = (void *)(DCLANG_PTR)POP;
             fd = (int) POP;
             result = write(fd, buf, num_bytes);
@@ -2658,7 +2672,7 @@ void dclang_execute() {
                perror("tcplisten -- ERROR opening socket.");
             }
             bzero((char *) &serv_addr, sizeof(serv_addr));
-            portno = (DCLANG_INT) POP;
+            portno = (DCLANG_INT)POP;
             serv_addr.sin_family = AF_INET;
             serv_addr.sin_addr.s_addr = INADDR_ANY;
             serv_addr.sin_port = htons(portno);
@@ -2666,7 +2680,7 @@ void dclang_execute() {
                   sizeof(serv_addr)) < 0)
                   perror("ERROR on binding");
             listen(sockfd, 5);
-            push((DCLANG_INT) sockfd);
+            push((DCLANG_INT)sockfd);
             NEXT;
         OP_TCPACCEPT:
             // Take a given tcplisten-ready socket object and actually make it
@@ -2678,10 +2692,10 @@ void dclang_execute() {
                 return;
             }
             DCLANG_UINT clilen = sizeof(cli_addr);
-            sockfd = (DCLANG_INT) POP;
+            sockfd = (DCLANG_INT)POP;
             DCLANG_INT newsockfd = accept(sockfd, (struct sockaddr *) &cli_addr, &clilen);
             if (newsockfd < 0) perror("tcpaccept -- ERROR on accept step!");
-            push((DCLANG_INT) newsockfd);
+            push((DCLANG_INT)newsockfd);
             NEXT;
         OP_TCPCONNECT:
             // A tcp client word. This can reach out to a pre-established tcp server
@@ -2692,9 +2706,9 @@ void dclang_execute() {
             }
             sockfd = socket(AF_INET, SOCK_STREAM, 0);
             if (sockfd < 0) perror("tcpconnect -- ERROR opening socket");
-            portno = (DCLANG_INT) POP;
+            portno = (DCLANG_INT)POP;
             struct sockaddr_in host_addr;
-            host = (char *) (DCLANG_PTR) POP;
+            host = (char *) (DCLANG_PTR)POP;
             server = gethostbyname(host);
             if (server == NULL) {
                 fprintf(stderr, "tcpconnect -- ERROR, no such host\n");
@@ -2706,7 +2720,7 @@ void dclang_execute() {
             host_addr.sin_port = htons(portno);
             if (connect(sockfd, (struct sockaddr *)&host_addr, sizeof(host_addr)) < 0)
                 perror("tcpconnect -- ERROR connecting");
-            push((DCLANG_INT) sockfd);
+            push((DCLANG_INT)sockfd);
             NEXT;
         OP_UDPRECV:
             // Receive data over UDP
@@ -2715,9 +2729,9 @@ void dclang_execute() {
                 return;
             }
             // stack values
-            buf = (char *) (DCLANG_PTR) POP;
-            DCLANG_INT max_bytes = (DCLANG_INT) POP;
-            portno = (DCLANG_INT) POP;
+            buf = (char *) (DCLANG_PTR)POP;
+            DCLANG_INT max_bytes = (DCLANG_INT)POP;
+            portno = (DCLANG_INT)POP;
             // make a socket
             sockfd = socket(AF_INET, SOCK_DGRAM, 0);
             if (sockfd < 0) {
@@ -2743,7 +2757,7 @@ void dclang_execute() {
             }
             buf[result] = '\0'; // Null terminate the received data
             close(sockfd);
-            push((DCLANG_LONG) result);
+            push((DCLANG_LONG)result);
             NEXT;
         OP_UDPSEND:
             // Send data over UDP to a specified host and port
@@ -2752,9 +2766,9 @@ void dclang_execute() {
                 return;
             }
             // stack values
-            buf = (char *) (DCLANG_PTR) POP;
-            portno = (DCLANG_INT) POP;
-            host = (char *) (DCLANG_PTR) POP;
+            buf = (char *) (DCLANG_PTR)POP;
+            portno = (DCLANG_INT)POP;
+            host = (char *) (DCLANG_PTR)POP;
             // make a socket
             sockfd = socket(AF_INET, SOCK_DGRAM, 0);
             if (sockfd < 0) {
@@ -2782,7 +2796,7 @@ void dclang_execute() {
                 perror("udpsend -- ERROR sending data");
             }
             close(sockfd);
-            push((DCLANG_INT) result);
+            push((DCLANG_INT)result);
             NEXT;
         OP_BLOCKSIGINT:
             sigemptyset(&block_sigint);
@@ -2799,14 +2813,14 @@ void dclang_execute() {
             // TODO: a future enhancement might be to have a counting system in place for
             // avoiding fork-bomb DoS attacks. So, the introspection of a connection limit
             // before granting a new `fork`.
-            push((DCLANG_INT) fork());
+            push((DCLANG_INT)fork());
             NEXT;
         OP_EXIT:
             if (data_stack_ptr < 1) {
                 printf("exit -- stack underflow; need an <integer_exit_code> on the stack");
                 return;
             }
-            DCLANG_INT code = (DCLANG_INT) POP;
+            DCLANG_INT code = (DCLANG_INT)POP;
             exit(code);
             NEXT;
         OP_SHOWPRIMITIVES:
@@ -2860,12 +2874,12 @@ void dclang_execute() {
                 input_pad[input_here++] = input_ch;
                 if ((input_ch = getchar()) == EOF) exit(0);
             }
-            DCLANG_PTR string_addr = (DCLANG_PTR) string_start;
+            DCLANG_PTR string_addr = (DCLANG_PTR)string_start;
             DCLANG_PTR string_size = (DCLANG_PTR)(input_here - string_start);
             char *string_dest = dclang_malloc(string_size + 1);
             char nullstr[] = "\0";
             memcpy(string_dest, (char *)((DCLANG_PTR)&input_pad[0] + string_addr), string_size);
-            str_ptr_addr = (DCLANG_PTR) string_dest;
+            str_ptr_addr = (DCLANG_PTR)string_dest;
             if (str_ptr_addr < MIN_STR || MIN_STR == 0) {
                 MIN_STR = str_ptr_addr;
             }
@@ -2915,7 +2929,7 @@ void dclang_execute() {
                 return;
             }
             char *text = sqlite3_column_text(stmt, col_index);
-            DCLANG_PTR text_ptr = (DCLANG_PTR) text;
+            DCLANG_PTR text_ptr = (DCLANG_PTR)text;
             int charsize = strlen(text);
             // update print safety:
             if (text_ptr < MIN_STR || MIN_STR == 0)
@@ -2975,13 +2989,13 @@ void dclang_execute() {
             NEXT;
         _OP_PM_OPENOUT:
             Pm_GetDefaultOutputDeviceID();
-            DCLANG_INT midi_out_device = (DCLANG_LONG) POP;
+            DCLANG_INT midi_out_device = (DCLANG_LONG)POP;
             Pm_OpenOutput(&midi_out_stream, midi_out_device, NULL, 0, NULL, NULL , 0);
             NEXT;
         _OP_PM_WS:
-            midi_data2 = (DCLANG_LONG) POP;
-            midi_data1 = (DCLANG_LONG) POP;
-            midi_status = (DCLANG_LONG) POP;
+            midi_data2 = (DCLANG_LONG)POP;
+            midi_data1 = (DCLANG_LONG)POP;
+            midi_status = (DCLANG_LONG)POP;
             Pm_WriteShort(
                 midi_out_stream,
                 TIME_PROC(TIME_INFO),
@@ -2989,9 +3003,9 @@ void dclang_execute() {
             );
             NEXT;
         _OP_PM_WSR:
-            midi_status = (DCLANG_LONG) POP;
-            midi_data1 = (DCLANG_LONG) POP;
-            midi_data2 = (DCLANG_LONG) POP;
+            midi_status = (DCLANG_LONG)POP;
+            midi_data1 = (DCLANG_LONG)POP;
+            midi_data2 = (DCLANG_LONG)POP;
             Pm_WriteShort(
                 midi_out_stream,
                 0,
@@ -3000,7 +3014,7 @@ void dclang_execute() {
             NEXT;
         _OP_PM_OPENIN:
             Pm_GetDefaultInputDeviceID();
-            DCLANG_INT midi_in_device = (DCLANG_LONG) POP;
+            DCLANG_INT midi_in_device = (DCLANG_LONG)POP;
             PmError open_status;
             open_status = Pm_OpenInput(&midi_in_stream, midi_in_device, NULL, 1, NULL, NULL);
             if (open_status != 0) fprintf(stderr, "Error opening MIDI input: %i\n", open_status);
@@ -3012,14 +3026,14 @@ void dclang_execute() {
             event_status = Pm_Read(midi_in_stream, event, 1);
             //if (event_status < 0) fprintf(stderr, "Error receiving MIDI event: %i\n", event_status);
             if (event_status > 0) {
-                push((DCLANG_LONG) Pm_MessageData2(event[0].message));
-                push((DCLANG_LONG) Pm_MessageData1(event[0].message));
-                push((DCLANG_LONG) Pm_MessageStatus(event[0].message));
+                push((DCLANG_LONG)Pm_MessageData2(event[0].message));
+                push((DCLANG_LONG)Pm_MessageData1(event[0].message));
+                push((DCLANG_LONG)Pm_MessageStatus(event[0].message));
             } else {
                 // Nothing there, or read error, push -1
-                push((DCLANG_LONG) -1);
-                push((DCLANG_LONG) -1);
-                push((DCLANG_LONG) -1);
+                push((DCLANG_LONG)-1);
+                push((DCLANG_LONG)-1);
+                push((DCLANG_LONG)-1);
             }
             NEXT;
         _OP_PM_CLOSE:
@@ -3437,9 +3451,9 @@ void compile_or_interpret(const char *token) {
         if (strcmp(const_keys[const_search_idx], token) == 0) {
             if (def_mode) {
                 prog[iptr].opcode = OP_PUSH;
-                prog[iptr++].param = (DCLANG_FLT) const_vals[const_search_idx];
+                prog[iptr++].param = (DCLANG_FLT)const_vals[const_search_idx];
             } else {
-                push((DCLANG_FLT) const_vals[const_search_idx]);
+                push((DCLANG_FLT)const_vals[const_search_idx]);
             }
             return;
         }
@@ -3450,9 +3464,9 @@ void compile_or_interpret(const char *token) {
         if (strcmp(var_keys[var_search_idx], token) == 0) {
             if (def_mode) {
                 prog[iptr].opcode = OP_PUSH;
-                prog[iptr++].param = (DCLANG_FLT) var_vals[var_search_idx];
+                prog[iptr++].param = (DCLANG_FLT)var_vals[var_search_idx];
             } else {
-                push((DCLANG_FLT) var_vals[var_search_idx]);
+                push((DCLANG_FLT)var_vals[var_search_idx]);
             }
             return;
         }
@@ -3497,7 +3511,6 @@ void _repl() {
                 locals_idx = 0;
                 while (strcmp(token = get_token(), "}")) {
                     // Add key to ongoing array of keys
-                    //printf("Token is: %s\n", token);
                     locals_keys[locals_base_idx + locals_idx] = (DCLANG_PTR)token;
                     locals_idx += 1;
                 }
@@ -3506,7 +3519,7 @@ void _repl() {
                 // onto the locals_vals array:
                 for (int i=0; i<locals_idx; i++) {
                     prog[iptr].opcode = OP_SET_LOCAL;
-                    prog[iptr++].param = (DCLANG_FLT) i;
+                    prog[iptr++].param = (DCLANG_FLT)i;
                 }
             } else {
                 printf("Illegal use of '{' (locals definition) outside of word definition\n");
@@ -3533,7 +3546,7 @@ void _execfunc() {
         printf("exec -- stack underflow; needs a string representing a word or primitive on the stack! ");
         return;
     }
-    DCLANG_PTR string_uint_addr = (DCLANG_PTR) POP;
+    DCLANG_PTR string_uint_addr = (DCLANG_PTR)POP;
     if (string_uint_addr < MIN_STR || string_uint_addr > MAX_STR)
     {
         perror("exec -- String address out-of-range.");
