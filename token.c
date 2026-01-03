@@ -150,8 +150,23 @@ void add_to_buf(char ch) {
 
 char *buf2str() {
     buf[bufused++] = '\0';
-    return dclang_strdup(buf);
+    return buf;
 }
+
+//////////////////////////////////////////////////////////////////////////////////////
+// NOTE:                                                                            //
+// Tokens returned by get_token()/buf2str() are ephemeral.                          //
+// Any word that needs to retain a token must copy it with dclang_strdup().         //
+//                                                                                  //
+// N.B. that strings returned by `stringfunc()` (which is invisible to the user,    //
+// but called by `get_token()`, and triggered by the occurrence of '"' in the input //
+// stream) have their own *separate lifetime* from `get_token()`, and by design,    //
+// string creation _always_ leaks memory, unless immediately freed after use via    //
+// `free`.                                                                          //
+//                                                                                  //
+// As mentioned elsewhere, the correct memory-conserving pattern for strings in     //
+// `dclang` is to bind them to a `const` or `var` and (re)-use that binding.        //
+//////////////////////////////////////////////////////////////////////////////////////
 
 // End helpers for `get_token()`
 

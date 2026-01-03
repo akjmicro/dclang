@@ -54,10 +54,11 @@ DCLANG_LONG dclang_import(char *infilestr) {
         infile = fopen(infilestr, "r");
         setinput(infile);
         repl();
+        fclose(infile);
         live_repl = saved_live_repl;
         return 0;
     }
-    char *full_path = dclang_malloc(512);
+    char full_path[512];
     memset(full_path, 0, 512);
     char *slash = "/";
     strcat(full_path, prefix);
@@ -67,6 +68,7 @@ DCLANG_LONG dclang_import(char *infilestr) {
         FILE *infile = fopen(full_path, "r");
         setinput(infile);
         repl();
+        fclose(infile);
         live_repl = saved_live_repl;
         return 0;
     }
@@ -983,7 +985,7 @@ void dclang_execute() {
         // variables
         OP_VARIABLE:
             next_var = vars_idx++;
-            var_keys[var_map_idx] = get_token();
+            var_keys[var_map_idx] = dclang_strdup(get_token());
             var_vals[var_map_idx++] = next_var;
             NEXT;
         OP_POKE:
@@ -1025,7 +1027,7 @@ void dclang_execute() {
             NEXT;
         OP_CREATE:
             next_var = vars_idx++;
-            var_keys[var_map_idx] = get_token();
+            var_keys[var_map_idx] = dclang_strdup(get_token());
             var_vals[var_map_idx++] = next_var;
             --vars_idx;
             NEXT;
@@ -1042,7 +1044,7 @@ void dclang_execute() {
             push((DCLANG_PTR)vars_idx);
             NEXT;
         OP_CONSTANT:
-            const_keys[const_idx] = get_token();
+            const_keys[const_idx] = dclang_strdup(get_token());
             const_vals[const_idx++] = POP;
             NEXT;
         // environment variables
@@ -3498,7 +3500,7 @@ void _repl() {
             // grab name
             char *this_token;
             // TODO: validation
-            this_token = get_token();
+            this_token = dclang_strdup(get_token());
             // put name and current location in user_words lookup array
             user_words[num_user_words].name = this_token;
             user_words[num_user_words++].word_start = iptr;
@@ -3511,7 +3513,7 @@ void _repl() {
                 locals_idx = 0;
                 while (strcmp(token = get_token(), "}")) {
                     // Add key to ongoing array of keys
-                    locals_keys[locals_base_idx + locals_idx] = (DCLANG_PTR)token;
+                    locals_keys[locals_base_idx + locals_idx] = (DCLANG_PTR) dclang_strdup(token);
                     locals_idx += 1;
                 }
                 reverse_array(locals_keys + locals_base_idx, locals_idx - 1);
@@ -3535,7 +3537,6 @@ void _repl() {
         }
         // Ok, finally 'compile' the token, or interpret it on-the-fly
         compile_or_interpret(token);
-        dclang_free(token);  // save memory!
     }
     compile_or_interpret(0);
 }
