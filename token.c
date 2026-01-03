@@ -90,6 +90,10 @@ void stringfunc() {
     int stat = -1;
     char *scratch = &memory_pool[unused_mem_idx];
     char *scratch_start = scratch;
+    // record where we are for `free` to use for rewinds
+    if (alloc_stack_top < ALLOC_STACK_DEPTH) {
+        alloc_stack[alloc_stack_top++] = unused_mem_idx;
+    }
     in_string = 1;
     // Get the first character
     if ((ch = get_char()) == EOF) exit(0);
