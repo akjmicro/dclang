@@ -335,3 +335,43 @@ var _strtok_state
   endif
   _str_split_real
 ;
+
+: chop_head { haystack needle }
+  # `chop_head` will cut the front off of a `haystack` string,
+  # all the way up to the end of the match of `needle_str`.
+  # Example:
+  # "This is my special sentence, full of sauce" ", " chop_head
+  # will return:
+  # "full of sauce"
+  haystack needle strfind needle strlen +  # ( newstr )
+  dup        # ( newstr newstr )
+  strlen 1 + # ( newstr newlen )
+  mkbuf      # ( newstr result )
+  dup svpush # ( newstr result )   -> ( result )
+  swap       # ( result newstr )      ( result )
+  dup strlen # ( result newstr size ) ( result )
+  mempcpy    # ( )                    ( result )
+  svpop      # ( result )
+;
+
+: chop_tail { haystack needle }
+  # `chop_tail` will cut the back off of a `haystack` string,
+  # starting from the match of `needle_str`.
+  # Example:
+  # "This is my special sentence, full of sauce" ", " chop_tail
+  # will return:
+  # "This is my special sentence"
+  haystack dup needle strfind "" strreplace
+;
+
+: chop_between { haystack needle1 needle2 }
+  # Combines `chop_head` and `chop_tail` to return a middle string
+  # Example:
+  # "This is my special sentence, full of sauce" ", " " of" chop_between
+  # will return:
+  # "full"
+  haystack needle1 chop_head needle2 chop_tail
+;
+
+"This is my special sentence, full of sauce" ", " " of" chop_between
+"full" str= assert

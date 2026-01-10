@@ -3257,10 +3257,6 @@ void add_all_primitives() {
     add_primitive("mkbuf", "Memory", OP_MKBUF);
     add_primitive("free", "Memory", OP_FREE);
     add_primitive("memused", "Memory", OP_MEMUSED);
-    // regex
-    add_primitive("regcomp", "Regex", OP_REGCOMP);
-    add_primitive("regexec", "Regex", OP_REGEXEC);
-    add_primitive("regread", "Regex", OP_REGREAD);
     // file
     add_primitive("import", "Files", OP_IMPORT);
     add_primitive("fopen", "Files", OP_FILEOPEN);
@@ -3302,6 +3298,10 @@ void add_all_primitives() {
     // dynamic input
     add_primitive("exec", "Dynamic Input", OP_EXEC);
     add_primitive("input", "Dynamic Input", OP_INPUT);
+    // regex -- now "private"
+    add_primitive("_regcomp", "Regex", OP_REGCOMP);
+    add_primitive("_regexec", "Regex", OP_REGEXEC);
+    add_primitive("_regread", "Regex", OP_REGREAD);
     // SQLite3 interface
     add_primitive("_sqlite_open", "SQLite", _OP_SQLITEOPEN);
     add_primitive("_sqlite_prepare", "SQLite", _OP_SQLITEPREPARE);

@@ -1,0 +1,12 @@
+"string.dc" import
+
+: match { needle haystack flags which_match }
+    haystack
+      needle 1 _regcomp
+        over
+          flags
+      _regexec
+        which_match
+        _regread
+    strslice
+;
