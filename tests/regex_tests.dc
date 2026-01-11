@@ -1,21 +1,53 @@
 "regex.dc" import
 
-var pattern
-"([[:digit:]]+)[[:blank:]]+(things)"
-pattern !
+"([[:digit:]]+)[[:blank:]]+(things)" const :pattern
+"(?in).+@(fraud|evil.*|pwned).com"   const :email_pattern
 
 var phrase
 "I have 1024 things right here!"
 phrase !
 
-pattern @ phrase @ 0 0 match
+var nomatch_phrase
+"This won't have a match."
+nomatch_phrase !
+
+# Tests
+:pattern phrase @ 0 match
   "1024 things"
 str= assert
 
-pattern @ phrase @ 0 1 match
+:pattern phrase @ 1 match
   "1024"
 str= assert
 
-pattern @ phrase @ 0 2 match
+:pattern phrase @ 2 match
   "things"
 str= assert
+
+:pattern phrase @ 3 match
+  ""
+str= assert
+
+:pattern nomatch_phrase @ 0 match
+  ""
+str= assert
+
+# test ignoring of case
+"(?i)something" "SomEThiNG" 0 match
+  "SomEThiNG"
+str= assert
+
+"(?n)(.*?)$" "end\nbegin" 1 match
+  "end"
+str= assert
+
+# some fraud email-pattern tests:
+:email_pattern "melvin@EvILsguy.Com" matches?   true  = assert
+:email_pattern "melvin@DEvILsguy.Com" matches?  false = assert
+:email_pattern "melvin@FrAUD.Com" matches?      true  = assert
+:email_pattern "melvin@pWned.com" matches?      true  = assert
+:email_pattern "melvin@pwned.org" matches?      false = assert
+
+# error test
+"The following is meant to error on purpose:" print cr
+"(?i)[xbad" "bogus" 0 match  -1 = assert

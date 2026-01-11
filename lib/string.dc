@@ -25,6 +25,15 @@ const :STRREPLACE_UNDERFLOW_ERROR
 "str_split needs <str_to_split> <split_char> on the stack"
 const :STRSPLIT_UNDERFLOW_ERROR
 
+"`chop_head` needs <haystack_str> <needle_str> on the stack"
+const :CHOP_HEAD_ERROR
+
+"`chop_tail` needs <haystack_str> <needle_str> on the stack"
+const :CHOP_TAIL_ERROR
+
+"`chop_between` needs <haystack_str> <needle1_str> <needle2_str> on the stack"
+const :CHOP_BETWEEN_ERROR
+
 : strdup
   # copies a string; leaves the new string's
   # beginning address on the stack
@@ -336,13 +345,19 @@ var _strtok_state
   _str_split_real
 ;
 
-: chop_head { haystack needle }
+: chop_head
+  depth 2 <
+  if
+    :CHOP_HEAD_ERROR print cr
+    return
+  endif
+  { haystack needle }
   # `chop_head` will cut the front off of a `haystack` string,
   # all the way up to the end of the match of `needle_str`.
   # Example:
-  # "This is my special sentence, full of sauce" ", " chop_head
+  # "This is my sentence, full of magic sauce." ", " chop_head
   # will return:
-  # "full of sauce"
+  # "full of magic sauce."
   haystack needle strfind needle strlen +  # ( newstr )
   dup        # ( newstr newstr )
   strlen 1 + # ( newstr newlen )
@@ -350,28 +365,38 @@ var _strtok_state
   dup svpush # ( newstr result )   -> ( result )
   swap       # ( result newstr )      ( result )
   dup strlen # ( result newstr size ) ( result )
-  mempcpy    # ( )                    ( result )
+  mempcpy    # ( end_of_buf )         ( result )
+  drop       # ( )                    ( result )
   svpop      # ( result )
 ;
 
-: chop_tail { haystack needle }
+: chop_tail
+  depth 2 <
+  if
+    :CHOP_TAIL_ERROR print cr
+    return
+  endif
+  { haystack needle }
   # `chop_tail` will cut the back off of a `haystack` string,
   # starting from the match of `needle_str`.
   # Example:
-  # "This is my special sentence, full of sauce" ", " chop_tail
+  # "This is my sentence, full of magic sauce." ", " chop_tail
   # will return:
-  # "This is my special sentence"
+  # "This is my sentence"
   haystack dup needle strfind "" strreplace
 ;
 
-: chop_between { haystack needle1 needle2 }
+: chop_between
+  depth 3 <
+  if
+    :CHOP_BETWEEN_ERROR print cr
+    return
+  endif
+  { haystack needle1 needle2 }
   # Combines `chop_head` and `chop_tail` to return a middle string
   # Example:
-  # "This is my special sentence, full of sauce" ", " " of" chop_between
+  # "This is my sentence, full of magic sauce." ", " " of" chop_between
   # will return:
   # "full"
   haystack needle1 chop_head needle2 chop_tail
 ;
-
-"This is my special sentence, full of sauce" ", " " of" chop_between
-"full" str= assert

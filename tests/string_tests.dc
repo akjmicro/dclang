@@ -53,3 +53,10 @@ split_list @ 2 l@ "a"     str= assert
 split_list @ 3 l@ "line"  str= assert
 split_list @ 4 l@ "to"    str= assert
 split_list @ 5 l@ "split" str= assert
+
+# testing the new chop_* words:
+
+"This is my sentence, full of magic sauce." const :test_sentence
+:test_sentence ", "       chop_head     "full of magic sauce."       str= assert
+:test_sentence " of"      chop_tail     "This is my sentence, full"  str= assert
+:test_sentence ", " " of" chop_between  "full"                       str= assert

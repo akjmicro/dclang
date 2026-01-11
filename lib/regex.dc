@@ -1,12 +1,129 @@
 "string.dc" import
 
-: match { needle haystack flags which_match }
-    haystack
-      needle 1 _regcomp
-        over
-          flags
-      _regexec
-        which_match
-        _regread
-    strslice
+"" const :blank
+
+"`match` needs <needle_regex_str> <haystack> <which_match_idx> on the stack.
+N.B. that <needle_regex_str> can have a front-part denoting up to four options,
+each a single letter, like so: \"(?inbe)<rest_of_regex>\", where the options are:
+  i -> REG_ICASE   (case-insensitive matching)
+  n -> REG_NEWLINE (. does not match newline)
+  b -> REG_NOTBOL  (^ does not match beginning of line)
+  e -> REG_NOTEOL  ($ does not match end-of-line)
+" const :MATCH_ERR
+
+"`matches?` needs <neelde_regex_str> <haystack> on the stack.
+N.B. that <needle_regex_str> can have a front-part denoting up to four options,
+each a single letter, like so: \"(?inbe)<rest_of_regex>\", where the options are:
+  i -> REG_ICASE   (case-insensitive matching)
+  n -> REG_NEWLINE (. does not match newline)
+  b -> REG_NOTBOL  (^ does not match beginning of line)
+  e -> REG_NOTEOL  ($ does not match end-of-line)
+" const :MATCHES_ERR
+
+"([(][?]([inbe]{1,4})?[)])?(.*)" const :regex_options
+"i" const :i
+"n" const :n
+"b" const :b
+"e" const :e
+
+###################################################################### 
+# For these constants, see the reference meaning in `regex.h`,       #
+# which usually lives in someplace like `/usr/include/regex.h`       #
+# Here, for compatibility, they are mapped exactly.                  #
+#                                                                    #
+# They can be `or`-ed to get a singel integer flag, e.g.             #
+# (spaces used for argument clarity):                                #
+#                                                                    #
+# "something" "SomeThiNg"  REG_EXTENDED REG_ICASE or   0   0   match #
+######################################################################
+
+# cflags for `_regcomp`
+1 const REG_EXTENDED
+2 const REG_ICASE
+4 const REG_NEWLINE
+# N.B. REG_NOSUB is not considered
+
+# eflags for `_regexec`, see the C-implementation in regex.h
+# These are actually l-shifted by 3 so they can be `and`-ed later and shifted
+# back, folding all options into an easy API
+8  const REG_NOTBOL
+16 const REG_NOTEOL
+
+: _match
+  { needle regcomp_flags regexec_flags haystack which_match }
+  needle regcomp_flags _regcomp
+  dup -1 =
+  if
+    return
+  else
+    haystack swap over regexec_flags _regexec
+    dup -1 =
+    if
+      # ( haystack regobj )
+      2drop
+      :blank return
+    else
+      which_match # ( haystack regobj which_match )
+      _regread    # ( haystack so eo )
+      dup -1 =
+      if          # ( haystack so eo )
+        2drop drop
+        :blank return
+      else
+        strslice strdup
+      endif
+    endif
+  endif
+;
+
+: _derive_real_needle_and_flags { needle_with_options }
+  # A helper used to feed flag options via front-extensions
+  # to the regex expression, fed by `"(?inbe)..."` options
+  # inside parens at the front of a regex string.
+  # Any option can be present of the four:
+  #
+  # i = REG_ICASE
+  # n = REG_NEWLINE
+  # b = REG_NOTBOL
+  # e = REG_NOTEOL
+  #:regex_options 1 _regcomp
+  #needle_with_options 0 _regexec   # ( reg_obj )
+  #dup svpush                       # ( reg_obj )          ( reg_obj )
+  #needle_with_options swap         # ( needle reg_obj )     ...
+  #3 _regread strslice strdup       # ( real_regex_str )     ...
+  #needle_with_options svpop        # ( real_regex_str needle reg_obj ) ()
+  #2 _regread strslice strdup       # ( real_regex_str options_str )
+  :regex_options 1 0 needle_with_options 3 _match
+  :regex_options 1 0 needle_with_options 2 _match
+  REG_EXTENDED                     # ( real_regex_str options_str EXT )
+  over :i strfind if REG_ICASE   or endif
+  over :n strfind if REG_NEWLINE or endif
+  over :b strfind if REG_NOTBOL  or endif
+  over :e strfind if REG_NOTEOL  or endif
+  swap drop
+;
+
+: match
+  depth 3 <
+  if
+    :MATCH_ERR print cr
+    return
+  endif
+  { needle haystack which_match }
+  needle _derive_real_needle_and_flags # ( needle derived_opts )
+  dup                                  # ( needle derived_opts derived_opts )
+  3 >>                                 # ( needle regcomp_opts regexec_opts )
+  haystack which_match
+  _match
+;
+
+: matches?
+  depth 2 <
+  if
+    :MATCHES_ERR print cr
+    return
+  endif
+  { needle haystack }
+  needle haystack 0 match
+  strlen 0 >
 ;

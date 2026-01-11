@@ -2343,15 +2343,17 @@ void dclang_execute() {
             if (pattern_ptr_addr < MIN_STR || pattern_ptr_addr > MAX_STR)
             {
                 perror("regcomp -- Pattern address out-of-range.\n");
+                push((DCLANG_LONG)-1);
                 return;
             }
             char *pattern = (char *)pattern_ptr_addr;
             // Compile the regex pattern
-            regex= (regex_t *)dclang_malloc(sizeof(regex_t));
+            regex = (regex_t *)dclang_malloc(sizeof(regex_t));
             if (regcomp(regex, pattern, (DCLANG_INT)regex_flags)!= 0)
             {
-                perror("regcomp -- Error compiling regex pattern\n");
+                perror("_regcomp -- Error compiling regex pattern\n");
                 dclang_free(regex);
+                push((DCLANG_LONG)-1);
                 return;
             }
             // Push the compiled regex object pointer onto the stack
@@ -2360,19 +2362,26 @@ void dclang_execute() {
         OP_REGEXEC:
             if (data_stack_ptr < 3)
             {
-                printf("regexec -- stack underflow; need <regexobj> <string_to_search> <regex_flags> on the stack!\n");
+                printf("_regexec -- stack underflow; need <regexobj> <string_to_search> <regex_flags> on the stack!\n");
                 return;
             }
             // Pop the input string and the compiled regex object from the stack
             regex_flags = (DCLANG_INT)POP;
             DCLANG_PTR input_str_ptr_addr = (DCLANG_PTR)POP;
             DCLANG_PTR regex_obj_PTR = (DCLANG_PTR)POP;
-            if (regex_obj_PTR < 0 || input_str_ptr_addr < MIN_STR || input_str_ptr_addr > MAX_STR)
+            if (regex_obj_PTR < 0)
             {
-                perror("regexec -- Invalid regex object or string address.\n");
+                perror("_regexec -- Invalid regex object.\n");
+                push((DCLANG_LONG)-1);
                 return;
             }
-            regex= (regex_t *)regex_obj_PTR;
+            if (input_str_ptr_addr < MIN_STR || input_str_ptr_addr > MAX_STR)
+            {
+                perror("_regexec -- Invalid string address for input string.\n");
+                push((DCLANG_LONG)-1);
+                return;
+            }
+            regex = (regex_t *)regex_obj_PTR;
             char *input_str = (char *)input_str_ptr_addr;
             // Execute the regex matching
             regmatch_t *match = (regmatch_t *)dclang_malloc(10 * sizeof(regmatch_t));

@@ -213,7 +213,8 @@ A non-exhaustive notes on some of the things implemented thus far:
       `ispunct`, `isspace`, `isupper`, `isxdigit` -- all of these can take the integer output
       from `ord` and return `-1` (true) or `0` (false) for determining the class of a given character.
       (N.B.: If given a string of len > 1, `ord` uses the first character of the string by default.)
-    * regex primitives: `regcomp`, `regexec`, and `regread`
+    * a `regex.dc` library, which uses the private regex primitives: `_regcomp`, `_regexec`, and `_regread`
+      in a `match` word, giving basic regex functionality.
   * Variables/Arrays:
     * Declare a constant with `const`:
         ```
