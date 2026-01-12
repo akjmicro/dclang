@@ -356,10 +356,6 @@ enum dclang_opcodes {
     OP_MKBUF,
     OP_FREE,
     OP_MEMUSED,
-    // regex
-    OP_REGCOMP,
-    OP_REGEXEC,
-    OP_REGREAD,
     // file
     OP_IMPORT,
     OP_FILEOPEN,
@@ -400,6 +396,10 @@ enum dclang_opcodes {
     OP_SHOWVARS,
     OP_EXEC,
     OP_INPUT,
+    // regex
+    _OP_REGCOMP,
+    _OP_REGEXEC,
+    _OP_REGREAD,
     // sqlite3
     _OP_SQLITEOPEN,
     _OP_SQLITEPREPARE,

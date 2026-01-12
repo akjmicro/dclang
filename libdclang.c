@@ -357,9 +357,6 @@ void dclang_execute() {
         &&OP_MKBUF,
         &&OP_FREE,
         &&OP_MEMUSED,
-        &&OP_REGCOMP,
-        &&OP_REGEXEC,
-        &&OP_REGREAD,
         &&OP_IMPORT,
         &&OP_FILEOPEN,
         &&OP_FILEMEMOPEN,
@@ -394,6 +391,9 @@ void dclang_execute() {
         &&OP_SHOWVARS,
         &&OP_EXEC,
         &&OP_INPUT,
+        &&_OP_REGCOMP,
+        &&_OP_REGEXEC,
+        &&_OP_REGREAD,
         &&_OP_SQLITEOPEN,
         &&_OP_SQLITEPREPARE,
         &&_OP_SQLITESTEP,
@@ -2331,92 +2331,6 @@ void dclang_execute() {
             DCLANG_FLT memused = (DCLANG_FLT)(((float) unused_mem_idx) / ((float) MEMSIZE));
             push(memused);
             NEXT;
-        OP_REGCOMP:
-            if (data_stack_ptr < 2)
-            {
-                printf("regcomp -- stack underflow: need <pattern> <regex_flags> on the stack!\n");
-                return;
-            }
-            // Pop the regex pattern from the stack
-            regex_flags = (DCLANG_INT)POP;
-            DCLANG_PTR pattern_ptr_addr = (DCLANG_PTR)POP;
-            if (pattern_ptr_addr < MIN_STR || pattern_ptr_addr > MAX_STR)
-            {
-                perror("regcomp -- Pattern address out-of-range.\n");
-                push((DCLANG_LONG)-1);
-                return;
-            }
-            char *pattern = (char *)pattern_ptr_addr;
-            // Compile the regex pattern
-            regex = (regex_t *)dclang_malloc(sizeof(regex_t));
-            if (regcomp(regex, pattern, (DCLANG_INT)regex_flags)!= 0)
-            {
-                perror("_regcomp -- Error compiling regex pattern\n");
-                dclang_free(regex);
-                push((DCLANG_LONG)-1);
-                return;
-            }
-            // Push the compiled regex object pointer onto the stack
-            push((DCLANG_PTR)regex);
-            NEXT;
-        OP_REGEXEC:
-            if (data_stack_ptr < 3)
-            {
-                printf("_regexec -- stack underflow; need <regexobj> <string_to_search> <regex_flags> on the stack!\n");
-                return;
-            }
-            // Pop the input string and the compiled regex object from the stack
-            regex_flags = (DCLANG_INT)POP;
-            DCLANG_PTR input_str_ptr_addr = (DCLANG_PTR)POP;
-            DCLANG_PTR regex_obj_PTR = (DCLANG_PTR)POP;
-            if (regex_obj_PTR < 0)
-            {
-                perror("_regexec -- Invalid regex object.\n");
-                push((DCLANG_LONG)-1);
-                return;
-            }
-            if (input_str_ptr_addr < MIN_STR || input_str_ptr_addr > MAX_STR)
-            {
-                perror("_regexec -- Invalid string address for input string.\n");
-                push((DCLANG_LONG)-1);
-                return;
-            }
-            regex = (regex_t *)regex_obj_PTR;
-            char *input_str = (char *)input_str_ptr_addr;
-            // Execute the regex matching
-            regmatch_t *match = (regmatch_t *)dclang_malloc(10 * sizeof(regmatch_t));
-            if (regexec(regex, input_str, 10, match, (DCLANG_INT)regex_flags) == 0)
-            {
-                // If a match is found, push the match object onto the stack
-                push((DCLANG_PTR)match);
-            }
-            else
-            {
-                // No match found, push -1 to indicate failure
-                push((DCLANG_LONG)-1);
-            }
-            NEXT;
-        OP_REGREAD:
-            if (data_stack_ptr < 2)
-            {
-                printf("regread -- stack underflow; need <regexec_result> <match_index> on the stack! \n");
-                printf("regread will return a start and end index relative to the original searched string. \n");
-                printf("If the user actually wants that substring, it makes sense to have saved the original \n");
-                printf("string, and put the results of regread at the top of stack, then call `strslice`,\n");
-                printf("which needs to be imported from the 'string' module.\n");
-                return;
-            }
-            DCLANG_LONG index = (DCLANG_LONG)POP;
-            DCLANG_PTR regmatch_pnt = (DCLANG_PTR)POP;
-            if ((DCLANG_LONG)regmatch_pnt > 0) {
-                regmatch_t *match = (regmatch_t *)regmatch_pnt;
-                push((DCLANG_LONG)(match[index].rm_so));
-                push((DCLANG_LONG)(match[index].rm_eo));
-            } else {
-                push((DCLANG_LONG)-1);
-                push((DCLANG_LONG)-1);
-            }
-            NEXT;
         OP_IMPORT:
             if (data_stack_ptr < 1) {
                 printf("import -- stack underflow! ");
@@ -2900,6 +2814,92 @@ void dclang_execute() {
             push(str_ptr_addr);
             revertinput();
             NEXT;
+        _OP_REGCOMP:
+            if (data_stack_ptr < 2)
+            {
+                printf("regcomp -- stack underflow: need <pattern> <regex_flags> on the stack!\n");
+                return;
+            }
+            // Pop the regex pattern from the stack
+            regex_flags = (DCLANG_INT)POP;
+            DCLANG_PTR pattern_ptr_addr = (DCLANG_PTR)POP;
+            if (pattern_ptr_addr < MIN_STR || pattern_ptr_addr > MAX_STR)
+            {
+                perror("regcomp -- Pattern address out-of-range.\n");
+                push((DCLANG_LONG)-1);
+                return;
+            }
+            char *pattern = (char *)pattern_ptr_addr;
+            // Compile the regex pattern
+            regex = (regex_t *)dclang_malloc(sizeof(regex_t));
+            if (regcomp(regex, pattern, (DCLANG_INT)regex_flags)!= 0)
+            {
+                perror("_regcomp -- Error compiling regex pattern\n");
+                dclang_free(regex);
+                push((DCLANG_LONG)-1);
+                return;
+            }
+            // Push the compiled regex object pointer onto the stack
+            push((DCLANG_PTR)regex);
+            NEXT;
+        _OP_REGEXEC:
+            if (data_stack_ptr < 3)
+            {
+                printf("_regexec -- stack underflow; need <regexobj> <string_to_search> <regex_flags> on the stack!\n");
+                return;
+            }
+            // Pop the input string and the compiled regex object from the stack
+            regex_flags = (DCLANG_INT)POP;
+            DCLANG_PTR input_str_ptr_addr = (DCLANG_PTR)POP;
+            DCLANG_PTR regex_obj_PTR = (DCLANG_PTR)POP;
+            if (regex_obj_PTR < 0)
+            {
+                perror("_regexec -- Invalid regex object.\n");
+                push((DCLANG_LONG)-1);
+                return;
+            }
+            if (input_str_ptr_addr < MIN_STR || input_str_ptr_addr > MAX_STR)
+            {
+                perror("_regexec -- Invalid string address for input string.\n");
+                push((DCLANG_LONG)-1);
+                return;
+            }
+            regex = (regex_t *)regex_obj_PTR;
+            char *input_str = (char *)input_str_ptr_addr;
+            // Execute the regex matching
+            regmatch_t *match = (regmatch_t *)dclang_malloc(10 * sizeof(regmatch_t));
+            if (regexec(regex, input_str, 10, match, (DCLANG_INT)regex_flags) == 0)
+            {
+                // If a match is found, push the match object onto the stack
+                push((DCLANG_PTR)match);
+            }
+            else
+            {
+                // No match found, push -1 to indicate failure
+                push((DCLANG_LONG)-1);
+            }
+            NEXT;
+        _OP_REGREAD:
+            if (data_stack_ptr < 2)
+            {
+                printf("regread -- stack underflow; need <regexec_result> <match_index> on the stack! \n");
+                printf("regread will return a start and end index relative to the original searched string. \n");
+                printf("If the user actually wants that substring, it makes sense to have saved the original \n");
+                printf("string, and put the results of regread at the top of stack, then call `strslice`,\n");
+                printf("which needs to be imported from the 'string' module.\n");
+                return;
+            }
+            DCLANG_LONG index = (DCLANG_LONG)POP;
+            DCLANG_PTR regmatch_pnt = (DCLANG_PTR)POP;
+            if ((DCLANG_LONG)regmatch_pnt > 0) {
+                regmatch_t *match = (regmatch_t *)regmatch_pnt;
+                push((DCLANG_LONG)(match[index].rm_so));
+                push((DCLANG_LONG)(match[index].rm_eo));
+            } else {
+                push((DCLANG_LONG)-1);
+                push((DCLANG_LONG)-1);
+            }
+            NEXT;
         _OP_SQLITEOPEN:
             const char* db_path = (const char*)(DCLANG_PTR)POP;
             rc = sqlite3_open(db_path, &db);
@@ -3308,9 +3308,9 @@ void add_all_primitives() {
     add_primitive("exec", "Dynamic Input", OP_EXEC);
     add_primitive("input", "Dynamic Input", OP_INPUT);
     // regex -- now "private"
-    add_primitive("_regcomp", "Regex", OP_REGCOMP);
-    add_primitive("_regexec", "Regex", OP_REGEXEC);
-    add_primitive("_regread", "Regex", OP_REGREAD);
+    add_primitive("_regcomp", "Regex", _OP_REGCOMP);
+    add_primitive("_regexec", "Regex", _OP_REGEXEC);
+    add_primitive("_regread", "Regex", _OP_REGREAD);
     // SQLite3 interface
     add_primitive("_sqlite_open", "SQLite", _OP_SQLITEOPEN);
     add_primitive("_sqlite_prepare", "SQLite", _OP_SQLITEPREPARE);
