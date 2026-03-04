@@ -1,0 +1,159 @@
+############################################################################
+# This example explores a subset of musical linear temperaments called 
+# "meantone temperaments". The basis is typically an interval of a 
+# musical fifth (3/2) that has been flattened by some fraction of the 
+# syntonic comma (81/80, or the difference between the pure major 3d 
+# (5/4) and the Pythagorean 3rd (81/64)). The latter Pythagorean 3rd is 
+# formed by a stack of 4 3/2, AKA (3/2)^4, but octave-reduced to be in 
+# the range between 1 and 2).
+#
+# Illustrating as math:
+#
+# 3/2 * 3/2 * 3/2 * 3/2 = 81/16 -> 81/64 (drop 2 octaves)
+# (81/64) / (5/4) = 81/80, the syntonic comma
+#
+# Tempering the fifth by some fraction of the syntonic comma (81/80) 
+# allows for the 3rds which result from stacking the fifth as a "scale 
+# generator" to have a more in-tune, "sweeter" sound. The tradeoff is 
+# that the 5ths will be slightly flat and be a bit more "active" and 
+# beat slightly. Flattening the 5ths by various degrees of the comma 
+# allow for various degrees of compromise between 3rds (5th-overtone 
+# based intervals) and 5ths (3rd-overtone based intervals). Common 
+# values for flattening 5ths include: 1/4-comma, 1/3-comma, 1/5-comma, 
+# 1/6-comma, and 2/7-comma, although there are many other possibilities 
+# based on such fractional components. 1/4-comma is arguably the most 
+# historically common and important of this family of temperaments, so 
+# the fifth is by default set to the value of a 1/4-comma meantone fifth 
+# in this module. This can be changed to, e.g. 2/7 comma by:
+#
+#   2 7 / set_fifth  make_meantone
+#
+# Once you have set the fifth, the other thing this module does is to 
+# survey the accuracy of various interger overtone series 
+# representations of the given meantone temperament. For example, to 
+# explore the accuracy of the overtones from 64 to 256 as a starting 
+# point "denominator", you'd do:
+#
+#   64 257 meantone2int_survey
+#
+# This will give a pipe-delimited list of the overtone and its maximum 
+# absolute-val log2 (octave) error from the ideal for each pitch in the 
+# gamut. Once you found an interesting example, you can examine an 
+# individual denominator via `meantone2int`. For example, when 1/4-comma 
+# is selected, 91 happens to be a pretty good optimal representation. 
+# So:
+#
+#   1 4 / set_fifth
+#   91 meantone2int
+#
+# ...will print out the output gamut, and give a log2 (octave) error for 
+# each individual pitch in the gamut.
+#
+# The gamut size itself can be changed via the `gamut_size` variable, as
+# can the `neg_fifths` variable, which, when gamut size is `12`, means that,
+# given "C" as a central pitch, and `neg_fifths` default value of `-3`, the
+# generator of fifths starts at "Eb" (3 generator fifths below C in the
+# musical circle of fifths.
+############################################################################
+
+"math.dc" import
+
+1.5 4 pow log2
+  5 log2
+-
+const COMMA
+
+var fifth
+
+: set_fifth { comma_frac }
+  1.5 log2  COMMA comma_frac *   -
+  fifth !
+;
+
+#################################
+# 1/4-comma meantone by default #
+#################################
+1 4 /  set_fifth
+
+var gamut_size  12 gamut_size  !
+var neg_fifths  -3 neg_fifths  !
+
+var gamut  256 allot
+
+var max_error
+
+"|" const :pipe
+"error: " const :error
+
+: make_meantone
+  gamut_size @ times
+    fifth @
+      i neg_fifths @ +
+    *
+      1
+    absmod
+      gamut i +
+    ! 
+  again
+  gamut  gamut_size @  sortnums
+;
+
+: show_meantone
+  gamut_size @ times
+    2
+      gamut i + @
+    pow
+    . cr
+  again
+;
+
+: meantone2int { scale }
+  make_meantone
+  gamut_size @ times
+    2
+      gamut i + @
+    pow
+      scale
+    *
+    round
+    dup
+    .
+    :error print
+      scale
+    /
+    log2
+      gamut i + @
+    -
+    . cr
+  again
+;
+
+: meantone2int_survey { min_scale max_scale }
+  make_meantone
+  max_scale min_scale 1 for
+    0 max_error !
+    gamut_size @ times
+      2
+        gamut i + @
+      pow
+        j
+      *
+      round
+        j
+      /
+      log2
+        gamut i + @
+      -
+      abs
+        dup
+          max_error @
+        >
+      if
+        max_error !
+      else
+        drop
+      endif
+    again
+    i .. :pipe print max_error @ . cr
+  next
+;
