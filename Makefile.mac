@@ -1,6 +1,7 @@
 CC = clang
-CFLAGS = -w -O3 -static -finline-functions
-LDFLAGS = -lm -lportmidi -lsqlite3
+BREW_PREFIX = /opt/homebrew
+CFLAGS = -w -O3 -finline-functions -I$(BREW_PREFIX)/include
+LDFLAGS = -L$(BREW_PREFIX)/lib -lm -lportmidi -lsqlite3
 LDDCLANG = -ldclang
 OBJECTS = main.o
 EXECUTABLE = dclang
@@ -30,10 +31,12 @@ libtest: lib install
 	$(CC) $(LIBTESTC) -o $@ $(LDDCLANG)
 
 install: lib dclang
-	cp -a $(HEADER) $(PREFIX)/include
-	cp -a $(LIBSOOBJ) $(PREFIX)/lib
+	mkdir -p $(PREFIX)/include $(PREFIX)/lib $(PREFIX)/bin
+	cp -a $(HEADER) $(PREFIX)/include/
+	cp -a $(LIBSOOBJ) $(PREFIX)/lib/
+	rm -f $(PREFIX)/lib/dclang
 	ln -s $(shell pwd)/lib $(PREFIX)/lib/dclang
-	cp -a $(EXECUTABLE) $(PREFIX)/bin
+	cp -a $(EXECUTABLE) $(PREFIX)/bin/
 
 clean:
 	rm -rf examples/*~ *~ dclang libtest *.o *.so

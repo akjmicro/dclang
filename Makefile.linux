@@ -1,5 +1,5 @@
 CC = gcc
-CFLAGS = -w -DHAS_TREEDESTROY -march=native -O3 -static -finline-functions
+CFLAGS = -w -march=native -O3 -static -finline-functions
 LDFLAGS = -lm -lportmidi -lsqlite3
 LDDCLANG = -ldclang
 OBJECTS = main.o
@@ -30,9 +30,10 @@ libtest: lib install
 	$(CC) $(LIBTESTC) -o $@ $(LDDCLANG)
 
 install: lib dclang
-	cp -a $(HEADER) $(PREFIX)/include
-	cp -a $(LIBSOOBJ) $(PREFIX)/lib
-	cp -a $(EXECUTABLE) $(PREFIX)/bin
+	mkdir -p $(PREFIX)/include $(PREFIX)/lib $(PREFIX)/bin
+	cp -a $(HEADER) $(PREFIX)/include/
+	cp -a $(LIBSOOBJ) $(PREFIX)/lib/
+	cp -a $(EXECUTABLE) $(PREFIX)/bin/
 
 clean:
 	rm -rf examples/*~ *~ dclang libtest *.o *.so

@@ -122,7 +122,9 @@ void stringfunc() {
             printf("Illegal escape sequence in string.\n");
             return;
         }
-        scratch = mempcpy(scratch, chbuf, strlen(chbuf));
+        size_t len = strlen(chbuf);
+        memcpy(scratch, chbuf, len);
+        scratch += len;
         if ((ch = get_char()) == EOF) exit(0);
         continue;
     }
