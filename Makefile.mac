@@ -40,3 +40,10 @@ install: lib dclang
 
 clean:
 	rm -rf examples/*~ *~ dclang libtest *.o *.so
+
+docker-image:
+	docker buildx build --builder multiarch \
+	                    --platform linux/amd64,linux/arm64 \
+	                    --tag akjmicro17/dclang:latest --load \
+	                    -f contrib/Dockerfile \
+	                    .

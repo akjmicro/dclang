@@ -8,14 +8,36 @@ int main(int argc, char **argv) {
         for(int opt = 1; opt < argc; opt++) {
             if (strcmp(argv[opt], "-i") == 0) {
                 live_repl = 1;
+            } else if (strcmp(argv[opt], "-e") == 0) {
+                if (opt + 1 < argc) {
+                    const char *code = argv[++opt];
+                    FILE *f = fmemopen((void*)code, strlen(code), "r");
+                    if (!f) {
+                        perror("fmemopen failed to open input!");
+                        return 1;
+                    }
+                    setinput(f);
+                    repl();
+                    fclose(f);
+                } else {
+                    fprintf(stderr, "dclang: -e requires an argument\n");
+                    return 1;
+                }
             } else {
                 dclang_import(argv[opt]);
             }
         };
     } else {
-        live_repl = 1;
+        if (isatty(STDIN_FILENO)) {
+            live_repl = 1;
+        } else {
+            repl();   // run interpreter on piped stdin
+            return 0;
+        }
     }
+
     if (live_repl) {
+        setinput(stdin);
         printf("Welcome to dclang! (v4.2.0) Aaron Krister Johnson, 2018-2026\n");
         printf("Make sure to peruse README.md to get your bearings!\n");
         printf("You can type 'primitives' to see a list of all the primitive (c-builtin) words.\n");

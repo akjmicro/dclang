@@ -33,7 +33,16 @@ install: lib dclang
 	mkdir -p $(PREFIX)/include $(PREFIX)/lib $(PREFIX)/bin
 	cp -a $(HEADER) $(PREFIX)/include/
 	cp -a $(LIBSOOBJ) $(PREFIX)/lib/
+	rm -f $(PREFIX)/lib/dclang
+	ln -s $(shell pwd)/lib $(PREFIX)/lib/dclang
 	cp -a $(EXECUTABLE) $(PREFIX)/bin/
 
 clean:
 	rm -rf examples/*~ *~ dclang libtest *.o *.so
+
+docker-image:
+	docker buildx build --builder multiarch \
+	                    --platform linux/amd64,linux/arm64 \
+	                    --tag akjmicro17/dclang:latest --load \
+	                    -f contrib/Dockerfile \
+	                    .

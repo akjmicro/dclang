@@ -1,4 +1,4 @@
-FROM alpine:latest
+FROM alpine:latest AS builder
 WORKDIR /dclang
 COPY . ./
 RUN apk add --no-cache build-base sqlite-dev portmidi-dev git rlwrap && \
@@ -16,18 +16,21 @@ CMD /bin/bash
 FROM busybox:1.36-glibc
 WORKDIR /
 # system needs
-COPY --from=0 /lib/ld-musl-x86_64.so.1 /lib/
-COPY --from=0 /usr/lib/libreadline* /usr/lib/
-COPY --from=0 /usr/lib/libncursesw* /usr/lib/
-COPY --from=0 /usr/lib/libasound* /usr/lib/
-COPY --from=0 /usr/lib/libsqlite3* /usr/lib/
+COPY --from=builder /lib/ld-musl-*.so.1 /lib/
+COPY --from=builder /usr/lib/libreadline* /usr/lib/
+COPY --from=builder /usr/lib/libptytty* /usr/lib
+COPY --from=builder /usr/lib/libncursesw* /usr/lib/
+COPY --from=builder /usr/lib/libgcc_s* /usr/lib
+COPY --from=builder /usr/lib/libasound* /usr/lib/
 # immediate lib deps
-COPY --from=0 /usr/lib/libportmidi* /usr/lib/
-COPY --from=0 /usr/local/lib/libdclang* /lib/
+COPY --from=builder /usr/lib/libsqlite3* /usr/lib/
+COPY --from=builder /usr/lib/libportmidi* /usr/lib/
+COPY --from=builder /usr/local/lib/libdclang* /lib/
 # binaries
-COPY --from=0 /usr/bin/rlwrap /usr/bin/
-COPY --from=0 /usr/local/bin/dclang /usr/bin/
+COPY --from=builder /usr/bin/rlwrap /usr/bin/
+COPY --from=builder /usr/local/bin/dclang /usr/bin/
 # environment
-COPY --from=0 /root/.profile /root/.profile
-COPY --from=0 /dclang* /dclang/
+COPY --from=builder /root/.profile /root/.profile
+COPY --from=builder /dclang* /dclang/
+# command entrypoint
 CMD sh -l
