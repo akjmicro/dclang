@@ -68,18 +68,18 @@ var four_digits 4 allot
   false
 ;
 
-: check_coverage { num }
+: check_coverage { num count }
   # checks if all numbers from 0 to num-1 are present in data
+  # returns the count of unique digits
   num 1 - num!  # decrement first
   num -1 = if
-    true return
+    count return
   endif
   num _number_present?
-  not if
-    false return
-  else
-    num check_coverage
+  if
+    count 1 + count!
   endif
+  num count check_coverage
 ;
 
 "|" const :PIPE
@@ -95,7 +95,7 @@ var four_digits 4 allot
       j .. :PIPE print
       i .. :PIPE print
       check_period .. :PIPE print
-      j check_coverage if :TRUE_STR else :FALSE_STR endif print cr
+      j 0 check_coverage .. cr
     next
   next
 ;
