@@ -11,7 +11,7 @@ each a single letter, like so: \"(?inbe)<rest_of_regex>\", where the options are
   e -> REG_NOTEOL  ($ does not match end-of-line)
 " const :MATCH_ERR
 
-"`matches?` needs <neelde_regex_str> <haystack> on the stack.
+"`matches?` needs <needle_regex_str> <haystack> on the stack.
 N.B. that <needle_regex_str> can have a front-part denoting up to four options,
 each a single letter, like so: \"(?inbe)<rest_of_regex>\", where the options are:
   i -> REG_ICASE   (case-insensitive matching)
@@ -26,16 +26,15 @@ each a single letter, like so: \"(?inbe)<rest_of_regex>\", where the options are
 "b" const :b
 "e" const :e
 
-###################################################################### 
-# For these constants, see the reference meaning in `regex.h`,       #
-# which usually lives in someplace like `/usr/include/regex.h`       #
-# Here, for compatibility, they are mapped exactly.                  #
-#                                                                    #
-# They can be `or`-ed to get a singel integer flag, e.g.             #
-# (spaces used for argument clarity):                                #
-#                                                                    #
-# "something" "SomeThiNg"  REG_EXTENDED REG_ICASE or   0   0   match #
-######################################################################
+####################################################################
+# For these constants, see the reference meaning in `regex.h`,     #
+# which usually lives in someplace like `/usr/include/regex.h`     #
+# Here, for compatibility, they are mapped exactly.                #
+#                                                                  #
+# Typically, one makes use of them via the `match` API in the form #
+# of the options "(?inbe)..." inside a regex pattern, rather than  #
+# having them used directly.                                       #
+####################################################################
 
 # cflags for `_regcomp`
 1 const REG_EXTENDED
@@ -86,13 +85,6 @@ each a single letter, like so: \"(?inbe)<rest_of_regex>\", where the options are
   # n = REG_NEWLINE
   # b = REG_NOTBOL
   # e = REG_NOTEOL
-  #:regex_options 1 _regcomp
-  #needle_with_options 0 _regexec   # ( reg_obj )
-  #dup svpush                       # ( reg_obj )          ( reg_obj )
-  #needle_with_options swap         # ( needle reg_obj )     ...
-  #3 _regread strslice strdup       # ( real_regex_str )     ...
-  #needle_with_options svpop        # ( real_regex_str needle reg_obj ) ()
-  #2 _regread strslice strdup       # ( real_regex_str options_str )
   :regex_options 1 0 needle_with_options 3 _match
   :regex_options 1 0 needle_with_options 2 _match
   REG_EXTENDED                     # ( real_regex_str options_str EXT )
