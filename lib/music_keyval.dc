@@ -11,39 +11,36 @@
 "w"          const :write
 "/tmp/keys/" const :tmpdir
 "\n"         const :newline
-var getbuf
-32 mkbuf getbuf !
-var setbuf
-32 mkbuf setbuf !
+64 const PATHBUF_SIZE
+var pathbuf
+PATHBUF_SIZE mkbuf pathbuf !
 var setvalbuf
 128 mkbuf setvalbuf !
 
 : keyval_get { key }
-  getbuf @ 0 32 memset
+  pathbuf @ 0 PATHBUF_SIZE memset
   :tmpdir str+ key str+ drop  # done building path string
-  getbuf @ :read fopen
+  pathbuf @ :read fopen
   dup -1 = if
     drop "0" return
   endif
-  dup freadall drop
+  dup freadline drop
   # cleanup
-  swap fclose
-  key free
+  swap dup fclose free
 ;
 
 : keyval_set { val key }
-  setbuf @ 0 32 memset
+  pathbuf @ 0 PATHBUF_SIZE memset
   :tmpdir str+ key str+ drop  # done building path string
   setvalbuf @ 0 128 memset
   val str+ :newline str+ drop  # done building val string
     setvalbuf @
       dup strlen
-        setbuf @ :write fopen dup svpush
+        pathbuf @ :write fopen dup svpush
     fwrite
   drop
   # cleanup
-  svpop fclose
-  key free
+  svpop dup fclose free
 ;
 
 # grab a string, turn it into a number,
