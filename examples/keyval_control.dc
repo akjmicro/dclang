@@ -1,5 +1,5 @@
 "http_server.dc"  import
-"music_keyval.dc" import
+"music.dc" import
 
 "keyval_control.html" "r" fopen dup
 freadall drop const SLIDER_HTML fclose
