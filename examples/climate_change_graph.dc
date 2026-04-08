@@ -5,6 +5,12 @@
 # place to hold our randomized values string
 var databuf
 65536 mkbuf databuf !
+var replace_buf
+65536 mkbuf replace_buf !
+var outer_replace_buf1
+65536 mkbuf outer_replace_buf1 !
+var outer_replace_buf2
+65536 mkbuf outer_replace_buf2 !
 
 # place we'll load the response string
 var climate_html
@@ -72,7 +78,11 @@ var which_var
   databuf @ 0 65536 memset drop   # clear the data buffer
   :tucson_airport_db sqlite3_open db !
     db @
-      query_to_run @ :which which_var @ strreplace
+      replace_buf @
+        query_to_run @
+          :which
+            which_var @
+      strreplace
       dup svpush
     sqlite3_prepare
   stmt !
@@ -89,24 +99,34 @@ var which_var
   # load minimum temp avgs
   BASIC_SQL_QUERY query_to_run !
   :tmin which_var ! make_data
-    :data_min databuf @ strreplace
-  climate_html !
+  outer_replace_buf1 @
+    swap
+      :data_min
+        databuf @
+  strreplace
   # load maximum temp avgs
   :tmax which_var ! make_data
-  climate_html @ dup
-    :data_max databuf @ strreplace
-  climate_html ! free
+  outer_replace_buf2 @
+    swap
+      :data_max
+        databuf @
+  strreplace
   # load 5-year running avg minimum
   RUNNING_AVG_QUERY query_to_run !
   :tmin which_var ! make_data
-  climate_html @ dup
-    :data_min_avg databuf @ strreplace
-  climate_html ! free
+  outer_replace_buf1 @
+    swap
+      :data_min_avg
+        databuf @
+  strreplace
   # load 5-year running avg maximum
   :tmax which_var ! make_data
-  climate_html @ dup
-    :data_max_avg databuf @ strreplace
-  climate_html ! free
+  outer_replace_buf2 @
+    swap
+      :data_max_avg
+        databuf @
+  strreplace
+  climate_html !
 ;
 
 : custom_response

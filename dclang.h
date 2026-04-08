@@ -11,6 +11,7 @@ Born on 2018-05-05 */
 #include <stdio.h>
 #include <stdlib.h>
 #include <inttypes.h>
+#include <errno.h>
 #include <string.h>
 #include <regex.h>
 #include <unistd.h>
@@ -20,9 +21,12 @@ Born on 2018-05-05 */
 #include <signal.h>
 #include <inttypes.h>
 #include <stdlib.h>
+#include <sys/types.h>
 #include <sys/socket.h>
+#include <sys/select.h>
 #include <netinet/in.h>
 #include <netdb.h>
+#include <arpa/inet.h>
 #include <sys/time.h>
 #include <time.h>
 #include <portmidi.h>
@@ -56,7 +60,7 @@ Born on 2018-05-05 */
 #define DATA_STACK_SIZE   32
 #define RETURN_STACK_SIZE 128
 #define MAXWORD           1048576
-#define MAX_OPCODES       208
+#define MAX_OPCODES       216
 #define IBUFSIZE          128
 #define NUMLOCALS         8
 #define NUMVARS           16777216
@@ -279,9 +283,7 @@ enum dclang_opcodes {
     OP_TREEGET,
     OP_TREEWALK,
     OP_TREEDELETE,
-#ifdef HAS_TREEDESTROY
     OP_TREEDESTROY,
-#endif
     // linked lists
     OP_LISTMAKE,
     OP_LISTNEXT,
@@ -355,6 +357,8 @@ enum dclang_opcodes {
     // memory buffers
     OP_MKBUF,
     OP_FREE,
+    OP_MARK,
+    OP_REWIND,
     OP_MEMUSED,
     // file
     OP_IMPORT,
@@ -381,8 +385,10 @@ enum dclang_opcodes {
     OP_TCPLISTEN,
     OP_TCPACCEPT,
     OP_TCPCONNECT,
+    OP_UDPOPEN,
     OP_UDPRECV,
     OP_UDPSEND,
+    OP_UDPCLOSE,
     // block a SIGINT
     OP_BLOCKSIGINT,
     OP_UNBLOCKSIGINT,

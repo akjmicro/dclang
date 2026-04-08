@@ -1,6 +1,5 @@
-var __private_ll_token_holder__
-
 " " const :blank
+var __private_ll_token_holder__
 
 : _list_init_nums_helper  # ( list ) -- ( list )
   null :blank __private_ll_token_holder__ strtok
@@ -42,14 +41,14 @@ var __private_ll_token_holder__
 # Public API #
 ##############
 
-: linit_nums  # ( all_nums_str ) -- ( list )
+: linit_nums  # ( all_nums_str_buf ) -- ( list )
   ############################################################
   # Produce a list of nums based on a space-delimited string #
   # of numbers                                               #
   ############################################################
   depth 1 <
   if
-    "linit_nums: need <all_nums_str> on the stack." print cr
+    "linit_nums: need <all_nums_str_buf> on the stack." print cr
     return
   endif
   lmake swap

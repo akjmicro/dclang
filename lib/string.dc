@@ -107,90 +107,32 @@ const :CHOP_BETWEEN_ERROR
   svpop and
 ;
 
-: _incr_saved_counter
-  svpop 1 + svpush
-;
-
-: _substr_count_helper
-  # ( substr str ) ( 0 ) -> ( cnt ) ( )
-  over strfind dup
+: _strreplace_helper { buf s find repl }
+  buf s dup find strfind dup
   if
-    _incr_saved_counter
-    over strlen +
-    _substr_count_helper
-  else
-    2drop svpop
-  endif
-;
-
-: substr_count
-  # ( str substr ) -> # ( substr str ) ( 0 )
-  0 svpush swap
-  _substr_count_helper
-;
-
-: _setup_replace_buffer
-  # ( str findstr replacestr times )
-  rot rot
-  strlen swap strlen - *
-  swap strlen +
-  mkbuf
-;
-
-: _strreplace_setup
-  # ( str find repl )
-  2 pick 2 pick substr_count
-  # ( str find repl count )
-  2over 2over _setup_replace_buffer
-  # ( str find repl count buffer )
-  nip
-  # ( str find repl buffer )
-  swap
-  # ( str find buffer repl )
-  svpush
-  # ( str find buffer ) ( repl )
-  -rot
-  # ( buffer str find ) ( repl )
-  svpop
-  # ( buffer str find repl )
-;
-
-: _strreplace_helper
-  2over 2over drop strfind dup
-  # ( buffer str find repl buffer found found ) ( buffer )
-  if
-  # ( buffer str find repl buffer found ) ( buffer )
+    over -
     dup svpush
-    # ( buffer str find repl buffer found ) ( found buffer )
-    4 pick tuck -
-    # ( buffer str find repl buffer str sz ) ( found buffer )
-    mempcpy over dup strlen mempcpy
-    # ( buffer str find repl newbufrepl ) ( found buffer )
-    svpop 3 pick strlen +
-    # ( buffer str find repl newbufrepl found+findlen ) ( buffer )
-    2rot 2drop 2swap
-    # ( newbufrepl found+findlen find repl ) ( buffer )
+    mempcpy
+    repl dup strlen mempcpy
+      s svpop + find strlen +
+        find
+          repl
     _strreplace_helper
   else
-  # ( buffer str find repl buffer found ) ( buffer )
-    2drop 2drop dup strlen
-  # ( buffer str sz )
-    mempcpy drop svpop
-  # ( buffer )
+    drop
+    dup strlen 1 + mempcpy
   endif
 ;
 
-: strreplace
-  depth 3 <
+: strreplace { buf s find repl }
+  find strlen 0 =
   if
-    :STRREPLACE_UNDERFLOW_ERROR print cr
+    buf s dup strlen 1 + mempcpy drop
+    buf
     return
   endif
-  _strreplace_setup
-  # ( buffer str find repl )
-  3 pick svpush
-  # ( buffer str find repl ) ( buffer )
-  _strreplace_helper
+  buf s find repl _strreplace_helper drop
+  buf
 ;
 
 : _get_next_num_from_line
@@ -383,7 +325,14 @@ var _strtok_state
   # "This is my sentence, full of magic sauce." ", " chop_tail
   # will return:
   # "This is my sentence"
-  haystack dup needle strfind "" strreplace
+  haystack needle strfind
+    haystack
+  -
+  mkbuf
+    haystack
+      dup needle strfind
+        ""
+  strreplace
 ;
 
 : chop_between

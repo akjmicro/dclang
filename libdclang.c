@@ -286,9 +286,7 @@ void dclang_execute() {
         &&OP_TREEGET,
         &&OP_TREEWALK,
         &&OP_TREEDELETE,
-    #ifdef HAS_TREEDESTROY
         &&OP_TREEDESTROY,
-    #endif
         &&OP_LISTMAKE,
         &&OP_LISTNEXT,
         &&OP_LISTSET,
@@ -356,6 +354,8 @@ void dclang_execute() {
         &&OP_MEMSET,
         &&OP_MKBUF,
         &&OP_FREE,
+        &&OP_MARK,
+        &&OP_REWIND,
         &&OP_MEMUSED,
         &&OP_IMPORT,
         &&OP_FILEOPEN,
@@ -379,8 +379,10 @@ void dclang_execute() {
         &&OP_TCPLISTEN,
         &&OP_TCPACCEPT,
         &&OP_TCPCONNECT,
+        &&OP_UDPOPEN,
         &&OP_UDPRECV,
         &&OP_UDPSEND,
+        &&OP_UDPCLOSE,
         &&OP_BLOCKSIGINT,
         &&OP_UNBLOCKSIGINT,
         &&OP_FORK,
@@ -1227,9 +1229,9 @@ void dclang_execute() {
             tree_val = (DCLANG_FLT)POP;
             search_key = (char *)(DCLANG_PTR)POP;
             tree_idx = (DCLANG_PTR)POP;
-            te_del = make_tree_entry(dclang_strdup(search_key), tree_val);
+            te_del = make_tree_entry(search_key, tree_val);
             tdelete(te_del, &tree_roots[tree_idx], tree_compare_func);
-            te = make_tree_entry(dclang_strdup(search_key), tree_val);
+            te = make_tree_entry(search_key, tree_val);
             retval = tsearch(te, &tree_roots[tree_idx], tree_compare_func);
             push((DCLANG_FLT)((*(struct tree_entry **)retval)->value));
             NEXT;
@@ -1249,11 +1251,10 @@ void dclang_execute() {
             // Pop args
             search_key = (char *)(DCLANG_PTR)POP;
             tree_idx = (DCLANG_PTR)POP;
-            te_del = make_tree_entry(dclang_strdup(search_key), 0);
+            te_del = make_tree_entry(search_key, 0);
             tdelete(te_del, &tree_roots[tree_idx], tree_compare_func);
             dclang_free(te_del);
             NEXT;
-        #ifdef HAS_TREEDESTROY
         OP_TREEDESTROY:
             if (data_stack_ptr < 1) {
                 printf("tdestroy -- stack underflow! needs <tree_root> on the stack.\n");
@@ -1263,7 +1264,6 @@ void dclang_execute() {
             tdestroy(tree_roots[tree_idx], dclang_free);
             tree_roots[tree_idx] = NULL;
             NEXT;
-        #endif
         // linked lists
         OP_LISTMAKE:
             // Allocate memory for the head node
@@ -2327,6 +2327,12 @@ void dclang_execute() {
             DCLANG_PTR loc_PTR = (DCLANG_PTR)POP;
             dclang_free((char *) loc_PTR);
             NEXT;
+        OP_MARK:
+            dclang_mark();
+            NEXT;
+        OP_REWIND:
+            dclang_rewind();
+            NEXT;
         OP_MEMUSED:
             DCLANG_FLT memused = (DCLANG_FLT)(((float) unused_mem_idx) / ((float) MEMSIZE));
             push(memused);
@@ -2647,65 +2653,130 @@ void dclang_execute() {
                 perror("tcpconnect -- ERROR connecting");
             push((DCLANG_INT)sockfd);
             NEXT;
-        OP_UDPRECV:
-            // Receive data over UDP
-            if (data_stack_ptr < 3) {
-                printf("udprecv -- need <port_number> <max_bytes> <buffer> on the stack\n");
+        OP_UDPOPEN:
+            if (data_stack_ptr < 1) {
+                printf("udpopen -- need <port> on the stack\n");
                 return;
             }
-            // stack values
-            buf = (char *) (DCLANG_PTR)POP;
-            DCLANG_INT max_bytes = (DCLANG_INT)POP;
             portno = (DCLANG_INT)POP;
-            // make a socket
             sockfd = socket(AF_INET, SOCK_DGRAM, 0);
             if (sockfd < 0) {
-                perror("udprecv -- ERROR opening socket");
-                return;
+                perror("udpopen -- ERROR opening socket");
+                push((DCLANG_INT)-1);
+                NEXT;
             }
-            socklen_t udp_clilen = sizeof(udp_cli_addr);
-            bzero((char *) &udp_serv_addr, sizeof(udp_serv_addr));
+            bzero((char *)&udp_serv_addr, sizeof(udp_serv_addr));
             udp_serv_addr.sin_family = AF_INET;
             udp_serv_addr.sin_addr.s_addr = INADDR_ANY;
             udp_serv_addr.sin_port = htons(portno);
-            // bind the socket
-            if (bind(sockfd, (struct sockaddr *) &udp_serv_addr,
+            if (bind(sockfd, (struct sockaddr *)&udp_serv_addr,
                      sizeof(udp_serv_addr)) < 0) {
-                perror("udprecv -- ERROR on binding");
+                perror("udpopen -- ERROR on binding");
+                close(sockfd);
+                push((DCLANG_INT)-1);
+                NEXT;
             }
+            push((DCLANG_INT)sockfd);
+            NEXT;
+        OP_UDPRECV:
+            if (data_stack_ptr < 4) {
+                printf("udprecv -- need <sockfd> <timeout_ms> <max_bytes> <buffer> on the stack\n");
+                return;
+            }
+            buf = (char *)(DCLANG_PTR)POP;
+            DCLANG_INT max_bytes = (DCLANG_INT)POP;
+            DCLANG_INT timeout_ms = (DCLANG_INT)POP;
+            sockfd = (DCLANG_INT)POP;
+            if ((DCLANG_PTR)buf < MIN_STR || (DCLANG_PTR)buf > MAX_STR) {
+                perror("udprecv -- buffer address out-of-range");
+                push((DCLANG_INT)-1);
+                NEXT;
+            }
+            if (sockfd < 0) {
+                perror("udprecv -- invalid socket");
+                push((DCLANG_INT)-1);
+                NEXT;
+            }
+            if (max_bytes <= 0) {
+                printf("udprecv -- <max_bytes> must be > 0\n");
+                push((DCLANG_INT)-1);
+                NEXT;
+            }
+            fd_set readfds;
+            FD_ZERO(&readfds);
+            FD_SET(sockfd, &readfds);
+            int sel_result;
+            if (timeout_ms < 0) {
+                // block indefinitely
+                sel_result = select(sockfd + 1, &readfds, NULL, NULL, NULL);
+            } else {
+                struct timeval tv;
+                tv.tv_sec = timeout_ms / 1000;
+                tv.tv_usec = (timeout_ms % 1000) * 1000;
+                sel_result = select(sockfd + 1, &readfds, NULL, NULL, &tv);
+            }
+            if (sel_result < 0) {
+                perror("udprecv -- select failed");
+                push((DCLANG_INT)-1);
+                NEXT;
+            }
+            if (sel_result == 0) {
+                // timeout / immediate no-data poll
+                if (max_bytes > 0) {
+                    buf[0] = '\0';
+                }
+                push((DCLANG_INT)0);
+                NEXT;
+            }
+            socklen_t udp_clilen = sizeof(udp_cli_addr);
             result = recvfrom(
-                sockfd, buf, max_bytes, 0,
-                (struct sockaddr *)&udp_cli_addr, &udp_clilen
+                sockfd,
+                buf,
+                max_bytes - 1,   // leave room for null terminator
+                0,
+                (struct sockaddr *)&udp_cli_addr,
+                &udp_clilen
             );
             if (result < 0) {
                 perror("udprecv -- ERROR receiving data");
+                push((DCLANG_INT)-1);
+                NEXT;
             }
-            buf[result] = '\0'; // Null terminate the received data
-            close(sockfd);
-            push((DCLANG_LONG)result);
+            buf[result] = '\0';
+            push((DCLANG_INT)result);
             NEXT;
         OP_UDPSEND:
-            // Send data over UDP to a specified host and port
             if (data_stack_ptr < 3) {
                 printf("udpsend -- need <host> <port> <buffer> on the stack\n");
                 return;
             }
-            // stack values
-            buf = (char *) (DCLANG_PTR)POP;
+            buf = (char *)(DCLANG_PTR)POP;
             portno = (DCLANG_INT)POP;
-            host = (char *) (DCLANG_PTR)POP;
-            // make a socket
+            host = (char *)(DCLANG_PTR)POP;
+            if ((DCLANG_PTR)buf < MIN_STR || (DCLANG_PTR)buf > MAX_STR) {
+                perror("udpsend -- invalid buffer address");
+                push((DCLANG_INT)-1);
+                NEXT;
+            }
+            if ((DCLANG_PTR)host < MIN_STR || (DCLANG_PTR)host > MAX_STR) {
+                perror("udpsend -- invalid host address");
+                push((DCLANG_INT)-1);
+                NEXT;
+            }
             sockfd = socket(AF_INET, SOCK_DGRAM, 0);
             if (sockfd < 0) {
                 perror("udpsend -- ERROR opening socket");
-                return;
+                push((DCLANG_INT)-1);
+                NEXT;
             }
             server = gethostbyname(host);
             if (server == NULL) {
                 fprintf(stderr, "udpsend -- ERROR, no such host\n");
-                return;
+                close(sockfd);
+                push((DCLANG_INT)-1);
+                NEXT;
             }
-            bzero((char *) &dest_addr, sizeof(dest_addr));
+            bzero((char *)&dest_addr, sizeof(dest_addr));
             dest_addr.sin_family = AF_INET;
             bcopy(
                 (char *)server->h_addr,
@@ -2714,14 +2785,33 @@ void dclang_execute() {
             );
             dest_addr.sin_port = htons(portno);
             result = sendto(
-                sockfd, buf, strlen(buf) + 1, 0,
-                (struct sockaddr *)&dest_addr, sizeof(dest_addr)
+                sockfd,
+                buf,
+                strlen(buf) + 1,
+                0,
+                (struct sockaddr *)&dest_addr,
+                sizeof(dest_addr)
             );
             if (result < 0) {
                 perror("udpsend -- ERROR sending data");
+                close(sockfd);
+                push((DCLANG_INT)-1);
+                NEXT;
             }
             close(sockfd);
             push((DCLANG_INT)result);
+            NEXT;
+        OP_UDPCLOSE:
+            if (data_stack_ptr < 1) {
+                printf("udpclose -- need <sockfd> on the stack\n");
+                return;
+            }
+            sockfd = (DCLANG_INT)POP;
+            if (sockfd < 0) {
+                perror("udpclose -- invalid socket");
+                NEXT;
+            }
+            close(sockfd);
             NEXT;
         OP_BLOCKSIGINT:
             sigemptyset(&block_sigint);
@@ -2732,7 +2822,7 @@ void dclang_execute() {
             sigprocmask(SIG_UNBLOCK, &block_sigint, NULL);
             NEXT;
         OP_FORK:
-            // This wrod mainly exists so that a multi-client capable tcp/web server
+            // This word mainly exists so that a multi-client capable tcp/web server
             // can be had. It is assumed that the return value will be caught, inspected,
             // and handled by the caller, so this is really quite a simple c->dclang mapping.
             // TODO: a future enhancement might be to have a counting system in place for
@@ -3089,7 +3179,7 @@ void add_primitive(char *name, char *category, int opcode) {
 };
 
 void add_all_primitives() {
-    primitives = (struct primitive *)dclang_malloc(208*sizeof(primitive));
+    primitives = (struct primitive *)dclang_malloc(216*sizeof(primitive));
     // stack manipulation
     add_primitive("drop", "Stack Ops", OP_DROP);
     add_primitive("dup", "Stack Ops", OP_DUP);
@@ -3191,9 +3281,7 @@ void add_all_primitives() {
     add_primitive("t@", "Trees", OP_TREEGET);
     add_primitive("twalk", "Trees", OP_TREEWALK);
     add_primitive("tdel", "Trees", OP_TREEDELETE);
-#ifdef HAS_TREEDESTROY
     add_primitive("tdestroy", "Trees", OP_TREEDESTROY);
-#endif
     // linked lists
     add_primitive("lmake", "Lists", OP_LISTMAKE);
     add_primitive("_lnext", "Lists", OP_LISTNEXT);
@@ -3265,6 +3353,8 @@ void add_all_primitives() {
     // memory buffers
     add_primitive("mkbuf", "Memory", OP_MKBUF);
     add_primitive("free", "Memory", OP_FREE);
+    add_primitive("mark", "Memory", OP_MARK);
+    add_primitive("rewind", "Memory", OP_REWIND);
     add_primitive("memused", "Memory", OP_MEMUSED);
     // file
     add_primitive("import", "Files", OP_IMPORT);
@@ -3291,8 +3381,10 @@ void add_all_primitives() {
     add_primitive("tcplisten", "Sockets", OP_TCPLISTEN);
     add_primitive("tcpaccept", "Sockets", OP_TCPACCEPT);
     add_primitive("tcpconnect", "Sockets", OP_TCPCONNECT);
+    add_primitive("udpopen", "Sockets", OP_UDPOPEN);
     add_primitive("udprecv", "Sockets", OP_UDPRECV);
     add_primitive("udpsend", "Sockets", OP_UDPSEND);
+    add_primitive("udpclose", "Sockets", OP_UDPCLOSE);
     // block a SIGINT
     add_primitive("block_sigint", "Interrupt Blocking", OP_BLOCKSIGINT);
     add_primitive("unblock_sigint", "Interrupt Blocking", OP_UNBLOCKSIGINT);

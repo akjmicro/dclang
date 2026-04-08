@@ -11,6 +11,7 @@
 "w"          const :write
 "/tmp/keys/" const :tmpdir
 "\n"         const :newline
+""           const :blank
 64 const PATHBUF_SIZE
 var pathbuf
 PATHBUF_SIZE mkbuf pathbuf !
@@ -69,6 +70,7 @@ var remainder 1 remainder !
 "base_pitch"       const :BASE_PITCH
 "edo"              const :EDO
 "scale"            const :SCALE
+"gamut"            const :GAMUT
 "md" make_channel_string
                    const :MODE
 "tr" make_channel_string
@@ -219,12 +221,40 @@ var next_off_time
   tonum_free
 ;
 
+var sclbuf 16 mkbuf sclbuf !
 : get_scale
-  :SCALE keyval_get "\n" "" strreplace
+  mark
+  sclbuf @
+    16 mkbuf :SCALE keyval_get :newline :blank strreplace
+      dup strlen 1 +
+    mempcpy
+  drop
+  rewind
+  sclbuf @
 ;
 
+var gamut_buf 1024 mkbuf gamut_buf !
+: get_gamut
+  mark
+  gamut_buf @
+    1024 mkbuf :GAMUT keyval_get :newline :blank strreplace
+      dup strlen 1 +
+    mempcpy
+  drop
+  rewind
+  gamut_buf @
+;
+
+var rhythm_type_buf 16 mkbuf rhythm_type_buf !
 : get_rhythm_type
-  :RHYTHM_TYPE keyval_get "\n" "" strreplace
+  mark
+  rhythm_type_buf @
+    16 mkbuf :RHYTHM_TYPE keyval_get :newline :blank strreplace
+      dup strlen 1 +
+    mempcpy
+  drop
+  rewind
+  rhythm_type_buf @
 ;
 
 #############################################################

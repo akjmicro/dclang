@@ -1,3 +1,5 @@
+"string.dc" import
+
 tmake const :mytree
 :mytree "Garfield" "A cat" t! drop  # t! will automatically put the value of the key to TOS
 :mytree "Droopy" "A dog" t! drop    # many times, we want to ignore it, so we `drop` it here.
@@ -31,3 +33,35 @@ tmake const :mytree2
 :mytree tdestroy
 :mytree "Garfield" t@
   0 = assert
+
+# Test pointer lifetime
+var newtree tmake  newtree !
+64 mkbuf const :KBUF
+:KBUF "Garfield" str+ drop
+newtree @ :KBUF "A cat" t! drop
+newtree @ :KBUF t@
+  "A cat" str= assert
+newtree @ :KBUF tdel
+newtree @ "Garfield" t@
+  0 = assert
+
+# Allocator thrash test1
+var newtree2 tmake  newtree2 !
+newtree2 @ "foo" "bar" t! drop
+mark
+  "junk1" drop
+  "junk2" drop
+  "junk3" drop
+rewind
+newtree2 @ "foo" t@
+  "bar" str= assert
+
+# Repeat assignment sanity
+tmake const :t
+:t "X" "one" t! drop
+:t "X" "two" t! drop
+:t "X" t@
+  "two" str= assert
+:t "X" "three" t! drop
+:t "X" t@
+  "three" str= assert
