@@ -1,25 +1,24 @@
 "string.dc" import
 
+var replace_buf
+256 mkbuf replace_buf !
+
 var teststr
 "thisBLAHisBLAHa littleBLAH testBLAHstring"
 teststr !
 
-"BLAH" const :BLAH
+"BLAH"    const :BLAH
+"BLAHFOO" const :BLAHFOO
 
-# run `substr_count` as a test!
-teststr @ :BLAH
-
-substr_count
-
-# make an assertion that our test string has 4 instances
-# of "BLAH"
-4 = assert
-
-teststr @ :BLAH "BLAHFOO" strreplace
+replace_buf @ teststr @ :BLAH :BLAHFOO strreplace
 "thisBLAHFOOisBLAHFOOa littleBLAHFOO testBLAHFOOstring"
 str= assert
 
-teststr @ "NOTFOUND" " " strreplace
+replace_buf @ teststr @ :BLAH " " strreplace
+"this is a little  test string"
+str= assert
+
+replace_buf @ teststr @ "NOTFOUND" " " strreplace
 teststr @
 str= assert
 
@@ -55,7 +54,6 @@ split_list @ 4 l@ "to"    str= assert
 split_list @ 5 l@ "split" str= assert
 
 # testing the new chop_* words:
-
 "This is my sentence, full of magic sauce." const :test_sentence
 :test_sentence ", "       chop_head     "full of magic sauce."       str= assert
 :test_sentence " of"      chop_tail     "This is my sentence, full"  str= assert

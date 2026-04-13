@@ -1,0 +1,14 @@
+memused
+"This uses string memory" drop
+memused
+< assert
+
+memused
+mark "This will disappear" drop rewind
+memused
+= assert
+
+memused
+"This also disappears" dup drop free
+memused
+= assert

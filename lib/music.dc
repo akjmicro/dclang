@@ -208,15 +208,127 @@ var cur_scl_str  "" cur_scl_str !
 "archytas"   const :archytas
 "enharmonic" const :enharmonic
 "equable"    const :equable
+"custom"     const :custom
+
+#########################################################
+# Stuff to handle custom rational/JI-based scale gamuts #
+#########################################################
+" "   const BLANK
+"/"   const SLASH
+"1/1" const 1_1
+var __blank_tok_hold__
+var __slash_tok_hold__
+var gamut_idx
+# custom scale slots
+var current_gamut_str           1024 mkbuf current_gamut_str !
+var custom_gamut_0 128 allot
+var custom_gamut_1 128 allot
+var custom_size                 8 custom_size !
+var active_custom_gamut         custom_gamut_1 active_custom_gamut !
+var loading_custom_gamut        custom_gamut_0 loading_custom_gamut !
+
+: _reset_gamut_idx   0 gamut_idx ! ;
+: _update_gamut_idx  gamut_idx @  1 +  gamut_idx !  ;
+
+: _toggle_gamuts
+  active_custom_gamut @
+    custom_gamut_1
+  = if
+    custom_gamut_1 loading_custom_gamut !
+    custom_gamut_0 active_custom_gamut  !
+  else
+    custom_gamut_1 active_custom_gamut  !
+    custom_gamut_0 loading_custom_gamut !
+  endif
+;
+
+: _protect_value  dup 0 = if drop 1 endif ;
+
+: frac_to_oct_gamut  { frac_str }
+    frac_str SLASH __slash_tok_hold__ strtok  tonum
+    _protect_value
+      null   SLASH __slash_tok_hold__ strtok  tonum
+      _protect_value
+    /
+    log2
+      loading_custom_gamut @
+        gamut_idx @
+      +
+  !
+  _update_gamut_idx
+;
+
+: _process_fraction_list
+  null BLANK __blank_tok_hold__ strtok
+  dup 0 = if
+    drop
+  else
+    frac_to_oct_gamut
+    _process_fraction_list
+  endif
+;
+
+: process_fraction_list { frac_str_list }
+  _reset_gamut_idx
+    frac_str_list BLANK __blank_tok_hold__ strtok
+    dup 0 =
+    if
+      drop
+      1_1
+      frac_to_oct_gamut
+    else
+      frac_to_oct_gamut
+      _process_fraction_list
+    endif
+;
+
+: process_custom_scale
+  mark
+  get_gamut
+    dup
+      current_gamut_str @
+    str=
+    if
+      drop
+      rewind
+      return
+    else
+      current_gamut_str @ over str+ drop
+      process_fraction_list
+    endif
+  ###################################################
+  # now we need to toggle the custom gamut targets, #
+  # and point the active gamut to `scale`, and the  #
+  # `gamut_idx` + 1 as `custom_size`                #
+  ###################################################
+  _toggle_gamuts
+  active_custom_gamut @ scale !
+  gamut_idx @     custom_size !
+  custom_size     scale_size !
+  rewind
+;
 
 : set_scale
   get_scale
-    dup
-      cur_scl_str @
-    str= if
-      drop
+  mark
+    dup                     # (scl scl)
+      :custom               # (scl scl custom)
+    str=                    # (scl eq?)
+    if                      # (scl)
+      cur_scl_str !         # ()
+      process_custom_scale
+      rewind
       return
-    endif
+    else                    # (scl)
+      dup                   # (scl scl)
+      cur_scl_str @         # (scl scl cur_scl)
+      str=                  # (scl eq?)
+      if                    # (scl)
+        drop                # ()
+        rewind
+        return              # ()
+      endif                 #
+    endif                   # (scl)
   dup :otonal     str= if :otonal     cur_scl_str !  otonal     scale !  otonal_size     scale_size ! endif
   dup :pentatonic str= if :pentatonic cur_scl_str !  pentatonic scale !  pentatonic_size scale_size ! endif
   dup :s4679      str= if :s4679      cur_scl_str !  s4679      scale !  s4679_size      scale_size ! endif
@@ -229,9 +341,16 @@ var cur_scl_str  "" cur_scl_str !
   dup :archytas   str= if :archytas   cur_scl_str !  archytas   scale !  archytas_size   scale_size ! endif
   dup :enharmonic str= if :enharmonic cur_scl_str !  enharmonic scale !  enharmonic_size scale_size ! endif
       :equable    str= if :equable    cur_scl_str !  equable    scale !  equable_size    scale_size ! endif
+  rewind
 ;
 
 set_scale
+
+: show_scale
+  scale_size @ @ times
+    scale @ i + @ . cr
+  again
+;
 
 ##########################
 # END SCALES DEFINITIONS #
@@ -333,24 +452,43 @@ var prev_euclid_int
 # End Euclidean rhythm algorithm #
 ##################################
 
-#######################################################################
-# A general string-to-lgen generator, private. The idea is it be used #
-# By the `do_*` words as below. TODO: a gate iterator.                #
-#######################################################################
+########################################################
+# A general string-to-lgen generator, private.         #
+# The idea is it be used by the `do_*` words as below. #
+########################################################
+
+var _str_to_lgen_buf
+1024 mkbuf _str_to_lgen_buf !
 
 : _string_to_lgen { str_to_check cur_str lgen_struct }
-  str_to_check keyval_get
-    dup
-      cur_str @
-    str= not
-  if
-    dup
-    strdup cur_str !
-    linit_nums lgen_struct !
-    0 lgen_struct 1 + !
-  else
+    str_to_check keyval_get
+      dup
+        cur_str @
+      str= not
+      if
+      # first, copy the string to the `cur_str` so it's
+      # registered for future comparisons
+      dup
+        cur_str @
+        swap
+          dup strlen 1 +
+        mempcpy
+      drop
+      # next, copy it to the `strtok` buffer taht consumes
+      # it for list creation
+      _str_to_lgen_buf @
+      swap
+        dup strlen 1 +
+      mempcpy
     drop
-  endif
+    # now create the list from the consumable buffer
+      _str_to_lgen_buf @ linit_nums
+    lgen_struct !
+    # initialize the current node counter:
+    0 lgen_struct 1 + !
+      else
+  drop
+      endif
   lgen_struct true lgen
 ;
 
@@ -363,11 +501,11 @@ var prev_euclid_int
 # Deal with rhythm string setup
 "rh"  make_channel_string  const :rhythm_string
 make_lgen_struct     _rhythm_lgen
-var _cur_rhythm_str  "" _cur_rhythm_str !
+var _cur_rhythm_str  1024 mkbuf _cur_rhythm_str !
 # Deal with gate string setup
 "gt"  make_channel_string  const :gate_string
 make_lgen_struct     _gate_lgen
-var _cur_gate_str    "" _cur_gate_str   !
+var _cur_gate_str    1024 mkbuf _cur_gate_str   !
 
 : _do_rhythm_string
   :rhythm_string

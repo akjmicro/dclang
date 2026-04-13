@@ -1,0 +1,19 @@
+"string.dc" import
+
+9999 const :PORT
+1024 mkbuf const :BUF
+
+:PORT udpopen const :sock
+uuid const :id
+
+"127.0.0.1" :PORT :id udpsend
+dup 0 > assert
+drop
+
+:sock 1000 1024 :BUF udprecv
+dup 0 > assert
+drop
+
+:BUF :id str= assert
+
+:sock udpclose
