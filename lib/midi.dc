@@ -120,3 +120,303 @@ check_mididev
   dup 7 >>
   swap 0x7f and
 ;
+
+###########################
+# MIDI file functionality #
+###########################
+
+2 mkbuf const :midi_byte_buf
+:midi_byte_buf 0 2 memset drop
+8 mkbuf const :midi_dummy
+:midi_dummy    0 4 memset drop
+
+"MThd"      const :MThd
+"MTrk"      const :MTrk
+"TrkEnd"    const :TrkEnd
+"Meta"      const :Meta
+"TrackName" const :TrackName
+"Tempo"     const :Tempo
+"TimeSig"   const :TimeSig
+"SysEx"     const :SysEx
+"r"         const :r
+" "         const :space
+"MIDI file header not found!"
+            const :midi_header_error
+"MIDI file track not found!"
+            const :midi_track_error
+var midi_file_type
+var midi_num_tracks
+var midi_resolution
+var running_status_byte   0x90 running_status_byte !
+var data_byte_count          2     data_byte_count !
+var current_midi_timestamp
+
+: _read_midi_byte { mfp }
+  :midi_byte_buf 1 mfp fread
+  drop
+  :midi_byte_buf ord
+;
+
+: _read_var_length  # ( running_sum midi_file_pointer )
+  { running_sum mfp }
+  mfp _read_midi_byte
+  dup                  # (num num)
+  0x7f and             # (num num&127)
+  running_sum          # (num num&127 running_sum)
+  or                   # (num new_sum)
+  swap                 # (new_sum num)
+  0x80 and             # (new_sum mask)
+  0x80 =               # (new_sum cont?)
+  if                   # (new_sum)
+    7 <<               # (new_sum<<7)
+      mfp              # (new_sum<<7 mfp)
+    _read_var_length
+  endif                # (new_sum)
+;
+
+: read_var_length { mfp }
+  0 mfp _read_var_length
+;
+
+: _read_chunk_length # ( mfp )
+  dup  _read_midi_byte    8 <<  # (mfp 1st_iter)
+  over _read_midi_byte or 8 <<  # (mfp 2nd_iter)
+  over _read_midi_byte or 8 <<  # (mfp 3rd_iter)
+  swap _read_midi_byte or       # (4th_iter)
+;
+
+: read_midi_header { mfp }
+  :midi_dummy 4 mfp fread    # (num_bytes_read)
+  drop                       # ()
+  :midi_dummy
+    :MThd
+  str= not
+  if
+    :midi_header_error print cr
+    return
+  else
+    # fast forward through the '00 00 00 06'
+    mfp _read_chunk_length
+    drop
+    # get the filetype
+    mfp _read_midi_byte  8 <<
+      mfp _read_midi_byte
+    or
+    midi_file_type !
+    # get the number of tracks
+    mfp _read_midi_byte  8 <<
+      mfp _read_midi_byte
+    or
+    midi_num_tracks !
+    # get the resolution -- we don't assume SMPTE here (yet)
+    mfp _read_midi_byte  8 <<
+      mfp _read_midi_byte
+    or
+    midi_resolution !
+  endif
+  # output info to display!
+  :MThd print :space print
+  midi_file_type  @ .
+  midi_num_tracks @ .
+  midi_resolution @ .
+  cr
+;
+
+: _output_as_hex  # (status_byte)
+  tohex dup print :space print free
+;
+
+: _handle_sysex { mfp }
+  :SysEx print :space print
+  mfp read_var_length
+  times
+    mfp _read_midi_byte .
+  again
+  cr
+;
+
+: _handle_track_name { mfp }
+  :TrackName print :space print
+  mfp read_var_length
+  times
+    mfp _read_midi_byte uemit
+  again
+  cr
+;
+
+: _handle_tempo { mfp }
+  # We know it's 3 bytes, so read and drop
+  mfp read_var_length drop
+  mfp _read_midi_byte 16 <<
+    mfp _read_midi_byte  8 <<
+      mfp _read_midi_byte
+    or
+  or
+  :Tempo print :space print . cr
+;
+
+: _handle_timesig { mfp }
+  # We know it's 4 bytes, so read and drop
+  mfp read_var_length drop
+  :TimeSig print :space print
+  mfp _read_midi_byte .
+  2 mfp _read_midi_byte pow .
+  mfp _read_midi_byte .
+  mfp _read_midi_byte . cr
+;
+
+: _handle_meta { meta_byte mfp }
+  meta_byte 0x03 =
+  if
+    mfp _handle_track_name
+    return
+  endif
+  meta_byte 0x51 =
+  if
+    mfp _handle_tempo
+    return
+  endif
+  meta_byte 0x58 =
+  if
+    mfp _handle_timesig
+    return
+  endif
+  :Meta print :space print
+  meta_byte _output_as_hex
+  mfp read_var_length
+  times
+    mfp _read_midi_byte .
+  again
+  cr
+;
+
+: _handle_status { status_byte mfp }
+  status_byte        # (status_byte)
+  dup                # (status_byte status_byte)
+  0x80 and           # (status_byte status_mask)
+  0x80 =             # (status_byte is_status?)
+  if                 # (status_byte)
+    # output the status byte
+    dup              # (status_byte status_byte)
+    _output_as_hex
+    dup              # (status_byte status_byte)
+    running_status_byte !
+                     # (status_byte)
+    0xf0 and         # (status_mask)
+    dup              # (status_mask status_mask)
+    0xc0             # (status_mask status_mask 0xc0)
+    =                # (status_mask mask_eq_0xc0?)
+    swap             # (mask_eq_0xc0? status_mask)
+    0xd0             # (mask_eq_0xc0? status_mask 0xd0)
+    =                # (mask_eq_0xc0? mask_eq_0xd0?)
+    or               # (is_one_byte_data?)
+    if
+      mfp _read_midi_byte .
+      1 data_byte_count !
+    else
+      mfp _read_midi_byte .
+      mfp _read_midi_byte .
+      2 data_byte_count !
+    endif
+  else               # (data_byte)
+    # running status
+    running_status_byte @
+    _output_as_hex
+    # always output 'this byte'
+    .
+    # if the data is 2-byte, also
+    # do the next byte:
+    data_byte_count @ 2 =
+    if
+      mfp _read_midi_byte .
+    endif
+  endif
+  cr
+;
+
+: _track_loop { mfp }
+  mfp read_var_length
+    current_midi_timestamp @
+  +
+  dup .
+  current_midi_timestamp !
+  # now get status byte
+  mfp _read_midi_byte   # (status_byte)
+  dup                   # (status_byte status_byte)
+  0xff                  # (status_byte status_byte 0xff)
+  =                     # (status_byte eq0xff?)
+  if                    # (status_byte)
+    ########################
+    # We have a meta event #
+    ########################
+    drop                # ()
+    mfp _read_midi_byte # (2nd_ff_byte)
+    dup                 # (2nd_ff_byte 2nd_ff_byte)
+    0x2f =              # (2nd_ff_byte eq0x2f?)
+    if                  # (2nd_ff_byte)
+      drop
+      mfp _read_midi_byte
+      drop
+      :TrkEnd print cr
+      return
+    else                # (2nd_ff_byte)
+      mfp               # (2nd_ff_byte mfp)
+      _handle_meta      # ()
+      mfp _track_loop
+    endif
+  else                  # (status_byte)
+    dup                 # (status_byte status_byte)
+    0xf0 =              # (status_byte eq0xf0?)
+    over                # (status_byte eq0xf0? status_byte)
+    0xf7 =              # (status_byte eq0xf0? eq0xf7?)
+    or                  # (status_byte eq0xf0_or_0xf7?)
+    if
+      #########################
+      # We have a SysEx event #
+      #########################
+      drop              # ()
+      mfp               # (mfp)
+      _handle_sysex     # ()
+    else
+      ##########################
+      # We have a normal event #
+      ##########################
+      mfp                 # (status_byte mfp)
+      _handle_status      # ()
+    endif
+    mfp _track_loop
+  endif
+;
+
+: read_midi_track { mfp }
+  # reset the timestamp
+  0 current_midi_timestamp !
+  # read 'MTrk'
+  :midi_dummy 4 mfp fread    # (num_bytes_read)
+  drop                       # ()
+  :midi_dummy
+    :MTrk
+  str= not
+  if
+    :midi_track_error print cr
+    return
+  else
+    0 . :MTrk print cr
+    mfp _read_chunk_length
+    drop
+    mfp _track_loop
+  endif
+;
+
+: read_midi_file { midi_filename }
+  midi_filename :r fopen     # (mfp)
+  dup svpush                 # (mfp)          (mfp)
+  read_midi_header           # ()             (mfp)
+  midi_num_tracks @          # (num_tracks)   (mfp)
+  times                      # ()             (mfp)
+    0 svpick                 # (mfp)          (mfp)
+    read_midi_track          # ()
+  again
+  svpop                      # (mfp)          ()
+  fclose                     # ()
+;

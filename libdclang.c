@@ -2015,7 +2015,7 @@ void dclang_execute() {
                 return;
             }
             char *string_loc = (char *) str_ptr_addr;
-            push((int) *string_loc);
+            push((unsigned char) *string_loc);
             NEXT;
         OP_TOLOWER:
             if (data_stack_ptr < 1)

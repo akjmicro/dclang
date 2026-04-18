@@ -100,6 +100,13 @@
   "\x0a" "\n" str= assert
 ;
 
+: test_ord
+  "\xff" ord 255 = assert
+  "\x80" ord 128 = assert
+  "\x90" ord 144 = assert
+  "\x93" ord 147 = assert
+;
+
 test_isalnum
 test_isalpha
 test_iscntrl
@@ -115,3 +122,4 @@ test_isspace
 test_isupper
 test_isxdigit
 test_encoding
+test_ord
