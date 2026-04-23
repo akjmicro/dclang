@@ -310,14 +310,13 @@ var loading_custom_gamut        custom_gamut_0 loading_custom_gamut !
 
 : set_scale
   get_scale
-  mark
     dup                     # (scl scl)
       :custom               # (scl scl custom)
     str=                    # (scl eq?)
     if                      # (scl)
-      cur_scl_str !         # ()
+      drop                  # ()
+      :custom cur_scl_str !
       process_custom_scale
-      rewind
       return
     else                    # (scl)
       dup                   # (scl scl)
@@ -325,7 +324,6 @@ var loading_custom_gamut        custom_gamut_0 loading_custom_gamut !
       str=                  # (scl eq?)
       if                    # (scl)
         drop                # ()
-        rewind
         return              # ()
       endif                 #
     endif                   # (scl)
@@ -341,7 +339,6 @@ var loading_custom_gamut        custom_gamut_0 loading_custom_gamut !
   dup :archytas   str= if :archytas   cur_scl_str !  archytas   scale !  archytas_size   scale_size ! endif
   dup :enharmonic str= if :enharmonic cur_scl_str !  enharmonic scale !  enharmonic_size scale_size ! endif
       :equable    str= if :equable    cur_scl_str !  equable    scale !  equable_size    scale_size ! endif
-  rewind
 ;
 
 set_scale

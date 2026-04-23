@@ -6,20 +6,37 @@
 "dsp.dc"  import
 "music.dc" import
 
-"drone_vol"     const :DRONE_VOL
-"lead_rev_vol"  const :LEAD_REV_VOL
-"lead_rev_cf"   const :LEAD_REV_CF
-"lead_rev_fb"   const :LEAD_REV_FB
+"lead_gate" const :LEAD_GATE
+"lead_att"  const :LEAD_ATT
+"lead_rel"  const :LEAD_REL
+"lead_port" const :LEAD_PORT
+"lead_fb"   const :LEAD_FB
+"lead_res"  const :LEAD_RES
+"drone_vol" const :DRONE_VOL
+"drone_fb"  const :DRONE_FB
+"rev_vol"   const :REV_VOL
+"rev_cf"    const :REV_CF
+"rev_fb"    const :REV_FB
+0.95        const :DELWET
+1 :DELWET - const :DELDRY
+0.75        const :DELWDT
+1 :DELWDT - const :DELWDT_I
 
-var tempo          :LEAD_TEMPO get_x_tempo          tempo !
-var gatevar              :GATE keyval_get tonum                gatevar !
-var bass_pitch                 get_base_pitch  bass_pitch !
-var pitch                      bass_pitch @  4 *                pitch !
-var lead_vol                   get_lead_vol      lead_vol !
-var drone_vol       :DRONE_VOL keyval_get tonum              drone_vol !
-var lead_rev_vol :LEAD_REV_VOL keyval_get tonum           lead_rev_vol !
-var lead_rev_cf   :LEAD_REV_CF keyval_get tonum            lead_rev_cf !
-var lead_rev_fb   :LEAD_REV_FB keyval_get tonum            lead_rev_fb !
+var tempo      :LEAD_TEMPO get_x_tempo              tempo !
+var gatevar     :LEAD_GATE keyval_get tonum       gatevar !
+var attack       :LEAD_ATT keyval_get tonum        attack !
+var release      :LEAD_REL keyval_get tonum       release !
+var lead_port   :LEAD_PORT keyval_get tonum     lead_port !
+var lead_fb       :LEAD_FB keyval_get tonum       lead_fb !
+var lead_res     :LEAD_RES keyval_get tonum      lead_res !
+var lead_vol               get_lead_vol          lead_vol !
+var drone_pitch            get_base_pitch     drone_pitch !
+var drone_fb     :DRONE_FB keyval_get tonum      drone_fb !
+var pitch                 drone_pitch @ 4 *         pitch !
+var drone_vol   :DRONE_VOL keyval_get tonum     drone_vol !
+var rev_cf         :REV_CF keyval_get tonum        rev_cf !
+var rev_fb         :REV_FB keyval_get tonum        rev_fb !
+var rev_vol       :REV_VOL keyval_get tonum       rev_vol !
 
 var curtrig
 var lasttrig
@@ -30,11 +47,23 @@ var trigmask
 var pitch_port1
 var pitch_port2
 var amp_port
+var amp_env
+
+var lfo_sig
 
 var slmem1
 var slmem2
 var slmem3
 var slmem4
+make_hc_filter osc_flt
+
+3 make_delay_line dlyL
+3 make_delay_line dlyR
+var ltap
+var rtap
+var drysig
+make_hc_filter dlylpL
+make_hc_filter dlylpR
 
 make_digit_expansion_struct gen_struct
 make_reverb_struct          my_reverb
@@ -46,16 +75,13 @@ make_reverb_struct          my_reverb
     ####################################################################
     t 256 % 0 =
     if
-      # has lead vol changed?
-      :LEAD_VOL     lead_vol     true  update_from_key
-      # has drone vol changed?
-      :DRONE_VOL    drone_vol    true  update_from_key
+      # has drone stuff changed?
+      :DRONE_VOL  drone_vol  true  update_from_key
+      :DRONE_FB    drone_fb  true  update_from_key
       # has reverb stuff changed?
-      :LEAD_REV_VOL lead_rev_vol true  update_from_key
-      :LEAD_REV_CF  lead_rev_cf  true  update_from_key
-      :LEAD_REV_FB  lead_rev_fb  true  update_from_key
-      # has the gate value changed?
-      :GATE gatevar true update_from_key
+      :REV_VOL      rev_vol  true  update_from_key
+      :REV_CF        rev_cf  true  update_from_key
+      :REV_FB        rev_fb  true  update_from_key
     endif
     ############################
     # Our main metronome pulse #
@@ -66,9 +92,18 @@ make_reverb_struct          my_reverb
       # has tempo changed?
       :LEAD_TEMPO get_x_tempo dup tempo @ <>
       if tempo ! else drop endif
+      # has lead vol changed?
+      :LEAD_VOL  lead_vol  true update_from_key
+      # has the gate value changed?
+      :LEAD_GATE gatevar   true  update_from_key
+      :LEAD_ATT  attack    true  update_from_key
+      :LEAD_REL  release   true  update_from_key
+      :LEAD_PORT lead_port true  update_from_key
+      :LEAD_FB   lead_fb   true  update_from_key
+      :LEAD_RES  lead_res  true  update_from_key
       # has bass pitch changed?
       get_base_pitch dup base_pitch @ <>
-      if bass_pitch ! else drop endif
+      if drone_pitch ! else drop endif
       # possibly alter rhythm
       trigcount @ current_euclid @ % 0 =
       if
@@ -84,51 +119,103 @@ make_reverb_struct          my_reverb
       endif
       trigcount @ 1 + trigcount !
     endif
+    #######
+    # LFO #
+    #######
+    0.02 sine 0.5 * 0.5 + lfo_sig !
     ################
     # melody voice #
     ################
-      curtrig @ trigmask @ lead_vol @ * *
-        amp_port 0.001 6.0
-      port
-        dup
-          slmem1
-            pitch @ pitch_port1 0.01 0.01 port
-              0.37
-          sineloop
-        *
-      0.1 panmix
-        slmem2
-          pitch @ 1.004 * pitch_port2 0.01 0.01 port
-            0.37
-        sineloop
-      *
-    0.9 panmix
+    curtrig @ trigmask @ lead_vol @ * *
+      amp_port attack @ release @
+    port amp_env !
+    # OSC 1
+    slmem1
+      pitch @ pitch_port1 lead_port @ lead_port @ port
+        lead_fb @
+    sineloop
+    # OSC 2
+      slmem2
+        pitch @ 1.004 * pitch_port2 lead_port @ lead_port @ port
+          lead_fb @
+      sineloop
+    +
+    # Apply envelope
+    amp_env @ *
+    # Apply filter
+      osc_flt
+        600
+          3000 lfo_sig @ *
+        +
+          3000 amp_env @ *
+        +
+          lead_res @
+    hc_lowpass
+    0.5 panmix
+    ########################
+    # read current echoes  #
+    ########################
+    dlyL 2 tempo @ / 3 * 2 /         delay_read ltap !
+    dlyR 2 tempo @ / 3 * 2 / 0.002 + delay_read rtap !
+    ##########################
+    # mix dry & delayed sigs #
+    ##########################
+    # Establish dry (mono) signal
+    lchan @ rchan @ +   drysig !
+    # Mix with delayed
+    drysig @ :DELDRY *  ltap @ :DELWET *  +
+    :DELWDT_I panmix   # left out
+    drysig @ :DELDRY *  rtap @ :DELWET *  +
+    :DELWDT   panmix   # right out
     ##############
     # bass drone #
     ##############
       slmem3
-        bass_pitch @
-          0.29
+        drone_pitch @
+          drone_fb @
       sineloop drone_vol @ *
     0.3 panmix
       slmem4
-        bass_pitch @ 1.5024 *
-          0.29
+        drone_pitch @ 1.007 *
+          drone_fb @
       sineloop drone_vol @ *
     0.7 panmix
-    ##########
-    # output #
-    ##########
-      lchan @ lead_rev_vol @ *
-        rchan @ lead_rev_vol @ *
+    ###################
+    # reverb & output #
+    ###################
+      lchan @ rev_vol @ *
+        rchan @ rev_vol @ *
           my_reverb
-            lead_rev_cf @
-              lead_rev_fb @
+            rev_cf @
+              rev_fb @
         reverb
       1.0 panmix
     0.0 panmix
     stereo_out
+    #############################################
+    # cross-feedback:                           #
+    # left gets dry injection + feedback from R #
+    # right gets feedback from L                #
+    #############################################
+      drysig @ 0.5 *
+        rtap @ 0.75 *
+      +
+        dlylpL
+          2600
+            0.35
+      hc_lowpass
+        dlyL
+    delay_write
+      ltap @ 0.85 *
+        dlylpR
+          2300
+            0.35
+        hc_lowpass
+      dlyR
+    delay_write
+    # Update trigger state
     curtrig @ lasttrig !
+    # Advance the sample clock
     t+
   again
 ;

@@ -1,6 +1,3 @@
 "music.dc" import
 
-"Start timestamp is:" print cr
-
-"start_timestamp" redis_get print cr
 synchronized_start

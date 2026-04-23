@@ -44,9 +44,11 @@ var rntrg
     endif
     # sineloop oscillator:
     mysl
-    current_pitch @ octfac 256 *
-    pitch_port 0.02 0.03 port
-    ampenv @ 0.89 * 0.4 + sineloop ampenv @ *
+      current_pitch @ octfac 256 *
+      pitch_port 0.02 0.03 port
+        ampenv @ 0.89 * 0.4 +
+    sineloop
+    ampenv @ *
     # boost amplitude
     2.3 *
     # cut the highs a bit:
@@ -61,7 +63,7 @@ var rntrg
     0.65 panmix
     # output
     stereo_out
-    # 89% feedback
+    # feed the delay feedback!
     + 0.5 * mydelay delay_write
     # update trigger state
     curtrig @ lasttrig !
