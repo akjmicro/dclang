@@ -46,6 +46,8 @@ var trigmask
 
 var pitch_port1
 var pitch_port2
+var pitch_port3
+var pitch_port4
 var amp_port
 var amp_env
 
@@ -73,15 +75,24 @@ make_reverb_struct          my_reverb
     ####################################################################
     # check control changes (at a decent k-rate) that are not rhythmic #
     ####################################################################
-    t 256 % 0 =
+    t 384 % 0 =
     if
       # has drone stuff changed?
-      :DRONE_VOL  drone_vol  true  update_from_key
-      :DRONE_FB    drone_fb  true  update_from_key
+      :DRONE_VOL keyval_get tonum drone_vol !
+      :DRONE_FB  keyval_get tonum drone_fb !
       # has reverb stuff changed?
-      :REV_VOL      rev_vol  true  update_from_key
-      :REV_CF        rev_cf  true  update_from_key
-      :REV_FB        rev_fb  true  update_from_key
+      :REV_VOL   keyval_get tonum  rev_vol !
+      :REV_CF    keyval_get tonum  rev_cf !
+      :REV_FB    keyval_get tonum  rev_fb !
+      # has lead vol changed?
+      :LEAD_VOL  keyval_get tonum  lead_vol !
+      # has the gate value changed?
+      :LEAD_GATE keyval_get tonum  gatevar !
+      :LEAD_ATT  keyval_get tonum  attack !
+      :LEAD_REL  keyval_get tonum  release !
+      :LEAD_PORT keyval_get tonum  lead_port !
+      :LEAD_FB   keyval_get tonum  lead_fb !
+      :LEAD_RES  keyval_get tonum  lead_res !
     endif
     ############################
     # Our main metronome pulse #
@@ -92,15 +103,6 @@ make_reverb_struct          my_reverb
       # has tempo changed?
       :LEAD_TEMPO get_x_tempo dup tempo @ <>
       if tempo ! else drop endif
-      # has lead vol changed?
-      :LEAD_VOL  lead_vol  true update_from_key
-      # has the gate value changed?
-      :LEAD_GATE gatevar   true  update_from_key
-      :LEAD_ATT  attack    true  update_from_key
-      :LEAD_REL  release   true  update_from_key
-      :LEAD_PORT lead_port true  update_from_key
-      :LEAD_FB   lead_fb   true  update_from_key
-      :LEAD_RES  lead_res  true  update_from_key
       # has bass pitch changed?
       get_base_pitch dup base_pitch @ <>
       if drone_pitch ! else drop endif
@@ -135,19 +137,25 @@ make_reverb_struct          my_reverb
         lead_fb @
     sineloop
     # OSC 2
-      slmem2
-        pitch @ 1.004 * pitch_port2 lead_port @ lead_port @ port
-          lead_fb @
-      sineloop
+      pitch @ pitch_port2 lead_port @ lead_port @ port
+      sine 0.5 *
+    +
+      pitch @ 2.004 * pitch_port3 lead_port @ lead_port @ port
+      sine 0.25 *
+    +
+      pitch @ 3.004 * pitch_port4 lead_port @ lead_port @ port
+      tri 0.12 *
     +
     # Apply envelope
     amp_env @ *
     # Apply filter
       osc_flt
-        600
-          3000 lfo_sig @ *
+        300
+          2000 lfo_sig @ *
         +
-          3000 amp_env @ *
+        8000
+          over
+        - amp_env @ *
         +
           lead_res @
     hc_lowpass
@@ -176,7 +184,7 @@ make_reverb_struct          my_reverb
       sineloop drone_vol @ *
     0.3 panmix
       slmem4
-        drone_pitch @ 1.007 *
+        drone_pitch @ 1.005 *
           drone_fb @
       sineloop drone_vol @ *
     0.7 panmix

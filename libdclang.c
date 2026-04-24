@@ -3252,9 +3252,9 @@ void add_all_primitives() {
     add_primitive("acos", "Trigonometry", OP_ACOS);
     add_primitive("atan", "Trigonometry", OP_ATAN);
     add_primitive("atan2", "Trigonometry", OP_ATAN2);
-    add_primitive("sinh", "Trigonometry", OP_ATAN);
-    add_primitive("cosh", "Trigonometry", OP_ATAN);
-    add_primitive("tanh", "Trigonometry", OP_ATAN);
+    add_primitive("sinh", "Trigonometry", OP_SINH);
+    add_primitive("cosh", "Trigonometry", OP_COSH);
+    add_primitive("tanh", "Trigonometry", OP_TANH);
     // randomness
     add_primitive("rand", "Randomness", OP_RAND);
     // variables and arrays

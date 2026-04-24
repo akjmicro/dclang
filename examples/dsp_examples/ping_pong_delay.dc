@@ -39,7 +39,7 @@ create pitches  1 1  / ,
 var dummy
 var pitches_size  dummy pitches -  pitches_size !
 
-: pingpong_example
+: ping_pong_delay
   inf times
     #######################################
     # simple plucked-ish repeating source #
@@ -92,4 +92,4 @@ var pitches_size  dummy pitches -  pitches_size !
   again
 ;
 
-pingpong_example
+ping_pong_delay

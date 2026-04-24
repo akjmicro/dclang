@@ -15,7 +15,7 @@ pi 2 / const PI_DIV_2
 
 # sample rate and bit depth here
 # can be 8000, 44100, 48000, etc.
-44100 const SAMPLE_RATE
+48000 const SAMPLE_RATE
 
 # more efficient, for multiplication
 1 SAMPLE_RATE / const INV_SAMPLE_RATE
@@ -106,12 +106,9 @@ var _phasor_array 64 allot
 
 : tri  # (freq -- sig)
   phasor
-  dup floor -
-  dup 0.5 < if
-    2 * 1 -
-  else
-    2 * -1 +
-  endif
+  0.25 + dup 1 >= if 1 - endif
+  0.5 - abs
+  4 * 1 -
 ;
 
 # ( freq --> sine )

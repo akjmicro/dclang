@@ -299,16 +299,3 @@ var rhythm_type_buf 16 mkbuf rhythm_type_buf !
   :EUCLID_D keyval_get tonum_free
   dup 1 < if drop 1 endif
 ;
-
-###########################################
-# Generalized update from stored key word #
-###########################################
-: update_from_key { key varname cast_to_num? }
-    key keyval_get
-      cast_to_num?
-    if
-      tonum_free
-    endif
-    dup varname @ <>
-  if varname ! else drop endif
-;
