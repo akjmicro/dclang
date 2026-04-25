@@ -10,6 +10,7 @@
 
 # For saving the current value of 'x'
 var x
+0.0001 const :EPSILON
 
 #####################################################################
 # statistical study of chaos values for the first wrap*2 iterations #
@@ -44,14 +45,20 @@ var wrap
   again
 ;
 
+: tent_chaos { chaos epsilon }
+  x @
+  dup 0.5 >= if 1 swap - endif
+  chaos *  epsilon +   1 %
+  dup x !
+;
+
 : chaos_stats
   chaos_end @ chaos_start @ 1
   for
     _clear_figures
     wrap @ 2 * 0 1
     for
-      x @ 1 + j 1000 / * 1 %         # get next result
-      dup x !                        # copy it for next iteration
+      j 1000 /  0.00001 tent_chaos
       wrap @ * floor                 # convert and scale to int
       figures + dup @ 1 + swap !
     next
@@ -77,12 +84,17 @@ var drawchars
   drawchars @ swap dup 1 + strslice print cr
 ;
 
+"eps" const :EPSILON
+
 : _draw_chaos_infinite
-  x @ 1 + get_chaos * 1 %
-  dup x !
-  get_wrap
+  get_chaos
+    :EPSILON keyval_get tonum
+  tent_chaos
+  get_mul
   *
   floor
+  get_wrap
+  %
   _draw_row
   1 0.99 get_on_gate
   get_off_gate
