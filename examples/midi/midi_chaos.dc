@@ -7,6 +7,8 @@
 
 "music.dc" import
 
+var x
+
 : tent_chaos { chaos epsilon }
   x @
   dup 0.5 >= if 1 swap - endif
@@ -14,13 +16,13 @@
   dup x !
 ;
 
-"eps" make_channel_string :EPSILON
+"eps" make_channel_string const :EPSILON
 
 : get_epsilon
   :EPSILON keyval_get tonum
 ;
 
-: chaos_music { chaos epsilon }
+: chaos_music
   get_chaos get_epsilon tent_chaos
   get_mul * floor
   data_player
