@@ -2,7 +2,18 @@
 # DCLANG DSP! #
 ###############
 
-"deprecated_stack.dc" import
+# sample rate and bit depth here
+# can be 8000, 44100, 48000, etc.
+48000 const SAMPLE_RATE
+
+# more efficient, for multiplication
+1 SAMPLE_RATE / const INV_SAMPLE_RATE
+
+# 32-bit audio sample depth
+0x7fffffff const BIT_DEPTH
+
+# useful for correcting phase drift (see `phasor`)
+1 BIT_DEPTH / const INV_BIT_DEPTH
 
 # definition of 2pi
 pi 2 * const 2PI
@@ -13,21 +24,8 @@ pi 2 / const PI_DIV_2
 # 1 / 2pi
 1 2 pi * / const INV_2PI
 
-# sample rate and bit depth here
-# can be 8000, 44100, 48000, etc.
-48000 const SAMPLE_RATE
-
-# more efficient, for multiplication
-1 SAMPLE_RATE / const INV_SAMPLE_RATE
-
 # useful in normalized frequency calculations:
 2PI SAMPLE_RATE / const 2PIDSR
-
-# 32-bit audio sample depth
-0x7fffffff const BIT_DEPTH
-
-# useful for correcting phase drift (see `phasor`)
-1 BIT_DEPTH / const INV_BIT_DEPTH
 
 # setup timestamp; unit will be samples.
 var sample_clock
@@ -39,7 +37,7 @@ var rchan
 
 : seconds2samples
   # (seconds -- samples )
-    SAMPLE_RATE * round
+  SAMPLE_RATE * round
 ;
 
 # sample clock (timestamp) and channel routines here
@@ -92,6 +90,12 @@ var _phasor_array 64 allot
     _phasor_count dup @ 1 + swap !
 ;
 
+: sawtooth # ( freq -- sig )
+  phasor
+  0.5 + 1 %
+  2 * 1 -
+;
+
 # a simple metronome trigger:
 # ( freq -- sig )
 : metro phasor 0.001 <= abs ;
@@ -104,9 +108,8 @@ var _phasor_array 64 allot
 # ( width freq -- sig )
 : pulse phasor > if 1 else -1 endif ;
 
-: tri  # (freq -- sig)
-  phasor
-  0.25 + dup 1 >= if 1 - endif
+: tri
+  phasor 0.75 + 1 %
   0.5 - abs
   4 * 1 -
 ;
@@ -643,22 +646,40 @@ var _phasor_array 64 allot
 
 0.1 seconds2samples  const REV_DELAY_SIZE
 REV_DELAY_SIZE 2 +   const REV_MEM_SIZE
-17                   const REV_HEADER_SIZE
+17                   const REV_LFO_FREQS
+25                   const REV_LFO_DEPTHS
+33                   const REV_HEADER_SIZE
 9                    const REV_DELAY_LENGTHS
 1                    const REV_FILTERS
+
+: _fix 6 / ;
 
 : make_reverb_struct
   var                            # `var` will consume the next token as a name
     9 allot                      # Junction, plus 8 delay line lpfilter states.
-
-    2473 INV_SAMPLE_RATE * ,     # The delay read times, taken from csound's
-    2767 INV_SAMPLE_RATE * ,     # `reverbsc` code and UDO. Other primes can
-    3217 INV_SAMPLE_RATE * ,     # certainly be experimented with...N.B. these
-    3557 INV_SAMPLE_RATE * ,     # are designed for sr=44100.
-    3907 INV_SAMPLE_RATE * ,
-    4127 INV_SAMPLE_RATE * ,
-    2143 INV_SAMPLE_RATE * ,
-    1933 INV_SAMPLE_RATE * ,
+    # Delay read times
+    2473 SAMPLE_RATE 44100 / * INV_SAMPLE_RATE * ,     # The delay read times, taken from csound's
+    2767 SAMPLE_RATE 44100 / * INV_SAMPLE_RATE * ,     # `reverbsc` code and UDO. Other primes can
+    3217 SAMPLE_RATE 44100 / * INV_SAMPLE_RATE * ,     # certainly be experimented with...N.B. these
+    3557 SAMPLE_RATE 44100 / * INV_SAMPLE_RATE * ,     # are designed for sr=44100.
+    3907 SAMPLE_RATE 44100 / * INV_SAMPLE_RATE * ,
+    4127 SAMPLE_RATE 44100 / * INV_SAMPLE_RATE * ,
+    2143 SAMPLE_RATE 44100 / * INV_SAMPLE_RATE * ,
+    1933 SAMPLE_RATE 44100 / * INV_SAMPLE_RATE * ,
+    # LFO freqs, in seconds
+    3.100 , 3.500 , 1.110 , 3.973 , 2.341 , 1.897 , 0.891 , 3.221 ,
+    # LFO depths
+    0.0010 _fix ,
+    0.0011 _fix ,
+    0.0017 _fix ,
+    0.0006 _fix ,
+    0.0010 _fix ,
+    0.0011 _fix ,
+    0.0017 _fix ,
+    0.0006 _fix ,
+    ############################
+    # Actual delay line memory #
+    ############################
     8 times                      # The delay lines proper, 8 of them
       REV_DELAY_SIZE ,
       0 ,
@@ -686,6 +707,10 @@ REV_DELAY_SIZE 2 +   const REV_MEM_SIZE
   ###############################################################
     reverb_struct REV_MEM_SIZE 0 * REV_HEADER_SIZE + +
       reverb_struct REV_DELAY_LENGTHS 0 + + @
+        reverb_struct REV_LFO_FREQS 0 + + @ sine
+          reverb_struct REV_LFO_DEPTHS 0 + + @
+        *
+      +
     delay_read
     feedback *
       reverb_struct REV_FILTERS 0 + +
@@ -702,6 +727,10 @@ REV_DELAY_SIZE 2 +   const REV_MEM_SIZE
   delay_write
     reverb_struct REV_MEM_SIZE 1 * REV_HEADER_SIZE + +
       reverb_struct REV_DELAY_LENGTHS 1 + + @
+        reverb_struct REV_LFO_FREQS 1 + + @ sine
+          reverb_struct REV_LFO_DEPTHS 2 + + @
+        *
+      +
     delay_read
     feedback *
       reverb_struct REV_FILTERS 1 + +
@@ -718,6 +747,10 @@ REV_DELAY_SIZE 2 +   const REV_MEM_SIZE
   delay_write
     reverb_struct REV_MEM_SIZE 2 * REV_HEADER_SIZE + +
       reverb_struct REV_DELAY_LENGTHS 2 + + @
+        reverb_struct REV_LFO_FREQS 2 + + @ sine
+          reverb_struct REV_LFO_DEPTHS 2 + + @
+        *
+      +
     delay_read
     feedback *
       reverb_struct REV_FILTERS 2 + +
@@ -734,6 +767,10 @@ REV_DELAY_SIZE 2 +   const REV_MEM_SIZE
   delay_write
     reverb_struct REV_MEM_SIZE 3 * REV_HEADER_SIZE + +
       reverb_struct REV_DELAY_LENGTHS 3 + + @
+        reverb_struct REV_LFO_FREQS 3 + + @ sine
+          reverb_struct REV_LFO_DEPTHS 3 + + @
+        *
+      +
     delay_read
     feedback *
       reverb_struct REV_FILTERS 3 + +
@@ -750,6 +787,10 @@ REV_DELAY_SIZE 2 +   const REV_MEM_SIZE
   delay_write
     reverb_struct REV_MEM_SIZE 4 * REV_HEADER_SIZE + +
       reverb_struct REV_DELAY_LENGTHS 4 + + @
+        reverb_struct REV_LFO_FREQS 4 + + @ sine
+          reverb_struct REV_LFO_DEPTHS 4 + + @
+        *
+      +
     delay_read
     feedback *
       reverb_struct REV_FILTERS 4 + +
@@ -766,6 +807,10 @@ REV_DELAY_SIZE 2 +   const REV_MEM_SIZE
   delay_write
     reverb_struct REV_MEM_SIZE 5 * REV_HEADER_SIZE + +
       reverb_struct REV_DELAY_LENGTHS 5 + + @
+        reverb_struct REV_LFO_FREQS 5 + + @ sine
+          reverb_struct REV_LFO_DEPTHS 5 + + @
+        *
+      +
     delay_read
     feedback *
       reverb_struct REV_FILTERS 5 + +
@@ -782,6 +827,10 @@ REV_DELAY_SIZE 2 +   const REV_MEM_SIZE
   delay_write
     reverb_struct REV_MEM_SIZE 6 * REV_HEADER_SIZE + +
       reverb_struct REV_DELAY_LENGTHS 6 + + @
+        reverb_struct REV_LFO_FREQS 6 + + @ sine
+          reverb_struct REV_LFO_DEPTHS 6 + + @
+        *
+      +
     delay_read
     feedback *
       reverb_struct REV_FILTERS 6 + +
@@ -798,6 +847,10 @@ REV_DELAY_SIZE 2 +   const REV_MEM_SIZE
   delay_write
     reverb_struct REV_MEM_SIZE 7 * REV_HEADER_SIZE + +
       reverb_struct REV_DELAY_LENGTHS 7 + + @
+        reverb_struct REV_LFO_FREQS 7 + + @ sine
+          reverb_struct REV_LFO_DEPTHS 7 + + @
+        *
+      +
     delay_read
     feedback *
       reverb_struct REV_FILTERS 7 + +

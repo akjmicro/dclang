@@ -20,7 +20,7 @@ COPY --from=builder /lib/ld-musl-*.so.1 /lib/
 COPY --from=builder /usr/lib/libreadline* /usr/lib/
 COPY --from=builder /usr/lib/libptytty* /usr/lib
 COPY --from=builder /usr/lib/libncursesw* /usr/lib/
-COPY --from=builder /usr/lib/libgcc_s* /usr/lib
+COPY --from=builder /usr/lib/libgcc_s* /usr/lib/
 COPY --from=builder /usr/lib/libasound* /usr/lib/
 # immediate lib deps
 COPY --from=builder /usr/lib/libsqlite3* /usr/lib/

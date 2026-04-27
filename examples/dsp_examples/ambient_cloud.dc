@@ -1,0 +1,279 @@
+"dsp.dc" import
+"music.dc" import
+
+261 16 15 / * const :BASE_FREQ
+0.5        const :REV_VOL
+0.89       const :REV_CF
+0.983      const :REV_FB
+0.47       const :CHANCE
+"lead_res" const :LEAD_RES
+"saw_mix"  const :SAW_MIX
+
+var lfo_sig
+var saw_mix
+var lead_res  0.5 lead_res !
+
+create durations
+  1 13 / ,
+  1  8 / ,
+  1  5 / ,
+  1  3 / ,
+  1  2 / ,
+  1 , 2 , 3 , 5 , 8 , 13 ,
+var dummy
+dummy durations -  const :NDURS
+
+create pitches
+  1  4 / ,
+  1  2 / ,
+  3  4 / ,
+  1  1 / ,
+  9  8 / ,
+ 32 27 / ,
+  4  3 / ,
+  3  2 / ,
+ 27 16 / ,
+ 16  9 / ,
+  2  1 / ,
+  9  4 / ,
+ 64 27 / ,
+  8  3 / ,
+  3  1 / ,
+ 27  8 / ,
+ 32  9 / ,
+  4  1 / ,
+var dummy2
+dummy2 pitches -  const :NPITCHES
+
+create commas
+ 121 120 / ,
+ 144 143 / ,
+ 169 168 / ,
+ 196 195 / ,
+var dummy3
+dummy3 commas -  const :NCOMMAS
+
+make_hc_filter     osc_fltL
+make_hc_filter     osc_fltR
+make_reverb_struct my_reverb
+make_dcblock       my_dcblockL
+make_dcblock       my_dcblockR
+
+: rand_dur  # ( -- seconds )
+  :NDURS randint durations swap + @
+;
+
+: rand_fb  # ( -- fb )
+  rand 1.75 * 1.0 +
+;
+
+: rand_freq  # ( -- hz )
+  :NPITCHES randint
+  pitches swap + @
+  :BASE_FREQ *
+;
+
+: rand_comma
+  :NCOMMAS randint commas swap + @
+;
+
+: freq_pan_width  # (freq -- width)
+  pitches @ :BASE_FREQ * / :NPITCHES /
+  dup 1 > if drop 1 endif
+;
+
+: rand_pan_for_freq  # (freq -- pan)
+  0.5 swap           # (0.5 freq)
+  freq_pan_width     # (0.5 wdt)
+  swap               # (wdt 0.5)
+  over               # (wdt 0.5 wdt)
+  0.5 *              # (wdt 0.5 half_wdt)
+  -                  # (wdt 0.5-half_wdt)
+  swap               # (centered_min wdt)
+  rand *             # (centered_min wdt*rand)
+  +                  # (res)
+;
+
+0  const :active
+1  const :vol
+2  const :env_mem
+3  const :rem
+4  const :half
+5  const :env
+6  const :sl_mem1
+7  const :freq1
+8  const :fb
+9  const :fb_mem
+10 const :sl_mem2
+11 const :freq2
+12 const :pan
+13 const :lfo_freq
+14 const :lfo_depth
+15 const :lfo_mem
+
+: make_cloud_voice_struct
+  create 0 , 0 , 0 , 0 ,
+         0 , 0 , 0 , 0 ,
+         0 , 0 , 0 , 0 ,
+         0 , 0 , 0 , 0 ,
+;
+
+: init_voice { cvs } # cvs = cloud_voice_struct
+  rand_dur                  # (rand_dur)
+  SAMPLE_RATE * floor       # (rand_dur_smps)
+  dup                       # (rand_dur_smps rand_dur_smps)
+  cvs :rem + !              # (rand_dur_smps)
+  2 /                       # (half_smps)
+  cvs :half + !             # ()
+  rand_freq
+  dup                              cvs :freq1 + !
+  dup rand_comma *                 cvs :freq2 + !
+  rand_pan_for_freq                cvs :pan + !
+  rand_fb                          cvs :fb + !
+  rand 0.15 * 0.05 +
+    rand :CHANCE < abs
+  *                                cvs :vol + !
+  rand 2 * 0.01 +                  cvs :lfo_freq + !
+  rand 0.005 *                     cvs :lfo_depth + !
+  rand :CHANCE < if 1 else 0 endif cvs :active + !
+;
+
+: run_voice { cvs }  # cvs = cloud_voice_struct
+  cvs :active + @ 0 =
+  if
+    cvs init_voice
+  endif
+  ###########################
+  # Active sample countdown #
+  ###########################
+  cvs :active + @
+  if
+    cvs :rem + @ 0 >
+    if
+      cvs :rem + @ 1 -
+      cvs :rem + !
+    else
+      0 cvs :active  + !
+    endif
+  endif
+  ###############################
+  # Portamento envelope shaping #
+  ###############################
+  cvs :rem + @ cvs :half + @ > abs # gate high for first half, low for release half
+    cvs :vol + @
+  *
+    # attack/release times are approximately half the total event
+    cvs :env_mem +
+      cvs :half + @ SAMPLE_RATE /
+        dup
+  port cvs :env + !
+  ###########################
+  # Oscillator sound source #
+  ###########################
+  cvs :lfo_freq + @ sine
+    cvs :lfo_depth + @
+  * cvs :lfo_mem + !
+  # osc 1
+  cvs :sl_mem1 +
+    cvs :freq1 + @  cvs :lfo_mem + @ 1 + *
+      cvs :fb + @
+        cvs :env + @ 1.5 *
+          cvs :fb_mem +
+            0.1
+              0.1
+        port
+      *
+  sineloop #1.005 * tanh
+  cvs :env + @ *
+  # osc 2
+  cvs :sl_mem2 +
+    cvs :freq2 + @  cvs :lfo_mem + @ 1 + *
+      cvs :fb + @
+        cvs :env + @ 1.5 *
+          cvs :fb_mem +
+            0.1
+              0.1
+        port
+      *
+  sineloop #1.005 * tanh
+  cvs :env + @ *
+  # osc 3
+  cvs :freq1 + @  cvs :lfo_mem + @ 1 + *
+  sawtooth
+  1.02 * tanh
+  cvs :env + @ * 0.66 * saw_mix @ *
+  # osc 4
+  cvs :freq2 + @  cvs :lfo_mem + @ 1 + *
+  sine
+  cvs :env + @ * 0.6 *
+  # add outputs, filter, and pan
+  + + + 0.33 *
+  cvs :pan + @
+  panmix
+;
+
+# setup voices first
+make_cloud_voice_struct voice1
+make_cloud_voice_struct voice2
+make_cloud_voice_struct voice3
+make_cloud_voice_struct voice4
+make_cloud_voice_struct voice5
+make_cloud_voice_struct voice6
+make_cloud_voice_struct voice7
+
+: ambient_cloud
+  inf times
+    t 384 % 0 =
+    if
+      :LEAD_RES keyval_get tonum lead_res !
+      :SAW_MIX  keyval_get tonum  saw_mix !
+    endif
+    0.02 sine 0.5 * 0.51 +  lfo_sig !
+    voice1 run_voice
+    voice2 run_voice
+    voice3 run_voice
+    voice4 run_voice
+    voice5 run_voice
+    voice6 run_voice
+    voice7 run_voice
+    # post-scaling
+    lchan @ 0.15 * tanh
+      osc_fltL
+        2000
+          5960 lfo_sig @ *
+        +
+          lead_res @ 0.01 +
+    hc_lowpass tanh
+    0 lchan !  # zero out previous lchan sig
+    0.0 panmix
+    rchan @ 0.15 * tanh
+      osc_fltR
+        2000
+          5960 lfo_sig @ *
+        +
+          lead_res @ 0.01 +
+    hc_lowpass tanh
+    0 rchan !  # zero out previous rchan sig
+    1.0 panmix
+    ##########
+    # Reverb #
+    ##########
+      lchan @
+        rchan @
+          my_reverb
+            :REV_CF
+              :REV_FB
+        reverb
+      :REV_VOL * swap :REV_VOL *
+        my_dcblockR
+      dcblock
+      1.0 panmix
+      my_dcblockL
+    dcblock
+    0.0 panmix
+    stereo_out
+    t+
+  again
+;
+
+ambient_cloud

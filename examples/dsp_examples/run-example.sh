@@ -19,7 +19,7 @@ if command -v pw-cat >/dev/null 2>&1 && command -v pw-link >/dev/null 2>&1
 then
   echo "PipeWire detected."
 
-  if ! pw-link -o | grep -q "^${PIPEWIRE_TARGET}$"
+  if ! pw-link -o | grep -q "^${PIPEWIRE_TARGET}"
   then
     echo "Creating PipeWire null sink: ${PIPEWIRE_TARGET}"
 
@@ -37,7 +37,7 @@ then
   fi
 
   dclang sync.dc
-  nice -19 dclang "$EXAMPLE" | pw-cat -p -a \
+  nice -19 dclang "$EXAMPLE" | tee out.raw | pw-cat -p -a \
     --rate "$RATE" \
     --channels "$CHANNELS" \
     --format "$FORMAT" \
@@ -49,7 +49,7 @@ then
   echo "PipeWire not detected; using pa_play."
 
   dclang sync.dc
-  nice -19 dclang "$EXAMPLE" | ./pa_play \
+  nice -19 dclang "$EXAMPLE" | tee out.raw | ./pa_play \
     --rate "$RATE" \
     --channels "$CHANNELS" \
     --format "$FORMAT"le
