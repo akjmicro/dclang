@@ -1,7 +1,7 @@
 ## DSP examples
 
 To run an example:
-  - `./run_example.sh <script_name.dc>
+  - `./run_example.sh <script_name.dc>`
 
 
 - Make sure that `DCLANG_LIBS` environment variable is defined in your `~/.bashrc` or equivalent, e.g:
