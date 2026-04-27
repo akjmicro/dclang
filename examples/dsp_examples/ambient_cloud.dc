@@ -2,16 +2,14 @@
 "music.dc" import
 
 261 16 15 / * const :BASE_FREQ
-0.5        const :REV_VOL
-0.89       const :REV_CF
-0.983      const :REV_FB
-0.47       const :CHANCE
-"lead_res" const :LEAD_RES
-"saw_mix"  const :SAW_MIX
+0.5     const :REV_VOL
+0.89    const :REV_CF
+0.987   const :REV_FB
+0.43    const :CHANCE
+0.92    const :LEAD_RES
+0.25    const :SAW_MIX
 
 var lfo_sig
-var saw_mix
-var lead_res  0.5 lead_res !
 
 create durations
   1 13 / ,
@@ -41,7 +39,6 @@ create pitches
   3  1 / ,
  27  8 / ,
  32  9 / ,
-  4  1 / ,
 var dummy2
 dummy2 pitches -  const :NPITCHES
 
@@ -64,7 +61,7 @@ make_dcblock       my_dcblockR
 ;
 
 : rand_fb  # ( -- fb )
-  rand 1.75 * 1.0 +
+  rand 1.3 * 0.5 +
 ;
 
 : rand_freq  # ( -- hz )
@@ -177,37 +174,37 @@ make_dcblock       my_dcblockR
   cvs :sl_mem1 +
     cvs :freq1 + @  cvs :lfo_mem + @ 1 + *
       cvs :fb + @
-        cvs :env + @ 1.5 *
+        cvs :env + @
           cvs :fb_mem +
             0.1
               0.1
         port
       *
-  sineloop #1.005 * tanh
+  sineloop 0.5 * tanh 0.5 tanh /
   cvs :env + @ *
   # osc 2
-  cvs :sl_mem2 +
-    cvs :freq2 + @  cvs :lfo_mem + @ 1 + *
+  #cvs :sl_mem2 +
+  cvs :freq2 + @  cvs :lfo_mem + @ 1 + *
+    1.001
       cvs :fb + @
-        cvs :env + @ 1.5 *
+        cvs :env + @
           cvs :fb_mem +
             0.1
               0.1
         port
       *
-  sineloop #1.005 * tanh
+  fm 0.5 * tanh 0.5 tanh /
   cvs :env + @ *
   # osc 3
   cvs :freq1 + @  cvs :lfo_mem + @ 1 + *
-  sawtooth
-  1.02 * tanh
-  cvs :env + @ * 0.66 * saw_mix @ *
+  sawtooth 2.0 * tanh
+  cvs :env + @ * 0.66 * :SAW_MIX *
   # osc 4
   cvs :freq2 + @  cvs :lfo_mem + @ 1 + *
   sine
-  cvs :env + @ * 0.6 *
+  cvs :env + @ * 0.33 *
   # add outputs, filter, and pan
-  + + + 0.33 *
+  + + + 0.5 *
   cvs :pan + @
   panmix
 ;
@@ -223,11 +220,6 @@ make_cloud_voice_struct voice7
 
 : ambient_cloud
   inf times
-    t 384 % 0 =
-    if
-      :LEAD_RES keyval_get tonum lead_res !
-      :SAW_MIX  keyval_get tonum  saw_mix !
-    endif
     0.02 sine 0.5 * 0.51 +  lfo_sig !
     voice1 run_voice
     voice2 run_voice
@@ -242,7 +234,7 @@ make_cloud_voice_struct voice7
         2000
           5960 lfo_sig @ *
         +
-          lead_res @ 0.01 +
+          :LEAD_RES
     hc_lowpass tanh
     0 lchan !  # zero out previous lchan sig
     0.0 panmix
@@ -251,7 +243,7 @@ make_cloud_voice_struct voice7
         2000
           5960 lfo_sig @ *
         +
-          lead_res @ 0.01 +
+          :LEAD_RES
     hc_lowpass tanh
     0 rchan !  # zero out previous rchan sig
     1.0 panmix

@@ -14,14 +14,14 @@ make_hc_filter mylp2
     endif
       0.1 21 midictl 127 / 6 * +
       sine
-    0.5 * 0.5 + 0.5 * 0.5 + modwave !
+    0.5 * 0.5 + 1.5 * modwave !
     # left channel
-    sl1 120 modwave @ sineloop 0.99 *
-    mylp 1200 0.1 hc_lowpass 0.3 *
+    sl1 120 modwave @ sineloop 0.59 *
+    mylp 1200 0.1 hc_lowpass 0.2 *
     0.02 panmix
     # right channel
-    sl2 89.751 2 * modwave @ sineloop 0.99 *
-    mylp2 1205 0.1 hc_lowpass 0.3 *
+    sl2 179.5 modwave @ sineloop 0.59 *
+    mylp2 1205 0.1 hc_lowpass 0.2 *
     0.98 panmix
     # output
     stereo_out

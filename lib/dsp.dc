@@ -108,6 +108,11 @@ var _phasor_array 64 allot
 # ( width freq -- sig )
 : pulse phasor > if 1 else -1 endif ;
 
+: pulse_tanh
+  phasor
+  - 12.0 * tanh
+;
+
 : tri
   phasor 0.75 + 1 %
   0.5 - abs
