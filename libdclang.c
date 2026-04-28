@@ -165,6 +165,56 @@ void reverse_array(DCLANG_PTR arr[], int n) {
 }
 // end locals helpers
 
+// audio helpers
+
+#define AUDIO_OUTBUF_SIZE 2048  // 256 frames * 4 bytes * 2 channels
+
+static unsigned char audio_outbuf[AUDIO_OUTBUF_SIZE];
+static size_t audio_outbuf_pos = 0;
+
+static void audio_flush(void)
+{
+    if (audio_outbuf_pos > 0) {
+        fwrite(audio_outbuf, 1, audio_outbuf_pos, ofp);
+        audio_outbuf_pos = 0;
+    }
+}
+
+static inline void audio_write_s32le(int32_t sample)
+{
+    if (audio_outbuf_pos + 4 > AUDIO_OUTBUF_SIZE) {
+        audio_flush();
+    }
+
+#if defined(__BYTE_ORDER__) && __BYTE_ORDER__ == __ORDER_LITTLE_ENDIAN__
+    memcpy(audio_outbuf + audio_outbuf_pos, &sample, 4);
+    audio_outbuf_pos += 4;
+#else
+    uint32_t v = (uint32_t)sample;
+    audio_outbuf[audio_outbuf_pos++] = (unsigned char)( v        & 0xff);
+    audio_outbuf[audio_outbuf_pos++] = (unsigned char)((v >>  8) & 0xff);
+    audio_outbuf[audio_outbuf_pos++] = (unsigned char)((v >> 16) & 0xff);
+    audio_outbuf[audio_outbuf_pos++] = (unsigned char)((v >> 24) & 0xff);
+#endif
+}
+
+static inline void audio_write_stereo_s32le(int32_t l, int32_t r)
+{
+    if (audio_outbuf_pos + 8 > AUDIO_OUTBUF_SIZE) {
+        audio_flush();
+    }
+
+#if defined(__BYTE_ORDER__) && __BYTE_ORDER__ == __ORDER_LITTLE_ENDIAN__
+    memcpy(audio_outbuf + audio_outbuf_pos, &l, 4);
+    memcpy(audio_outbuf + audio_outbuf_pos + 4, &r, 4);
+    audio_outbuf_pos += 8;
+#else
+    audio_write_s32le(l);
+    audio_write_s32le(r);
+#endif
+}
+
+// end audio helpers
 
 // sqlite3 API helper
 static int __sqlcallback(void *NotUsed, int argc, char **argv, char **azColName) {
@@ -324,7 +374,7 @@ void dclang_execute() {
         &&OP_PRINT,
         &&OP_EMIT,
         &&OP_UEMIT,
-        &&OP_BYTES32,
+        &&OP_STEREO_OUT32,
         &&OP_ISALNUM,
         &&OP_ISALPHA,
         &&OP_ISCNTRL,
@@ -1720,19 +1770,18 @@ void dclang_execute() {
             fprintf(ofp, "%s", utf8_buf);
             fflush(ofp);
             NEXT;
-        OP_BYTES32:
-            DCLANG_INT byteval = (DCLANG_INT)POP;
-            char low = (char) byteval & 0xff;
-            byteval >>= 8;
-            char lowmid = (char) byteval & 0xff;
-            byteval >>= 8;
-            char highmid = (char) byteval & 0xff;
-            byteval >>= 8;
-            char high = (char) byteval & 0xff;
-            fputc(low, ofp);
-            fputc(lowmid, ofp);
-            fputc(highmid, ofp);
-            fputc(high, ofp);
+        OP_STEREO_OUT32:
+            double r = (double)POP;
+            double l = (double)POP;
+            // clamp
+            if (l > 1.0) l = 1.0;
+            if (l < -1.0) l = -1.0;
+            if (r > 1.0) r = 1.0;
+            if (r < -1.0) r = -1.0;
+            // scale + convert
+            int32_t li = (int32_t)lrint(l * 2147483647.0);
+            int32_t ri = (int32_t)lrint(r * 2147483647.0);
+            audio_write_stereo_s32le(li, ri);
             NEXT;
         OP_ISALNUM:
             if (data_stack_ptr < 1)
@@ -3319,7 +3368,7 @@ void add_all_primitives() {
     // character emitters
     add_primitive("emit", "Character Emitters", OP_EMIT);
     add_primitive("uemit", "Character Emitters", OP_UEMIT);
-    add_primitive("bytes32", "Character Emitters", OP_BYTES32);
+    add_primitive("_stereo_out32", "Character Emitters", OP_STEREO_OUT32);
     // character types
     add_primitive("isalnum", "Character Types", OP_ISALNUM);
     add_primitive("isalpha", "Character Types", OP_ISALPHA);

@@ -323,7 +323,7 @@ enum dclang_opcodes {
     OP_PRINT,
     OP_EMIT,
     OP_UEMIT,
-    OP_BYTES32,
+    OP_STEREO_OUT32,
     // character types
     OP_ISALNUM,
     OP_ISALPHA,

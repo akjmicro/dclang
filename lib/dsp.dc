@@ -905,20 +905,11 @@ REV_DELAY_SIZE 2 +   const REV_MEM_SIZE
   * lcget + lcset
 ;
 
-# sending out the signal
-: sendout
-  BIT_DEPTH * round bytes32
-;
-
 # stereo version of output
 : stereo_out
-  lcget sendout
-  rcget sendout
-;
-
-# stereo signals to stack for pick-up by external API calls
-: stereo_stack
-  rcget lcget
+  lcget
+  rcget
+  _stereo_out32
 ;
 
 # word to advance the clock
