@@ -324,6 +324,7 @@ enum dclang_opcodes {
     OP_EMIT,
     OP_UEMIT,
     OP_STEREO_OUT32,
+    OP_STEREO_IN32,
     // character types
     OP_ISALNUM,
     OP_ISALPHA,

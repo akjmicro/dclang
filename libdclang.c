@@ -214,6 +214,62 @@ static inline void audio_write_stereo_s32le(int32_t l, int32_t r)
 #endif
 }
 
+#define AUDIO_INBUF_SIZE 2048  // 256 frames * 4 bytes * 2 channels
+
+static unsigned char audio_inbuf[AUDIO_INBUF_SIZE];
+static size_t audio_inbuf_pos = 0;
+static size_t audio_inbuf_len = 0;
+
+static int audio_fill_input(void)
+{
+    audio_inbuf_len = fread(audio_inbuf, 1, AUDIO_INBUF_SIZE, stdin);
+    audio_inbuf_pos = 0;
+    return audio_inbuf_len > 0;
+}
+
+static inline int audio_read_s32le(int32_t *sample)
+{
+    if (audio_inbuf_pos + 4 > audio_inbuf_len) {
+        if (!audio_fill_input()) {
+            return 0;
+        }
+    }
+
+#if defined(__BYTE_ORDER__) && __BYTE_ORDER__ == __ORDER_LITTLE_ENDIAN__
+    memcpy(sample, audio_inbuf + audio_inbuf_pos, 4);
+#else
+    uint32_t v =
+        ((uint32_t)audio_inbuf[audio_inbuf_pos]) |
+        ((uint32_t)audio_inbuf[audio_inbuf_pos + 1] << 8) |
+        ((uint32_t)audio_inbuf[audio_inbuf_pos + 2] << 16) |
+        ((uint32_t)audio_inbuf[audio_inbuf_pos + 3] << 24);
+    *sample = (int32_t)v;
+#endif
+
+    audio_inbuf_pos += 4;
+    return 1;
+}
+
+static inline int audio_read_stereo_s32le(int32_t *l, int32_t *r)
+{
+    if (audio_inbuf_pos + 8 > audio_inbuf_len) {
+        if (!audio_fill_input()) {
+            return 0;
+        }
+    }
+
+#if defined(__BYTE_ORDER__) && __BYTE_ORDER__ == __ORDER_LITTLE_ENDIAN__
+    memcpy(l, audio_inbuf + audio_inbuf_pos, 4);
+    memcpy(r, audio_inbuf + audio_inbuf_pos + 4, 4);
+    audio_inbuf_pos += 8;
+#else
+    if (!audio_read_s32le(l)) return 0;
+    if (!audio_read_s32le(r)) return 0;
+#endif
+
+    return 1;
+}
+
 // end audio helpers
 
 // sqlite3 API helper
@@ -375,6 +431,7 @@ void dclang_execute() {
         &&OP_EMIT,
         &&OP_UEMIT,
         &&OP_STEREO_OUT32,
+        &&OP_STEREO_IN32,
         &&OP_ISALNUM,
         &&OP_ISALPHA,
         &&OP_ISCNTRL,
@@ -1771,17 +1828,35 @@ void dclang_execute() {
             fflush(ofp);
             NEXT;
         OP_STEREO_OUT32:
-            double r = (double)POP;
-            double l = (double)POP;
+            double r_out = (double)POP;
+            double l_out = (double)POP;
             // clamp
-            if (l > 1.0) l = 1.0;
-            if (l < -1.0) l = -1.0;
-            if (r > 1.0) r = 1.0;
-            if (r < -1.0) r = -1.0;
+            if (l_out > 1.0)  l_out =  1.0;
+            if (l_out < -1.0) l_out = -1.0;
+            if (r_out > 1.0)  r_out =  1.0;
+            if (r_out < -1.0) r_out = -1.0;
             // scale + convert
-            int32_t li = (int32_t)lrint(l * 2147483647.0);
-            int32_t ri = (int32_t)lrint(r * 2147483647.0);
-            audio_write_stereo_s32le(li, ri);
+            int32_t l_int_out = (int32_t)lrint(l_out * 2147483647.0);
+            int32_t r_int_out = (int32_t)lrint(r_out * 2147483647.0);
+            audio_write_stereo_s32le(l_int_out, r_int_out);
+            NEXT;
+        OP_STEREO_IN32:
+            int32_t l_int_in = 0;
+            int32_t r_int_in = 0;
+            if (!audio_read_stereo_s32le(&l_int_in, &r_int_in)) {
+                push(0.0);
+                push(0.0);
+                NEXT;
+            }
+            double l_dbl_in = (double)l_int_in / 2147483647.0;
+            double r_dbl_in = (double)r_int_in / 2147483647.0;
+            // clamp
+            if (l_dbl_in > 1.0) l_dbl_in = 1.0;
+            if (l_dbl_in < -1.0) l_dbl_in = -1.0;
+            if (r_dbl_in > 1.0) r_dbl_in = 1.0;
+            if (r_dbl_in < -1.0) r_dbl_in = -1.0;
+            push(l_dbl_in);
+            push(r_dbl_in);
             NEXT;
         OP_ISALNUM:
             if (data_stack_ptr < 1)
@@ -3369,6 +3444,7 @@ void add_all_primitives() {
     add_primitive("emit", "Character Emitters", OP_EMIT);
     add_primitive("uemit", "Character Emitters", OP_UEMIT);
     add_primitive("_stereo_out32", "Character Emitters", OP_STEREO_OUT32);
+    add_primitive("_stereo_in32", "Character Emitters", OP_STEREO_IN32);
     // character types
     add_primitive("isalnum", "Character Types", OP_ISALNUM);
     add_primitive("isalpha", "Character Types", OP_ISALPHA);

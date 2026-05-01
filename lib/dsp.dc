@@ -48,6 +48,12 @@ var rchan
 : rcset rchan ! ;
 : _clear_channels  0.0 lcset 0.0 rcset ;
 
+###############
+# AUDIO INPUT #
+###############
+
+: stereo_in _stereo_in32 ;
+
 #######################
 # PHASORS/OSCILLATORS #
 #######################

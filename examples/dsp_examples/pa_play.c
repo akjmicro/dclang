@@ -41,7 +41,7 @@ int main(int argc, char *argv[]) {
         .prefill_buffers = DEFAULT_PREFILL_BUFFERS,
         .format = FMT_S32LE,
         .pa_format = paInt32,
-        .sample_size_bytes = 2
+        .sample_size_bytes = 4
     };
 
     for (int i = 1; i < argc; i++) {
