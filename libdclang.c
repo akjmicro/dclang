@@ -3258,7 +3258,7 @@ void dclang_execute() {
                 // Nothing there, or read error, push -1
                 push((DCLANG_LONG)-1);
                 push((DCLANG_LONG)-1);
-                push((DCLANG_LONG)-1);
+                push((DCLANG_LONG)event_status);
             }
             NEXT;
         _OP_PM_CLOSE:

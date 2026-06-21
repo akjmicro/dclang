@@ -20,6 +20,8 @@ typedef struct {
     int channels;
     int frames_per_buffer;
     int prefill_buffers;
+    int device;
+    int list_devices;
     AudioFormat format;
     PaSampleFormat pa_format;
     size_t sample_size_bytes;
@@ -28,9 +30,37 @@ typedef struct {
 static void usage(const char *prog) {
     fprintf(stderr,
         "Usage: %s [--rate RATE] [--channels N] [--format FORMAT] [--buffer FRAMES] [--prefill N]\n"
-        "  FORMAT: s16le (default), s24le, s32le, f32le\n",
+        "          [--device INDEX] [--list-devices]"
+        "  FORMAT: s16le, s24le, s32le (default), f32le\n",
         prog);
     exit(1);
+}
+
+static void list_devices(void) {
+    int n = Pa_GetDeviceCount();
+    if (n < 0) {
+        fprintf(stderr, "PortAudio error: %s\n", Pa_GetErrorText(n));
+        return;
+    }
+
+    for (int i = 0; i < n; i++) {
+        const PaDeviceInfo *info = Pa_GetDeviceInfo(i);
+        const PaHostApiInfo *api = Pa_GetHostApiInfo(info->hostApi);
+
+        printf("%2d: %s [%s] inputs=%d outputs=%d",
+            i,
+            info->name,
+            api ? api->name : "unknown",
+            info->maxInputChannels,
+            info->maxOutputChannels
+        );
+
+        if (i == Pa_GetDefaultOutputDevice()) {
+            printf("  [default output]");
+        }
+
+        printf("\n");
+    }
 }
 
 int main(int argc, char *argv[]) {
@@ -39,6 +69,8 @@ int main(int argc, char *argv[]) {
         .channels = DEFAULT_CHANNELS,
         .frames_per_buffer = DEFAULT_FRAMES_PER_BUFFER,
         .prefill_buffers = DEFAULT_PREFILL_BUFFERS,
+        .device = paNoDevice,
+        .list_devices = 0,
         .format = FMT_S32LE,
         .pa_format = paInt32,
         .sample_size_bytes = 4
@@ -53,6 +85,10 @@ int main(int argc, char *argv[]) {
             cfg.frames_per_buffer = atoi(argv[++i]);
         } else if (!strcmp(argv[i], "--prefill") && i + 1 < argc) {
             cfg.prefill_buffers = atoi(argv[++i]);
+        } else if ((!strcmp(argv[i], "--device") || !strcmp(argv[i], "-d")) && i + 1 < argc) {
+            cfg.device = atoi(argv[++i]);
+        } else if (!strcmp(argv[i], "--list-devices")) {
+            cfg.list_devices = 1;
         } else if ((!strcmp(argv[i], "--format") || !strcmp(argv[i], "-f")) && i + 1 < argc) {
             const char *fmt = argv[++i];
             if (!strcmp(fmt, "s16le")) {
@@ -78,6 +114,18 @@ int main(int argc, char *argv[]) {
         } else {
             usage(argv[0]);
         }
+    }
+
+    PaStream *stream = NULL;
+    PaError err;
+
+    err = Pa_Initialize();
+    if (err != paNoError) goto error;
+
+    if (cfg.list_devices) {
+        list_devices();
+        Pa_Terminate();
+        return 0;
     }
 
     const size_t block_bytes =
@@ -117,19 +165,45 @@ int main(int argc, char *argv[]) {
         return 0;
     }
 
-    PaStream *stream = NULL;
-    PaError err;
+    if (cfg.device == paNoDevice) {
+        cfg.device = Pa_GetDefaultOutputDevice();
+    }
 
-    err = Pa_Initialize();
-    if (err != paNoError) goto error;
+    if (cfg.device == paNoDevice) {
+        fprintf(stderr, "No default output device.\n");
+        goto error;
+    }
 
-    err = Pa_OpenDefaultStream(
+    const PaDeviceInfo *devinfo = Pa_GetDeviceInfo(cfg.device);
+    if (!devinfo) {
+        fprintf(stderr, "Invalid output device index: %d\n", cfg.device);
+        goto error;
+    }
+
+    if (cfg.channels > devinfo->maxOutputChannels) {
+        fprintf(stderr,
+            "Device only supports %d output channels, requested %d.\n",
+            devinfo->maxOutputChannels,
+            cfg.channels
+        );
+        goto error;
+    }
+
+    PaStreamParameters output;
+    memset(&output, 0, sizeof(output));
+    output.device = cfg.device;
+    output.channelCount = cfg.channels;
+    output.sampleFormat = cfg.pa_format;
+    output.suggestedLatency = devinfo->defaultLowOutputLatency;
+    output.hostApiSpecificStreamInfo = NULL;
+
+    err = Pa_OpenStream(
         &stream,
-        0,
-        cfg.channels,
-        cfg.pa_format,
+        NULL,
+        &output,
         cfg.sample_rate,
         cfg.frames_per_buffer,
+        paClipOff,
         NULL,
         NULL
     );

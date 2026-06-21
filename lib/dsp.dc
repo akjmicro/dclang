@@ -114,34 +114,39 @@ var _phasor_array 64 allot
 # ( width freq -- sig )
 : pulse phasor > if 1 else -1 endif ;
 
-: pulse_tanh
+: pulse_tanh  # ( width freq )
   phasor
   - 12.0 * tanh
 ;
 
-: tri
+: tri  # ( freq -- tri_sig )
   phasor 0.75 + 1 %
   0.5 - abs
   4 * 1 -
 ;
 
-# ( freq --> sine )
+# ( freq -- sine )
 : sine phasor 2PI * sin ;
+
+# ( freq phase -- sine )
+: sine_phase { freq phase }
+  freq phasor
+  phase +
+  1.0 %
+  2PI *
+  sin
+;
 
 # FM osc; basic carrier/modulator pair
 : fm { carrier_freq mod_ratio index }
   carrier_freq
-    mod_ratio
-  *
-  sine
-    index
-  *
-    carrier_freq
-    phasor
-  +
-  1.0 %
-  2PI *
-  sin
+    dup
+      mod_ratio
+    *
+    sine
+      index
+    *
+  sine_phase
 ;
 
 # sineloop, a feedback sine wave

@@ -12,6 +12,7 @@ EXAMPLE="$1"
 RATE=48000
 CHANNELS=2
 FORMAT=s32
+FORMAT_UPPER=S32_LE
 LATENCY=128
 PIPEWIRE_TARGET="dclang_mixer"
 
@@ -44,19 +45,31 @@ then
     --latency "$LATENCY" \
     --target "$PIPEWIRE_TARGET" -
 
+elif command -v aplay >/dev/null 2>&1
+then
+  echo "PipeWire not detected; using aplay."
+
+  dclang sync.dc
+  nice -19 dclang "$EXAMPLE" | tee out.raw | aplay \
+    -r "$RATE" \
+    -c "$CHANNELS" \
+    -f "$FORMAT_UPPER" \
+    --buffer-size="$LATENCY"
+
 elif command -v ./pa_play >/dev/null 2>&1
 then
-  echo "PipeWire not detected; using pa_play."
+  echo "PipeWire and aplay not detected; using pa_play."
 
   dclang sync.dc
   nice -19 dclang "$EXAMPLE" | tee out.raw | ./pa_play \
     --rate "$RATE" \
     --channels "$CHANNELS" \
-    --format "$FORMAT"le
+    --format "$FORMAT"le \
+    --buffer "$LATENCY"
 
 else
   echo "No supported audio player found."
   echo "Need either PipeWire tools: pw-cat, pw-link, pw-cli"
-  echo "or pa_play."
+  echo "aplay, or pa_play."
   exit 1
 fi

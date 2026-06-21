@@ -471,7 +471,7 @@ var _str_to_lgen_buf
           dup strlen 1 +
         mempcpy
       drop
-      # next, copy it to the `strtok` buffer taht consumes
+      # next, copy it to the `strtok` buffer that consumes
       # it for list creation
       _str_to_lgen_buf @
       swap
