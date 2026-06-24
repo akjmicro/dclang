@@ -60,6 +60,7 @@ Born on 2018-05-05 */
 #define DATA_STACK_SIZE   32
 #define RETURN_STACK_SIZE 128
 #define MAXWORD           1048576
+#define EXEC_TRAMPOLINE   (MAXWORD - 4)
 #define MAX_OPCODES       216
 #define IBUFSIZE          128
 #define NUMLOCALS         8

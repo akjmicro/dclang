@@ -1320,9 +1320,9 @@ void dclang_execute() {
             if (retval == NULL)
             {
                 push((DCLANG_PTR)0);
-                return;
+            } else {
+                push((DCLANG_FLT)((*(struct tree_entry **)retval)->value));
             }
-            push((DCLANG_FLT)((*(struct tree_entry **)retval)->value));
             NEXT;
         OP_TREESET:
             if (data_stack_ptr < 3)
@@ -3767,6 +3767,14 @@ void _repl() {
     compile_or_interpret(0);
 }
 
+void dclang_call_primitive_opcode(DCLANG_LONG opcode) {
+    prog[EXEC_TRAMPOLINE].opcode = opcode;
+    prog[EXEC_TRAMPOLINE].param  = 0;
+    prog[EXEC_TRAMPOLINE + 1].opcode = OP_RETURN;
+    prog[EXEC_TRAMPOLINE + 1].param  = 0;
+    dclang_callword(EXEC_TRAMPOLINE);
+}
+
 void _execfunc() {
     if (data_stack_ptr < 1)
     {
@@ -3805,8 +3813,7 @@ void _execfunc() {
                 prog[iptr++].opcode = pr->opcode;
             } else {
                 if (validate(token_arg)) {
-                    prog[iptr].opcode = pr->opcode;
-                    dclang_execute();
+                    dclang_call_primitive_opcode(pr->opcode);
                 }
             }
             return;

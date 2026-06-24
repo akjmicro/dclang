@@ -1,0 +1,32 @@
+# Meant to be called via the bash script, `run_tests.sh`
+# ...in case /tmp/keys doesn't exist, that script will create it
+
+"music.dc" import
+
+: test_do_symbol_string
+  # set to standard 12-edo and make a little arpeggio
+  "12"               "edo" keyval_set
+  "c _e g _b"       "sym1" keyval_set
+  # test iteration
+  do_symbol_string   0  = assert
+  do_symbol_string   3  = assert
+  do_symbol_string   7  = assert
+  do_symbol_string  10  = assert
+  do_symbol_string   0  = assert
+  # Now, 31-edo, and a little scale and octave drop
+  "31"               "edo" keyval_set
+  "c d e g <_b c,," "sym1" keyval_set
+  do_symbol_string   0  = assert
+  do_symbol_string   5  = assert
+  do_symbol_string  10  = assert
+  do_symbol_string  18  = assert
+  do_symbol_string  25  = assert
+  do_symbol_string -62  = assert
+  "53"               "edo" keyval_set
+  "a' -^c'' e''"    "sym1" keyval_set
+  do_symbol_string  93  = assert
+  do_symbol_string 110  = assert
+  do_symbol_string 124  = assert
+;
+
+test_do_symbol_string

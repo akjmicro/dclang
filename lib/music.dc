@@ -455,9 +455,10 @@ var prev_euclid_int
 ########################################################
 
 var _str_to_lgen_buf
-1024 mkbuf _str_to_lgen_buf !
+8192 mkbuf _str_to_lgen_buf !
+"tonum" const :tonum  # standard string for method used
 
-: _string_to_lgen { str_to_check cur_str lgen_struct }
+: _string_to_lgen { str_to_check cur_str lgen_struct method }
     str_to_check keyval_get
       dup
         cur_str @
@@ -479,7 +480,7 @@ var _str_to_lgen_buf
       mempcpy
     drop
     # now create the list from the consumable buffer
-      _str_to_lgen_buf @ linit_nums
+      _str_to_lgen_buf @ method linit
     lgen_struct !
     # initialize the current node counter:
     0 lgen_struct 1 + !
@@ -497,17 +498,18 @@ var _str_to_lgen_buf
 "string"                   const :string
 # Deal with rhythm string setup
 "rh"  make_channel_string  const :rhythm_string
-make_lgen_struct     _rhythm_lgen
-var _cur_rhythm_str  1024 mkbuf _cur_rhythm_str !
+var _cur_rhythm_str   2048 mkbuf _cur_rhythm_str !
+make_lgen_struct  _rhythm_lgen
 # Deal with gate string setup
 "gt"  make_channel_string  const :gate_string
-make_lgen_struct     _gate_lgen
-var _cur_gate_str    1024 mkbuf _cur_gate_str   !
+var _cur_gate_str   2048 mkbuf _cur_gate_str   !
+make_lgen_struct  _gate_lgen
 
 : _do_rhythm_string
   :rhythm_string
     _cur_rhythm_str
       _rhythm_lgen
+        :tonum
   _string_to_lgen
   dup 0 = if drop 1 endif
 ;
@@ -516,6 +518,7 @@ var _cur_gate_str    1024 mkbuf _cur_gate_str   !
   :gate_string
     _cur_gate_str
       _gate_lgen
+        :tonum
   _string_to_lgen
   dup 0 < if drop 0 endif
   dup 1 > if drop 1 endif
@@ -599,19 +602,154 @@ var digit_sum_counter
   digit_sum_counter !
 ;
 
-#############################################
-# Future manual pitch-string sequencer work #
-#############################################
+############################
+# Sequence attack volumes! #
+############################
 
-"pch" make_channel_string  const :pitch_string
+"att" make_channel_string  const :attack_string
+var _cur_attack_str   2048 mkbuf _cur_attack_str !
+make_lgen_struct  _attack_lgen
 
-make_lgen_struct    _pitch_lgen
-var _cur_pitch_str  "" _cur_pitch_str !
-
-: _do_pitch_string
-  :pitch_string
-    _cur_pitch_str
-      _pitch_lgen
+: do_attack_string
+  :attack_string
+    _cur_attack_str
+      _attack_lgen
+        :tonum
   _string_to_lgen
-  data_player
+;
+
+#########################################################################
+# Takes a note-as-letter preceded by accidentals and followed by any    #
+# number of octave apostrophes or commas (e.g. _a,, for a-flat 2 octs   #
+# below middle a-flat, or ^g' got g-sharp an octave above middle        #
+# g-sharp) and returns the pitch as an integer EDO index, the math      #
+# having been adjusted to consider the current EDO-context via          #
+# `get_edo`. `pitch_token` is assumed to be previously gathered from a  #
+# string of such pitches, and represents a single pitch to calculate.   #
+#########################################################################
+
+var note_symbol_tree
+tmake note_symbol_tree !
+
+# constants for note symbols
+"c" const :c
+"d" const :d
+"e" const :e
+"f" const :f
+"g" const :g
+"a" const :a
+"b" const :b
+"^" const :sharp
+"_" const :flat
+"+" const :81_80_up
+"-" const :81_80_down
+">" const :64_63_up
+"<" const :64_63_down
+"'" const :oct_up
+"," const :oct_down
+
+: _get_edo_3_2 { local_edo }
+  3 2 / log2 local_edo * round
+;
+
+: _update_note_symbol_tree { local_edo }
+  note_symbol_tree @ :f        local_edo _get_edo_3_2 -1 * local_edo absmod t! drop
+  note_symbol_tree @ :c                                       0 t! drop
+  note_symbol_tree @ :g        local_edo _get_edo_3_2  1 * local_edo absmod t! drop
+  note_symbol_tree @ :d        local_edo _get_edo_3_2  2 * local_edo absmod t! drop
+  note_symbol_tree @ :a        local_edo _get_edo_3_2  3 * local_edo absmod t! drop
+  note_symbol_tree @ :e        local_edo _get_edo_3_2  4 * local_edo absmod t! drop
+  note_symbol_tree @ :b        local_edo _get_edo_3_2  5 * local_edo absmod t! drop
+  note_symbol_tree @ :sharp    local_edo _get_edo_3_2  7 * local_edo absmod t! drop
+  note_symbol_tree @ :flat     local_edo _get_edo_3_2  7 * local_edo absmod
+                                                                       -1 * t! drop
+  note_symbol_tree @ :81_80_up              81 80 / log2 local_edo * round  t! drop
+  note_symbol_tree @ :81_80_down            81 80 / log2 local_edo * round
+                                                                       -1 * t! drop
+  note_symbol_tree @ :64_63_up              64 63 / log2 local_edo * round  t! drop
+  note_symbol_tree @ :64_63_down            64 63 / log2 local_edo * round
+                                                                       -1 * t! drop
+  note_symbol_tree @ :oct_up                                      local_edo t! drop
+  note_symbol_tree @ :oct_down                                    local_edo
+                                                                       -1 * t! drop
+;
+
+var _cur_edo  get_edo _cur_edo !
+_cur_edo @ _update_note_symbol_tree
+
+: symbol_to_edo_int { pitch_token }
+  get_edo dup _cur_edo @ <>
+  if
+    dup _update_note_symbol_tree
+        _cur_edo !
+  else
+    drop
+  endif
+  0
+  pitch_token strlen times
+    note_symbol_tree @
+      pitch_token i i 1 + strslice
+    t@
+    +
+  again
+;
+
+#############################################################
+# Iterate through a symbol string and calculate EDO pitches #
+#############################################################
+"sym" make_channel_string  const :symbol_string
+var _cur_sym_str   8192 mkbuf _cur_sym_str !
+var _cur_sym_str_ptr
+var _sym_token_buf  16 mkbuf _sym_token_buf !
+
+: _reset_sym_str_ptr
+  _cur_sym_str @  _cur_sym_str_ptr !
+;
+
+: _process_next_symbol
+  # if there's no str length left, reset it
+  _cur_sym_str_ptr @ strlen 0 =
+  if
+    _reset_sym_str_ptr
+  endif
+  # advance whitespace
+  _cur_sym_str_ptr @
+    dup BLANK strspn
+  + _cur_sym_str_ptr !
+  # blank the token buf first
+    _sym_token_buf @ 0 16 memset
+  # get next symbol
+      _cur_sym_str_ptr @
+        dup
+          BLANK
+        strcspn
+            2dup
+        svpush svpush
+    1 + mempcpy
+  drop
+  # update sym ptr position:
+    svpop
+      svpop
+    +
+  _cur_sym_str_ptr !
+  # get result:
+  _sym_token_buf @ symbol_to_edo_int
+;
+
+: do_symbol_string
+  :symbol_string keyval_get     # (symstr)
+    dup                         # (symstr symstr)
+      _cur_sym_str @            # (symstr symstr cur)
+    str= not                    # (symstr bool?)
+    if                          #
+        _cur_sym_str @ 0 8192 memset
+          swap                  # (cur symstr)
+            dup strlen 1 +      # (cur symstr len+1)
+        mempcpy                 # (endptr)
+      drop                      # ()
+      _reset_sym_str_ptr        # ()
+    else
+      drop                      # ()
+    endif
+  _process_next_symbol
 ;

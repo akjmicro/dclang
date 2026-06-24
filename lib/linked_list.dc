@@ -1,14 +1,15 @@
 " " const :blank
 var __private_ll_token_holder__
 
-: _list_init_nums_helper  # ( list ) -- ( list )
+: _list_init_helper { list_obj token_method } # ( list token_method ) -- ( list )
+  list_obj
   null :blank __private_ll_token_holder__ strtok
   dup null =
   if
     drop
   else
-    tonum over swap lpush
-    _list_init_nums_helper
+    token_method exec over swap lpush
+    token_method _list_init_helper
   endif
 ;
 
@@ -41,24 +42,25 @@ var __private_ll_token_holder__
 # Public API #
 ##############
 
-: linit_nums  # ( all_nums_str_buf ) -- ( list )
+: linit  # ( str_buf token_method ) -- ( list )
   ############################################################
   # Produce a list of nums based on a space-delimited string #
-  # of numbers                                               #
+  # of numbers. `token_method` runs on each token.           #
   ############################################################
-  depth 1 <
+  depth 2 <
   if
-    "linit_nums: need <all_nums_str_buf> on the stack." print cr
+    "linit: need <str_buf> <token_method_str> on the stack." print cr
     return
   endif
-  lmake swap
-  :blank __private_ll_token_holder__ strtok
+  { str_buf token_method }
+  lmake
+  str_buf :blank __private_ll_token_holder__ strtok
   dup null =
   if
     drop
   else
-    tonum over swap lpush
-    _list_init_nums_helper
+    token_method exec over swap lpush
+    token_method _list_init_helper
   endif
 ;
 
