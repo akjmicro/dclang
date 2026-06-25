@@ -9,7 +9,23 @@
 var midi_channel
 
 : populate_midi_channel
-  "MIDI_CHANNEL" envget dup 0 = if drop 1 else tonum endif midi_channel !
+  "CHAN" envget
+  dup 0 =
+  if
+    drop
+    "MIDI_CHANNEL" envget
+    dup 0 =
+    if drop
+      1
+    else
+      tonum
+    endif
+    midi_channel !
+    return
+  else
+    tonum
+  endif
+  midi_channel !
 ;
 
 populate_midi_channel

@@ -387,9 +387,11 @@ enum dclang_opcodes {
     OP_TCPLISTEN,
     OP_TCPACCEPT,
     OP_TCPCONNECT,
-    OP_UDPOPEN,
-    OP_UDPRECV,
+    OP_UDPSOCKET,
+    OP_UDPBIND,
+    OP_UDPCONNECT,
     OP_UDPSEND,
+    OP_UDPRECV,
     OP_UDPCLOSE,
     // block a SIGINT
     OP_BLOCKSIGINT,
@@ -424,7 +426,10 @@ enum dclang_opcodes {
     _OP_PM_OPENIN,
     _OP_PM_READ,
     _OP_PM_CLOSE,
-    _OP_PM_TERMINATE
+    _OP_PM_TERMINATE,
+    _OP_OSC_PUT_STR,
+    _OP_OSC_PUT_I32,
+    _OP_OSC_PUT_F32
 };
 
 // user words

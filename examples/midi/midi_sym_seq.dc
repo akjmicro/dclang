@@ -1,0 +1,48 @@
+# This illustrates using a string of space-separated symbolic pitch representations
+# being used to make music via MIDI
+#
+# First, follow the more general MIDI setup instructions in this
+# directory's README.md
+#
+# Shell command should be:
+#   PM_OUT=<some#> dclang midi_sym_seq.dc
+# If you desired midi channel isn't 1 (default), set it via:
+#
+# PM_OUT=<some#> MIDI_CHANNEL=<some#> dclang midi_fractions.dc
+
+"music.dc" import
+
+: _main
+  block_sigint
+  ###########
+  # note on #
+  ###########
+  do_attack_string
+    do_symbol_string dup svpush
+      midi_channel @ 1 -
+  edo_degree_to_midi
+  rhythm_generator get_on_gate
+  ############
+  # note off #
+  ############
+  0
+    svpop
+      midi_channel @ 1 -
+  edo_degree_to_midi
+  get_off_gate
+  unblock_sigint
+  _main
+;
+
+: main
+  "You are now entering an endless loop, hit CTRL-C to stop..." print cr
+  "Notice that you won't be able to stop until a note off event hits." print cr
+  "In this way, the notes end cleanly!" print cr
+  set_clock_start
+  _main
+;
+
+synchronized_start
+main
+
+panic

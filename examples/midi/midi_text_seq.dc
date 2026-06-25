@@ -1,0 +1,48 @@
+# First, follow the more general MIDI setup instructions in this
+# directory's README.md
+#
+# Shell command should be:
+#   PM_OUT=<some#> dclang midi_text_seq.dc
+# If you desired midi channel isn't 1 (default), set it via:
+#
+# CHAN=<some#> dclang midi_text_seq.dc
+
+"music.dc" import
+
+: _main
+  block_sigint
+  ###########
+  # note on #
+  ###########
+  do_seq_string dup svpush
+    :att keyval_get tonum_free
+    swap
+      midi_channel @ 1 -
+  edo_degree_to_midi
+  _seq_duration @
+    :gate_string keyval_get tonum_free
+  get_on_gate
+  ############
+  # note off #
+  ############
+  0
+    svpop
+      midi_channel @ 1 -
+  edo_degree_to_midi
+  get_off_gate
+  unblock_sigint
+  _main
+;
+
+: main
+  "You are now entering an endless loop, hit CTRL-C to stop..." print cr
+  "Notice that you won't be able to stop until a note off event hits." print cr
+  "In this way, the notes end cleanly!" print cr
+  set_clock_start
+  _main
+;
+
+synchronized_start
+main
+
+panic

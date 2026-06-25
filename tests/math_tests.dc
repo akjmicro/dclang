@@ -1,0 +1,43 @@
+"math.dc" import
+
+# gcd
+23 7 gcd 1 = assert
+45 6 gcd 3 = assert
+45 9 gcd 9 = assert
+473 583 gcd 11 = assert
+
+# factorial
+3 factorial      6  = assert
+4 factorial     24  = assert
+5 factorial    120  = assert
+7 factorial   5040  = assert
+9 factorial 362880  = assert
+19 factorial
+ 121645100408832000 = assert
+20 factorial
+2432902008176640000 = assert
+
+# is-prime
+ 1 is-prime 0 = assert
+ 2 is-prime 1 = assert
+ 3 is-prime 1 = assert
+ 4 is-prime 0 = assert
+ 5 is-prime 1 = assert
+ 6 is-prime 0 = assert
+ 7 is-prime 1 = assert
+ 8 is-prime 0 = assert
+ 9 is-prime 0 = assert
+10 is-prime 0 = assert
+11 is-prime 1 = assert
+12 is-prime 0 = assert
+13 is-prime 1 = assert
+27 is-prime 0 = assert
+29 is-prime 1 = assert
+30 is-prime 0 = assert
+31 is-prime 1 = assert
+36 is-prime 0 = assert
+37 is-prime 1 = assert
+137507 is-prime 1 = assert
+862913 is-prime 1 = assert
+862917 is-prime 0 = assert
+1782778337 is-prime 1 = assert

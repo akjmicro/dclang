@@ -3,10 +3,15 @@
 9999 const :PORT
 1024 mkbuf const :BUF
 
-:PORT udpopen const :sock
+udpsocket const :sock
+:sock :PORT udpbind 0 = assert
+
 uuid const :id
 
-"127.0.0.1" :PORT :id udpsend
+udpsocket const :send_sock
+:send_sock "127.0.0.1" :PORT udpconnect 0 = assert
+
+:send_sock :id :id strlen udpsend
 dup 0 > assert
 drop
 
@@ -14,6 +19,9 @@ drop
 dup 0 > assert
 drop
 
+"Received: " print :BUF print cr
+
 :BUF :id str= assert
 
-:sock udpclose
+:send_sock udpclose 0 = assert
+:sock udpclose 0 = assert

@@ -1,0 +1,85 @@
+# osc.dc
+# Simple OSC message builder/sender.
+#
+# Requires C primitives:
+#   _osc_put_str  ( buf len str -- len' )
+#   _osc_put_i32  ( buf len int -- len' )
+#   _osc_put_f32  ( buf len float -- len' )
+#
+# Requires UDP primitives:
+#   udpsocket udpconnect udpsend udpclose
+
+4096 mkbuf const :OSC_BUF
+var osc_len
+var osc_sock
+
+: osc_connect { host port }
+  udpsocket osc_sock !
+  osc_sock @ host port udpconnect drop
+;
+
+: osc_message { path types }
+  0 osc_len !
+  :OSC_BUF osc_len @  path _osc_put_str osc_len !
+  :OSC_BUF osc_len @ types _osc_put_str osc_len !
+;
+
+: osc_s { strval }
+  :OSC_BUF osc_len @ strval _osc_put_str osc_len !
+;
+
+: osc_i { val }
+  :OSC_BUF osc_len @ val _osc_put_i32 osc_len !
+;
+
+: osc_f { val }
+  :OSC_BUF osc_len @ val _osc_put_f32 osc_len !
+;
+
+: osc_send
+  osc_sock @ :OSC_BUF osc_len @ udpsend drop
+;
+
+: osc_close
+  osc_sock @ udpclose drop
+;
+
+#######################################
+# Special synth communication helpers #
+#######################################
+
+64 mkbuf const :prefix_buf
+",f"     const :osc_float_type
+"/freq"  const :freq_path
+"/gain"  const :gain_path
+"/gate"  const :gate_path
+
+: _make_path { path_prefix path_suffix }
+    :prefix_buf 0 64 memset
+      path_prefix
+        dup strlen
+    mempcpy
+      path_suffix
+        dup strlen
+    mempcpy
+  drop
+  :prefix_buf
+;
+
+: osc_synth_note_on { path_prefix freq gain }
+  # send freq
+  path_prefix :freq_path _make_path :osc_float_type osc_message
+  freq osc_f osc_send
+  # send gain
+  path_prefix :gain_path _make_path :osc_float_type osc_message
+  gain osc_f osc_send
+  # send gate
+  path_prefix :gate_path _make_path :osc_float_type osc_message
+  1.0 osc_f osc_send
+;
+
+: osc_synth_note_off { path_prefix }
+  # send gate
+  path_prefix :gate_path _make_path :osc_float_type osc_message
+  0.0 osc_f osc_send
+;

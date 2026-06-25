@@ -1,5 +1,6 @@
 "math.dc"         import
 "midi.dc"         import
+"osc.dc"          import
 "linked_list.dc"  import
 "music_keyval.dc" import
 
@@ -213,8 +214,8 @@ var cur_scl_str  "" cur_scl_str !
 #########################################################
 # Stuff to handle custom rational/JI-based scale gamuts #
 #########################################################
-" "   const BLANK
-"/"   const SLASH
+" "   const :BLANK
+"/"   const :SLASH
 "1/1" const 1_1
 var __blank_tok_hold__
 var __slash_tok_hold__
@@ -245,9 +246,9 @@ var loading_custom_gamut        custom_gamut_0 loading_custom_gamut !
 : _protect_value  dup 0 = if drop 1 endif ;
 
 : frac_to_oct_gamut  { frac_str }
-    frac_str SLASH __slash_tok_hold__ strtok  tonum
+    frac_str :SLASH __slash_tok_hold__ strtok  tonum
     _protect_value
-      null   SLASH __slash_tok_hold__ strtok  tonum
+      null   :SLASH __slash_tok_hold__ strtok  tonum
       _protect_value
     /
     log2
@@ -259,7 +260,7 @@ var loading_custom_gamut        custom_gamut_0 loading_custom_gamut !
 ;
 
 : _process_fraction_list
-  null BLANK __blank_tok_hold__ strtok
+  null :BLANK __blank_tok_hold__ strtok
   dup 0 = if
     drop
   else
@@ -270,7 +271,7 @@ var loading_custom_gamut        custom_gamut_0 loading_custom_gamut !
 
 : process_fraction_list { frac_str_list }
   _reset_gamut_idx
-    frac_str_list BLANK __blank_tok_hold__ strtok
+    frac_str_list :BLANK __blank_tok_hold__ strtok
     dup 0 =
     if
       drop
@@ -505,11 +506,32 @@ make_lgen_struct  _rhythm_lgen
 var _cur_gate_str   2048 mkbuf _cur_gate_str   !
 make_lgen_struct  _gate_lgen
 
+var __fraction_tok_holder__
+"\\" const :BACKSLASH
+
+: _token_has_backslash? :BACKSLASH strfind 0 <> ;
+
+: _process_rhythm { tok }
+  tok _token_has_backslash?
+  if
+    tok :BACKSLASH __fraction_tok_holder__ strtok tonum
+    _protect_value
+      null :BACKSLASH __fraction_tok_holder__ strtok tonum
+      _protect_value
+    /
+    4 *
+  else
+    tok tonum
+  endif
+;
+
+"_process_rhythm" const :process_rhythm
+
 : _do_rhythm_string
   :rhythm_string
     _cur_rhythm_str
       _rhythm_lgen
-        :tonum
+        :process_rhythm
   _string_to_lgen
   dup 0 = if drop 1 endif
 ;
@@ -606,6 +628,11 @@ var digit_sum_counter
 # Sequence attack volumes! #
 ############################
 
+# alternate singleton short key
+"at" make_channel_string   const :att
+
+# longer chain of attack values key
+# Attacks are unsigned 7-bit (0-127)
 "att" make_channel_string  const :attack_string
 var _cur_attack_str   2048 mkbuf _cur_attack_str !
 make_lgen_struct  _attack_lgen
@@ -614,6 +641,20 @@ make_lgen_struct  _attack_lgen
   :attack_string
     _cur_attack_str
       _attack_lgen
+        :tonum
+  _string_to_lgen
+;
+
+# Similar idea, but for OSC-based synths that use
+# floating-point 'gain', normalized from 0-1
+"gn" make_channel_string const :gain_string
+var _cur_gain_str 2048 mkbuf _cur_gain_str !
+make_lgen_struct _gain_lgen
+
+: do_gain_string
+  :gain_string
+    _cur_gain_str
+      _gain_lgen
         :tonum
   _string_to_lgen
 ;
@@ -632,21 +673,27 @@ var note_symbol_tree
 tmake note_symbol_tree !
 
 # constants for note symbols
-"c" const :c
-"d" const :d
-"e" const :e
-"f" const :f
-"g" const :g
-"a" const :a
-"b" const :b
-"^" const :sharp
-"_" const :flat
-"+" const :81_80_up
-"-" const :81_80_down
-">" const :64_63_up
-"<" const :64_63_down
-"'" const :oct_up
-"," const :oct_down
+"C" const :c
+"D" const :d
+"E" const :e
+"F" const :f
+"G" const :g
+"A" const :a
+"B" const :b
+"#" const :sharp
+"b" const :flat
+"x" const :double_sharp
+"^" const :edo_1_up
+"v" const :edo_1_down
+"0" const :oct_0
+"1" const :oct_1
+"2" const :oct_2
+"3" const :oct_3
+"4" const :oct_4
+"5" const :oct_5
+"6" const :oct_6
+"7" const :oct_7
+"8" const :oct_8
 
 : _get_edo_3_2 { local_edo }
   3 2 / log2 local_edo * round
@@ -654,7 +701,7 @@ tmake note_symbol_tree !
 
 : _update_note_symbol_tree { local_edo }
   note_symbol_tree @ :f        local_edo _get_edo_3_2 -1 * local_edo absmod t! drop
-  note_symbol_tree @ :c                                       0 t! drop
+  note_symbol_tree @ :c                                                   0 t! drop
   note_symbol_tree @ :g        local_edo _get_edo_3_2  1 * local_edo absmod t! drop
   note_symbol_tree @ :d        local_edo _get_edo_3_2  2 * local_edo absmod t! drop
   note_symbol_tree @ :a        local_edo _get_edo_3_2  3 * local_edo absmod t! drop
@@ -663,15 +710,18 @@ tmake note_symbol_tree !
   note_symbol_tree @ :sharp    local_edo _get_edo_3_2  7 * local_edo absmod t! drop
   note_symbol_tree @ :flat     local_edo _get_edo_3_2  7 * local_edo absmod
                                                                        -1 * t! drop
-  note_symbol_tree @ :81_80_up              81 80 / log2 local_edo * round  t! drop
-  note_symbol_tree @ :81_80_down            81 80 / log2 local_edo * round
-                                                                       -1 * t! drop
-  note_symbol_tree @ :64_63_up              64 63 / log2 local_edo * round  t! drop
-  note_symbol_tree @ :64_63_down            64 63 / log2 local_edo * round
-                                                                       -1 * t! drop
-  note_symbol_tree @ :oct_up                                      local_edo t! drop
-  note_symbol_tree @ :oct_down                                    local_edo
-                                                                       -1 * t! drop
+  note_symbol_tree @ :double_sharp         note_symbol_tree @ :sharp t@ 2 * t! drop
+  note_symbol_tree @ :edo_1_up                                            1 t! drop
+  note_symbol_tree @ :edo_1_down                                         -1 t! drop
+  note_symbol_tree @ :oct_0                                  local_edo -4 * t! drop
+  note_symbol_tree @ :oct_1                                  local_edo -3 * t! drop
+  note_symbol_tree @ :oct_2                                  local_edo -2 * t! drop
+  note_symbol_tree @ :oct_3                                  local_edo -1 * t! drop
+  note_symbol_tree @ :oct_4                                  local_edo  0 * t! drop
+  note_symbol_tree @ :oct_5                                  local_edo  1 * t! drop
+  note_symbol_tree @ :oct_6                                  local_edo  2 * t! drop
+  note_symbol_tree @ :oct_7                                  local_edo  3 * t! drop
+  note_symbol_tree @ :oct_8                                  local_edo  4 * t! drop
 ;
 
 var _cur_edo  get_edo _cur_edo !
@@ -714,14 +764,14 @@ var _sym_token_buf  16 mkbuf _sym_token_buf !
   endif
   # advance whitespace
   _cur_sym_str_ptr @
-    dup BLANK strspn
+    dup :BLANK strspn
   + _cur_sym_str_ptr !
   # blank the token buf first
     _sym_token_buf @ 0 16 memset
   # get next symbol
       _cur_sym_str_ptr @
         dup
-          BLANK
+          :BLANK
         strcspn
             2dup
         svpush svpush
@@ -752,4 +802,229 @@ var _sym_token_buf  16 mkbuf _sym_token_buf !
       drop                      # ()
     endif
   _process_next_symbol
+;
+
+########################################################################
+# Mono-voice tokenizer sequencer                                       #
+#                                                                      #
+# Tokens are whitespace-separated. State-change tokens do not emit an  #
+# event; pitch tokens emit one integer EDO degree suitable for         #
+# edo_degree_to_[midi|hz].                                             #
+#                                                                      #
+#   key=val   arbitrary persistent keyval state update                 #
+#   n\d       duration state update, where 1\4 == quarter == 1 beat    #
+#   n/d       absolute JI ratio, mapped to the current EDO             #
+#   d:n       relative JI ratio transition d -> n, mapped to EDO delta #
+#   d;n       relative JI ratio transition, as above, but output no    #
+#             note value, simply increment the EDO delta counter       #
+#   C Eb G    existing symbolic pitch tokens                           #
+########################################################################
+
+"="       const :EQUALS
+":"       const :COLON
+";"       const :SEMICOLON
+"ABCDEFG" const :LETTERS
+"seq" make_channel_string const :_seq_string
+
+var _seq_degree    0 _seq_degree !
+var _seq_duration  1 _seq_duration !
+
+var _cur_seq_str   8192 mkbuf _cur_seq_str !
+var _cur_seq_str_ptr
+var _seq_token_buf 128 mkbuf _seq_token_buf !
+var _slash_hold
+var _colon_hold
+var _semicolon_hold
+var _bslash_hold
+var _eq_hold
+
+: _reset_seq_str_ptr
+  _cur_seq_str @  _cur_seq_str_ptr !
+;
+
+: _ratio_to_edo_delta { num den }
+  num _protect_value
+    den _protect_value
+  /
+  log2
+    get_edo
+  *
+  round
+;
+
+: _process_keyval_token { tok }
+  tok :EQUALS _eq_hold strtok
+    null :EQUALS _eq_hold strtok
+  swap keyval_set
+;
+
+: _process_duration_token { tok }
+  tok :BACKSLASH _bslash_hold strtok tonum
+    null :BACKSLASH _bslash_hold strtok tonum
+  _protect_value
+  /
+  4 *
+  _seq_duration !
+;
+
+: _parse_abs_ratio_token { tok }
+  tok :SLASH _slash_hold strtok tonum
+    null :SLASH _slash_hold strtok tonum
+  _ratio_to_edo_delta
+;
+
+: _parse_rel_ratio_token { tok }
+  tok :COLON _colon_hold strtok tonum
+    null :COLON _colon_hold strtok tonum
+  # Stack is now (left right).  The transition left:right means
+  # move by right/left, so swap before ratio-to-delta.
+  swap
+  _ratio_to_edo_delta
+;
+
+: _parse_rel_ratio_token_silent { tok }
+  tok :SEMICOLON _semicolon_hold strtok tonum
+    null :SEMICOLON _semicolon_hold strtok tonum
+  swap
+  _ratio_to_edo_delta
+;
+
+: _token_has_equals?    :EQUALS    strfind 0 <> ;
+: _token_has_semicolon? :SEMICOLON strfind 0 <> ;
+: _token_has_colon?     :COLON     strfind 0 <> ;
+: _token_has_slash?     :SLASH     strfind 0 <> ;
+: _token_has_letter?    :LETTERS   strspn  1 >= ;
+
+: _copy_next_token
+  # if there's no str length left, reset it
+  _cur_seq_str_ptr @ strlen 0 =
+  if
+    _reset_seq_str_ptr
+  endif
+  # advance whitespace
+  _cur_seq_str_ptr @
+    dup :BLANK strspn
+  + _cur_seq_str_ptr !
+  # if whitespace put us at the end, reset and advance again
+  _cur_seq_str_ptr @ strlen 0 =
+  if
+    _reset_seq_str_ptr
+    _cur_seq_str_ptr @
+      dup :BLANK strspn
+    + _cur_seq_str_ptr !
+  endif
+  # blank the token buf first
+    _seq_token_buf @ 0 128 memset
+  # get next token
+      _cur_seq_str_ptr @
+        dup
+          :BLANK
+        strcspn
+            2dup
+        svpush svpush
+    1 + mempcpy
+  drop
+  # update seq ptr position:
+    svpop
+      svpop
+    +
+  _cur_seq_str_ptr !
+;
+
+: _process_next_event
+  _copy_next_token
+  #################
+  # key/val token #
+  #################
+  _seq_token_buf @ dup _token_has_equals?
+  if
+    _process_keyval_token
+    _process_next_event
+    return
+  else
+    drop
+  endif
+  ##################
+  # duration token #
+  ##################
+  _seq_token_buf @ dup _token_has_backslash?
+  if
+    _process_duration_token
+    _process_next_event
+    return
+  else
+    drop
+  endif
+  #################################
+  # relative ratio token (silent) #
+  #################################
+  _seq_token_buf @ dup _token_has_semicolon?
+  if
+    _parse_rel_ratio_token_silent
+    _seq_degree @ +
+    _process_next_event
+    return
+  else
+    drop
+  endif
+  #################################
+  # relative ratio token (active) #
+  #################################
+  _seq_token_buf @ dup _token_has_colon?
+  if
+    _parse_rel_ratio_token
+    _seq_degree @ +
+    dup _seq_degree !
+    return
+  else
+    drop
+  endif
+  #################################
+  # absolute fraction/ratio token #
+  #################################
+  _seq_token_buf @ dup _token_has_slash?
+  if
+    _parse_abs_ratio_token
+    dup _seq_degree !
+    return
+  else
+    drop
+  endif
+  #####################################
+  # symbolic letter/accidentals pitch #
+  #####################################
+  _seq_token_buf @ dup _token_has_letter?
+  if
+    symbol_to_edo_int
+    dup _seq_degree !
+    return
+  else
+    drop
+  endif
+  ########################################
+  # At this point the only other option  #
+  # is to interpret as a raw EDO integer #
+  ########################################
+  _seq_token_buf @ tonum
+    dup _seq_degree !
+;
+
+: do_seq_string
+  :_seq_string keyval_get            # (seqstr)
+    dup                              # (seqstr seqstr)
+      _cur_seq_str @                 # (seqstr seqstr cur)
+    str= not                         # (seqstr bool?)
+    if                               #
+        _cur_seq_str @ 0 8192 memset
+          swap                       # (cur seqstr)
+            dup strlen 1 +           # (cur seqstr len+1)
+        mempcpy                      # (endptr)
+      drop                           # ()
+      _reset_seq_str_ptr             # ()
+      0 _seq_degree !                # reset relative accumulator on new seq
+      1 _seq_duration !              # default quarter note duration
+    else
+      drop                           # ()
+    endif
+  _process_next_event
 ;

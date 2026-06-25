@@ -87,7 +87,7 @@ Opening device number: 2
 
 Great, it's now registered, via an environment variable, that we want to open
 `PM_OUT` number `2`. (ATM, we don't have to worry about the fact
-taht `PM_IN` is unset.
+that `PM_IN` is unset.
 
 Now, many of these scripts use parameters set in the file-based 
 key/value store (whose library implementation is part of music.dc, but 

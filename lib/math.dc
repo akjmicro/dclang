@@ -33,6 +33,13 @@
 
 784 48 gcd 16 = assert
 
+: factorial { x }
+  1
+    1 x -1 for
+      i *
+    next
+;
+
 : _digit_sum_helper
   over 0 >
   if
@@ -158,6 +165,9 @@
 ;
 
 : is-prime
+    dup 1 = if
+      drop 0
+    endif
     is-2-3-5-7?
     if
       drop 1

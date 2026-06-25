@@ -1,0 +1,19 @@
+"string.dc" import
+"osc.dc" import
+
+"localhost" 6000 osc_connect
+
+"/freq" ",f" osc_message
+440.0 osc_f
+osc_send
+
+"/note" ",if" osc_message
+60 osc_i
+275.417 osc_f
+osc_send
+
+"/message" ",s" osc_message
+uuid osc_s
+osc_send
+
+osc_close

@@ -1,0 +1,46 @@
+# This illustrates using decimal expansions of a fraction division in any base
+# being used to make music via MIDI
+#
+# Shell command should be:
+#   OSC_PORT=<some#> OSC_PREFIX=<some_string> CHAN=<some#> dclang osc_fractions.dc
+
+"music.dc" import
+
+make_digit_expansion_struct  gen_struct
+
+"localhost" "OSC_PORT" envget tonum osc_connect
+var osc_prefix  "OSC_PREFIX" envget osc_prefix !
+
+: _main
+  block_sigint
+  ###########
+  # note on #
+  ###########
+  osc_prefix @
+    gen_struct fraction_music
+    edo_degree_to_hz
+      do_gain_string
+  osc_synth_note_on
+  rhythm_generator get_on_gate
+  ############
+  # note off #
+  ############
+  osc_prefix @
+  osc_synth_note_off
+  get_off_gate
+  unblock_sigint
+  _main
+;
+
+: main
+  "You are now entering an endless loop, hit CTRL-C to stop..." print cr
+  "Notice that you won't be able to stop until a note off event hits." print cr
+  "In this way, the notes end cleanly!" print cr
+  set_clock_start
+  _main
+;
+
+synchronized_start
+main
+
+panic
