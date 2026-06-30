@@ -59,11 +59,7 @@ DCLANG_LONG dclang_import(char *infilestr) {
         return 0;
     }
     char full_path[512];
-    memset(full_path, 0, 512);
-    char *slash = "/";
-    strcat(full_path, prefix);
-    strcat(full_path, slash);
-    strcat(full_path, infilestr);
+    snprintf(full_path, sizeof(full_path), "%s/%s", prefix, infilestr);
     if (access(full_path, F_OK) == 0) {
         FILE *infile = fopen(full_path, "r");
         setinput(infile);
