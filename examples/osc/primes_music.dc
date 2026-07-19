@@ -1,0 +1,38 @@
+# TODO: This can probably be much more compelling than it currently
+# is with its current settings. I'll probably evolve it over time.
+
+"music.dc" import
+
+"localhost" "OSC_PORT" envget tonum osc_connect
+var osc_prefix  "OSC_PREFIX" envget osc_prefix !
+
+: _main
+  inf times
+    block_sigint
+    # note on
+    osc_prefix @
+      primes_music
+      edo_degree_to_hz
+        do_gain_string
+    osc_synth_note_on
+    rhythm_generator get_on_gate
+    # note off
+    osc_prefix @
+    osc_synth_note_off
+    get_off_gate
+    unblock_sigint
+  again
+;
+
+: main
+  "You are now entering an endless loop, hit CTRL-C to stop..." print cr
+  "Notice that you won't be able to stop until a note off event hits." print cr
+  "In this way, the notes end cleanly!" print cr
+  set_clock_start
+  _main
+;
+
+synchronized_start
+main
+
+panic

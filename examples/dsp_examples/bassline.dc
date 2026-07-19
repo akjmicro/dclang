@@ -5,6 +5,12 @@
 var my_ampport
 var my_pitchport
 var my_fbport
+0.002  tau_to_alpha const :ATT
+0.291  tau_to_alpha const :REL
+0.005  tau_to_alpha const :PCH_RISE
+0.01   tau_to_alpha const :PCH_FALL
+0.001  tau_to_alpha const :FB_RISE
+0.3    tau_to_alpha const :FB_FALL
 
 var tempo  :BASS_TEMPO get_x_tempo     tempo !
 var myvol              get_bass_vol    myvol !
@@ -37,17 +43,17 @@ create my_iter 16 , 0 ,
       pitch !
     endif
     curtrig @
-      my_ampport 0.002 0.55
+      my_ampport :ATT :REL
     port
       sl
         pitch @
-          my_pitchport 0.0005 0.01
+          my_pitchport :PCH_RISE :PCH_FALL
         port
           curtrig @
-            my_fbport 0.0001 0.3
+            my_fbport :FB_RISE :FB_FALL
           port
-          0.47 0.2 rand * + *
-          0.2  0.1 rand * + +
+          0.47 0.05   rand * + *
+          0.2  0.0125 rand * + +
       sineloop
     *
     lpmem 0.7 lowpass myvol @ *

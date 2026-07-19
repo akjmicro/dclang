@@ -278,34 +278,21 @@ var _phasor_array 64 allot
 ##############
 # PORT (lag) #
 ##############
-# A portamento (or lag) can be roughly done by grabbing and saving a previous sample,
-# considering that a starting point for the next sample 'target', and making
-# the decision: is this a rising slope or a falling slope? We have half-way
-# point parameters for both. The algorithm is basically:
-#   * fetch the previous sample value (call it the 'oldsig')
-#   * fetch the current signal (call it the 'sig')
-#   * if the previous sample is lower than the current signal, add:
-#       sig oldsig - 0.5 * rise-time-in-samples /
-#       and +/save it to the accumulator
-#   * if the previous sample is higher than the current signal, add:
-#       sig oldsig - 0.5 * fall-time-in-samples /
-#       ...and +/save it to the accumulator
+# A form of lowpass filter that has a different response time
+# when the input signal delta is rising or falling.
 # Neat bonus: this 'port' ugen can be used to make envelopes!
 # See the example file 'bell_of_doom.fs' for an example.
 
-: port { sig mem rise_time fall_time }
+: tau_to_alpha { tau }
+    1 -1 tau SAMPLE_RATE * / exp -
+;
+
+: port { sig mem rise_alpha fall_alpha }
     sig mem @ -
-      dup
-      0 >
-        1
-        swap
-        if rise_time else fall_time endif
-        0.5 *
-        SAMPLE_RATE *
-      /
+      dup 0 >
+      if rise_alpha else fall_alpha endif
     *
-      mem @
-    +
+    mem @ +
       dup
     mem !
 ;

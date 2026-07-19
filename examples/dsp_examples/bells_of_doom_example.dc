@@ -3,6 +3,10 @@
 # portamento vars
 var myport
 var myport_two
+0.02 tau_to_alpha const :ATT1
+1.21 tau_to_alpha const :REL1
+0.03 tau_to_alpha const :ATT2
+0.71 tau_to_alpha const :REL2
 
 : mod_ratio_wobble
   6.37 sine 0.015 * 0.5723 +
@@ -12,14 +16,14 @@ var myport_two
   # trigger for portamento envelope
   0.2 metro 0.35 *
   # reference array for port and portamento call
-  myport 0.04 2.5 port
+  myport :ATT1 :REL1 port
 ;
 
 : trigger_env-2
   # trigger for 2nd portamento envelope
   0.5 metro 0.4 *
   # reference array for port and portamento call
-  myport_two 0.05 1.3 port
+  myport_two :ATT2 :REL2 port
 ;
 
 : bells_of_doom_example

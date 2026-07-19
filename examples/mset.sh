@@ -12,4 +12,3 @@ while [ "$#" -gt 1 ]; do
   printf "%s\n" "$val" > "$tmp" &&
   mv "$tmp" "$KEYDIR/$key"
 done
-

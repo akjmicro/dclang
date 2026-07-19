@@ -7,6 +7,10 @@
 var env_port
 var ampenv
 var pitch_port
+0.04 tau_to_alpha const :ATT
+0.70 tau_to_alpha const :REL
+0.02 tau_to_alpha const :PCH_RISE
+0.03 tau_to_alpha const :PCH_FALL
 
 # a sineloop variable
 var mysl
@@ -33,7 +37,7 @@ var rntrg
     # random trigger
     0.01 trigval randtrig dup curtrig !
     # reference array for port and portamento call
-    env_port 0.04 0.9 port
+    env_port :ATT :REL port
     # route to 'ampenv' variable:
     ampenv !
     # change the pitch variable randomly, in sync with the trigger:
@@ -45,7 +49,7 @@ var rntrg
     # sineloop oscillator:
     mysl
       current_pitch @ octfac 256 *
-      pitch_port 0.02 0.03 port
+      pitch_port :PCH_RISE :PCH_FALL port
         ampenv @ 0.89 * 0.4 +
     sineloop
     ampenv @ *

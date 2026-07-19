@@ -18,6 +18,21 @@
   / floor svpop
 ;
 
+: bounce { n lower upper }
+  n lower upper lower -
+  { n lower range }
+    n
+      range
+    +
+      range 2 *
+    %
+      range
+    -
+    abs
+      lower
+    +
+;
+
 : ?dup
   dup 0 =
   if else dup endif

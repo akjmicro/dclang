@@ -1,5 +1,17 @@
 "math.dc" import
 
+# bounce
+0 0 3 bounce 0 = assert
+1 0 3 bounce 1 = assert
+2 0 3 bounce 2 = assert
+3 0 3 bounce 3 = assert
+4 0 3 bounce 2 = assert
+5 0 3 bounce 1 = assert
+6 0 3 bounce 0 = assert
+6 -3 3 bounce 3 = assert
+7 -3 3 bounce 2 = assert
+12 -3 3 bounce -3 = assert
+
 # gcd
 23 7 gcd 1 = assert
 45 6 gcd 3 = assert

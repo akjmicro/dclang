@@ -1,13 +1,16 @@
 "dsp.dc" import
 "music.dc" import
 
-261 16 15 / * const :BASE_FREQ
+261 16 15 / *
+        const :BASE_FREQ
 0.5     const :REV_VOL
 0.89    const :REV_CF
 0.987   const :REV_FB
 0.43    const :CHANCE
 0.92    const :LEAD_RES
 0.25    const :SAW_MIX
+0.1 tau_to_alpha
+        const :LAG_0p1
 
 var lfo_sig
 
@@ -96,32 +99,36 @@ make_dcblock       my_dcblockR
 2  const :env_mem
 3  const :rem
 4  const :half
-5  const :env
-6  const :sl_mem1
-7  const :freq1
-8  const :fb
-9  const :fb_mem
-10 const :sl_mem2
-11 const :freq2
-12 const :pan
-13 const :lfo_freq
-14 const :lfo_depth
-15 const :lfo_mem
+5  const :lag
+6  const :env
+7  const :sl_mem1
+8  const :freq1
+9  const :fb
+10 const :fb_mem
+11 const :sl_mem2
+12 const :freq2
+13 const :pan
+14 const :lfo_freq
+15 const :lfo_depth
+16 const :lfo_mem
 
 : make_cloud_voice_struct
   create 0 , 0 , 0 , 0 ,
          0 , 0 , 0 , 0 ,
          0 , 0 , 0 , 0 ,
-         0 , 0 , 0 , 0 ,
+         0 , 0 , 0 , 0 , 0 ,
 ;
 
 : init_voice { cvs } # cvs = cloud_voice_struct
-  rand_dur                  # (rand_dur)
-  SAMPLE_RATE * floor       # (rand_dur_smps)
-  dup                       # (rand_dur_smps rand_dur_smps)
-  cvs :rem + !              # (rand_dur_smps)
-  2 /                       # (half_smps)
-  cvs :half + !             # ()
+  rand_dur                   # (rand_dur)
+  SAMPLE_RATE * floor        # (rand_dur_smps)
+  dup                        # (rand_dur_smps rand_dur_smps)
+  cvs :rem + !               # (rand_dur_smps)
+  2 /                        # (half_smps)
+  dup                        # (half_smps half_smps)
+  SAMPLE_RATE / tau_to_alpha # (half_smps alpha_lag)
+  cvs :lag  + !              # (half_smps)
+  cvs :half + !              # ()
   rand_freq
   dup                              cvs :freq1 + !
   dup rand_comma *                 cvs :freq2 + !
@@ -161,7 +168,7 @@ make_dcblock       my_dcblockR
   *
     # attack/release times are approximately half the total event
     cvs :env_mem +
-      cvs :half + @ SAMPLE_RATE /
+      cvs :lag + @
         dup
   port cvs :env + !
   ###########################
@@ -176,8 +183,8 @@ make_dcblock       my_dcblockR
       cvs :fb + @
         cvs :env + @
           cvs :fb_mem +
-            0.1
-              0.1
+            :LAG_0p1
+              dup
         port
       *
   sineloop 0.5 * tanh 0.5 tanh /
@@ -189,8 +196,8 @@ make_dcblock       my_dcblockR
       cvs :fb + @
         cvs :env + @
           cvs :fb_mem +
-            0.1
-              0.1
+            :LAG_0p1
+              dup
         port
       *
   fm 0.5 * tanh 0.5 tanh /

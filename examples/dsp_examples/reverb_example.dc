@@ -2,15 +2,17 @@
 
 var lpmem1
 var myport
+0.19 tau_to_alpha const :ATT
+0.10 tau_to_alpha const :REL
 make_reverb_struct my_reverb
 
 : reverb_example
   inf times
       noise 0.87 *
-        lpmem1 0.25
+        lpmem1 0.37
       lowpass
         0.01 0.34 rand 0.14 * 0.14 + - gate
-          myport 0.01 0.1
+          myport :ATT :REL
         port
       *
       0.5 *

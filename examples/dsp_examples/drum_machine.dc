@@ -81,6 +81,9 @@ var op_hihat_port
 var cl_hihat_port
 var snare_drum_port
 var bass_drum_port
+0.001 tau_to_alpha const :ATT
+0.060 tau_to_alpha const :REL1
+0.180 tau_to_alpha const :REL2
 
 ##########################################
 # Hal Chamberlain filters for the hihats #
@@ -159,7 +162,7 @@ _query_drum_parts
     # bass drum sound #
     ###################
     curtrig @ bass_drum_mask @ *
-      bass_drum_port 0.001 0.06
+      bass_drum_port :ATT :REL1
     port
       dup 90 * 90 + sine
     *
@@ -169,7 +172,7 @@ _query_drum_parts
     # snare drum sound #
     ####################
     curtrig @ snare_drum_mask @ *
-      snare_drum_port 0.001 0.06
+      snare_drum_port :ATT :REL1
     port
       noise 0.4 *
         383 sine 0.3 *
@@ -181,7 +184,7 @@ _query_drum_parts
     # closed hihat sound #
     ######################
     curtrig @ cl_hihat_mask @ *
-      cl_hihat_port 0.001 0.06
+      cl_hihat_port :ATT :REL1
     port
       noise 0.2 *
         cl_hihat_flt
@@ -194,7 +197,7 @@ _query_drum_parts
     # open hihat sound #
     ####################
     curtrig @ op_hihat_mask @ *
-      op_hihat_port 0.001 0.18
+      op_hihat_port :ATT :REL2
     port
       noise 0.3 *
         op_hihat_flt

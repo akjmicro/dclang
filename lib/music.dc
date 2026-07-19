@@ -246,11 +246,16 @@ var loading_custom_gamut        custom_gamut_0 loading_custom_gamut !
 : _protect_value  dup 0 = if drop 1 endif ;
 
 : frac_to_oct_gamut  { frac_str }
-    frac_str :SLASH __slash_tok_hold__ strtok  tonum
-    _protect_value
-      null   :SLASH __slash_tok_hold__ strtok  tonum
+    frac_str :SLASH strfind 0 =
+    if
+      1
+    else
+      frac_str :SLASH __slash_tok_hold__ strtok  tonum
       _protect_value
-    /
+        null   :SLASH __slash_tok_hold__ strtok  tonum
+        _protect_value
+      /
+    endif
     log2
       loading_custom_gamut @
         gamut_idx @
@@ -622,6 +627,23 @@ var digit_sum_counter
   digit_sum_counter @
     1 +
   digit_sum_counter !
+;
+
+var _current_prime
+1 _current_prime !
+
+var _current_prime_music_degree
+12 _current_prime_music_degree !
+
+# TODO - make this much more compelling/better-sounding
+: primes_music
+  # use with edo = 12
+  1 _current_prime @
+    find-next-prime dup _current_prime !
+  13 % 11 % 5 -
+    _current_prime_music_degree @
+  + -12 24 bounce
+  dup _current_prime_music_degree !
 ;
 
 ############################

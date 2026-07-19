@@ -21,6 +21,8 @@ var port3vol
 var port4pch
 var port4brt
 var port4vol
+1.0 tau_to_alpha :ALPHA_ONE
+2.0 tau_to_alpha :ALPHA_TWO
 
 make_dcblock lchan_dcfilt
 make_dcblock rchan_dcfilt
@@ -71,42 +73,42 @@ create commas  15  16 / ,  39  41 / ,
   endif
     sl1
       21 overtone_ctl 41 beat_ctl *
-      port1pch 1.0 1.0 port
+      port1pch :ALPHA_ONE :ALPHA_ONE port
         25 bright_ctl
-        port1brt 2.0 2.0 port
+        port1brt :ALPHA_TWO :ALPHA_TWO port
     sineloop
       45 vol_ctl
-      port1vol 2.0 2.0 port
+      port1vol :ALPHA_TWO :ALPHA_TWO port
     *
   0.4 panmix
     sl2
       22 overtone_ctl 42 beat_ctl *
-      port2pch 1.0 1.0 port
+      port2pch :ALPHA_ONE :ALPHA_ONE port
         26 bright_ctl
-        port2brt 2.0 2.0 port
+        port2brt :ALPHA_TWO :ALPHA_TWO port
     sineloop
       46 vol_ctl
-      port2vol 2.0 2.0 port
+      port2vol :ALPHA_TWO :ALPHA_TWO port
     *
   0.6 panmix
     sl3
       23 overtone_ctl 43 beat_ctl *
-      port3pch 1.0 1.0 port
+      port3pch :ALPHA_ONE :ALPHA_ONE port
         27 bright_ctl
-        port3brt 2.0 2.0 port
+        port3brt :ALPHA_TWO :ALPHA_TWO port
     sineloop
       47 vol_ctl
-      port3vol 2.0 2.0 port
+      port3vol :ALPHA_TWO :ALPHA_TWO port
     *
   0.05 panmix
     sl4
       24 overtone_ctl 44 beat_ctl *
-      port4pch 1.0 1.0 port
+      port4pch :ALPHA_ONE :ALPHA_ONE port
         28 bright_ctl
-        port4brt 2.0 2.0 port
+        port4brt :ALPHA_TWO :ALPHA_TWO port
     sineloop
       48 vol_ctl
-      port4vol 2.0 2.0 port
+      port4vol :ALPHA_TWO :ALPHA_TWO port
     *
   0.95 panmix
   # reverb

@@ -2,12 +2,15 @@
 
 var myport
 
+0.02 tau_to_alpha const :ATT
+0.35 tau_to_alpha const :REL
+
 : metronome_example
   inf times
       400 sine
         2.01 metro
         1.2 *
-          myport 0.09 1.0
+          myport :ATT :REL
         port
       *
         0.4
@@ -15,7 +18,7 @@ var myport
       467 sine
         2.51 metro
         1.2 *
-          myport 0.09 1.0
+          myport :ATT :REL
         port
       *
         0.3 sine
@@ -25,7 +28,7 @@ var myport
       600 sine
         3.01 metro
         1.2 *
-          myport 0.09 1.0
+          myport :ATT :REL
         port
       *
         0.6

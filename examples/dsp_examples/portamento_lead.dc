@@ -78,8 +78,8 @@ make_reverb_struct          my_reverb
     t 384 % 0 =
     if
       # has drone stuff changed?
-      :DRONE_VOL keyval_get tonum drone_vol !
-      :DRONE_FB  keyval_get tonum drone_fb !
+      :DRONE_VOL keyval_get tonum  drone_vol !
+      :DRONE_FB  keyval_get tonum  drone_fb !
       # has reverb stuff changed?
       :REV_VOL   keyval_get tonum  rev_vol !
       :REV_CF    keyval_get tonum  rev_cf !
@@ -88,9 +88,12 @@ make_reverb_struct          my_reverb
       :LEAD_VOL  keyval_get tonum  lead_vol !
       # has the gate value changed?
       :LEAD_GATE keyval_get tonum  gatevar !
-      :LEAD_ATT  keyval_get tonum  attack !
-      :LEAD_REL  keyval_get tonum  release !
-      :LEAD_PORT keyval_get tonum  lead_port !
+      :LEAD_ATT  keyval_get tonum
+                     tau_to_alpha  attack !
+      :LEAD_REL  keyval_get tonum
+                     tau_to_alpha  release !
+      :LEAD_PORT keyval_get tonum
+                     tau_to_alpha  lead_port !
       :LEAD_FB   keyval_get tonum  lead_fb !
       :LEAD_RES  keyval_get tonum  lead_res !
     endif

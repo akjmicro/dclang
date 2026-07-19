@@ -4,13 +4,15 @@
 1 make_delay_line mydelay
 
 var myport
+0.02 tau_to_alpha const :ATT
+0.35 tau_to_alpha const :REL
 
 # example function
 : simple_delay_example
   inf times
     440 sine
     0.4333 metro 0.8 *
-    myport 0.03 0.6 port *
+    myport :ATT :REL port *
     mydelay 0.4462 delay_read 0.75 *
     2dup +
     mydelay delay_write

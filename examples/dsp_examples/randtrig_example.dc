@@ -2,6 +2,10 @@
 
 var myampport
 var mypchport
+0.01 tau_to_alpha const :ATT
+0.61 tau_to_alpha const :REL
+0.01 tau_to_alpha const :PCH_RISE
+0.01 tau_to_alpha const :PCH_FALL
 var trigval
 var curtrig
 var lasttrig
@@ -19,11 +23,17 @@ create choices
       choices 6 randint + @ 50 *  # calculate a new pitch if so
       pitch !                     # and set it
     endif
-    pitch @
-    mypchport 0.01 0.01 port      # get the pitch, portamento it
+      pitch @
+        mypchport
+          :PCH_RISE
+            :PCH_FALL
+      port                        # get the pitch, portamento it
     sine                          # assign the portamento-pitch to a sine wave
-    curtrig @ 0.7 *               # grab the same trigger signal
-    myampport 0.01 0.6 port *     # envelope it
+      curtrig @ 0.7 *             # grab the same trigger signal
+        myampport
+          :ATT
+            :REL
+      port *                      # envelope it
     0.5 panmix                    # center pan
     stereo_out                    # send out
     curtrig @ lasttrig !          # lasttrig = curtrig
