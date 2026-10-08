@@ -26,7 +26,7 @@
 # the fifth is by default set to the value of a 1/4-comma meantone fifth 
 # in this module. This can be changed to, e.g. 2/7 comma by:
 #
-#   2 7 / set_fifth  make_meantone
+#   2 7 / set_fifth  show_meantone
 #
 # Once you have set the fifth, the other thing this module does is to 
 # survey the accuracy of various interger overtone series 
@@ -58,15 +58,18 @@
 
 "math.dc" import
 
-1.5 4 pow log2
-  5 log2
--
-const COMMA
+"show_meantone_hz -- needs `base_hz` `num_octaves` on the stack"
+const :SHOW_MEANTONE_HZ_HELP
+"|"       const :pipe
+"error: " const :error
+
+ 3  2 / log2 const PERFECT_FIFTH
+81 80 / log2 const SYNTONIC_COMMA
 
 var fifth
 
 : set_fifth { comma_frac }
-  1.5 log2  COMMA comma_frac *   -
+  1.5 log2  SYNTONIC_COMMA comma_frac *   -
   fifth !
 ;
 
@@ -82,10 +85,7 @@ var gamut  256 allot
 
 var max_error
 
-"|" const :pipe
-"error: " const :error
-
-: make_meantone
+: _make_meantone
   gamut_size @ times
     fifth @
       i neg_fifths @ +
@@ -93,22 +93,42 @@ var max_error
       1
     absmod
       gamut i +
-    ! 
+    !
   again
   gamut  gamut_size @  sortnums
 ;
 
 : show_meantone
+  _make_meantone
   gamut_size @ times
-    2
-      gamut i + @
-    pow
+    2  gamut i + @  pow
     . cr
   again
 ;
 
+: show_meantone_hz  # ( base_hz num_octaves )
+  depth 2 < if
+     :SHOW_MEANTONE_HZ_HELP print cr
+     return
+  endif
+  { base_hz num_octaves }
+  _make_meantone
+  num_octaves times
+    gamut_size @ times
+      2  gamut i + @  pow
+        2 j pow
+      *
+      base_hz *
+      . cr
+    again
+  again
+  2 num_octaves pow
+    base_hz *
+  . cr
+;
+
 : meantone2int { scale }
-  make_meantone
+  _make_meantone
   gamut_size @ times
     2
       gamut i + @
@@ -129,7 +149,7 @@ var max_error
 ;
 
 : meantone2int_survey { min_scale max_scale }
-  make_meantone
+  _make_meantone
   max_scale min_scale 1 for
     0 max_error !
     gamut_size @ times
