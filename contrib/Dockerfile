@@ -13,7 +13,7 @@ RUN apk add --no-cache build-base sqlite-dev portmidi-dev git rlwrap && \
     echo 'alias dclang="rlwrap dclang"' >> /root/.profile
 CMD /bin/bash
 
-FROM busybox:1.36-glibc
+FROM busybox:glibc
 WORKDIR /
 # system needs
 COPY --from=builder /lib/ld-musl-*.so.1 /lib/
