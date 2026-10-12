@@ -1,93 +1,77 @@
 {
-  "scopeName": "source.dclang",
+  "$schema": "https://raw.githubusercontent.com/martinring/tmlanguage/master/tmlanguage.json",
   "name": "dclang",
+  "scopeName": "source.dclang",
   "patterns": [
     {
-      "name": "comment.line.dclang",
-      "match": "#.*$",
-      "settings": {
-        "foreground": "#FFFFFF",
-        "background": "#000000"
-      }
+      "name": "comment.line.number-sign.dclang",
+      "match": "#.*$"
     },
     {
-      "name": "constant.other.dclang",
-      "match": "(^|\\s)([_:A-Z0-9]+)(?=\\s|$)",
-      "settings": {
-        "foreground": "#FF00FF"
-      }
-    },
-    {
-      "name": "constant.language.dclang",
-      "match": "(^|\\s)(null|false|true|pi|e)(?=\\s|$)",
-      "settings": {
-        "foreground": "#FF80FF"
-      }
+      "name": "string.quoted.double.dclang",
+      "begin": "\"",
+      "end": "\"",
+      "patterns": [
+        {
+          "name": "constant.character.escape.dclang",
+          "match": "\\\\."
+        }
+      ]
     },
     {
       "name": "constant.numeric.dclang",
-      "match": "(^|\\s)(-?[0-9]+\\.?[0-9]*|0[xX][0-9a-fA-F]+)(?=\\s|$)",
-      "settings": {
-        "foreground": "#FFFFFF",
-        "background": "#000000"
-      }
+      "match": "(?<!\\S)[+-]?(?:0[xX][0-9a-fA-F]+|(?:[0-9]+(?:\\.[0-9]*)?|\\.[0-9]+)(?:[eE][+-]?[0-9]+)?)(?!\\S)"
     },
     {
-      "name": "string.quoted.dclang",
-      "begin": "\"",
-      "end": "\"",
-      "settings": {
-        "foreground": "#FFFF00"
-      }
+      "name": "constant.language.dclang",
+      "match": "(?<!\\S)(?:false|null|true|pi|e)(?!\\S)"
     },
     {
       "name": "keyword.operator.dclang",
-      "match": "(^|\\s)(\\+|-|\\*|/|%|abs|min|max|<<|>>|=|<>|<|>|<=|>=|assert|and|or|not|xor|round|ceil|floor|pow|sqrt|log|log2|log10|sin|cos|tan|rand)(?=\\s|$)",
-      "settings": {
-        "foreground": "#FFFF80"
-      }
+      "match": "(?<!\\S)(?:assert|atan2|floor|log10|round|acos|asin|atan|ceil|cosh|log2|rand|sinh|sqrt|tanh|abs|and|cos|exp|log|max|min|not|pow|sin|tan|xor|<<|<=|<>|>=|>>|or|%|\\*|\\+|\\-|/|<|=|>)(?!\\S)"
     },
     {
       "name": "support.function.stack.dclang",
-      "match": "(^|\\s)(drop|dup|over|pick|swap|2drop|2dup|2over|depth|clear|\\.|\\.\\.|\\.rj|\\.s|svpush|svpop|svdrop|svpick|svdepth|svclear)(?=\\s|$)",
-      "settings": {
-        "foreground": "#0080FF"
-      }
+      "match": "(?<!\\S)(?:svclear|svdepth|svdrop|svpick|svpush|2drop|2over|clear|depth|svpop|2dup|drop|over|pick|swap|\\.pz|\\.rj|dup|\\.\\.|\\.s|\\.)(?!\\S)"
     },
     {
       "name": "support.function.memory.dclang",
-      "match": "(^|\\s)(!|@|const|var|allot|create|,|h@|h!|hkeys|sortnums|sortstrs|t!|t@|tmake|twalk|tdel|tdestroy|l!|l@|lmake|lpush|lpop|lins|lrem|ldel)(?=\\s|$)",
-      "settings": {
-        "foreground": "#FF0000"
-      }
+      "match": "(?<!\\S)(?:sortnums|sortstrs|tdestroy|create|envget|envset|allot|const|hkeys|lmake|lpush|lsize|tmake|twalk|here|ldel|lins|lpop|lrem|tdel|var|h!|h@|l!|l@|t!|t@|!|,|@)(?!\\S)"
     },
     {
       "name": "keyword.control.dclang",
-      "match": "(^|\\s)(times|again|exittimes|for|next|exitfor|i|j|k|if|else|endif|return)(?=\\\\s|$)",
-      "settings": {
-        "foreground": "#80FF00"
-      }
+      "match": "(?<!\\S)(?:exittimes|exitfor|return|again|endif|times|else|next|for|if|i|j|k)(?!\\S)"
     },
     {
       "name": "support.function.other.dclang",
-      "match": "(^|\\s)(cr|print|emit|uemit|ord|tohex|bytes32|strlen|str=|str<|str>|strfind|strspn|strcspn|strtok|mempcpy|memset|mkbuf|free|isalnum|isalpha|iscntrl|isdigit|isgraph|islower|isprint|ispunct|isspace|isupper|isxdigit|tolower|toupper|regcomp|regexec|regread|fopen|fmemopen|fread|freadline|freadall|fseek|ftell|fwrite|fflush|fclose|redirect|seterr|setout|flush|open|read|write|close|tcplisten|tcpaccept|tcpconnect|clock|sleep|epoch|dt->epoch|epoch->dt|block_sigint|unblock_sigint)(?=\\s|$)",
-      "settings": {
-        "foreground": "#00FFFF"
+      "match": "(?<!\\S)(?:unblock_sigint|block_sigint|tcpconnect|udpconnect|dt\\->epoch|epoch\\->dt|freadline|tcpaccept|tcplisten|udpsocket|fmemopen|freadall|redirect|udpclose|mempcpy|memused|strcspn|strfind|tolower|toupper|udpbind|udprecv|udpsend|fclose|fflush|fwrite|memset|rewind|seterr|setout|strlen|strspn|strtok|clock|close|epoch|flush|fopen|fread|fseek|ftell|mkbuf|print|sleep|tohex|tonum|tostr|uemit|write|emit|exit|fork|free|mark|open|read|str<|str=|str>|ord|cr)(?!\\S)"
+    },
+    {
+      "name": "support.function.meta.dclang",
+      "match": "(?<!\\S)(?:primitives|constants|variables|import|input|words|exec)(?!\\S)"
+    },
+    {
+      "match": "(?<!\\S)(:)(\\s+)([^\\s]+)",
+      "captures": {
+        "1": {
+          "name": "keyword.declaration.dclang"
+        },
+        "3": {
+          "name": "entity.name.function.dclang"
+        }
       }
     },
     {
-      "name": "punctuation.definition.dclang",
-      "match": "(^|\\s)(:|;)(?=\\s|$)",
-      "settings": {
-        "foreground": "#FF0000"
-      }
+      "name": "keyword.declaration.dclang",
+      "match": "(?<!\\S)(?::|;|\\{|\\})(?!\\S)"
     },
     {
-      "name": "entity.name.function.dclang",
-      "match": "(^|\\s)([^\\s]+)(?=\\s|$)",
-      "settings": {
-        "foreground": "#00FF00"
-      }
+      "name": "constant.other.dclang",
+      "match": "(?<!\\S)[_:A-Z0-9]+(?!\\S)"
+    },
+    {
+      "name": "variable.function.dclang",
+      "match": "(?<!\\S)[^\\s\"]+(?!\\S)"
     }
   ]
 }

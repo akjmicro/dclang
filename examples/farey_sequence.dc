@@ -1,0 +1,44 @@
+################################################
+# Prints out order-N Farey sequences           #
+# https://en.wikipedia.org/wiki/Farey_sequence #
+################################################
+
+"/" const :slash
+"farey_seq: need <n>, which is the 'order' (max numerator and denominator) of the Farey Sequence, on the stack"
+const :FAREY_SEQ_ARGS_ERROR
+
+: _farey_next { n a b c d }
+  n b + d / floor    # (fl)
+
+  dup  c * a -       # (fl fl*c-a)
+  swap d * b -       # (fl*c-a fl*d-b)
+;
+
+: _farey_seq { n a b c d }
+
+  a .. :slash print b .
+
+  inf times
+    c .. :slash print d .
+
+    c 1 = d 1 = and
+    if
+      exittimes
+    endif
+    n a b c d _farey_next  # (next_a next_b)
+    c a!
+    d b!                   # (next_a next_b)
+    d!                     # (next_a)
+    c!                     # ()
+  again
+;
+
+: farey_seq # ( n - ) prints out sequence as side-effect
+  depth 1 < if
+    :FAREY_SEQ_ARGS_ERROR print cr
+    return
+  endif
+  { n }
+  n 0 1 1 n _farey_seq
+  cr
+;

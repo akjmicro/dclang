@@ -1,45 +1,42 @@
-## Here is an example for Bourne shell scripts.
-
+## dclang syntax for GNU nano
 syntax "dclang" "\.dc$"
 header "^#!.*(dclang[-0-9_]*)"
 comment "#"
 
-# general constants
-color magenta "(^|[[:space:]])(([_:A-Z0-9]+)($|[[:space:]]))*"
-# general names
-color green "(^|[[:space:]])(([^[:space:]]+)($|[[:space:]]))*"
-# decimal numeric
-color white,black "(^|[[:space:]])((-?[0-9]+\.?[0-9]*)($|[[:space:]]))*"
-# hexidecimal numeric
-color white,black "(^|[[:space:]])((-?0[x|X][0-9a-fA-F]+)($|[[:space:]]))*"
-# escaped chars
-color white,black "(^|[[:space:]])((\\.)($|[[:space:]]))*"
-# strings
+# General names, overridden by specific rules below
+color green "[^[:space:]]+"
+# Uppercase identifiers / symbols
+color magenta "(^|[[:space:]])[_:A-Z0-9]+($|[[:space:]])"
+# Numeric literals (decimal, exponent, hexadecimal); GNU nano uses POSIX ERE
+color white,black "(^|[[:space:]])[-+]?0[xX][[:xdigit:]]+($|[[:space:]])"
+color white,black "(^|[[:space:]])[-+]?([0-9]+(\.[0-9]*)?|\.[0-9]+)([eE][-+]?[0-9]+)?($|[[:space:]])"
+
+# constant
+color brightmagenta "(^|[[:space:]])(false|null|true|pi|e)($|[[:space:]])"
+
+# math
+color brightyellow "(^|[[:space:]])(assert|atan2|floor|log10|round|acos|asin|atan|ceil|cosh|log2|rand|sinh|sqrt|tanh|abs|and|cos|exp|log|max|min|not|pow|sin|tan|xor|<<|<=|<>|>=|>>|or|%|\*|\+|-|/|<|=|>)($|[[:space:]])"
+
+# stack
+color brightblue "(^|[[:space:]])(svclear|svdepth|svdrop|svpick|svpush|2drop|2over|clear|depth|svpop|2dup|drop|over|pick|swap|\.pz|\.rj|dup|\.\.|\.s|\.)($|[[:space:]])"
+
+# memory
+color brightred "(^|[[:space:]])(sortnums|sortstrs|tdestroy|create|envget|envset|allot|const|hkeys|lmake|lpush|lsize|tmake|twalk|here|ldel|lins|lpop|lrem|tdel|var|h!|h@|l!|l@|t!|t@|!|,|@)($|[[:space:]])"
+
+# control
+color brightgreen "(^|[[:space:]])(exittimes|exitfor|return|again|endif|times|else|next|for|if|i|j|k)($|[[:space:]])"
+
+# other
+color cyan "(^|[[:space:]])(unblock_sigint|block_sigint|tcpconnect|udpconnect|dt->epoch|epoch->dt|freadline|tcpaccept|tcplisten|udpsocket|fmemopen|freadall|redirect|udpclose|mempcpy|memused|strcspn|strfind|tolower|toupper|udpbind|udprecv|udpsend|fclose|fflush|fwrite|memset|rewind|seterr|setout|strlen|strspn|strtok|clock|close|epoch|flush|fopen|fread|fseek|ftell|mkbuf|print|sleep|tohex|tonum|tostr|uemit|write|emit|exit|fork|free|mark|open|read|str<|str=|str>|ord|cr)($|[[:space:]])"
+
+# special
+color yellow "(^|[[:space:]])(primitives|constants|variables|import|input|words|exec)($|[[:space:]])"
+
+# delimiter
+color brightred "(^|[[:space:]])(:|;|\{|\})($|[[:space:]])"
+
+# Strings and comments: nano cannot perfectly distinguish # inside a quoted string
 color yellow start="\"" end="\""
-# defined primitive constants
-color brightmagenta "(^|[[:space:]])((null|false|true|pi|e)($|[[:space:]]))*"
-# math primitives
-color brightyellow "(^|[[:space:]])((\+|-|\*|\/|\%|abs|min|max|<<|>>)($|[[:space:]]))*"
-color brightyellow "(^|[[:space:]])((=|<>|<|>|<=|>=|assert|and|or|not|xor)($|[[:space:]]))*"
-color brightyellow "(^|[[:space:]])((round|ceil|floor|pow|sqrt|log|log2|log10|sin|cos|tan|rand)($|[[:space:]]))*"
-# stack manipulation
-color brightblue "(^|[[:space:]])((drop|dup|over|pick|swap|2drop|2dup|2over|depth|clear|\.|\.\.|\.rj|\.s|svpush|svpop|svdrop|svpick|svdepth|svclear)($|[[:space:]]))*"
-# memory words
-color brightred "(^|[[:space:]])((\!|\@|const|var|allot|create|\,|h\@|h\!|hkeys|sortnums|sortstrs)($|[[:space:]]))*"
-color brightred "(^|[[:space:]])((t\!|t\@|tmake|twalk|tdel|tdestroy)($|[[:space:]]))*"
-color brightred "(^|[[:space:]])((l\!|l\@|lmake|lpush|lpop|lins|lrem|ldel)($|[[:space:]]))*"
-# control words
-color brightgreen "(^|[[:space:]])((times|again|exittimes|for|next|exitfor|i|j|k|if|else|endif|return)($|[[:space:]]))*"
-# other words
-color cyan "(^|[[:space:]])((cr|print|emit|uemit|ord|tohex|bytes32)($|[[:space:]]))*"
-color cyan "(^|[[:space:]])((strlen|str=|str<|str>|strfind|strspn|strcspn|strtok|mempcpy|memset|mkbuf|free)($|[[:space:]]))*"
-color cyan "(^|[[:space:]])((isalnum|isalpha|iscntrl|isdigit|isgraph|islower|isprint|ispunct|isspace|isupper|isxdigit|tolower|toupper)($|[[:space:]]))*"
-color cyan "(^|[[:space:]])((fopen|fmemopen|fread|freadline|freadall|fseek|ftell|fwrite|fflush|fclose|redirect|seterr|setout|flush|open|mkbuf|read|write|close)($|[[:space:]]))*"
-color cyan "(^|[[:space:]])((tcplisten|tcpaccept|tcpconnect|clock|sleep|epoch|dt->epoch|epoch->dt|block_sigint|unblock_sigint)($|[[:space:]]))*"
-color yellow "(^|[[:space:]])((words|primitives|import|input)($|[[:space:]]))*"
-# definition delimiters
-color brightred "(^|[[:space:]])((\:|;)($|[[:space:]]))*"
-# comments
-color white,black "(^|[[:space:]])#.*$"
-# trailing whitespace.
+color white,black "#.*$"
+# Highlight trailing whitespace last
 color ,red "[[:space:]]+$"

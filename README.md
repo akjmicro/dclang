@@ -5,9 +5,18 @@ ____________
 
 * Have the gcc (Linux) or clang (Mac) compiler on your machine.
 
-* Install `portmidi` and the `portmidi.h` and `porttime.h` headers onto your system.
+* Install `portmidi` and the `portmidi.h` and `porttime.h` headers onto
+  your system.
 
-* Copy the appropriate `Makefile.[linux|mac]` based on your OS to `Makefile`:
+* Clone the repo
+
+  ```
+  # clone the repo and build
+  git clone https://github.com/akjmicro/dclang
+  cd dclang
+  ```
+
+* Copy the appropriate `Makefile.[linux|mac]` based on your OS to `Makefile`
 
   ```
   # Linux
@@ -17,21 +26,14 @@ ____________
   cp Makefile.mac Makefile
   ```
 
-  ```
-  # clone the repo and build
-  git clone https://github.com/akjmicro/dclang
-  cd dclang
-  sudo make install
+* Build, using the new `Makefile`
 
-  # try running the primes example:
-  dclang -i examples/some_primes.dc
+  ```
+  # build
+  sudo make install
   ```
 
 * `make install` puts the executable `dclang` into `/usr/local/bin` by default.
-
-* Experiment as you wish with compiler optimizations in the Makefile,
-  particularly with float-point options, since 'dclang' is heavily
-  reliant on them.
 
 * You'll need to set `DCLANG_LIBS` to the location of your dclang source folder.
   ```
@@ -43,7 +45,19 @@ ____________
   ```
   export DCLANG_LIBS=/usr/local/dclang/lib
   ```
+
   You can add this export statement to your shell (`bash`, `zsh`, etc.) startup script, of course.
+
+* Experiment as you wish with compiler optimizations in the Makefile,
+  particularly with float-point options, since 'dclang' is heavily
+  reliant on them.
+
+* Run an example to test the interpreter
+
+  ```
+  # try running the primes example:
+  dclang -i examples/some_primes.dc
+  ```
 
 * For interaction, it's nice to use 'rlwrap' to get readline line-history:
   ```
@@ -59,53 +73,59 @@ ____________
 
 ### ABOUT:
 
-`dclang` is an RPN, stack-based language with near-zero syntax. It is in the
-spirit and tradition of `forth` and the grand ol' RPN calculator `dc`, which is
-oft-found on a UNIX/LINUX system near you! You can think of it as a dialect of
-`forth`, much in the same way `scheme` is a leaner dialect of `lisp`. Why `dclang`
-and not `gforth`? For the same reasons one would choose `scheme` instead of `lisp`!
-Smaller, easier to learn, in some ways, better in terms of usability and syntactical
-and naming improvements. I wanted to take what I like about `forth`, shave off what I
-didn't like, and make a more user-friendly idealized version of `forth` -- one that `forth`
-folks would recognize, but also would perhaps be friendlier to new users.
+`dclang` is an RPN, stack-based language with near-zero syntax. It is in
+the spirit and tradition of `forth` and the grand ol' RPN calculator
+`dc`, which is oft-found on a UNIX/LINUX system near you! You can think
+of it as a dialect of `forth`, much in the same way `scheme` is a leaner
+dialect of `lisp`. Why `dclang` and not `gforth`? For the same reasons
+one would choose `scheme` instead of `lisp`! Smaller, easier to learn,
+in some ways, better in terms of usability and syntactical and naming
+improvements. I wanted to take what I like about `forth`, shave off what
+I didn't like, and make a more user-friendly idealized version of
+`forth` -- one that `forth` folks would recognize, but also would
+perhaps be friendlier to new users.
 
-There are two constant goals of `dclang`: 
+There are two constant goals of `dclang`:
 
   1) to present hackers with a USABLE tool that they will enjoy!
   2) to create a lean, performant tool that utterly smokes most
      interpreted languages.
 
-I do not want to get stuck in exploring CS theory (although that
-is respectable and interesting) so much that I have a "Turing Tarpit Tool" that
-does nothing. `dclang` is slowly gathering features that means you can use it like
-you'd use `python`, `bash`, `gforth`, etc...and I have an eye to be guided by some
-of the key "daily use" functionality that is for instance offered by `glibc` in C.
-In fact, you might say that I'll know `dclang` is really done when every (or almost every)
-aspect/feature of `glibc` is somehow reflected in the in-built capabilities of `dclang`.
+I do not want to get stuck in exploring CS theory (although that is
+respectable and interesting) so much that I have a "Turing Tarpit Tool"
+that does nothing. `dclang` is slowly gathering features that means you
+can use it like you'd use `python`, `bash`, `gforth`, etc...and I have
+an eye to be guided by some of the key "daily use" functionality that is
+for instance offered by `glibc` in C. In fact, you might say that I'll
+know `dclang` is really done when every (or almost every) aspect/feature
+of `glibc` is somehow reflected in the in-built capabilities of
+`dclang`.
 
 RPN means "Reverse Polish Notation".  That means everything uses a
-'point-free-form', and there are no parenthesis, since there is a completely
-level order of operation.  Words operate on stack operands immediately,
-and leave the result on the stack immediately.  This makes the
-interpreter/parser not only simple but faster than one that has to do
-computational gymnastics around parsing things like braces or parenthesis,
-etc.  It also saves memory, since you don't have runaway linked-list
-creation that you have to later garbage-collect.  All actions happen on the
-stack.  Like `forth`, this is not and never will be a garbage collected
-language, but there will be operations to create variables and other data
-structures like lists and hashes (dictionaries) and so on, but they will be
-manually destroyed in memory to make room for other structures with other
-keywords ('free').  No garbage collection means things are kept simple, and
-the programmer is assumed to be a thoughtful and responsible adult. :)
-`forth` is a great language, and I mean to follow that lead, even as I simplify
-certain aspects of the `forth` standard in this dialect.
+'point-free-form', and there are no parenthesis, since there is a
+completely level order of operation.  Words operate on stack operands
+immediately, and leave the result on the stack immediately.  This makes
+the interpreter/parser not only simple but faster than one that has to
+do computational gymnastics around parsing things like braces or
+parenthesis, etc.  It also saves memory, since you don't have runaway
+linked-list creation that you have to later garbage-collect.  All
+actions happen on the stack.  Like `forth`, this is not and never will
+be a garbage collected language, but there will be operations to create
+variables and other data structures like lists and hashes (dictionaries)
+and so on, but they will be manually destroyed in memory to make room
+for other structures with other keywords ('free').  No garbage
+collection means things are kept simple, and the programmer is assumed
+to be a thoughtful and responsible adult. :) `forth` is a great
+language, and I mean to follow that lead, even as I simplify certain
+aspects of the `forth` standard in this dialect.
 
-The trade-off for that simplicity is that one has to get used to how order of
-operations work in this world (everything being immediate and w/o parenthesis).
-And also, one has to get used to manipulating the stack such that defined words
-make sensible, efficient use of the stack. It takes some getting used to. I direct
-the user to the internet or books to search for things relating to the fine art
-of programming `forth`, etc. Everything said there applies here.
+The trade-off for that simplicity is that one has to get used to how
+order of operations work in this world (everything being immediate and
+w/o parenthesis). And also, one has to get used to manipulating the
+stack such that defined words make sensible, efficient use of the stack.
+It takes some getting used to. I direct the user to the internet or
+books to search for things relating to the fine art of programming
+`forth`, etc. Everything said there applies here.
 
 Anyway, due to RPN, things will look like this, when you do math:
 
@@ -162,22 +182,24 @@ Anyway, due to RPN, things will look like this, when you do math:
 
 ```
 
-Notice the '.' character, which pops/prints the top-of-stack (TOS). This comes
-from `forth`, as does '.s', which non-destructively shows the stack contents.
-This is different from 'dc', where 'p' pops/prints the TOS.
+Notice the '.' character, which pops/prints the top-of-stack (TOS). This
+comes from `forth`, as does '.s', which non-destructively shows the
+stack contents. This is different from 'dc', where 'p' pops/prints the
+TOS.
 
-In the looping examples, the block has access to up to 3 hidden variables,
-'i', 'j', and 'k' which you can use to test conditionally and escape the loop.
-This allows nested loops up to three counters deep. Going any futher is a
-code-smell anyway, and you should refactor to a different implementation if
-you need something more.
+In the looping examples, the block has access to up to 3 hidden
+variables, 'i', 'j', and 'k' which you can use to test conditionally and
+escape the loop. This allows nested loops up to three counters deep.
+Going any futher is a code-smell anyway, and you should refactor to a
+different implementation if you need something more.
 
-The user is encouraged to preuse the `examples/` and `tests/` directory to 
-get a feel for the style and syntax of `dclang`. When you first launch an
-interactive commandline session by typing `dclang` (or `rlwrap dclang` to
-enable comand history, if you have `rlwrap`), you will see a categorized
-listing of all the primitives. You can always see the list again by
-calling the `primitives` word, which will show the info listing again.
+The user is encouraged to preuse the `examples/` and `tests/` directory
+to get a feel for the style and syntax of `dclang`. When you first
+launch an interactive commandline session by typing `dclang` (or `rlwrap
+dclang` to enable comand history, if you have `rlwrap`), you will see a
+categorized listing of all the primitives. You can always see the list
+again by calling the `primitives` word, which will show the info listing
+again.
 
 A non-exhaustive notes on some of the things implemented thus far:
 
@@ -238,30 +260,49 @@ A non-exhaustive notes on some of the things implemented thus far:
         # cells:
         var myarr 16 allot
         ```
-        There is also `create`, which does something similar, but is paired typically
-        with `,` which is an operator to place a stack value immediately into a storage
-        location. So, to initialize an array of four values to `1`, you'd do:
+
+        There is also `create`, which does something similar, but is
+        paired typically with `,` which is an operator to place a stack
+        value immediately into a storage location. So, to initialize an
+        array of four values to `1`, you'd do:
         ```
         create myarr 1 , 1 , 1 , 1 ,
         ```
-        Note that the comma operator is an actual operator-word, it's not a delimiter!
+
+        Note that the comma operator is an actual operator-word, it's
+        not a delimiter!
+
     * `!` (poke a value to a given slot, e.g. `5 funvar !` puts the value 5
       into `funvar`)
     * `@` (peek a value, copy it to the stack, e.g. `funvar @` will put our
     previously saved '5' onto the top of the stack.
     * Since the variables exist in an giant global array, there really is
-    no distinction between 'arrays' and 'variables' in dclang. Named
-    variables or constants can be emulated by makings them words, e.g.:
+    no distinction between 'arrays' and 'variables' in dclang.
+    Arrays are 0-based:
         ```
-        # make 'myvar' an alias for array slot number 53
-        # N.B. this does *not* make myvar = 53; instead it give a name
-        # to the slot that will hold the actual value.
-        : myvar 53 ;
-        # this will store 7.4231 into slot 53
-        7.4231 myvar !
-        myvar @ .
-        7.4231
+        var myarray 4 allot
+
+        # set slot 0 (first slot)
+        3 myarray !
+        # set slot 1 (2nd slot)
+        5 myarray 1 + !
+        # set slot 2 (3rd slot)
+        7 myarray 2 + !
+        # set slot 3 (4th slot)
+        11 myarray 3 + !
+
+        # get slot 2 (3rd slot):
+        myarray 2 + @  . cr
+        7   # result shown
+
+        # Alternatively, declare the 4-slot array in one go:
+        create myarray 3 , 5 , 7 , 11 ,
+
+        # get slot 3 (4th slot) this time:
+        myarray 3 + @  . cr
+        11  # result shown
         ```
+
     * This works in a similar fashion for something like a string variable
     (which is, in reality an address and a length):
       ```
@@ -301,9 +342,13 @@ A non-exhaustive notes on some of the things implemented thus far:
 
     key=favorite ice cream flavor, value=Pralines & Cream
     ```
-  * Linked lists: `lmake`, `lpush`, `lpop`, `l!`, `l@`, `lins`, `lrem`, `lsize`, `ldel`
+
+  * Linked lists: `lmake`, `lpush`, `lpop`, `l!`, `l@`, `lins`, `lrem`,
+    `lsize`, `ldel`
   * Timing:
-    * a clock function ('clock') so we can time execution in nanoseconds for benchmarking.
+    * a clock function ('clock') so we can time execution in nanoseconds
+      for benchmarking.
+
     * A hook into CPU-cycle clock, called 'rdtsc'. (not available on RPi)
     * A sleep function (C's `nanosleep` under-the-hood)
   * Importing a file of dclang code:
@@ -331,14 +376,17 @@ A non-exhaustive notes on some of the things implemented thus far:
     myfile @ fclose                       # close the file
     ```
 
-  * `tcplisten`, `tcpaccept` for server primitives, `tcpconnect` for clients. See the examples directory.
+  * `tcplisten`, `tcpaccept` for server primitives, `tcpconnect` for
+    clients. See the examples directory.
 
 
 ### A note on "composibility"
-After wrestling a bit back-n-forth with the stack API for trees and lists, I opted for what
-what some might consider a non-standard approach to stack order for both. On the face of it,
-the approach for these structures is inconsistent with the other variable types, "normal array slots"
-and "hashes". Consider:
+
+After wrestling a bit back-n-forth with the stack API for trees and
+lists, I opted for what what some might consider a non-standard approach
+to stack order for both. On the face of it, the approach for these
+structures is inconsistent with the other variable types, "normal array
+slots" and "hashes". Consider:
 
 ```
 var thing
@@ -351,9 +399,11 @@ var thing
       "foo" h@
 ```
 
-So, why have I not preserved this "standard stack-order way" for trees and lists? Well for starters, I did.
-However, since these structures can sometimes be nested, and one can do neat things with nesting, keeping
-this strictly FORTH-like way can be a nuisance, and unwieldy. Take for instance, a nested list:
+So, why have I not preserved this "standard stack-order way" for trees
+and lists? Well for starters, I did. However, since these structures can
+sometimes be nested, and one can do neat things with nesting, keeping
+this strictly FORTH-like way can be a nuisance, and unwieldy. Take for
+instance, a nested list:
 
 ```
 # make 3 lists
@@ -389,18 +439,23 @@ outer_list 1 l@ 0 l@    # 5
 outer_list 1 l@ 1 l@    # 7
 ```
 
-Now, isn't the 2nd way much nicer, and easier to parse? For starters, we preserve the "odometer" feeling
-of digging into a nested structure that most folks are used to. Also, notice how, related to that,
-the idea of "outer" and "inner" is actually preserved in a left-to-right reading. Finally, when you
-de-reference the `outer_list` with `l@`, you get the inner list, and can further deference _that_ in
-a "chaining" fashion with yet another index and `l@` operator. I find this much clearer, cleaner, and
-more intuitive.
+Now, isn't the 2nd way much nicer, and easier to parse? For starters, we
+preserve the "odometer" feeling of digging into a nested structure that
+most folks are used to. Also, notice how, related to that, the idea of
+"outer" and "inner" is actually preserved in a left-to-right reading.
+Finally, when you de-reference the `outer_list` with `l@`, you get the
+inner list, and can further deference _that_ in a "chaining" fashion
+with yet another index and `l@` operator. I find this much clearer,
+cleaner, and more intuitive.
 
-Since trees can be nested in a similar way, I changed their stack-order expectations in a similar way.
-There may come a time where I consider doing this to normal variables and hashes -- however, I've written
-so much code, and a chain of dereferences making for strange stack-order (i.e. nesting) is less common
-in those cases, and might be more upsetting the apple cart at this point. More thought and consideration
-of the matter is required at this point to convince me that changing that is worth it.
+Since trees can be nested in a similar way, I changed their stack-order
+expectations in a similar way. There may come a time where I consider
+doing this to normal variables and hashes -- however, I've written so
+much code, and a chain of dereferences making for strange stack-order
+(i.e. nesting) is less common in those cases, and might be more
+upsetting the apple cart at this point. More thought and consideration
+of the matter is required at this point to convince me that changing
+that is worth it.
 
 ### Contact
 

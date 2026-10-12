@@ -1,0 +1,93 @@
+{
+  "editor.tokenColorCustomizations": {
+    "textMateRules": [
+      {
+        "scope": "constant.language.dclang",
+        "settings": {
+          "foreground": "#FF80FF"
+        }
+      },
+      {
+        "scope": "keyword.operator.dclang",
+        "settings": {
+          "foreground": "#FFFF80"
+        }
+      },
+      {
+        "scope": "support.function.stack.dclang",
+        "settings": {
+          "foreground": "#0080FF"
+        }
+      },
+      {
+        "scope": "support.function.memory.dclang",
+        "settings": {
+          "foreground": "#FF0000"
+        }
+      },
+      {
+        "scope": "keyword.control.dclang",
+        "settings": {
+          "foreground": "#80FF00"
+        }
+      },
+      {
+        "scope": "support.function.other.dclang",
+        "settings": {
+          "foreground": "#00FFFF"
+        }
+      },
+      {
+        "scope": "support.function.meta.dclang",
+        "settings": {
+          "foreground": "#FFFF00"
+        }
+      },
+      {
+        "scope": "keyword.declaration.dclang",
+        "settings": {
+          "foreground": "#FF0000"
+        }
+      },
+      {
+        "scope": "constant.other.dclang",
+        "settings": {
+          "foreground": "#FF00FF"
+        }
+      },
+      {
+        "scope": [
+          "variable.function.dclang",
+          "entity.name.function.dclang"
+        ],
+        "settings": {
+          "foreground": "#00FF00"
+        }
+      },
+      {
+        "scope": "constant.numeric.dclang",
+        "settings": {
+          "foreground": "#FFFFFF"
+        }
+      },
+      {
+        "scope": "string.quoted.double.dclang",
+        "settings": {
+          "foreground": "#FFFF00"
+        }
+      },
+      {
+        "scope": "comment.line.number-sign.dclang",
+        "settings": {
+          "foreground": "#FFFFFF"
+        }
+      },
+      {
+        "scope": "constant.character.escape.dclang",
+        "settings": {
+          "foreground": "#FFFFFF"
+        }
+      }
+    ]
+  }
+}
