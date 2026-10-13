@@ -1,10 +1,10 @@
 ############################################################################
-# This example explores a subset of musical linear temperaments called 
-# "meantone temperaments". The basis is typically an interval of a 
-# musical fifth (3/2) that has been flattened by some fraction of the 
-# syntonic comma (81/80, or the difference between the pure major 3d 
-# (5/4) and the Pythagorean 3rd (81/64)). The latter Pythagorean 3rd is 
-# formed by a stack of 4 3/2, AKA (3/2)^4, but octave-reduced to be in 
+# This example explores a subset of musical linear temperaments called
+# "meantone temperaments". The basis is typically an interval of a
+# musical fifth (3/2) that has been flattened by some fraction of the
+# syntonic comma (81/80, or the difference between the pure major 3d
+# (5/4) and the Pythagorean 3rd (81/64)). The latter Pythagorean 3rd is
+# formed by a stack of 4 3/2, AKA (3/2)^4, but octave-reduced to be in
 # the range between 1 and 2).
 #
 # Illustrating as math:
@@ -12,41 +12,41 @@
 # 3/2 * 3/2 * 3/2 * 3/2 = 81/16 -> 81/64 (drop 2 octaves)
 # (81/64) / (5/4) = 81/80, the syntonic comma
 #
-# Tempering the fifth by some fraction of the syntonic comma (81/80) 
-# allows for the 3rds which result from stacking the fifth as a "scale 
-# generator" to have a more in-tune, "sweeter" sound. The tradeoff is 
-# that the 5ths will be slightly flat and be a bit more "active" and 
-# beat slightly. Flattening the 5ths by various degrees of the comma 
-# allow for various degrees of compromise between 3rds (5th-overtone 
-# based intervals) and 5ths (3rd-overtone based intervals). Common 
-# values for flattening 5ths include: 1/4-comma, 1/3-comma, 1/5-comma, 
-# 1/6-comma, and 2/7-comma, although there are many other possibilities 
-# based on such fractional components. 1/4-comma is arguably the most 
-# historically common and important of this family of temperaments, so 
-# the fifth is by default set to the value of a 1/4-comma meantone fifth 
+# Tempering the fifth by some fraction of the syntonic comma (81/80)
+# allows for the 3rds which result from stacking the fifth as a "scale
+# generator" to have a more in-tune, "sweeter" sound. The tradeoff is
+# that the 5ths will be slightly flat and be a bit more "active" and
+# beat slightly. Flattening the 5ths by various degrees of the comma
+# allow for various degrees of compromise between 3rds (5th-overtone
+# based intervals) and 5ths (3rd-overtone based intervals). Common
+# values for flattening 5ths include: 1/4-comma, 1/3-comma, 1/5-comma,
+# 1/6-comma, and 2/7-comma, although there are many other possibilities
+# based on such fractional components. 1/4-comma is arguably the most
+# historically common and important of this family of temperaments, so
+# the fifth is by default set to the value of a 1/4-comma meantone fifth
 # in this module. This can be changed to, e.g. 2/7 comma by:
 #
 #   2 7 / set_fifth  show_meantone
 #
-# Once you have set the fifth, the other thing this module does is to 
-# survey the accuracy of various interger overtone series 
-# representations of the given meantone temperament. For example, to 
-# explore the accuracy of the overtones from 64 to 256 as a starting 
+# Once you have set the fifth, the other thing this module does is to
+# survey the accuracy of various interger overtone series
+# representations of the given meantone temperament. For example, to
+# explore the accuracy of the overtones from 64 to 256 as a starting
 # point "denominator", you'd do:
 #
 #   64 257 meantone2int_survey
 #
-# This will give a pipe-delimited list of the overtone and its maximum 
-# absolute-val log2 (octave) error from the ideal for each pitch in the 
-# gamut. Once you found an interesting example, you can examine an 
-# individual denominator via `meantone2int`. For example, when 1/4-comma 
-# is selected, 91 happens to be a pretty good optimal representation. 
+# This will give a pipe-delimited list of the overtone and its maximum
+# absolute-val log2 (octave) error from the ideal for each pitch in the
+# gamut. Once you found an interesting example, you can examine an
+# individual denominator via `meantone2int`. For example, when 1/4-comma
+# is selected, 91 happens to be a pretty good optimal representation.
 # So:
 #
 #   1 4 / set_fifth
 #   91 meantone2int
 #
-# ...will print out the output gamut, and give a log2 (octave) error for 
+# ...will print out the output gamut, and give a log2 (octave) error for
 # each individual pitch in the gamut.
 #
 # The gamut size itself can be changed via the `gamut_size` variable, as

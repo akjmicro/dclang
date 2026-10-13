@@ -10,15 +10,15 @@ RUN apk add --no-cache build-base sqlite-dev portmidi-dev git rlwrap && \
     make lib && \
     make install && \
     echo 'export DCLANG_LIBS="/dclang/lib"' >> /root/.profile && \
-    echo 'alias dclang="rlwrap dclang"' >> /root/.profile
-CMD /bin/bash
+    echo 'alias dclang="rlwrap -n dclang"' >> /root/.profile
+CMD ["/bin/bash"]
 
 FROM busybox:glibc
 WORKDIR /
 # system needs
 COPY --from=builder /lib/ld-musl-*.so.1 /lib/
 COPY --from=builder /usr/lib/libreadline* /usr/lib/
-#COPY --from=builder /usr/lib/libptytty* /usr/lib
+COPY --from=builder /usr/lib/libptytty* /usr/lib
 COPY --from=builder /usr/lib/libncursesw* /usr/lib/
 COPY --from=builder /usr/lib/libgcc_s* /usr/lib/
 COPY --from=builder /usr/lib/libasound* /usr/lib/
@@ -33,4 +33,4 @@ COPY --from=builder /usr/local/bin/dclang /usr/bin/
 COPY --from=builder /root/.profile /root/.profile
 COPY --from=builder /dclang* /dclang/
 # command entrypoint
-CMD sh -l
+CMD ["sh", "-l"]
