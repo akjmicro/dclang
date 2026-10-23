@@ -1,0 +1,61 @@
+"/tmp/test_freadall" const :tmp_freadall
+"w"  const :w
+"r"  const :r
+"\n" const :ret
+"~"  const :tilde
+
+var myfile
+2048 mkbuf const TESTBUF
+
+: test_freadall { loops }
+  # clear the main buffer
+  TESTBUF 0 2048 memset
+  :tmp_freadall :w fopen myfile !
+  loops 0 > if
+    "Testing " print loops . "times" print cr
+    # fill the buffer
+    TESTBUF
+    loops times
+      :tilde 1 mempcpy
+    again
+    drop
+  endif
+
+  "TESTBUF IS:" print cr
+  TESTBUF print cr
+
+  # write the file
+  TESTBUF dup strlen myfile @ fwrite
+  "Asserting write count" print cr
+  loops =
+  assert
+  myfile @ fclose
+
+  # read the file
+  :tmp_freadall :r fopen myfile !
+  myfile @ freadall
+  "Asserting read count" print cr
+  loops =
+  assert
+  "Asserting string equality" print cr
+  TESTBUF str=
+  assert
+  myfile @ fclose
+;
+
+0 test_freadall
+1 test_freadall
+2 test_freadall
+63 test_freadall
+64 test_freadall
+127 test_freadall
+128 test_freadall
+255 test_freadall
+256 test_freadall
+257 test_freadall
+511 test_freadall
+512 test_freadall
+513 test_freadall
+1023 test_freadall
+1024 test_freadall
+1025 test_freadall

@@ -1256,10 +1256,15 @@ void dclang_execute() {
             confirm = hset(global_hash_table, key, hvalue);
             if ((confirm != NULL) && (existing_val == NULL))
             {
-                if (hashwords_cnt > hashwords_size)
+                if (hashwords_cnt >= hashwords_size)
                 {
+                    size_t old_hashwords_size = hashwords_size;
                     hashwords_size *= 2;
-                    hashwords = (char **)dclang_realloc(hashwords, hashwords_size * sizeof(*hashwords));
+                    hashwords = (char **)dclang_realloc(
+                        hashwords,
+                        old_hashwords_size * sizeof(*hashwords),
+                        hashwords_size * sizeof(*hashwords)
+                    );
                 }
                 hashwords[hashwords_cnt] = key;
                 ++hashwords_cnt;
@@ -2583,10 +2588,11 @@ void dclang_execute() {
             while ((ch = fgetc(file)) != EOF)
             {
                 chr_cnt += 1;
-                if (chr_cnt > req_bufsize)
+                if (chr_cnt >= req_bufsize)
                 {
+                    size_t old_req_bufsize = req_bufsize;
                     req_bufsize *= 2;
-                    allbuf = (char *) dclang_realloc(allbuf, req_bufsize);
+                    allbuf = (char *) dclang_realloc(allbuf, old_req_bufsize, req_bufsize);
                 }
                 memset(allbuf + chr_cnt - 1, ch, 1);
             }

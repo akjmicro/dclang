@@ -38,14 +38,19 @@ char *dclang_malloc(size_t size)
     return mem;
 }
 
-char *dclang_realloc(void *mem, size_t size)
+char *dclang_realloc(void *mem, size_t old_size, size_t new_size)
 {
-    char *new_mem = (char *) dclang_malloc(size);
-    if (new_mem != NULL) {
-        memcpy(new_mem, mem, size);
-    } else {
+    char *new_mem = (char *) dclang_malloc(new_size);
+
+    if (new_mem == NULL) {
         exit(1);
     }
+
+    if (mem != NULL) {
+        memcpy(new_mem, mem,
+               old_size < new_size ? old_size : new_size);
+    }
+
     return new_mem;
 }
 
