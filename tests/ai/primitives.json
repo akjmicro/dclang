@@ -1,0 +1,1922 @@
+{
+  "schema_version": 1,
+  "cases": [
+    {
+      "source": "primitive_collections_results_v0.8.json",
+      "case_index": 0,
+      "record": {
+        "test": "lmake/lsize",
+        "program": "lmake lsize",
+        "expected_stack": "0",
+        "observed_stack": "0",
+        "status": "pass",
+        "exit_code": 0,
+        "stdout": "data_stack: <1> 0 \nsave_stack: <0>",
+        "stderr": ""
+      }
+    },
+    {
+      "source": "primitive_collections_results_v0.8.json",
+      "case_index": 1,
+      "record": {
+        "test": "lpush/l@",
+        "program": "lmake dup 11 lpush 0 l@",
+        "expected_stack": "11",
+        "observed_stack": "11",
+        "status": "pass",
+        "exit_code": 0,
+        "stdout": "data_stack: <1> 11 \nsave_stack: <0>",
+        "stderr": ""
+      }
+    },
+    {
+      "source": "primitive_collections_results_v0.8.json",
+      "case_index": 2,
+      "record": {
+        "test": "lpush/lsize",
+        "program": "lmake dup 11 lpush dup 22 lpush lsize",
+        "expected_stack": "2",
+        "observed_stack": "2",
+        "status": "pass",
+        "exit_code": 0,
+        "stdout": "data_stack: <1> 2 \nsave_stack: <0>",
+        "stderr": ""
+      }
+    },
+    {
+      "source": "primitive_collections_results_v0.8.json",
+      "case_index": 3,
+      "record": {
+        "test": "lpop",
+        "program": "lmake dup 11 lpush dup 22 lpush lpop",
+        "expected_stack": "22",
+        "observed_stack": "22",
+        "status": "pass",
+        "exit_code": 0,
+        "stdout": "data_stack: <1> 22 \nsave_stack: <0>",
+        "stderr": ""
+      }
+    },
+    {
+      "source": "primitive_collections_results_v0.8.json",
+      "case_index": 4,
+      "record": {
+        "test": "l!",
+        "program": "lmake dup 11 lpush dup 0 42 l! 0 l@",
+        "expected_stack": "42",
+        "observed_stack": "42",
+        "status": "pass",
+        "exit_code": 0,
+        "stdout": "data_stack: <1> 42 \nsave_stack: <0>",
+        "stderr": ""
+      }
+    },
+    {
+      "source": "primitive_collections_results_v0.8.json",
+      "case_index": 5,
+      "record": {
+        "test": "lins",
+        "program": "lmake dup 11 lpush dup 22 lpush dup 1 33 lins dup lsize swap 1 l@",
+        "expected_stack": "3 33",
+        "observed_stack": "3 33",
+        "status": "pass",
+        "exit_code": 0,
+        "stdout": "data_stack: <2> 3 33 \nsave_stack: <0>",
+        "stderr": ""
+      }
+    },
+    {
+      "source": "primitive_collections_results_v0.8.json",
+      "case_index": 6,
+      "record": {
+        "test": "lrem",
+        "program": "lmake dup 11 lpush dup 22 lpush dup 0 lrem 0 l@",
+        "expected_stack": "22",
+        "observed_stack": "22",
+        "status": "pass",
+        "exit_code": 0,
+        "stdout": "data_stack: <1> 22 \nsave_stack: <0>",
+        "stderr": ""
+      }
+    },
+    {
+      "source": "primitive_collections_results_v0.8.json",
+      "case_index": 7,
+      "record": {
+        "test": "ldel",
+        "program": "lmake dup 11 lpush ldel",
+        "expected_stack": "",
+        "observed_stack": "",
+        "status": "pass",
+        "exit_code": 0,
+        "stdout": "data_stack: <0> \nsave_stack: <0>",
+        "stderr": ""
+      }
+    },
+    {
+      "source": "primitive_collections_results_v0.8.json",
+      "case_index": 8,
+      "record": {
+        "test": "h!/h@",
+        "program": "42 \"ai_test_hash_key\" h! \"ai_test_hash_key\" h@",
+        "expected_stack": "42",
+        "observed_stack": "42",
+        "status": "pass",
+        "exit_code": 0,
+        "stdout": "data_stack: <1> 42 \nsave_stack: <0>",
+        "stderr": ""
+      }
+    },
+    {
+      "source": "primitive_collections_results_v0.8.json",
+      "case_index": 9,
+      "record": {
+        "test": "h@ missing",
+        "program": "\"ai_test_hash_missing\" h@",
+        "expected_stack": "0",
+        "observed_stack": "0",
+        "status": "pass",
+        "exit_code": 0,
+        "stdout": "data_stack: <1> 0 \nsave_stack: <0>",
+        "stderr": ""
+      }
+    },
+    {
+      "source": "primitive_collections_results_v0.8.json",
+      "case_index": 10,
+      "record": {
+        "test": "tmake/t!",
+        "program": "tmake dup \"key\" 19 t! swap \"key\" t@",
+        "expected_stack": "19 19",
+        "observed_stack": "19 19",
+        "status": "pass",
+        "exit_code": 0,
+        "stdout": "data_stack: <2> 19 19 \nsave_stack: <0>",
+        "stderr": ""
+      }
+    },
+    {
+      "source": "primitive_collections_results_v0.8.json",
+      "case_index": 11,
+      "record": {
+        "test": "t@ missing",
+        "program": "tmake \"missing\" t@",
+        "expected_stack": "0",
+        "observed_stack": "0",
+        "status": "pass",
+        "exit_code": 0,
+        "stdout": "data_stack: <1> 0 \nsave_stack: <0>",
+        "stderr": ""
+      }
+    },
+    {
+      "source": "primitive_collections_results_v0.8.json",
+      "case_index": 12,
+      "record": {
+        "test": "tdel",
+        "program": "tmake dup \"key\" 19 t! drop dup \"key\" tdel \"key\" t@",
+        "expected_stack": "0",
+        "observed_stack": "0",
+        "status": "pass",
+        "exit_code": 0,
+        "stdout": "data_stack: <1> 0 \nsave_stack: <0>",
+        "stderr": ""
+      }
+    },
+    {
+      "source": "primitive_collections_results_v0.8.json",
+      "case_index": 13,
+      "record": {
+        "test": "tdestroy",
+        "program": "tmake tdestroy",
+        "expected_stack": "",
+        "observed_stack": "",
+        "status": "pass",
+        "exit_code": 0,
+        "stdout": "data_stack: <0> \nsave_stack: <0>",
+        "stderr": ""
+      }
+    },
+    {
+      "source": "primitive_file_time_exec_results_v1.1.json",
+      "case_index": 0,
+      "record": {
+        "test": "exec user word",
+        "program": " : sq dup * ; 7 \"sq\" exec",
+        "expected_stack": "49",
+        "observed_stack": "49",
+        "status": "pass",
+        "returncode": 0,
+        "stdout": "data_stack: <1> 49 \nsave_stack: <0>",
+        "stderr": ""
+      }
+    },
+    {
+      "source": "primitive_file_time_exec_results_v1.1.json",
+      "case_index": 1,
+      "record": {
+        "test": "exec primitive",
+        "program": "3 4 \"+\" exec",
+        "expected_stack": "7",
+        "observed_stack": "7",
+        "status": "pass",
+        "returncode": 0,
+        "stdout": "data_stack: <1> 7 \nsave_stack: <0>",
+        "stderr": ""
+      }
+    },
+    {
+      "source": "primitive_file_time_exec_results_v1.1.json",
+      "case_index": 2,
+      "record": {
+        "test": "exec missing word",
+        "program": "\"__nonexistent_word__\" exec",
+        "expected_stack": "",
+        "observed_stack": "",
+        "status": "pass",
+        "returncode": 0,
+        "stdout": "exec -- word not found: __nonexistent_word__\nIf you call 'exec' repeatedly without using a string constant, it will result in the string memory getting into a bad state.\nHINT: try using a constant like: \n      \"foo\" const :foo \n and then calling 'exec' with the constant on the stack.\ndata_stack: <0> \nsave_stack: <0>",
+        "stderr": ""
+      }
+    },
+    {
+      "source": "primitive_file_time_exec_results_v1.1.json",
+      "case_index": 3,
+      "record": {
+        "test": "clock",
+        "program": "clock 0 >",
+        "expected_stack": "-1",
+        "observed_stack": "-1",
+        "status": "pass",
+        "returncode": 0,
+        "stdout": "data_stack: <1> -1 \nsave_stack: <0>",
+        "stderr": ""
+      }
+    },
+    {
+      "source": "primitive_file_time_exec_results_v1.1.json",
+      "case_index": 4,
+      "record": {
+        "test": "epoch",
+        "program": "epoch 1700000000 >",
+        "expected_stack": "-1",
+        "observed_stack": "-1",
+        "status": "pass",
+        "returncode": 0,
+        "stdout": "data_stack: <1> -1 \nsave_stack: <0>",
+        "stderr": ""
+      }
+    },
+    {
+      "source": "primitive_file_time_exec_results_v1.1.json",
+      "case_index": 5,
+      "record": {
+        "test": "epoch->dt",
+        "program": "0 \"%Y\" epoch->dt print",
+        "expected_stack": "",
+        "observed_stack": "",
+        "status": "pass",
+        "returncode": 0,
+        "stdout": "1970data_stack: <0> \nsave_stack: <0>",
+        "stderr": ""
+      }
+    },
+    {
+      "source": "primitive_file_time_exec_results_v1.1.json",
+      "case_index": 6,
+      "record": {
+        "test": "fopen nonexistent",
+        "program": "\"/tmp/dclang_ai_nonexistent_2026_zz\" \"r\" fopen",
+        "expected_stack": "-1",
+        "observed_stack": "-1",
+        "status": "pass",
+        "returncode": 0,
+        "stdout": "The file named /tmp/dclang_ai_nonexistent_2026_zz doesn't appear to exist, or cannot be accessed.\ndata_stack: <1> -1 \nsave_stack: <0>",
+        "stderr": ""
+      }
+    },
+    {
+      "source": "primitive_file_time_exec_results_v1.1.json",
+      "case_index": 7,
+      "record": {
+        "test": "fopen ftell fclose",
+        "program": "\"/dev/null\" \"r\" fopen dup ftell swap fclose",
+        "expected_stack": "0",
+        "observed_stack": "0",
+        "status": "pass",
+        "returncode": 0,
+        "stdout": "data_stack: <1> 0 \nsave_stack: <0>",
+        "stderr": ""
+      }
+    },
+    {
+      "source": "primitive_file_time_exec_results_v1.1.json",
+      "case_index": 8,
+      "record": {
+        "test": "fseek ftell",
+        "program": "\"/dev/null\" \"r\" fopen dup 0 0 fseek dup ftell swap fclose",
+        "expected_stack": "0",
+        "observed_stack": "0",
+        "status": "pass",
+        "returncode": 0,
+        "stdout": "data_stack: <1> 0 \nsave_stack: <0>",
+        "stderr": ""
+      }
+    },
+    {
+      "source": "primitive_file_time_exec_results_v1.1.json",
+      "case_index": 9,
+      "record": {
+        "test": "fread zero",
+        "program": "8 mkbuf \"/dev/null\" \"r\" fopen dup svpush fread",
+        "expected_stack": "",
+        "observed_stack": "140402724380480 140402297898336",
+        "status": "review",
+        "returncode": 0,
+        "stdout": "Stack underflow!\nfread needs <buf_pointer> <number-of-bytes> <file_pointer> on the stack\ndata_stack: <2> 140402724380480 140402297898336 \nsave_stack: <1> 140402297898336",
+        "stderr": ""
+      }
+    },
+    {
+      "source": "primitive_memory_results_v0.9.json",
+      "case_index": 0,
+      "record": {
+        "name": "var store/read",
+        "program": "var x 42 x ! x @",
+        "expected": "42",
+        "actual": "42",
+        "status": "pass",
+        "stdout": "data_stack: <1> 42 \nsave_stack: <0> \n",
+        "stderr": "",
+        "exit_code": 0
+      }
+    },
+    {
+      "source": "primitive_memory_results_v0.9.json",
+      "case_index": 1,
+      "record": {
+        "name": "var initial zero",
+        "program": "var x x @",
+        "expected": "0",
+        "actual": "0",
+        "status": "pass",
+        "stdout": "data_stack: <1> 0 \nsave_stack: <0> \n",
+        "stderr": "",
+        "exit_code": 0
+      }
+    },
+    {
+      "source": "primitive_memory_results_v0.9.json",
+      "case_index": 2,
+      "record": {
+        "name": "var overwrite",
+        "program": "var x 4 x ! 9 x ! x @",
+        "expected": "9",
+        "actual": "9",
+        "status": "pass",
+        "stdout": "data_stack: <1> 9 \nsave_stack: <0> \n",
+        "stderr": "",
+        "exit_code": 0
+      }
+    },
+    {
+      "source": "primitive_memory_results_v0.9.json",
+      "case_index": 3,
+      "record": {
+        "name": "const lookup",
+        "program": "42 const answer answer",
+        "expected": "42",
+        "actual": "42",
+        "status": "pass",
+        "stdout": "data_stack: <1> 42 \nsave_stack: <0> \n",
+        "stderr": "",
+        "exit_code": 0
+      }
+    },
+    {
+      "source": "primitive_memory_results_v0.9.json",
+      "case_index": 4,
+      "record": {
+        "name": "create comma read",
+        "program": "create arr 11 , 22 , arr @ arr 1 + @",
+        "expected": "11 22",
+        "actual": "11 22",
+        "status": "pass",
+        "stdout": "data_stack: <2> 11 22 \nsave_stack: <0> \n",
+        "stderr": "",
+        "exit_code": 0
+      }
+    },
+    {
+      "source": "primitive_memory_results_v0.9.json",
+      "case_index": 5,
+      "record": {
+        "name": "here after var",
+        "program": "here var x here swap -",
+        "expected": "1",
+        "actual": "1",
+        "status": "pass",
+        "stdout": "data_stack: <1> 1 \nsave_stack: <0> \n",
+        "stderr": "",
+        "exit_code": 0
+      }
+    },
+    {
+      "source": "primitive_memory_results_v0.9.json",
+      "case_index": 6,
+      "record": {
+        "name": "allot slots",
+        "program": "here 4 allot here swap -",
+        "expected": "3",
+        "actual": "3",
+        "status": "pass",
+        "stdout": "data_stack: <1> 3 \nsave_stack: <0> \n",
+        "stderr": "",
+        "exit_code": 0
+      }
+    },
+    {
+      "source": "primitive_memory_results_v0.9.json",
+      "case_index": 7,
+      "record": {
+        "name": "mkbuf zeroed",
+        "program": "8 mkbuf dup strlen swap free",
+        "expected": "0",
+        "actual": "0",
+        "status": "pass",
+        "stdout": "data_stack: <1> 0 \nsave_stack: <0> \n",
+        "stderr": "",
+        "exit_code": 0
+      }
+    },
+    {
+      "source": "primitive_memory_results_v0.9.json",
+      "case_index": 8,
+      "record": {
+        "name": "mkbuf two allocations",
+        "program": "8 mkbuf 8 mkbuf free free",
+        "expected": "",
+        "actual": "",
+        "status": "pass",
+        "stdout": "data_stack: <0> \nsave_stack: <0> \n",
+        "stderr": "",
+        "exit_code": 0
+      }
+    },
+    {
+      "source": "primitive_memory_results_v0.9.json",
+      "case_index": 9,
+      "record": {
+        "name": "mark rewind",
+        "program": "mark 8 mkbuf drop rewind",
+        "expected": "",
+        "actual": "",
+        "status": "pass",
+        "stdout": "data_stack: <0> \nsave_stack: <0> \n",
+        "stderr": "",
+        "exit_code": 0
+      }
+    },
+    {
+      "source": "primitive_memory_results_v0.9.json",
+      "case_index": 10,
+      "record": {
+        "name": "memused value",
+        "program": "memused 0 >=",
+        "expected": "-1",
+        "actual": "-1",
+        "status": "pass",
+        "stdout": "data_stack: <1> -1 \nsave_stack: <0> \n",
+        "stderr": "",
+        "exit_code": 0
+      }
+    },
+    {
+      "source": "primitive_memory_results_v0.9.json",
+      "case_index": 11,
+      "record": {
+        "name": "env set/get",
+        "program": "\"test-value\" \"DCLANG_AI_TEST_KEY\" envset \"DCLANG_AI_TEST_KEY\" envget print",
+        "expected": "",
+        "actual": "",
+        "status": "pass",
+        "stdout": "test-valuedata_stack: <0> \nsave_stack: <0> \n",
+        "stderr": "",
+        "exit_code": 0
+      }
+    },
+    {
+      "source": "primitive_runtime_results_v0.7.json",
+      "case_index": 0,
+      "record": {
+        "word": "drop",
+        "program": "4 5 drop",
+        "expected": "4",
+        "observed": "4",
+        "status": "pass",
+        "exit_code": 0,
+        "stderr": ""
+      }
+    },
+    {
+      "source": "primitive_runtime_results_v0.7.json",
+      "case_index": 1,
+      "record": {
+        "word": "dup",
+        "program": "4 dup",
+        "expected": "4 4",
+        "observed": "4 4",
+        "status": "pass",
+        "exit_code": 0,
+        "stderr": ""
+      }
+    },
+    {
+      "source": "primitive_runtime_results_v0.7.json",
+      "case_index": 2,
+      "record": {
+        "word": "over",
+        "program": "4 5 over",
+        "expected": "4 5 4",
+        "observed": "4 5 4",
+        "status": "pass",
+        "exit_code": 0,
+        "stderr": ""
+      }
+    },
+    {
+      "source": "primitive_runtime_results_v0.7.json",
+      "case_index": 3,
+      "record": {
+        "word": "swap",
+        "program": "4 5 swap",
+        "expected": "5 4",
+        "observed": "5 4",
+        "status": "pass",
+        "exit_code": 0,
+        "stderr": ""
+      }
+    },
+    {
+      "source": "primitive_runtime_results_v0.7.json",
+      "case_index": 4,
+      "record": {
+        "word": "2drop",
+        "program": "1 2 3 2drop",
+        "expected": "1",
+        "observed": "1",
+        "status": "pass",
+        "exit_code": 0,
+        "stderr": ""
+      }
+    },
+    {
+      "source": "primitive_runtime_results_v0.7.json",
+      "case_index": 5,
+      "record": {
+        "word": "2dup",
+        "program": "1 2 2dup",
+        "expected": "1 2 1 2",
+        "observed": "1 2 1 2",
+        "status": "pass",
+        "exit_code": 0,
+        "stderr": ""
+      }
+    },
+    {
+      "source": "primitive_runtime_results_v0.7.json",
+      "case_index": 6,
+      "record": {
+        "word": "2over",
+        "program": "1 2 3 4 2over",
+        "expected": "1 2 3 4 1 2",
+        "observed": "1 2 3 4 1 2",
+        "status": "pass",
+        "exit_code": 0,
+        "stderr": ""
+      }
+    },
+    {
+      "source": "primitive_runtime_results_v0.7.json",
+      "case_index": 7,
+      "record": {
+        "word": "depth",
+        "program": "1 2 depth",
+        "expected": "1 2 2",
+        "observed": "1 2 2",
+        "status": "pass",
+        "exit_code": 0,
+        "stderr": ""
+      }
+    },
+    {
+      "source": "primitive_runtime_results_v0.7.json",
+      "case_index": 8,
+      "record": {
+        "word": "clear",
+        "program": "1 2 clear",
+        "expected": "",
+        "observed": "",
+        "status": "pass",
+        "exit_code": 0,
+        "stderr": ""
+      }
+    },
+    {
+      "source": "primitive_runtime_results_v0.7.json",
+      "case_index": 9,
+      "record": {
+        "word": "pick",
+        "program": "4 5 6 1 pick",
+        "expected": "4 5 6 5",
+        "observed": "4 5 6 5",
+        "status": "pass",
+        "exit_code": 0,
+        "stderr": ""
+      }
+    },
+    {
+      "source": "primitive_runtime_results_v0.7.json",
+      "case_index": 10,
+      "record": {
+        "word": "svpush",
+        "program": "7 svpush",
+        "expected": "",
+        "observed": "",
+        "status": "pass",
+        "exit_code": 0,
+        "stderr": ""
+      }
+    },
+    {
+      "source": "primitive_runtime_results_v0.7.json",
+      "case_index": 11,
+      "record": {
+        "word": "svpop",
+        "program": "7 svpush svpop",
+        "expected": "7",
+        "observed": "7",
+        "status": "pass",
+        "exit_code": 0,
+        "stderr": ""
+      }
+    },
+    {
+      "source": "primitive_runtime_results_v0.7.json",
+      "case_index": 12,
+      "record": {
+        "word": "svdrop",
+        "program": "7 svpush svdrop",
+        "expected": "",
+        "observed": "",
+        "status": "pass",
+        "exit_code": 0,
+        "stderr": ""
+      }
+    },
+    {
+      "source": "primitive_runtime_results_v0.7.json",
+      "case_index": 13,
+      "record": {
+        "word": "svdepth",
+        "program": "7 svpush svdepth",
+        "expected": "1",
+        "observed": "1",
+        "status": "pass",
+        "exit_code": 0,
+        "stderr": ""
+      }
+    },
+    {
+      "source": "primitive_runtime_results_v0.7.json",
+      "case_index": 14,
+      "record": {
+        "word": "svclear",
+        "program": "7 svpush svclear svdepth",
+        "expected": "0",
+        "observed": "0",
+        "status": "pass",
+        "exit_code": 0,
+        "stderr": ""
+      }
+    },
+    {
+      "source": "primitive_runtime_results_v0.7.json",
+      "case_index": 15,
+      "record": {
+        "word": "true",
+        "program": "true",
+        "expected": "-1",
+        "observed": "-1",
+        "status": "pass",
+        "exit_code": 0,
+        "stderr": ""
+      }
+    },
+    {
+      "source": "primitive_runtime_results_v0.7.json",
+      "case_index": 16,
+      "record": {
+        "word": "false",
+        "program": "false",
+        "expected": "0",
+        "observed": "0",
+        "status": "pass",
+        "exit_code": 0,
+        "stderr": ""
+      }
+    },
+    {
+      "source": "primitive_runtime_results_v0.7.json",
+      "case_index": 17,
+      "record": {
+        "word": "null",
+        "program": "null",
+        "expected": "0",
+        "observed": "0",
+        "status": "pass",
+        "exit_code": 0,
+        "stderr": ""
+      }
+    },
+    {
+      "source": "primitive_runtime_results_v0.7.json",
+      "case_index": 18,
+      "record": {
+        "word": "=",
+        "program": "4 4 =",
+        "expected": "-1",
+        "observed": "-1",
+        "status": "pass",
+        "exit_code": 0,
+        "stderr": ""
+      }
+    },
+    {
+      "source": "primitive_runtime_results_v0.7.json",
+      "case_index": 19,
+      "record": {
+        "word": "<>",
+        "program": "4 5 <>",
+        "expected": "-1",
+        "observed": "-1",
+        "status": "pass",
+        "exit_code": 0,
+        "stderr": ""
+      }
+    },
+    {
+      "source": "primitive_runtime_results_v0.7.json",
+      "case_index": 20,
+      "record": {
+        "word": "<",
+        "program": "4 5 <",
+        "expected": "-1",
+        "observed": "-1",
+        "status": "pass",
+        "exit_code": 0,
+        "stderr": ""
+      }
+    },
+    {
+      "source": "primitive_runtime_results_v0.7.json",
+      "case_index": 21,
+      "record": {
+        "word": ">",
+        "program": "4 5 >",
+        "expected": "0",
+        "observed": "0",
+        "status": "pass",
+        "exit_code": 0,
+        "stderr": ""
+      }
+    },
+    {
+      "source": "primitive_runtime_results_v0.7.json",
+      "case_index": 22,
+      "record": {
+        "word": "<=",
+        "program": "4 4 <=",
+        "expected": "-1",
+        "observed": "-1",
+        "status": "pass",
+        "exit_code": 0,
+        "stderr": ""
+      }
+    },
+    {
+      "source": "primitive_runtime_results_v0.7.json",
+      "case_index": 23,
+      "record": {
+        "word": ">=",
+        "program": "4 5 >=",
+        "expected": "0",
+        "observed": "0",
+        "status": "pass",
+        "exit_code": 0,
+        "stderr": ""
+      }
+    },
+    {
+      "source": "primitive_runtime_results_v0.7.json",
+      "case_index": 24,
+      "record": {
+        "word": "and",
+        "program": "6 3 and",
+        "expected": "2",
+        "observed": "2",
+        "status": "pass",
+        "exit_code": 0,
+        "stderr": ""
+      }
+    },
+    {
+      "source": "primitive_runtime_results_v0.7.json",
+      "case_index": 25,
+      "record": {
+        "word": "or",
+        "program": "6 3 or",
+        "expected": "7",
+        "observed": "7",
+        "status": "pass",
+        "exit_code": 0,
+        "stderr": ""
+      }
+    },
+    {
+      "source": "primitive_runtime_results_v0.7.json",
+      "case_index": 26,
+      "record": {
+        "word": "xor",
+        "program": "6 3 xor",
+        "expected": "5",
+        "observed": "5",
+        "status": "pass",
+        "exit_code": 0,
+        "stderr": ""
+      }
+    },
+    {
+      "source": "primitive_runtime_results_v0.7.json",
+      "case_index": 27,
+      "record": {
+        "word": "not",
+        "program": "1 not",
+        "expected": "-2",
+        "observed": "-2",
+        "status": "pass",
+        "exit_code": 0,
+        "stderr": ""
+      }
+    },
+    {
+      "source": "primitive_runtime_results_v0.7.json",
+      "case_index": 28,
+      "record": {
+        "word": "<<",
+        "program": "3 2 <<",
+        "expected": "12",
+        "observed": "12",
+        "status": "pass",
+        "exit_code": 0,
+        "stderr": ""
+      }
+    },
+    {
+      "source": "primitive_runtime_results_v0.7.json",
+      "case_index": 29,
+      "record": {
+        "word": ">>",
+        "program": "12 2 >>",
+        "expected": "3",
+        "observed": "3",
+        "status": "pass",
+        "exit_code": 0,
+        "stderr": ""
+      }
+    },
+    {
+      "source": "primitive_runtime_results_v0.7.json",
+      "case_index": 30,
+      "record": {
+        "word": "+",
+        "program": "8 3 +",
+        "expected": "11",
+        "observed": "11",
+        "status": "pass",
+        "exit_code": 0,
+        "stderr": ""
+      }
+    },
+    {
+      "source": "primitive_runtime_results_v0.7.json",
+      "case_index": 31,
+      "record": {
+        "word": "-",
+        "program": "8 3 -",
+        "expected": "5",
+        "observed": "5",
+        "status": "pass",
+        "exit_code": 0,
+        "stderr": ""
+      }
+    },
+    {
+      "source": "primitive_runtime_results_v0.7.json",
+      "case_index": 32,
+      "record": {
+        "word": "*",
+        "program": "8 3 *",
+        "expected": "24",
+        "observed": "24",
+        "status": "pass",
+        "exit_code": 0,
+        "stderr": ""
+      }
+    },
+    {
+      "source": "primitive_runtime_results_v0.7.json",
+      "case_index": 33,
+      "record": {
+        "word": "/",
+        "program": "8 2 /",
+        "expected": "4",
+        "observed": "4",
+        "status": "pass",
+        "exit_code": 0,
+        "stderr": ""
+      }
+    },
+    {
+      "source": "primitive_runtime_results_v0.7.json",
+      "case_index": 34,
+      "record": {
+        "word": "%",
+        "program": "8 3 %",
+        "expected": "2",
+        "observed": "2",
+        "status": "pass",
+        "exit_code": 0,
+        "stderr": ""
+      }
+    },
+    {
+      "source": "primitive_runtime_results_v0.7.json",
+      "case_index": 35,
+      "record": {
+        "word": "abs",
+        "program": "-8 abs",
+        "expected": "8",
+        "observed": "8",
+        "status": "pass",
+        "exit_code": 0,
+        "stderr": ""
+      }
+    },
+    {
+      "source": "primitive_runtime_results_v0.7.json",
+      "case_index": 36,
+      "record": {
+        "word": "min",
+        "program": "8 3 min",
+        "expected": "3",
+        "observed": "3",
+        "status": "pass",
+        "exit_code": 0,
+        "stderr": ""
+      }
+    },
+    {
+      "source": "primitive_runtime_results_v0.7.json",
+      "case_index": 37,
+      "record": {
+        "word": "max",
+        "program": "8 3 max",
+        "expected": "8",
+        "observed": "8",
+        "status": "pass",
+        "exit_code": 0,
+        "stderr": ""
+      }
+    },
+    {
+      "source": "primitive_runtime_results_v0.7.json",
+      "case_index": 38,
+      "record": {
+        "word": "round",
+        "program": "2.6 round",
+        "expected": "3",
+        "observed": "3",
+        "status": "pass",
+        "exit_code": 0,
+        "stderr": ""
+      }
+    },
+    {
+      "source": "primitive_runtime_results_v0.7.json",
+      "case_index": 39,
+      "record": {
+        "word": "floor",
+        "program": "2.6 floor",
+        "expected": "2",
+        "observed": "2",
+        "status": "pass",
+        "exit_code": 0,
+        "stderr": ""
+      }
+    },
+    {
+      "source": "primitive_runtime_results_v0.7.json",
+      "case_index": 40,
+      "record": {
+        "word": "ceil",
+        "program": "2.1 ceil",
+        "expected": "3",
+        "observed": "3",
+        "status": "pass",
+        "exit_code": 0,
+        "stderr": ""
+      }
+    },
+    {
+      "source": "primitive_runtime_results_v0.7.json",
+      "case_index": 41,
+      "record": {
+        "word": "sqrt",
+        "program": "9 sqrt",
+        "expected": "3",
+        "observed": "3",
+        "status": "pass",
+        "exit_code": 0,
+        "stderr": ""
+      }
+    },
+    {
+      "source": "primitive_runtime_results_v0.7.json",
+      "case_index": 42,
+      "record": {
+        "word": "pow",
+        "program": "2 3 pow",
+        "expected": "8",
+        "observed": "8",
+        "status": "pass",
+        "exit_code": 0,
+        "stderr": ""
+      }
+    },
+    {
+      "source": "primitive_runtime_results_v0.7.json",
+      "case_index": 43,
+      "record": {
+        "word": "strlen",
+        "program": "\"abcd\" strlen",
+        "expected": "4",
+        "observed": "4",
+        "status": "pass",
+        "exit_code": 0,
+        "stderr": ""
+      }
+    },
+    {
+      "source": "primitive_runtime_results_v0.7.json",
+      "case_index": 44,
+      "record": {
+        "word": "str=",
+        "program": "\"abc\" \"abc\" str=",
+        "expected": "-1",
+        "observed": "-1",
+        "status": "pass",
+        "exit_code": 0,
+        "stderr": ""
+      }
+    },
+    {
+      "source": "primitive_runtime_results_v0.7.json",
+      "case_index": 45,
+      "record": {
+        "word": "str<",
+        "program": "\"abc\" \"abd\" str<",
+        "expected": "-1",
+        "observed": "-1",
+        "status": "pass",
+        "exit_code": 0,
+        "stderr": ""
+      }
+    },
+    {
+      "source": "primitive_runtime_results_v0.7.json",
+      "case_index": 46,
+      "record": {
+        "word": "ord",
+        "program": "\"A\" ord",
+        "expected": "65",
+        "observed": "65",
+        "status": "pass",
+        "exit_code": 0,
+        "stderr": ""
+      }
+    },
+    {
+      "source": "primitive_strings_dynamic_results_v1.0.json",
+      "case_index": 0,
+      "record": {
+        "test": "strlen",
+        "program": "\"hello\" strlen",
+        "expected_stack": "5",
+        "observed_stack": "5",
+        "status": "pass",
+        "exit_code": 0,
+        "stdout": "data_stack: <1> 5 \nsave_stack: <0>",
+        "stderr": ""
+      }
+    },
+    {
+      "source": "primitive_strings_dynamic_results_v1.0.json",
+      "case_index": 1,
+      "record": {
+        "test": "str= equal",
+        "program": "\"abc\" \"abc\" str=",
+        "expected_stack": "-1",
+        "observed_stack": "-1",
+        "status": "pass",
+        "exit_code": 0,
+        "stdout": "data_stack: <1> -1 \nsave_stack: <0>",
+        "stderr": ""
+      }
+    },
+    {
+      "source": "primitive_strings_dynamic_results_v1.0.json",
+      "case_index": 2,
+      "record": {
+        "test": "str= unequal",
+        "program": "\"abc\" \"abd\" str=",
+        "expected_stack": "0",
+        "observed_stack": "0",
+        "status": "pass",
+        "exit_code": 0,
+        "stdout": "data_stack: <1> 0 \nsave_stack: <0>",
+        "stderr": ""
+      }
+    },
+    {
+      "source": "primitive_strings_dynamic_results_v1.0.json",
+      "case_index": 3,
+      "record": {
+        "test": "str<",
+        "program": "\"abc\" \"abd\" str<",
+        "expected_stack": "-1",
+        "observed_stack": "-1",
+        "status": "pass",
+        "exit_code": 0,
+        "stdout": "data_stack: <1> -1 \nsave_stack: <0>",
+        "stderr": ""
+      }
+    },
+    {
+      "source": "primitive_strings_dynamic_results_v1.0.json",
+      "case_index": 4,
+      "record": {
+        "test": "str>",
+        "program": "\"z\" \"a\" str>",
+        "expected_stack": "-1",
+        "observed_stack": "-1",
+        "status": "pass",
+        "exit_code": 0,
+        "stdout": "data_stack: <1> -1 \nsave_stack: <0>",
+        "stderr": ""
+      }
+    },
+    {
+      "source": "primitive_strings_dynamic_results_v1.0.json",
+      "case_index": 5,
+      "record": {
+        "test": "strspn",
+        "program": "\"aaab\" \"a\" strspn",
+        "expected_stack": "3",
+        "observed_stack": "3",
+        "status": "pass",
+        "exit_code": 0,
+        "stdout": "data_stack: <1> 3 \nsave_stack: <0>",
+        "stderr": ""
+      }
+    },
+    {
+      "source": "primitive_strings_dynamic_results_v1.0.json",
+      "case_index": 6,
+      "record": {
+        "test": "strcspn",
+        "program": "\"abc!\" \"!\" strcspn",
+        "expected_stack": "3",
+        "observed_stack": "3",
+        "status": "pass",
+        "exit_code": 0,
+        "stdout": "data_stack: <1> 3 \nsave_stack: <0>",
+        "stderr": ""
+      }
+    },
+    {
+      "source": "primitive_strings_dynamic_results_v1.0.json",
+      "case_index": 7,
+      "record": {
+        "test": "strfind present",
+        "program": "\"abcde\" \"cd\" strfind null <>",
+        "expected_stack": "-1",
+        "observed_stack": "-1",
+        "status": "pass",
+        "exit_code": 0,
+        "stdout": "data_stack: <1> -1 \nsave_stack: <0>",
+        "stderr": ""
+      }
+    },
+    {
+      "source": "primitive_strings_dynamic_results_v1.0.json",
+      "case_index": 8,
+      "record": {
+        "test": "strfind absent",
+        "program": "\"abcde\" \"xy\" strfind null =",
+        "expected_stack": "-1",
+        "observed_stack": "-1",
+        "status": "pass",
+        "exit_code": 0,
+        "stdout": "data_stack: <1> -1 \nsave_stack: <0>",
+        "stderr": ""
+      }
+    },
+    {
+      "source": "primitive_strings_dynamic_results_v1.0.json",
+      "case_index": 9,
+      "record": {
+        "test": "memset zero",
+        "program": "8 mkbuf dup 65 3 memset drop dup strlen swap free",
+        "expected_stack": "3",
+        "observed_stack": "3",
+        "status": "pass",
+        "exit_code": 0,
+        "stdout": "data_stack: <1> 3 \nsave_stack: <0>",
+        "stderr": ""
+      }
+    },
+    {
+      "source": "primitive_strings_dynamic_results_v1.0.json",
+      "case_index": 10,
+      "record": {
+        "test": "mempcpy",
+        "program": "8 mkbuf dup \"abc\" 4 mempcpy swap -",
+        "expected_stack": "4",
+        "observed_stack": "4",
+        "status": "pass",
+        "exit_code": 0,
+        "stdout": "data_stack: <1> 4 \nsave_stack: <0>",
+        "stderr": ""
+      }
+    },
+    {
+      "source": "primitive_strings_dynamic_results_v1.0.json",
+      "case_index": 11,
+      "record": {
+        "test": "tohex",
+        "program": "255 tohex print",
+        "expected_stack": "",
+        "observed_stack": "",
+        "status": "pass",
+        "exit_code": 0,
+        "stdout": "0xffdata_stack: <0> \nsave_stack: <0>",
+        "stderr": ""
+      }
+    },
+    {
+      "source": "primitive_strings_dynamic_results_v1.0.json",
+      "case_index": 12,
+      "record": {
+        "test": "ord",
+        "program": "\"A\" ord",
+        "expected_stack": "65",
+        "observed_stack": "65",
+        "status": "pass",
+        "exit_code": 0,
+        "stdout": "data_stack: <1> 65 \nsave_stack: <0>",
+        "stderr": ""
+      }
+    },
+    {
+      "source": "primitive_strings_dynamic_results_v1.0.json",
+      "case_index": 13,
+      "record": {
+        "test": "tolower",
+        "program": "65 tolower",
+        "expected_stack": "97",
+        "observed_stack": "",
+        "status": "review",
+        "exit_code": 0,
+        "stdout": "data_stack: <0> \nsave_stack: <0>",
+        "stderr": "tolower -- String address out-of-range.\n: No error information"
+      }
+    },
+    {
+      "source": "primitive_strings_dynamic_results_v1.0.json",
+      "case_index": 14,
+      "record": {
+        "test": "toupper",
+        "program": "97 toupper",
+        "expected_stack": "65",
+        "observed_stack": "",
+        "status": "review",
+        "exit_code": 0,
+        "stdout": "data_stack: <0> \nsave_stack: <0>",
+        "stderr": "toupper -- String address out-of-range.\n: No error information"
+      }
+    },
+    {
+      "source": "primitive_strings_dynamic_results_v1.0.json",
+      "case_index": 15,
+      "record": {
+        "test": "isalpha",
+        "program": "65 isalpha",
+        "expected_stack": "-1",
+        "observed_stack": "",
+        "status": "review",
+        "exit_code": 0,
+        "stdout": "data_stack: <0> \nsave_stack: <0>",
+        "stderr": "isalpha -- String address out-of-range.: No error information"
+      }
+    },
+    {
+      "source": "primitive_strings_dynamic_results_v1.0.json",
+      "case_index": 16,
+      "record": {
+        "test": "isdigit",
+        "program": "55 isdigit",
+        "expected_stack": "-1",
+        "observed_stack": "",
+        "status": "review",
+        "exit_code": 0,
+        "stdout": "data_stack: <0> \nsave_stack: <0>",
+        "stderr": "isdigit -- String address out-of-range.: No error information"
+      }
+    },
+    {
+      "source": "primitive_strings_dynamic_results_v1.0.json",
+      "case_index": 17,
+      "record": {
+        "test": "isprint",
+        "program": "32 isprint",
+        "expected_stack": "-1",
+        "observed_stack": "",
+        "status": "review",
+        "exit_code": 0,
+        "stdout": "data_stack: <0> \nsave_stack: <0>",
+        "stderr": "isprint -- String address out-of-range.: No error information"
+      }
+    },
+    {
+      "source": "primitive_strings_dynamic_results_v1.0.json",
+      "case_index": 18,
+      "record": {
+        "test": "strtok first",
+        "program": "var tok_save \"abc.def\" \".\" tok_save strtok print",
+        "expected_stack": "",
+        "observed_stack": "",
+        "status": "pass",
+        "exit_code": 0,
+        "stdout": "abcdata_stack: <0> \nsave_stack: <0>",
+        "stderr": ""
+      }
+    },
+    {
+      "source": "primitive_strings_dynamic_results_v1.0.json",
+      "case_index": 19,
+      "record": {
+        "test": "exec simple",
+        "program": "\"3 4 +\" exec",
+        "expected_stack": "7",
+        "observed_stack": "",
+        "status": "review",
+        "exit_code": 0,
+        "stdout": "exec -- word not found: 3 4 +\nIf you call 'exec' repeatedly without using a string constant, it will result in the string memory getting into a bad state.\nHINT: try using a constant like: \n      \"foo\" const :foo \n and then calling 'exec' with the constant on the stack.\ndata_stack: <0> \nsave_stack: <0>",
+        "stderr": ""
+      }
+    },
+    {
+      "source": "primitive_unbuffered_socket_results_v1.2.json",
+      "case_index": 0,
+      "record": {
+        "test": "open missing file",
+        "program": "\"/tmp/dclang_ai_missing_zzzz\" 0 open",
+        "expected": "-1",
+        "observed": "1.844674407370955162e+19",
+        "status": "review",
+        "returncode": 0,
+        "stdout": "data_stack: <1> 1.844674407370955162e+19 \nsave_stack: <0> \n",
+        "stderr": ""
+      }
+    },
+    {
+      "source": "primitive_unbuffered_socket_results_v1.2.json",
+      "case_index": 1,
+      "record": {
+        "test": "open close devnull",
+        "program": "\"/dev/null\" 0 open close",
+        "expected": "0",
+        "observed": "0",
+        "status": "pass",
+        "returncode": 0,
+        "stdout": "data_stack: <1> 0 \nsave_stack: <0> \n",
+        "stderr": ""
+      }
+    },
+    {
+      "source": "primitive_unbuffered_socket_results_v1.2.json",
+      "case_index": 2,
+      "record": {
+        "test": "read zero bytes",
+        "program": "\"/dev/null\" 0 open 8 mkbuf 0 read",
+        "expected": "0",
+        "observed": "0",
+        "status": "pass",
+        "returncode": 0,
+        "stdout": "data_stack: <1> 0 \nsave_stack: <0> \n",
+        "stderr": ""
+      }
+    },
+    {
+      "source": "primitive_unbuffered_socket_results_v1.2.json",
+      "case_index": 3,
+      "record": {
+        "test": "write zero bytes",
+        "program": "\"/dev/null\" 1 open \"abc\" 0 write",
+        "expected": "0",
+        "observed": "0",
+        "status": "pass",
+        "returncode": 0,
+        "stdout": "data_stack: <1> 0 \nsave_stack: <0> \n",
+        "stderr": ""
+      }
+    },
+    {
+      "source": "primitive_unbuffered_socket_results_v1.2.json",
+      "case_index": 4,
+      "record": {
+        "test": "sleep zero",
+        "program": "0 sleep 42",
+        "expected": "42",
+        "observed": "42",
+        "status": "pass",
+        "returncode": 0,
+        "stdout": "data_stack: <1> 42 \nsave_stack: <0> \n",
+        "stderr": ""
+      }
+    },
+    {
+      "source": "primitive_unbuffered_socket_results_v1.2.json",
+      "case_index": 5,
+      "record": {
+        "test": "dt to epoch",
+        "program": "\"1970-01-01 00:00:00\" \"%Y-%m-%d %H:%M:%S\" dt->epoch 0 >=",
+        "expected": "-1",
+        "observed": "-1",
+        "status": "pass",
+        "returncode": 0,
+        "stdout": "data_stack: <1> -1 \nsave_stack: <0> \n",
+        "stderr": ""
+      }
+    },
+    {
+      "source": "primitive_unbuffered_socket_results_v1.2.json",
+      "case_index": 6,
+      "record": {
+        "test": "udpsocket close",
+        "program": "udpsocket udpclose",
+        "expected": "0",
+        "observed": "0",
+        "status": "pass",
+        "returncode": 0,
+        "stdout": "data_stack: <1> 0 \nsave_stack: <0> \n",
+        "stderr": ""
+      }
+    },
+    {
+      "source": "primitive_unbuffered_socket_results_v1.2.json",
+      "case_index": 7,
+      "record": {
+        "test": "udpsocket invalid bind",
+        "program": "udpsocket -1 udpbind",
+        "expected": "-1",
+        "observed": "-1",
+        "status": "pass",
+        "returncode": 0,
+        "stdout": "udpbind -- invalid socket or port\ndata_stack: <1> -1 \nsave_stack: <0> \n",
+        "stderr": ""
+      }
+    },
+    {
+      "source": "primitive_unbuffered_socket_results_v1.2.json",
+      "case_index": 8,
+      "record": {
+        "test": "udpsocket invalid connect",
+        "program": "udpsocket \"127.0.0.1\" -1 udpconnect",
+        "expected": "-1",
+        "observed": "-1",
+        "status": "pass",
+        "returncode": 0,
+        "stdout": "udpconnect -- invalid port\ndata_stack: <1> -1 \nsave_stack: <0> \n",
+        "stderr": ""
+      }
+    }
+  ],
+  "source_audits": {
+    "primitive_consolidation_v1.3.json": {
+      "total": 213,
+      "signatures": 90,
+      "unresolved": 123,
+      "newly_backfilled": 50,
+      "conflicts": [
+        {
+          "name": "exec",
+          "existing": null,
+          "proposals": [
+            {
+              "effect": "( ... word-name-string -- ... )",
+              "source": "FILE_TIME_DYNAMIC_PRIMITIVES.md"
+            },
+            {
+              "effect": "( word-name-string -- ... )",
+              "source": "STRING_DYNAMIC_PRIMITIVES.md"
+            }
+          ]
+        }
+      ],
+      "backfilled_words": [
+        "var",
+        "!",
+        "@",
+        "allot",
+        "create",
+        ",",
+        "here",
+        "const",
+        "mkbuf",
+        "free",
+        "mark",
+        "rewind",
+        "memused",
+        "envset",
+        "envget",
+        "lmake",
+        "lpush",
+        "lpop",
+        "l!",
+        "l@",
+        "lins",
+        "lrem",
+        "lsize",
+        "ldel",
+        "h!",
+        "h@",
+        "hkeys",
+        "tmake",
+        "t!",
+        "t@",
+        "tdel",
+        "tdestroy",
+        "clock",
+        "epoch",
+        "epoch->dt",
+        "fopen",
+        "fmemopen",
+        "fclose",
+        "fread",
+        "fseek",
+        "ftell",
+        "fwrite",
+        "fflush",
+        "strfind",
+        "strspn",
+        "strcspn",
+        "strtok",
+        "mempcpy",
+        "memset",
+        "input"
+      ],
+      "scope": "Documentation-only consolidation, no new runtime tests"
+    },
+    "primitive_consolidation_v1.4.json": {
+      "total": 213,
+      "source_reviewed_signatures": 166,
+      "remaining": 47,
+      "new_signatures": [
+        "null",
+        "false",
+        "true",
+        "e",
+        "pi",
+        "rand",
+        "cr",
+        ".s",
+        "svdepth",
+        "primitives",
+        "words",
+        "constants",
+        "variables",
+        "svclear",
+        "block_sigint",
+        "unblock_sigint",
+        "sqrt",
+        "exp",
+        "log",
+        "log2",
+        "log10",
+        "sin",
+        "cos",
+        "tan",
+        "asin",
+        "acos",
+        "atan",
+        "sinh",
+        "cosh",
+        "tanh",
+        "strlen",
+        "tolower",
+        "toupper",
+        "tohex",
+        "tostr",
+        "tonum",
+        "ord",
+        "isalnum",
+        "isalpha",
+        "iscntrl",
+        "isdigit",
+        "isgraph",
+        "islower",
+        "isprint",
+        "ispunct",
+        "isspace",
+        "isupper",
+        "isxdigit",
+        "pow",
+        "atan2",
+        "=",
+        "<>",
+        "<",
+        ">",
+        "<=",
+        ">=",
+        "and",
+        "or",
+        "xor",
+        "str=",
+        "str<",
+        "str>",
+        "not",
+        "svdrop",
+        "svpick",
+        ".",
+        "..",
+        ".rj",
+        ".pz",
+        "print",
+        "emit",
+        "uemit",
+        "assert",
+        "_stereo_out32",
+        "_stereo_in32",
+        "exec"
+      ],
+      "unresolved_by_category": {
+        "Array Sorting": [
+          "sortnums",
+          "sortstrs"
+        ],
+        "Branching": [
+          "times",
+          "again",
+          "exittimes",
+          "for",
+          "next",
+          "exitfor",
+          "i",
+          "j",
+          "k",
+          "if",
+          "else",
+          "endif",
+          "return"
+        ],
+        "Files": [
+          "import",
+          "freadline",
+          "freadall",
+          "redirect",
+          "seterr",
+          "setout",
+          "flush"
+        ],
+        "Lists": [
+          "_lnext"
+        ],
+        "MIDI": [
+          "_pm_list",
+          "_pm_open_out",
+          "_pm_ws",
+          "_pm_wsr",
+          "_pm_open_in",
+          "_pm_read",
+          "_pm_close",
+          "_pm_terminate"
+        ],
+        "OSC": [
+          "_osc_put_str",
+          "_osc_put_i32",
+          "_osc_put_f32"
+        ],
+        "Operating System": [
+          "fork",
+          "exit"
+        ],
+        "Regex": [
+          "_regcomp",
+          "_regexec",
+          "_regread"
+        ],
+        "SQLite": [
+          "_sqlite_open",
+          "_sqlite_prepare",
+          "_sqlite_step",
+          "_sqlite_column",
+          "_sqlite_finalize",
+          "_sqlite_exec",
+          "_sqlite_close"
+        ],
+        "Trees": [
+          "twalk"
+        ]
+      },
+      "scope": "Source documentation pass only; no new runtime tests",
+      "opcode_label_not_found": []
+    },
+    "primitive_source_audit_v1.5.json": {
+      "signatures_added": {
+        "sortnums": "( array-start-index count -- )",
+        "sortstrs": "( array-start-index count -- )",
+        "twalk": "( tree-index -- )",
+        "_lnext": "( node-pointer -- next-node-pointer )",
+        "import": "( filename-string -- )",
+        "freadline": "( file-pointer -- line-pointer byte-count )",
+        "freadall": "( file-pointer -- buffer-pointer byte-count )",
+        "redirect": "( file-pointer -- )",
+        "seterr": "( -- )",
+        "setout": "( -- )",
+        "flush": "( -- )",
+        "fork": "( -- process-id )",
+        "exit": "( exit-code -- [process terminates] )"
+      },
+      "notes": {
+        "sortnums": "In-place qsort of vars[] numeric slots; caller must ensure valid array range.",
+        "sortstrs": "In-place qsort of vars[] string pointers; source underflow check prints but does not return (potential safety concern).",
+        "twalk": "Prints tree nodes via twalk callback; consumes root index.",
+        "_lnext": "Private; returns next linked-list node pointer or null.",
+        "import": "Imports a named file; library search path applies.",
+        "freadline": "getline-managed line buffer; pointer lifetime and EOF behavior need further testing.",
+        "freadall": "Allocates via custom allocator; returns buffer and byte length.",
+        "redirect": "Changes interpreter output FILE*; preserve valid stream lifetime.",
+        "seterr": "Redirects interpreter output to stderr.",
+        "setout": "Redirects interpreter output to stdout.",
+        "flush": "Flushes current interpreter output stream.",
+        "fork": "Creates child process; do not exercise in routine test harness.",
+        "exit": "Terminates interpreter process; use subprocess-only testing."
+      },
+      "runtime_probes": [
+        {
+          "name": "sortnums ascending",
+          "source": "create nums 9 , 2 , 5 , nums 3 sortnums nums @ nums 1 + @ nums 2 + @ .s",
+          "expected": "2 5 9",
+          "returncode": 0,
+          "stdout": "",
+          "stderr": "",
+          "status": "observed"
+        },
+        {
+          "name": "sortstrs ascending",
+          "source": "create names \"z\" , \"a\" , \"m\" , names 3 sortstrs names @ print cr names 1 + @ print cr names 2 + @ print",
+          "expected": "a\nm\nz",
+          "returncode": 0,
+          "stdout": "a\nm\n",
+          "stderr": "",
+          "status": "observed"
+        },
+        {
+          "name": "freadall /dev/null",
+          "source": "\"/dev/null\" \"r\" fopen freadall .s",
+          "expected": "",
+          "returncode": 0,
+          "stdout": "",
+          "stderr": "",
+          "status": "observed"
+        },
+        {
+          "name": "freadline /dev/null",
+          "source": "\"/dev/null\" \"r\" fopen freadline .s",
+          "expected": "",
+          "returncode": 0,
+          "stdout": "",
+          "stderr": "",
+          "status": "observed"
+        }
+      ]
+    },
+    "primitive_source_audit_v1.6.json": {
+      "source": "/mnt/data/libdclang_v12.c (source copy of libdclang.c)",
+      "added_count": 34,
+      "signatures": {
+        "times": "( count -- )",
+        "again": "( -- )",
+        "exittimes": "( -- )",
+        "for": "( limit start step -- )",
+        "next": "( -- )",
+        "exitfor": "( -- )",
+        "i": "( -- current-loop-index )",
+        "j": "( -- enclosing-loop-index )",
+        "k": "( -- outer-loop-index )",
+        "if": "( flag -- )",
+        "else": "( -- )",
+        "endif": "( -- )",
+        "return": "( -- )",
+        "_regcomp": "( pattern regex-flags -- regex-pointer | -1 )",
+        "_regexec": "( regex-pointer input-string exec-flags -- matches-pointer | -1 )",
+        "_regread": "( matches-pointer match-index -- start end )",
+        "_sqlite_open": "( database-path -- database-pointer [on success] )",
+        "_sqlite_prepare": "( database-pointer sql-string -- statement-pointer [on success] )",
+        "_sqlite_step": "( statement-pointer -- sqlite-result-code [on success] )",
+        "_sqlite_column": "( statement-pointer column-index -- text-pointer [on success] )",
+        "_sqlite_finalize": "( statement-pointer -- )",
+        "_sqlite_exec": "( database-pointer sql-string -- )",
+        "_sqlite_close": "( database-pointer -- )",
+        "_pm_list": "( -- )",
+        "_pm_open_out": "( device-id -- )",
+        "_pm_ws": "( status data1 data2 -- )",
+        "_pm_wsr": "( data2 data1 status -- )",
+        "_pm_open_in": "( device-id -- )",
+        "_pm_read": "( -- data2 data1 status-or-result )",
+        "_pm_close": "( -- )",
+        "_pm_terminate": "( -- )",
+        "_osc_put_str": "( buffer offset string -- new-offset | -1 )",
+        "_osc_put_i32": "( buffer offset integer -- new-offset | -1 )",
+        "_osc_put_f32": "( buffer offset float -- new-offset | -1 )"
+      },
+      "notes": {
+        "times": "Runtime loop setup. Known behavior: zero/negative count still executes body once; compiled-word context required.",
+        "again": "Runtime loop back-edge; requires active times loop.",
+        "exittimes": "Exit active times loop; does not restore arbitrary stack state.",
+        "for": "Runtime loop setup: pops step, start, limit; zero step can produce nonterminating loop.",
+        "next": "Runtime for-loop back-edge.",
+        "exitfor": "Exit active for-loop.",
+        "i": "Topmost loop counter; requires active loop.",
+        "j": "Second most recent loop counter; requires at least two active loops.",
+        "k": "Third most recent loop counter; requires at least three active loops.",
+        "if": "COMPILE-TIME conditional syntax: rewrites instruction into OP_JUMPZ; the flag is consumed at runtime by generated jump, not by OP_IF itself.",
+        "else": "COMPILE-TIME syntax: patches previous conditional jump; not a runtime data-stack operation.",
+        "endif": "COMPILE-TIME syntax: patches pending jump; not a runtime data-stack operation.",
+        "return": "Runtime return from compiled word; restores instruction pointer and local-variable base.",
+        "_regcomp": "Allocates compiled regex with custom allocator; compilation failure pushes -1; regex flags follow POSIX regcomp.",
+        "_regexec": "Allocates 10 match slots on each call; returns -1 on no match; allocation lifecycle needs review.",
+        "_regread": "Returns rm_so and rm_eo; match-index bounds are not checked in opcode.",
+        "_sqlite_open": "On sqlite3_open failure prints diagnostic and returns without pushing a result.",
+        "_sqlite_prepare": "On prepare failure prints diagnostic and returns without pushing a result.",
+        "_sqlite_step": "Pushes SQLITE_ROW or SQLITE_DONE on success; error branch returns without pushing.",
+        "_sqlite_column": "Returns sqlite3_column_text pointer; assumes non-NULL text and calls strlen, unsafe for SQL NULL; pointer owned by SQLite.",
+        "_sqlite_finalize": "Consumes statement; error branch calls sqlite3_db_handle on finalized statement, potentially unsafe.",
+        "_sqlite_exec": "Executes SQL with callback; prints errors but does not push status.",
+        "_sqlite_close": "Consumes database pointer; prints errors but does not push status.",
+        "_pm_list": "Prints PortMidi devices to stderr; no stack effect.",
+        "_pm_open_out": "Opens selected MIDI output; return status not checked.",
+        "_pm_ws": "Writes short MIDI message with PortMidi timestamp; status,data1,data2 pop order.",
+        "_pm_wsr": "Writes short MIDI message timestamp 0; NOTE reverse argument order vs _pm_ws.",
+        "_pm_open_in": "Opens MIDI input; sets active/sysex filter; errors printed to stderr.",
+        "_pm_read": "If event available returns data2,data1,status; otherwise returns -1,-1,event_status (0 or negative).",
+        "_pm_close": "Closes open MIDI streams; prints confirmation.",
+        "_pm_terminate": "Terminates PortMidi process; prints confirmation.",
+        "_osc_put_str": "Writes NUL-terminated OSC string padded to 4 bytes; updates offset. No destination-capacity check.",
+        "_osc_put_i32": "Writes network-byte-order 32-bit integer; no destination-capacity check.",
+        "_osc_put_f32": "Casts to 32-bit float and writes network-byte-order bits; no destination-capacity check."
+      },
+      "new_runtime_tests": 0,
+      "caveat": "Source-reviewed only; signatures for compile-time instructions reflect effective runtime behavior."
+    }
+  },
+  "summaries": {
+    "verification_summary_v0.5.json": {
+      "additional_tests": 16,
+      "matched_hypothesis": 13,
+      "mismatched_hypothesis": 3,
+      "note": "Hypothesis mismatches do not automatically imply implementation defects."
+    },
+    "verification_summary_v0.6.json": {
+      "version": "0.6",
+      "new_cases": 24,
+      "matched_initial_hypotheses": 17,
+      "hypothesis_mismatches": 5,
+      "unasserted_observations": 2,
+      "runtime": "uploaded dclang x86_64 musl binary",
+      "note": "Hypothesis mismatches involving true=1 are corrected documentation expectations, not interpreter failures."
+    }
+  }
+}

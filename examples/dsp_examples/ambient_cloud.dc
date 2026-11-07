@@ -6,7 +6,7 @@
 0.5     const :REV_VOL
 0.89    const :REV_CF
 0.987   const :REV_FB
-0.43    const :CHANCE
+0.19    const :CHANCE
 0.92    const :LEAD_RES
 0.25    const :SAW_MIX
 0.1 tau_to_alpha
@@ -42,10 +42,13 @@ create pitches
   3  1 / ,
  27  8 / ,
  32  9 / ,
+  4  1 / ,
 var dummy2
 dummy2 pitches -  const :NPITCHES
 
 create commas
+  81  80 / ,
+ 100  99 / ,
  121 120 / ,
  144 143 / ,
  169 168 / ,
@@ -134,7 +137,7 @@ make_dcblock       my_dcblockR
   dup rand_comma *                 cvs :freq2 + !
   rand_pan_for_freq                cvs :pan + !
   rand_fb                          cvs :fb + !
-  rand 0.15 * 0.05 +
+  rand 0.25 * 0.05 +
     rand :CHANCE < abs
   *                                cvs :vol + !
   rand 2 * 0.01 +                  cvs :lfo_freq + !

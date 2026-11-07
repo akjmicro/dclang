@@ -1,0 +1,3451 @@
+{
+  "schema_version": 1,
+  "source": "user-provided dclang.tgz, lib/*.dc",
+  "runtime_validation": "partial_16_examples_passed",
+  "modules": [
+    {
+      "module": "clock_sleep.dc",
+      "imports": [],
+      "words": [
+        {
+          "name": "_tight_watch",
+          "line": 9,
+          "visibility": "internal_by_convention",
+          "locals": [
+            "clock_target"
+          ],
+          "stack_effect": null,
+          "stack_effect_status": "unverified",
+          "source_stack_comment": null
+        },
+        {
+          "name": "sleep_until",
+          "line": 21,
+          "visibility": "public_or_unspecified",
+          "locals": [
+            "clock_target"
+          ],
+          "stack_effect": null,
+          "stack_effect_status": "unverified",
+          "source_stack_comment": null
+        }
+      ],
+      "word_count": 2
+    },
+    {
+      "module": "csvlib.dc",
+      "imports": [],
+      "words": [
+        {
+          "name": "csv_open_input_file",
+          "line": 21,
+          "visibility": "public_or_unspecified",
+          "locals": [],
+          "stack_effect": null,
+          "stack_effect_status": "unverified",
+          "source_stack_comment": null
+        },
+        {
+          "name": "_csv_init_col_buf",
+          "line": 28,
+          "visibility": "internal_by_convention",
+          "locals": [],
+          "stack_effect": null,
+          "stack_effect_status": "unverified",
+          "source_stack_comment": null
+        },
+        {
+          "name": "csv_next_input_line",
+          "line": 41,
+          "visibility": "public_or_unspecified",
+          "locals": [],
+          "stack_effect": null,
+          "stack_effect_status": "unverified",
+          "source_stack_comment": null
+        },
+        {
+          "name": "csv_column_loop",
+          "line": 56,
+          "visibility": "public_or_unspecified",
+          "locals": [],
+          "stack_effect": null,
+          "stack_effect_status": "unverified",
+          "source_stack_comment": null
+        },
+        {
+          "name": "csv_find_col_x",
+          "line": 84,
+          "visibility": "public_or_unspecified",
+          "locals": [],
+          "stack_effect": null,
+          "stack_effect_status": "unverified",
+          "source_stack_comment": null
+        },
+        {
+          "name": "csv_cleanup",
+          "line": 90,
+          "visibility": "public_or_unspecified",
+          "locals": [],
+          "stack_effect": null,
+          "stack_effect_status": "unverified",
+          "source_stack_comment": null
+        }
+      ],
+      "word_count": 6
+    },
+    {
+      "module": "deprecated_stack.dc",
+      "imports": [],
+      "words": [
+        {
+          "name": "nip",
+          "line": 16,
+          "visibility": "public_or_unspecified",
+          "locals": [],
+          "stack_effect": "( a b -- b )",
+          "stack_effect_status": "source_reviewed_and_runtime_sampled_v1.7",
+          "source_stack_comment": null
+        },
+        {
+          "name": "tuck",
+          "line": 18,
+          "visibility": "public_or_unspecified",
+          "locals": [],
+          "stack_effect": "( a b -- b a b )",
+          "stack_effect_status": "source_reviewed_and_runtime_sampled_v1.7",
+          "source_stack_comment": null
+        },
+        {
+          "name": "rot",
+          "line": 21,
+          "visibility": "public_or_unspecified",
+          "locals": [],
+          "stack_effect": "( a b c -- b c a )",
+          "stack_effect_status": "source_reviewed_and_runtime_sampled_v1.7",
+          "source_stack_comment": null
+        },
+        {
+          "name": "-rot",
+          "line": 27,
+          "visibility": "public_or_unspecified",
+          "locals": [],
+          "stack_effect": "( a b c -- c a b )",
+          "stack_effect_status": "source_reviewed_and_runtime_sampled_v1.7",
+          "source_stack_comment": null
+        },
+        {
+          "name": "2swap",
+          "line": 34,
+          "visibility": "public_or_unspecified",
+          "locals": [],
+          "stack_effect": "( a b c d -- c d a b )",
+          "stack_effect_status": "source_reviewed_and_runtime_sampled_v1.7",
+          "source_stack_comment": null
+        },
+        {
+          "name": "2rot",
+          "line": 40,
+          "visibility": "public_or_unspecified",
+          "locals": [],
+          "stack_effect": "( a b c d e f -- c d e f a b )",
+          "stack_effect_status": "source_reviewed_and_runtime_sampled_v1.7",
+          "source_stack_comment": null
+        },
+        {
+          "name": "-2rot",
+          "line": 46,
+          "visibility": "public_or_unspecified",
+          "locals": [],
+          "stack_effect": "( a b c d e f -- e f a b c d )",
+          "stack_effect_status": "source_reviewed_and_runtime_sampled_v1.7",
+          "source_stack_comment": null
+        }
+      ],
+      "word_count": 7
+    },
+    {
+      "module": "dsp.dc",
+      "imports": [],
+      "words": [
+        {
+          "name": "seconds2samples",
+          "line": 38,
+          "visibility": "public_or_unspecified",
+          "locals": [],
+          "stack_effect": null,
+          "stack_effect_status": "unverified",
+          "source_stack_comment": null
+        },
+        {
+          "name": "t",
+          "line": 44,
+          "visibility": "public_or_unspecified",
+          "locals": [],
+          "stack_effect": null,
+          "stack_effect_status": "unverified",
+          "source_stack_comment": null
+        },
+        {
+          "name": "lcget",
+          "line": 45,
+          "visibility": "public_or_unspecified",
+          "locals": [],
+          "stack_effect": null,
+          "stack_effect_status": "unverified",
+          "source_stack_comment": null
+        },
+        {
+          "name": "lcset",
+          "line": 46,
+          "visibility": "public_or_unspecified",
+          "locals": [],
+          "stack_effect": null,
+          "stack_effect_status": "unverified",
+          "source_stack_comment": null
+        },
+        {
+          "name": "rcget",
+          "line": 47,
+          "visibility": "public_or_unspecified",
+          "locals": [],
+          "stack_effect": null,
+          "stack_effect_status": "unverified",
+          "source_stack_comment": null
+        },
+        {
+          "name": "rcset",
+          "line": 48,
+          "visibility": "public_or_unspecified",
+          "locals": [],
+          "stack_effect": null,
+          "stack_effect_status": "unverified",
+          "source_stack_comment": null
+        },
+        {
+          "name": "_clear_channels",
+          "line": 49,
+          "visibility": "internal_by_convention",
+          "locals": [],
+          "stack_effect": null,
+          "stack_effect_status": "unverified",
+          "source_stack_comment": null
+        },
+        {
+          "name": "stereo_in",
+          "line": 55,
+          "visibility": "public_or_unspecified",
+          "locals": [],
+          "stack_effect": null,
+          "stack_effect_status": "unverified",
+          "source_stack_comment": null
+        },
+        {
+          "name": "_reset_phasor_count",
+          "line": 67,
+          "visibility": "internal_by_convention",
+          "locals": [],
+          "stack_effect": null,
+          "stack_effect_status": "unverified",
+          "source_stack_comment": null
+        },
+        {
+          "name": "phasor_pointer",
+          "line": 69,
+          "visibility": "public_or_unspecified",
+          "locals": [],
+          "stack_effect": null,
+          "stack_effect_status": "unverified",
+          "source_stack_comment": null
+        },
+        {
+          "name": "phasor",
+          "line": 71,
+          "visibility": "public_or_unspecified",
+          "locals": [
+            "freq"
+          ],
+          "stack_effect": null,
+          "stack_effect_status": "unverified",
+          "source_stack_comment": null
+        },
+        {
+          "name": "sawtooth",
+          "line": 99,
+          "visibility": "public_or_unspecified",
+          "locals": [],
+          "stack_effect": null,
+          "stack_effect_status": "unverified",
+          "source_stack_comment": "freq -- sig"
+        },
+        {
+          "name": "metro",
+          "line": 107,
+          "visibility": "public_or_unspecified",
+          "locals": [],
+          "stack_effect": null,
+          "stack_effect_status": "unverified",
+          "source_stack_comment": null
+        },
+        {
+          "name": "gate",
+          "line": 111,
+          "visibility": "public_or_unspecified",
+          "locals": [],
+          "stack_effect": null,
+          "stack_effect_status": "unverified",
+          "source_stack_comment": null
+        },
+        {
+          "name": "pulse",
+          "line": 115,
+          "visibility": "public_or_unspecified",
+          "locals": [],
+          "stack_effect": null,
+          "stack_effect_status": "unverified",
+          "source_stack_comment": null
+        },
+        {
+          "name": "pulse_tanh",
+          "line": 117,
+          "visibility": "public_or_unspecified",
+          "locals": [],
+          "stack_effect": null,
+          "stack_effect_status": "unverified",
+          "source_stack_comment": null
+        },
+        {
+          "name": "tri",
+          "line": 122,
+          "visibility": "public_or_unspecified",
+          "locals": [],
+          "stack_effect": null,
+          "stack_effect_status": "unverified",
+          "source_stack_comment": "freq -- tri_sig"
+        },
+        {
+          "name": "sine",
+          "line": 129,
+          "visibility": "public_or_unspecified",
+          "locals": [],
+          "stack_effect": null,
+          "stack_effect_status": "unverified",
+          "source_stack_comment": null
+        },
+        {
+          "name": "sine_phase",
+          "line": 132,
+          "visibility": "public_or_unspecified",
+          "locals": [
+            "freq",
+            "phase"
+          ],
+          "stack_effect": null,
+          "stack_effect_status": "unverified",
+          "source_stack_comment": null
+        },
+        {
+          "name": "fm",
+          "line": 141,
+          "visibility": "public_or_unspecified",
+          "locals": [
+            "carrier_freq",
+            "mod_ratio",
+            "index"
+          ],
+          "stack_effect": null,
+          "stack_effect_status": "unverified",
+          "source_stack_comment": null
+        },
+        {
+          "name": "sineloop",
+          "line": 153,
+          "visibility": "public_or_unspecified",
+          "locals": [
+            "mem",
+            "freq",
+            "fb"
+          ],
+          "stack_effect": null,
+          "stack_effect_status": "unverified",
+          "source_stack_comment": null
+        },
+        {
+          "name": "noise",
+          "line": 169,
+          "visibility": "public_or_unspecified",
+          "locals": [],
+          "stack_effect": null,
+          "stack_effect_status": "unverified",
+          "source_stack_comment": "-- sig"
+        },
+        {
+          "name": "randint",
+          "line": 177,
+          "visibility": "public_or_unspecified",
+          "locals": [
+            "range"
+          ],
+          "stack_effect": null,
+          "stack_effect_status": "unverified",
+          "source_stack_comment": "range -- int"
+        },
+        {
+          "name": "randtrig",
+          "line": 184,
+          "visibility": "public_or_unspecified",
+          "locals": [
+            "compare_val",
+            "hold_var"
+          ],
+          "stack_effect": null,
+          "stack_effect_status": "unverified",
+          "source_stack_comment": null
+        },
+        {
+          "name": "make_delay_line",
+          "line": 204,
+          "visibility": "public_or_unspecified",
+          "locals": [
+            "seconds"
+          ],
+          "stack_effect": null,
+          "stack_effect_status": "unverified",
+          "source_stack_comment": null
+        },
+        {
+          "name": "%abs",
+          "line": 218,
+          "visibility": "public_or_unspecified",
+          "locals": [
+            "n",
+            "d"
+          ],
+          "stack_effect": null,
+          "stack_effect_status": "unverified",
+          "source_stack_comment": null
+        },
+        {
+          "name": "_set_delay_value",
+          "line": 220,
+          "visibility": "internal_by_convention",
+          "locals": [],
+          "stack_effect": null,
+          "stack_effect_status": "unverified",
+          "source_stack_comment": null
+        },
+        {
+          "name": "_get_floor_val",
+          "line": 227,
+          "visibility": "internal_by_convention",
+          "locals": [],
+          "stack_effect": null,
+          "stack_effect_status": "unverified",
+          "source_stack_comment": null
+        },
+        {
+          "name": "_get_ceil_val",
+          "line": 237,
+          "visibility": "internal_by_convention",
+          "locals": [],
+          "stack_effect": null,
+          "stack_effect_status": "unverified",
+          "source_stack_comment": null
+        },
+        {
+          "name": "_interpolate",
+          "line": 247,
+          "visibility": "internal_by_convention",
+          "locals": [
+            "real_val",
+            "floor_val",
+            "ceil_val"
+          ],
+          "stack_effect": null,
+          "stack_effect_status": "unverified",
+          "source_stack_comment": null
+        },
+        {
+          "name": "delay_read",
+          "line": 255,
+          "visibility": "public_or_unspecified",
+          "locals": [
+            "delay_struct",
+            "time"
+          ],
+          "stack_effect": null,
+          "stack_effect_status": "unverified",
+          "source_stack_comment": "delay_struct time -- delsig"
+        },
+        {
+          "name": "delay_write",
+          "line": 269,
+          "visibility": "public_or_unspecified",
+          "locals": [
+            "sig",
+            "delay_struct"
+          ],
+          "stack_effect": null,
+          "stack_effect_status": "unverified",
+          "source_stack_comment": "sig delay_struct --"
+        },
+        {
+          "name": "tau_to_alpha",
+          "line": 286,
+          "visibility": "public_or_unspecified",
+          "locals": [
+            "tau"
+          ],
+          "stack_effect": null,
+          "stack_effect_status": "unverified",
+          "source_stack_comment": null
+        },
+        {
+          "name": "port",
+          "line": 290,
+          "visibility": "public_or_unspecified",
+          "locals": [
+            "sig",
+            "mem",
+            "rise_alpha",
+            "fall_alpha"
+          ],
+          "stack_effect": null,
+          "stack_effect_status": "unverified",
+          "source_stack_comment": null
+        },
+        {
+          "name": "lowpass",
+          "line": 303,
+          "visibility": "public_or_unspecified",
+          "locals": [
+            "sig",
+            "memvar",
+            "pole"
+          ],
+          "stack_effect": null,
+          "stack_effect_status": "unverified",
+          "source_stack_comment": "sig memvar pole -- newsig"
+        },
+        {
+          "name": "make_dcblock",
+          "line": 315,
+          "visibility": "public_or_unspecified",
+          "locals": [],
+          "stack_effect": null,
+          "stack_effect_status": "unverified",
+          "source_stack_comment": null
+        },
+        {
+          "name": "dcblock",
+          "line": 317,
+          "visibility": "public_or_unspecified",
+          "locals": [
+            "sig",
+            "dc_struct"
+          ],
+          "stack_effect": null,
+          "stack_effect_status": "unverified",
+          "source_stack_comment": null
+        },
+        {
+          "name": "make_allpass",
+          "line": 341,
+          "visibility": "public_or_unspecified",
+          "locals": [],
+          "stack_effect": null,
+          "stack_effect_status": "unverified",
+          "source_stack_comment": null
+        },
+        {
+          "name": "allpass",
+          "line": 354,
+          "visibility": "public_or_unspecified",
+          "locals": [
+            "sig",
+            "ap_struct",
+            "dltm",
+            "coef"
+          ],
+          "stack_effect": null,
+          "stack_effect_status": "unverified",
+          "source_stack_comment": "sig ap_struct dltm coef -- sig_out"
+        },
+        {
+          "name": "_set_bq_type",
+          "line": 405,
+          "visibility": "internal_by_convention",
+          "locals": [
+            "struct",
+            "type"
+          ],
+          "stack_effect": null,
+          "stack_effect_status": "unverified",
+          "source_stack_comment": "struct type --"
+        },
+        {
+          "name": "_set_cf_res_reinit",
+          "line": 426,
+          "visibility": "internal_by_convention",
+          "locals": [
+            "struct",
+            "reinit",
+            "cutoff",
+            "res"
+          ],
+          "stack_effect": null,
+          "stack_effect_status": "unverified",
+          "source_stack_comment": null
+        },
+        {
+          "name": "_calc_theta",
+          "line": 432,
+          "visibility": "internal_by_convention",
+          "locals": [
+            "struct"
+          ],
+          "stack_effect": null,
+          "stack_effect_status": "unverified",
+          "source_stack_comment": "struct --"
+        },
+        {
+          "name": "_calc_beta",
+          "line": 439,
+          "visibility": "internal_by_convention",
+          "locals": [
+            "struct",
+            "tmp"
+          ],
+          "stack_effect": null,
+          "stack_effect_status": "unverified",
+          "source_stack_comment": "struct tmp --"
+        },
+        {
+          "name": "_calc_gamma",
+          "line": 452,
+          "visibility": "internal_by_convention",
+          "locals": [
+            "struct"
+          ],
+          "stack_effect": null,
+          "stack_effect_status": "unverified",
+          "source_stack_comment": "struct --"
+        },
+        {
+          "name": "_calc_alpha",
+          "line": 459,
+          "visibility": "internal_by_convention",
+          "locals": [
+            "struct"
+          ],
+          "stack_effect": null,
+          "stack_effect_status": "unverified",
+          "source_stack_comment": "struct --"
+        },
+        {
+          "name": "_reinit_biquad",
+          "line": 468,
+          "visibility": "internal_by_convention",
+          "locals": [
+            "struct"
+          ],
+          "stack_effect": null,
+          "stack_effect_status": "unverified",
+          "source_stack_comment": "struct --"
+        },
+        {
+          "name": "_init_biquad",
+          "line": 478,
+          "visibility": "internal_by_convention",
+          "locals": [
+            "struct",
+            "reinit",
+            "cutoff",
+            "res",
+            "type"
+          ],
+          "stack_effect": null,
+          "stack_effect_status": "unverified",
+          "source_stack_comment": "struct reinit cutoff res type --"
+        },
+        {
+          "name": "biquad_compute",
+          "line": 491,
+          "visibility": "public_or_unspecified",
+          "locals": [
+            "sig",
+            "struct"
+          ],
+          "stack_effect": null,
+          "stack_effect_status": "unverified",
+          "source_stack_comment": null
+        },
+        {
+          "name": "make_biquad",
+          "line": 535,
+          "visibility": "public_or_unspecified",
+          "locals": [],
+          "stack_effect": null,
+          "stack_effect_status": "unverified",
+          "source_stack_comment": null
+        },
+        {
+          "name": "biquad_lp",
+          "line": 540,
+          "visibility": "public_or_unspecified",
+          "locals": [
+            "sig",
+            "struct",
+            "reinit",
+            "cutoff",
+            "res"
+          ],
+          "stack_effect": null,
+          "stack_effect_status": "unverified",
+          "source_stack_comment": "sig struct reinit cutoff res -- sig_out"
+        },
+        {
+          "name": "biquad_hp",
+          "line": 549,
+          "visibility": "public_or_unspecified",
+          "locals": [
+            "sig",
+            "struct",
+            "reinit",
+            "cutoff",
+            "res"
+          ],
+          "stack_effect": null,
+          "stack_effect_status": "unverified",
+          "source_stack_comment": "sig struct reinit cutoff res -- sig_out"
+        },
+        {
+          "name": "biquad_bp",
+          "line": 558,
+          "visibility": "public_or_unspecified",
+          "locals": [
+            "sig",
+            "struct",
+            "reinit",
+            "cutoff",
+            "res"
+          ],
+          "stack_effect": null,
+          "stack_effect_status": "unverified",
+          "source_stack_comment": "sig struct reinit cutoff res -- sig_out"
+        },
+        {
+          "name": "make_hc_filter",
+          "line": 581,
+          "visibility": "public_or_unspecified",
+          "locals": [],
+          "stack_effect": null,
+          "stack_effect_status": "unverified",
+          "source_stack_comment": null
+        },
+        {
+          "name": "_hc_common",
+          "line": 583,
+          "visibility": "internal_by_convention",
+          "locals": [
+            "sig",
+            "struct",
+            "fc",
+            "res"
+          ],
+          "stack_effect": null,
+          "stack_effect_status": "unverified",
+          "source_stack_comment": "sig struct fc res -- out"
+        },
+        {
+          "name": "hc_lowpass",
+          "line": 621,
+          "visibility": "public_or_unspecified",
+          "locals": [
+            "sig",
+            "struct",
+            "fc",
+            "res"
+          ],
+          "stack_effect": null,
+          "stack_effect_status": "unverified",
+          "source_stack_comment": "sig struct fc res -- out"
+        },
+        {
+          "name": "hc_highpass",
+          "line": 626,
+          "visibility": "public_or_unspecified",
+          "locals": [
+            "sig",
+            "struct",
+            "fc",
+            "res"
+          ],
+          "stack_effect": null,
+          "stack_effect_status": "unverified",
+          "source_stack_comment": "sig struct fc res -- out"
+        },
+        {
+          "name": "hc_bandpass",
+          "line": 631,
+          "visibility": "public_or_unspecified",
+          "locals": [
+            "sig",
+            "struct",
+            "fc",
+            "res"
+          ],
+          "stack_effect": null,
+          "stack_effect_status": "unverified",
+          "source_stack_comment": "sig struct fc res -- out"
+        },
+        {
+          "name": "hc_notch",
+          "line": 636,
+          "visibility": "public_or_unspecified",
+          "locals": [
+            "sig",
+            "struct",
+            "fc",
+            "res"
+          ],
+          "stack_effect": null,
+          "stack_effect_status": "unverified",
+          "source_stack_comment": "sig struct fc res -- out"
+        },
+        {
+          "name": "_fix",
+          "line": 658,
+          "visibility": "internal_by_convention",
+          "locals": [],
+          "stack_effect": null,
+          "stack_effect_status": "unverified",
+          "source_stack_comment": null
+        },
+        {
+          "name": "make_reverb_struct",
+          "line": 660,
+          "visibility": "public_or_unspecified",
+          "locals": [],
+          "stack_effect": null,
+          "stack_effect_status": "unverified",
+          "source_stack_comment": null
+        },
+        {
+          "name": "reverb",
+          "line": 694,
+          "visibility": "public_or_unspecified",
+          "locals": [
+            "sigL",
+            "sigR",
+            "reverb_struct",
+            "cutoff",
+            "feedback"
+          ],
+          "stack_effect": null,
+          "stack_effect_status": "unverified",
+          "source_stack_comment": null
+        },
+        {
+          "name": "panmix",
+          "line": 898,
+          "visibility": "public_or_unspecified",
+          "locals": [],
+          "stack_effect": null,
+          "stack_effect_status": "unverified",
+          "source_stack_comment": null
+        },
+        {
+          "name": "stereo_out",
+          "line": 907,
+          "visibility": "public_or_unspecified",
+          "locals": [],
+          "stack_effect": null,
+          "stack_effect_status": "unverified",
+          "source_stack_comment": null
+        },
+        {
+          "name": "t+",
+          "line": 914,
+          "visibility": "public_or_unspecified",
+          "locals": [],
+          "stack_effect": null,
+          "stack_effect_status": "unverified",
+          "source_stack_comment": null
+        }
+      ],
+      "word_count": 64
+    },
+    {
+      "module": "fractions.dc",
+      "imports": [],
+      "words": [
+        {
+          "name": "gcd",
+          "line": 7,
+          "visibility": "public_or_unspecified",
+          "locals": [],
+          "stack_effect": "( a b -- gcd )",
+          "stack_effect_status": "runtime_observed_source_reviewed",
+          "source_stack_comment": null,
+          "runtime_examples_passed": 1
+        },
+        {
+          "name": "simplify",
+          "line": 9,
+          "visibility": "public_or_unspecified",
+          "locals": [
+            "n",
+            "d"
+          ],
+          "stack_effect": "( n d -- reduced_n reduced_d )",
+          "stack_effect_status": "runtime_observed_source_reviewed",
+          "source_stack_comment": null,
+          "review_note": "locals and gcd",
+          "runtime_examples_passed": 1
+        },
+        {
+          "name": "fracadd",
+          "line": 13,
+          "visibility": "public_or_unspecified",
+          "locals": [
+            "n1",
+            "d1",
+            "n2",
+            "d2"
+          ],
+          "stack_effect": "( n1 d1 n2 d2 -- n d )",
+          "stack_effect_status": "runtime_observed_source_reviewed",
+          "source_stack_comment": null,
+          "review_note": "locals and simplify",
+          "runtime_examples_passed": 1
+        },
+        {
+          "name": "fracsub",
+          "line": 17,
+          "visibility": "public_or_unspecified",
+          "locals": [],
+          "stack_effect": "( n1 d1 n2 d2 -- n d )",
+          "stack_effect_status": "runtime_observed_source_reviewed",
+          "source_stack_comment": null,
+          "runtime_examples_passed": 1
+        },
+        {
+          "name": "fracmul",
+          "line": 19,
+          "visibility": "public_or_unspecified",
+          "locals": [
+            "n1",
+            "d1",
+            "n2",
+            "d2"
+          ],
+          "stack_effect": "( n1 d1 n2 d2 -- n d )",
+          "stack_effect_status": "runtime_observed_source_reviewed",
+          "source_stack_comment": null,
+          "review_note": "locals and simplify",
+          "runtime_examples_passed": 1
+        },
+        {
+          "name": "fracdiv",
+          "line": 23,
+          "visibility": "public_or_unspecified",
+          "locals": [],
+          "stack_effect": "( n1 d1 n2 d2 -- n d )",
+          "stack_effect_status": "runtime_observed_source_reviewed",
+          "source_stack_comment": null,
+          "runtime_examples_passed": 1
+        },
+        {
+          "name": "fracmediant",
+          "line": 25,
+          "visibility": "public_or_unspecified",
+          "locals": [
+            "n1",
+            "d1",
+            "n2",
+            "d2"
+          ],
+          "stack_effect": "( n1 d1 n2 d2 -- n d )",
+          "stack_effect_status": "runtime_observed_source_reviewed",
+          "source_stack_comment": null,
+          "review_note": "locals and arithmetic",
+          "runtime_examples_passed": 1
+        }
+      ],
+      "word_count": 7
+    },
+    {
+      "module": "http_server.dc",
+      "imports": [
+        "string.dc"
+      ],
+      "words": [
+        {
+          "name": "get_accepted_conn",
+          "line": 40,
+          "visibility": "public_or_unspecified",
+          "locals": [],
+          "stack_effect": null,
+          "stack_effect_status": "unverified",
+          "source_stack_comment": null
+        },
+        {
+          "name": "get_connbuf",
+          "line": 41,
+          "visibility": "public_or_unspecified",
+          "locals": [],
+          "stack_effect": null,
+          "stack_effect_status": "unverified",
+          "source_stack_comment": null
+        },
+        {
+          "name": "get_received",
+          "line": 42,
+          "visibility": "public_or_unspecified",
+          "locals": [],
+          "stack_effect": null,
+          "stack_effect_status": "unverified",
+          "source_stack_comment": null
+        },
+        {
+          "name": "zerobuf",
+          "line": 43,
+          "visibility": "public_or_unspecified",
+          "locals": [],
+          "stack_effect": null,
+          "stack_effect_status": "unverified",
+          "source_stack_comment": null
+        },
+        {
+          "name": "get_method",
+          "line": 44,
+          "visibility": "public_or_unspecified",
+          "locals": [],
+          "stack_effect": null,
+          "stack_effect_status": "unverified",
+          "source_stack_comment": null
+        },
+        {
+          "name": "get_path_and_query",
+          "line": 45,
+          "visibility": "public_or_unspecified",
+          "locals": [],
+          "stack_effect": null,
+          "stack_effect_status": "unverified",
+          "source_stack_comment": null
+        },
+        {
+          "name": "get_httpversion",
+          "line": 46,
+          "visibility": "public_or_unspecified",
+          "locals": [],
+          "stack_effect": null,
+          "stack_effect_status": "unverified",
+          "source_stack_comment": null
+        },
+        {
+          "name": "get_path",
+          "line": 47,
+          "visibility": "public_or_unspecified",
+          "locals": [],
+          "stack_effect": null,
+          "stack_effect_status": "unverified",
+          "source_stack_comment": null
+        },
+        {
+          "name": "get_query",
+          "line": 48,
+          "visibility": "public_or_unspecified",
+          "locals": [],
+          "stack_effect": null,
+          "stack_effect_status": "unverified",
+          "source_stack_comment": null
+        },
+        {
+          "name": "read_request",
+          "line": 54,
+          "visibility": "public_or_unspecified",
+          "locals": [],
+          "stack_effect": null,
+          "stack_effect_status": "unverified",
+          "source_stack_comment": null
+        },
+        {
+          "name": "split_request_topline",
+          "line": 63,
+          "visibility": "public_or_unspecified",
+          "locals": [],
+          "stack_effect": null,
+          "stack_effect_status": "unverified",
+          "source_stack_comment": null
+        },
+        {
+          "name": "split_path_and_query",
+          "line": 69,
+          "visibility": "public_or_unspecified",
+          "locals": [],
+          "stack_effect": null,
+          "stack_effect_status": "unverified",
+          "source_stack_comment": null
+        },
+        {
+          "name": "hash_assign",
+          "line": 74,
+          "visibility": "public_or_unspecified",
+          "locals": [],
+          "stack_effect": null,
+          "stack_effect_status": "unverified",
+          "source_stack_comment": null
+        },
+        {
+          "name": "_split_query_string_helper",
+          "line": 86,
+          "visibility": "internal_by_convention",
+          "locals": [],
+          "stack_effect": null,
+          "stack_effect_status": "unverified",
+          "source_stack_comment": null
+        },
+        {
+          "name": "split_query_string",
+          "line": 96,
+          "visibility": "public_or_unspecified",
+          "locals": [],
+          "stack_effect": null,
+          "stack_effect_status": "unverified",
+          "source_stack_comment": null
+        },
+        {
+          "name": "process_request",
+          "line": 117,
+          "visibility": "public_or_unspecified",
+          "locals": [],
+          "stack_effect": null,
+          "stack_effect_status": "unverified",
+          "source_stack_comment": null
+        },
+        {
+          "name": "_print_hash_table_helper",
+          "line": 123,
+          "visibility": "internal_by_convention",
+          "locals": [],
+          "stack_effect": null,
+          "stack_effect_status": "unverified",
+          "source_stack_comment": null
+        },
+        {
+          "name": "print_hash_table",
+          "line": 142,
+          "visibility": "public_or_unspecified",
+          "locals": [],
+          "stack_effect": null,
+          "stack_effect_status": "unverified",
+          "source_stack_comment": null
+        },
+        {
+          "name": "copy_header_to_buffer",
+          "line": 149,
+          "visibility": "public_or_unspecified",
+          "locals": [],
+          "stack_effect": null,
+          "stack_effect_status": "unverified",
+          "source_stack_comment": null
+        },
+        {
+          "name": "copy_footer_to_buffer",
+          "line": 155,
+          "visibility": "public_or_unspecified",
+          "locals": [],
+          "stack_effect": null,
+          "stack_effect_status": "unverified",
+          "source_stack_comment": null
+        },
+        {
+          "name": "write_response",
+          "line": 159,
+          "visibility": "public_or_unspecified",
+          "locals": [],
+          "stack_effect": null,
+          "stack_effect_status": "unverified",
+          "source_stack_comment": null
+        },
+        {
+          "name": "_acceptloop",
+          "line": 170,
+          "visibility": "internal_by_convention",
+          "locals": [],
+          "stack_effect": null,
+          "stack_effect_status": "unverified",
+          "source_stack_comment": null
+        },
+        {
+          "name": "acceptloop",
+          "line": 177,
+          "visibility": "public_or_unspecified",
+          "locals": [],
+          "stack_effect": null,
+          "stack_effect_status": "unverified",
+          "source_stack_comment": null
+        }
+      ],
+      "word_count": 23
+    },
+    {
+      "module": "linked_list.dc",
+      "imports": [],
+      "words": [
+        {
+          "name": "_list_init_helper",
+          "line": 4,
+          "visibility": "internal_by_convention",
+          "locals": [
+            "list_obj",
+            "token_method"
+          ],
+          "stack_effect": null,
+          "stack_effect_status": "unverified",
+          "source_stack_comment": null
+        },
+        {
+          "name": "_lmap_helper",
+          "line": 16,
+          "visibility": "internal_by_convention",
+          "locals": [],
+          "stack_effect": null,
+          "stack_effect_status": "unverified",
+          "source_stack_comment": null
+        },
+        {
+          "name": "_lshow_helper",
+          "line": 30,
+          "visibility": "internal_by_convention",
+          "locals": [],
+          "stack_effect": null,
+          "stack_effect_status": "unverified",
+          "source_stack_comment": null
+        },
+        {
+          "name": "linit",
+          "line": 45,
+          "visibility": "public_or_unspecified",
+          "locals": [],
+          "stack_effect": "( mutable_token_buffer token_word_name -- list )",
+          "stack_effect_status": "source_reviewed_and_runtime_sampled_v1.8",
+          "source_stack_comment": null
+        },
+        {
+          "name": "lmap",
+          "line": 67,
+          "visibility": "public_or_unspecified",
+          "locals": [],
+          "stack_effect": "( list word_name -- new_list )",
+          "stack_effect_status": "source_reviewed_and_runtime_sampled_v1.8",
+          "source_stack_comment": null
+        },
+        {
+          "name": "lshow",
+          "line": 82,
+          "visibility": "public_or_unspecified",
+          "locals": [],
+          "stack_effect": null,
+          "stack_effect_status": "unverified",
+          "source_stack_comment": null
+        },
+        {
+          "name": "make_lgen_struct",
+          "line": 92,
+          "visibility": "public_or_unspecified",
+          "locals": [],
+          "stack_effect": null,
+          "stack_effect_status": "unverified",
+          "source_stack_comment": "name_for_struct -- struct"
+        },
+        {
+          "name": "lgen",
+          "line": 99,
+          "visibility": "public_or_unspecified",
+          "locals": [
+            "lgen_struct",
+            "infinite?"
+          ],
+          "stack_effect": null,
+          "stack_effect_status": "unverified",
+          "source_stack_comment": null
+        }
+      ],
+      "word_count": 8
+    },
+    {
+      "module": "logging.dc",
+      "imports": [
+        "string.dc"
+      ],
+      "words": [
+        {
+          "name": "open_log",
+          "line": 11,
+          "visibility": "public_or_unspecified",
+          "locals": [],
+          "stack_effect": null,
+          "stack_effect_status": "unverified",
+          "source_stack_comment": null
+        },
+        {
+          "name": "to_log",
+          "line": 17,
+          "visibility": "public_or_unspecified",
+          "locals": [],
+          "stack_effect": null,
+          "stack_effect_status": "unverified",
+          "source_stack_comment": null
+        },
+        {
+          "name": "close_log",
+          "line": 31,
+          "visibility": "public_or_unspecified",
+          "locals": [],
+          "stack_effect": null,
+          "stack_effect_status": "unverified",
+          "source_stack_comment": null
+        }
+      ],
+      "word_count": 3
+    },
+    {
+      "module": "math.dc",
+      "imports": [],
+      "words": [
+        {
+          "name": "isneg",
+          "line": 3,
+          "visibility": "public_or_unspecified",
+          "locals": [],
+          "stack_effect": "( x -- flag )",
+          "stack_effect_status": "source_reviewed_not_executed",
+          "source_stack_comment": null,
+          "review_note": "source: 1 swap / 0 <"
+        },
+        {
+          "name": "absmod",
+          "line": 5,
+          "visibility": "public_or_unspecified",
+          "locals": [],
+          "stack_effect": "( a modulus -- nonnegative_remainder )",
+          "stack_effect_status": "runtime_observed_source_reviewed",
+          "source_stack_comment": null,
+          "review_note": "source: %, conditional adjustment",
+          "runtime_examples_passed": 1
+        },
+        {
+          "name": "divmod",
+          "line": 16,
+          "visibility": "public_or_unspecified",
+          "locals": [],
+          "stack_effect": "( dividend divisor -- quotient remainder )",
+          "stack_effect_status": "runtime_observed_source_reviewed",
+          "source_stack_comment": null,
+          "review_note": "2dup % svpush / floor svpop; check division semantics and integer rounding",
+          "runtime_examples_passed": 2
+        },
+        {
+          "name": "bounce",
+          "line": 21,
+          "visibility": "public_or_unspecified",
+          "locals": [
+            "n",
+            "lower",
+            "upper"
+          ],
+          "stack_effect": null,
+          "stack_effect_status": "unverified",
+          "source_stack_comment": null
+        },
+        {
+          "name": "?dup",
+          "line": 36,
+          "visibility": "public_or_unspecified",
+          "locals": [],
+          "stack_effect": "( x -- x [x if nonzero] )",
+          "stack_effect_status": "runtime_observed_source_reviewed",
+          "source_stack_comment": null,
+          "review_note": "conditional duplication",
+          "runtime_examples_passed": 2
+        },
+        {
+          "name": "gcd",
+          "line": 41,
+          "visibility": "public_or_unspecified",
+          "locals": [],
+          "stack_effect": "( a b -- gcd )",
+          "stack_effect_status": "runtime_observed_source_reviewed",
+          "source_stack_comment": null,
+          "runtime_examples_passed": 1
+        },
+        {
+          "name": "factorial",
+          "line": 51,
+          "visibility": "public_or_unspecified",
+          "locals": [
+            "x"
+          ],
+          "stack_effect": "( n -- factorial )",
+          "stack_effect_status": "runtime_observed_source_reviewed",
+          "source_stack_comment": null,
+          "runtime_examples_passed": 1
+        },
+        {
+          "name": "_digit_sum_helper",
+          "line": 58,
+          "visibility": "internal_by_convention",
+          "locals": [],
+          "stack_effect": null,
+          "stack_effect_status": "unverified",
+          "source_stack_comment": null
+        },
+        {
+          "name": "digit_sum",
+          "line": 74,
+          "visibility": "public_or_unspecified",
+          "locals": [],
+          "stack_effect": "( n base -- sum )",
+          "stack_effect_status": "runtime_observed_source_reviewed",
+          "source_stack_comment": null,
+          "runtime_examples_passed": 1
+        },
+        {
+          "name": "make_digit_expansion_struct",
+          "line": 90,
+          "visibility": "public_or_unspecified",
+          "locals": [],
+          "stack_effect": null,
+          "stack_effect_status": "unverified",
+          "source_stack_comment": null
+        },
+        {
+          "name": "_get_base",
+          "line": 92,
+          "visibility": "internal_by_convention",
+          "locals": [],
+          "stack_effect": null,
+          "stack_effect_status": "unverified",
+          "source_stack_comment": null
+        },
+        {
+          "name": "_set_base",
+          "line": 93,
+          "visibility": "internal_by_convention",
+          "locals": [],
+          "stack_effect": null,
+          "stack_effect_status": "unverified",
+          "source_stack_comment": null
+        },
+        {
+          "name": "_get_div",
+          "line": 94,
+          "visibility": "internal_by_convention",
+          "locals": [],
+          "stack_effect": null,
+          "stack_effect_status": "unverified",
+          "source_stack_comment": null
+        },
+        {
+          "name": "_set_div",
+          "line": 95,
+          "visibility": "internal_by_convention",
+          "locals": [],
+          "stack_effect": null,
+          "stack_effect_status": "unverified",
+          "source_stack_comment": null
+        },
+        {
+          "name": "_get_old_base",
+          "line": 96,
+          "visibility": "internal_by_convention",
+          "locals": [],
+          "stack_effect": null,
+          "stack_effect_status": "unverified",
+          "source_stack_comment": null
+        },
+        {
+          "name": "_set_old_base",
+          "line": 97,
+          "visibility": "internal_by_convention",
+          "locals": [],
+          "stack_effect": null,
+          "stack_effect_status": "unverified",
+          "source_stack_comment": null
+        },
+        {
+          "name": "_get_old_div",
+          "line": 98,
+          "visibility": "internal_by_convention",
+          "locals": [],
+          "stack_effect": null,
+          "stack_effect_status": "unverified",
+          "source_stack_comment": null
+        },
+        {
+          "name": "_set_old_div",
+          "line": 99,
+          "visibility": "internal_by_convention",
+          "locals": [],
+          "stack_effect": null,
+          "stack_effect_status": "unverified",
+          "source_stack_comment": null
+        },
+        {
+          "name": "_get_remainder",
+          "line": 100,
+          "visibility": "internal_by_convention",
+          "locals": [],
+          "stack_effect": null,
+          "stack_effect_status": "unverified",
+          "source_stack_comment": null
+        },
+        {
+          "name": "_set_remainder",
+          "line": 101,
+          "visibility": "internal_by_convention",
+          "locals": [],
+          "stack_effect": null,
+          "stack_effect_status": "unverified",
+          "source_stack_comment": null
+        },
+        {
+          "name": "_base_changed?",
+          "line": 102,
+          "visibility": "internal_by_convention",
+          "locals": [],
+          "stack_effect": null,
+          "stack_effect_status": "unverified",
+          "source_stack_comment": null
+        },
+        {
+          "name": "_reset_old_base",
+          "line": 103,
+          "visibility": "internal_by_convention",
+          "locals": [],
+          "stack_effect": null,
+          "stack_effect_status": "unverified",
+          "source_stack_comment": null
+        },
+        {
+          "name": "_div_changed?",
+          "line": 104,
+          "visibility": "internal_by_convention",
+          "locals": [],
+          "stack_effect": null,
+          "stack_effect_status": "unverified",
+          "source_stack_comment": null
+        },
+        {
+          "name": "_reset_old_div",
+          "line": 105,
+          "visibility": "internal_by_convention",
+          "locals": [],
+          "stack_effect": null,
+          "stack_effect_status": "unverified",
+          "source_stack_comment": null
+        },
+        {
+          "name": "gen_digit_expansion",
+          "line": 107,
+          "visibility": "public_or_unspecified",
+          "locals": [
+            "exp_struct"
+          ],
+          "stack_effect": null,
+          "stack_effect_status": "unverified",
+          "source_stack_comment": null
+        },
+        {
+          "name": "is-2-3-5-7?",
+          "line": 131,
+          "visibility": "public_or_unspecified",
+          "locals": [],
+          "stack_effect": null,
+          "stack_effect_status": "unverified",
+          "source_stack_comment": null
+        },
+        {
+          "name": "check-higher-than-49",
+          "line": 143,
+          "visibility": "public_or_unspecified",
+          "locals": [],
+          "stack_effect": null,
+          "stack_effect_status": "unverified",
+          "source_stack_comment": null
+        },
+        {
+          "name": "is-not-div-otherwise?",
+          "line": 156,
+          "visibility": "public_or_unspecified",
+          "locals": [],
+          "stack_effect": null,
+          "stack_effect_status": "unverified",
+          "source_stack_comment": null
+        },
+        {
+          "name": "is-not-div-by-2-3-5-7?",
+          "line": 165,
+          "visibility": "public_or_unspecified",
+          "locals": [],
+          "stack_effect": null,
+          "stack_effect_status": "unverified",
+          "source_stack_comment": null
+        },
+        {
+          "name": "is-prime",
+          "line": 182,
+          "visibility": "public_or_unspecified",
+          "locals": [],
+          "stack_effect": null,
+          "stack_effect_status": "unverified",
+          "source_stack_comment": null
+        },
+        {
+          "name": "find-next-prime",
+          "line": 194,
+          "visibility": "public_or_unspecified",
+          "locals": [
+            "direction",
+            "x"
+          ],
+          "stack_effect": null,
+          "stack_effect_status": "unverified",
+          "source_stack_comment": null
+        },
+        {
+          "name": "closest-prime",
+          "line": 203,
+          "visibility": "public_or_unspecified",
+          "locals": [
+            "x"
+          ],
+          "stack_effect": null,
+          "stack_effect_status": "unverified",
+          "source_stack_comment": null
+        }
+      ],
+      "word_count": 32
+    },
+    {
+      "module": "midi.dc",
+      "imports": [
+        "string.dc"
+      ],
+      "words": [
+        {
+          "name": "populate_midi_channel",
+          "line": 11,
+          "visibility": "public_or_unspecified",
+          "locals": [],
+          "stack_effect": null,
+          "stack_effect_status": "unverified",
+          "source_stack_comment": null
+        },
+        {
+          "name": "make_channel_string",
+          "line": 33,
+          "visibility": "public_or_unspecified",
+          "locals": [
+            "prefix"
+          ],
+          "stack_effect": null,
+          "stack_effect_status": "unverified",
+          "source_stack_comment": null
+        },
+        {
+          "name": "midi_shutdown",
+          "line": 48,
+          "visibility": "public_or_unspecified",
+          "locals": [],
+          "stack_effect": null,
+          "stack_effect_status": "unverified",
+          "source_stack_comment": null
+        },
+        {
+          "name": "check_mididev",
+          "line": 53,
+          "visibility": "public_or_unspecified",
+          "locals": [],
+          "stack_effect": null,
+          "stack_effect_status": "unverified",
+          "source_stack_comment": null
+        },
+        {
+          "name": "refresh_midictl",
+          "line": 92,
+          "visibility": "public_or_unspecified",
+          "locals": [],
+          "stack_effect": null,
+          "stack_effect_status": "unverified",
+          "source_stack_comment": null
+        },
+        {
+          "name": "midictl",
+          "line": 104,
+          "visibility": "public_or_unspecified",
+          "locals": [],
+          "stack_effect": null,
+          "stack_effect_status": "unverified",
+          "source_stack_comment": null
+        },
+        {
+          "name": "send_midi",
+          "line": 107,
+          "visibility": "public_or_unspecified",
+          "locals": [],
+          "stack_effect": null,
+          "stack_effect_status": "unverified",
+          "source_stack_comment": null
+        },
+        {
+          "name": "send_midi_reverse",
+          "line": 109,
+          "visibility": "public_or_unspecified",
+          "locals": [],
+          "stack_effect": null,
+          "stack_effect_status": "unverified",
+          "source_stack_comment": null
+        },
+        {
+          "name": "panic",
+          "line": 112,
+          "visibility": "public_or_unspecified",
+          "locals": [],
+          "stack_effect": null,
+          "stack_effect_status": "unverified",
+          "source_stack_comment": null
+        },
+        {
+          "name": "_bend_to_MSB_LSB_bytes",
+          "line": 131,
+          "visibility": "internal_by_convention",
+          "locals": [],
+          "stack_effect": null,
+          "stack_effect_status": "unverified",
+          "source_stack_comment": null
+        },
+        {
+          "name": "_read_midi_byte",
+          "line": 170,
+          "visibility": "internal_by_convention",
+          "locals": [
+            "mfp"
+          ],
+          "stack_effect": null,
+          "stack_effect_status": "unverified",
+          "source_stack_comment": null
+        },
+        {
+          "name": "_read_var_length",
+          "line": 176,
+          "visibility": "internal_by_convention",
+          "locals": [],
+          "stack_effect": null,
+          "stack_effect_status": "unverified",
+          "source_stack_comment": null
+        },
+        {
+          "name": "read_var_length",
+          "line": 193,
+          "visibility": "public_or_unspecified",
+          "locals": [
+            "mfp"
+          ],
+          "stack_effect": null,
+          "stack_effect_status": "unverified",
+          "source_stack_comment": null
+        },
+        {
+          "name": "_read_chunk_length",
+          "line": 197,
+          "visibility": "internal_by_convention",
+          "locals": [],
+          "stack_effect": null,
+          "stack_effect_status": "unverified",
+          "source_stack_comment": null
+        },
+        {
+          "name": "read_midi_header",
+          "line": 204,
+          "visibility": "public_or_unspecified",
+          "locals": [
+            "mfp"
+          ],
+          "stack_effect": null,
+          "stack_effect_status": "unverified",
+          "source_stack_comment": null
+        },
+        {
+          "name": "_output_as_hex",
+          "line": 241,
+          "visibility": "internal_by_convention",
+          "locals": [],
+          "stack_effect": null,
+          "stack_effect_status": "unverified",
+          "source_stack_comment": null
+        },
+        {
+          "name": "_handle_sysex",
+          "line": 245,
+          "visibility": "internal_by_convention",
+          "locals": [
+            "mfp"
+          ],
+          "stack_effect": null,
+          "stack_effect_status": "unverified",
+          "source_stack_comment": null
+        },
+        {
+          "name": "_handle_track_name",
+          "line": 254,
+          "visibility": "internal_by_convention",
+          "locals": [
+            "mfp"
+          ],
+          "stack_effect": null,
+          "stack_effect_status": "unverified",
+          "source_stack_comment": null
+        },
+        {
+          "name": "_handle_tempo",
+          "line": 263,
+          "visibility": "internal_by_convention",
+          "locals": [
+            "mfp"
+          ],
+          "stack_effect": null,
+          "stack_effect_status": "unverified",
+          "source_stack_comment": null
+        },
+        {
+          "name": "_handle_timesig",
+          "line": 274,
+          "visibility": "internal_by_convention",
+          "locals": [
+            "mfp"
+          ],
+          "stack_effect": null,
+          "stack_effect_status": "unverified",
+          "source_stack_comment": null
+        },
+        {
+          "name": "_handle_meta",
+          "line": 284,
+          "visibility": "internal_by_convention",
+          "locals": [
+            "meta_byte",
+            "mfp"
+          ],
+          "stack_effect": null,
+          "stack_effect_status": "unverified",
+          "source_stack_comment": null
+        },
+        {
+          "name": "_handle_status",
+          "line": 309,
+          "visibility": "internal_by_convention",
+          "locals": [
+            "status_byte",
+            "mfp"
+          ],
+          "stack_effect": null,
+          "stack_effect_status": "unverified",
+          "source_stack_comment": null
+        },
+        {
+          "name": "_track_loop",
+          "line": 353,
+          "visibility": "internal_by_convention",
+          "locals": [
+            "mfp"
+          ],
+          "stack_effect": null,
+          "stack_effect_status": "unverified",
+          "source_stack_comment": null
+        },
+        {
+          "name": "read_midi_track",
+          "line": 407,
+          "visibility": "public_or_unspecified",
+          "locals": [
+            "mfp"
+          ],
+          "stack_effect": null,
+          "stack_effect_status": "unverified",
+          "source_stack_comment": null
+        },
+        {
+          "name": "read_midi_file",
+          "line": 427,
+          "visibility": "public_or_unspecified",
+          "locals": [
+            "midi_filename"
+          ],
+          "stack_effect": null,
+          "stack_effect_status": "unverified",
+          "source_stack_comment": null
+        }
+      ],
+      "word_count": 25
+    },
+    {
+      "module": "music.dc",
+      "imports": [
+        "math.dc",
+        "midi.dc",
+        "osc.dc",
+        "linked_list.dc",
+        "music_keyval.dc"
+      ],
+      "words": [
+        {
+          "name": "set_bend_depth",
+          "line": 19,
+          "visibility": "public_or_unspecified",
+          "locals": [],
+          "stack_effect": null,
+          "stack_effect_status": "unverified",
+          "source_stack_comment": null
+        },
+        {
+          "name": "O-",
+          "line": 31,
+          "visibility": "public_or_unspecified",
+          "locals": [],
+          "stack_effect": null,
+          "stack_effect_status": "unverified",
+          "source_stack_comment": null
+        },
+        {
+          "name": "O+",
+          "line": 32,
+          "visibility": "public_or_unspecified",
+          "locals": [],
+          "stack_effect": null,
+          "stack_effect_status": "unverified",
+          "source_stack_comment": null
+        },
+        {
+          "name": "_reset_gamut_idx",
+          "line": 231,
+          "visibility": "internal_by_convention",
+          "locals": [],
+          "stack_effect": null,
+          "stack_effect_status": "unverified",
+          "source_stack_comment": null
+        },
+        {
+          "name": "_update_gamut_idx",
+          "line": 232,
+          "visibility": "internal_by_convention",
+          "locals": [],
+          "stack_effect": null,
+          "stack_effect_status": "unverified",
+          "source_stack_comment": null
+        },
+        {
+          "name": "_toggle_gamuts",
+          "line": 234,
+          "visibility": "internal_by_convention",
+          "locals": [],
+          "stack_effect": null,
+          "stack_effect_status": "unverified",
+          "source_stack_comment": null
+        },
+        {
+          "name": "_protect_value",
+          "line": 246,
+          "visibility": "internal_by_convention",
+          "locals": [],
+          "stack_effect": null,
+          "stack_effect_status": "unverified",
+          "source_stack_comment": null
+        },
+        {
+          "name": "frac_to_oct_gamut",
+          "line": 248,
+          "visibility": "public_or_unspecified",
+          "locals": [
+            "frac_str"
+          ],
+          "stack_effect": null,
+          "stack_effect_status": "unverified",
+          "source_stack_comment": null
+        },
+        {
+          "name": "_process_fraction_list",
+          "line": 267,
+          "visibility": "internal_by_convention",
+          "locals": [],
+          "stack_effect": null,
+          "stack_effect_status": "unverified",
+          "source_stack_comment": null
+        },
+        {
+          "name": "process_fraction_list",
+          "line": 277,
+          "visibility": "public_or_unspecified",
+          "locals": [
+            "frac_str_list"
+          ],
+          "stack_effect": null,
+          "stack_effect_status": "unverified",
+          "source_stack_comment": null
+        },
+        {
+          "name": "process_custom_scale",
+          "line": 291,
+          "visibility": "public_or_unspecified",
+          "locals": [],
+          "stack_effect": null,
+          "stack_effect_status": "unverified",
+          "source_stack_comment": null
+        },
+        {
+          "name": "set_scale",
+          "line": 317,
+          "visibility": "public_or_unspecified",
+          "locals": [],
+          "stack_effect": null,
+          "stack_effect_status": "unverified",
+          "source_stack_comment": null
+        },
+        {
+          "name": "show_scale",
+          "line": 352,
+          "visibility": "public_or_unspecified",
+          "locals": [],
+          "stack_effect": null,
+          "stack_effect_status": "unverified",
+          "source_stack_comment": null
+        },
+        {
+          "name": "edo_degree_to_midi",
+          "line": 366,
+          "visibility": "public_or_unspecified",
+          "locals": [],
+          "stack_effect": null,
+          "stack_effect_status": "unverified",
+          "source_stack_comment": null
+        },
+        {
+          "name": "edo_degree_to_hz",
+          "line": 406,
+          "visibility": "public_or_unspecified",
+          "locals": [
+            "degree"
+          ],
+          "stack_effect": null,
+          "stack_effect_status": "unverified",
+          "source_stack_comment": null
+        },
+        {
+          "name": "euclidean_rhythm",
+          "line": 422,
+          "visibility": "public_or_unspecified",
+          "locals": [],
+          "stack_effect": null,
+          "stack_effect_status": "unverified",
+          "source_stack_comment": null
+        },
+        {
+          "name": "euclidean_test_loop",
+          "line": 448,
+          "visibility": "public_or_unspecified",
+          "locals": [],
+          "stack_effect": null,
+          "stack_effect_status": "unverified",
+          "source_stack_comment": null
+        },
+        {
+          "name": "_string_to_lgen",
+          "line": 467,
+          "visibility": "internal_by_convention",
+          "locals": [
+            "str_to_check",
+            "cur_str",
+            "lgen_struct",
+            "method"
+          ],
+          "stack_effect": null,
+          "stack_effect_status": "unverified",
+          "source_stack_comment": null
+        },
+        {
+          "name": "_token_has_backslash?",
+          "line": 517,
+          "visibility": "internal_by_convention",
+          "locals": [],
+          "stack_effect": null,
+          "stack_effect_status": "unverified",
+          "source_stack_comment": null
+        },
+        {
+          "name": "_process_rhythm",
+          "line": 519,
+          "visibility": "internal_by_convention",
+          "locals": [
+            "tok"
+          ],
+          "stack_effect": null,
+          "stack_effect_status": "unverified",
+          "source_stack_comment": null
+        },
+        {
+          "name": "_do_rhythm_string",
+          "line": 535,
+          "visibility": "internal_by_convention",
+          "locals": [],
+          "stack_effect": null,
+          "stack_effect_status": "unverified",
+          "source_stack_comment": null
+        },
+        {
+          "name": "_do_gate_string",
+          "line": 544,
+          "visibility": "internal_by_convention",
+          "locals": [],
+          "stack_effect": null,
+          "stack_effect_status": "unverified",
+          "source_stack_comment": null
+        },
+        {
+          "name": "rhythm_generator",
+          "line": 554,
+          "visibility": "public_or_unspecified",
+          "locals": [],
+          "stack_effect": null,
+          "stack_effect_status": "unverified",
+          "source_stack_comment": null
+        },
+        {
+          "name": "data_player",
+          "line": 575,
+          "visibility": "public_or_unspecified",
+          "locals": [],
+          "stack_effect": null,
+          "stack_effect_status": "unverified",
+          "source_stack_comment": "number -- out_edo_degree"
+        },
+        {
+          "name": "fraction_music",
+          "line": 608,
+          "visibility": "public_or_unspecified",
+          "locals": [
+            "expansion_struct"
+          ],
+          "stack_effect": null,
+          "stack_effect_status": "unverified",
+          "source_stack_comment": null
+        },
+        {
+          "name": "digit_sum_music",
+          "line": 619,
+          "visibility": "public_or_unspecified",
+          "locals": [],
+          "stack_effect": null,
+          "stack_effect_status": "unverified",
+          "source_stack_comment": null
+        },
+        {
+          "name": "primes_music",
+          "line": 639,
+          "visibility": "public_or_unspecified",
+          "locals": [],
+          "stack_effect": null,
+          "stack_effect_status": "unverified",
+          "source_stack_comment": null
+        },
+        {
+          "name": "do_attack_string",
+          "line": 662,
+          "visibility": "public_or_unspecified",
+          "locals": [],
+          "stack_effect": null,
+          "stack_effect_status": "unverified",
+          "source_stack_comment": null
+        },
+        {
+          "name": "do_gain_string",
+          "line": 676,
+          "visibility": "public_or_unspecified",
+          "locals": [],
+          "stack_effect": null,
+          "stack_effect_status": "unverified",
+          "source_stack_comment": null
+        },
+        {
+          "name": "_get_edo_3_2",
+          "line": 720,
+          "visibility": "internal_by_convention",
+          "locals": [
+            "local_edo"
+          ],
+          "stack_effect": null,
+          "stack_effect_status": "unverified",
+          "source_stack_comment": null
+        },
+        {
+          "name": "_update_note_symbol_tree",
+          "line": 724,
+          "visibility": "internal_by_convention",
+          "locals": [
+            "local_edo"
+          ],
+          "stack_effect": null,
+          "stack_effect_status": "unverified",
+          "source_stack_comment": null
+        },
+        {
+          "name": "symbol_to_edo_int",
+          "line": 752,
+          "visibility": "public_or_unspecified",
+          "locals": [
+            "pitch_token"
+          ],
+          "stack_effect": null,
+          "stack_effect_status": "unverified",
+          "source_stack_comment": null
+        },
+        {
+          "name": "_reset_sym_str_ptr",
+          "line": 777,
+          "visibility": "internal_by_convention",
+          "locals": [],
+          "stack_effect": null,
+          "stack_effect_status": "unverified",
+          "source_stack_comment": null
+        },
+        {
+          "name": "_process_next_symbol",
+          "line": 781,
+          "visibility": "internal_by_convention",
+          "locals": [],
+          "stack_effect": null,
+          "stack_effect_status": "unverified",
+          "source_stack_comment": null
+        },
+        {
+          "name": "do_symbol_string",
+          "line": 811,
+          "visibility": "public_or_unspecified",
+          "locals": [],
+          "stack_effect": null,
+          "stack_effect_status": "unverified",
+          "source_stack_comment": null
+        },
+        {
+          "name": "_reset_seq_str_ptr",
+          "line": 863,
+          "visibility": "internal_by_convention",
+          "locals": [],
+          "stack_effect": null,
+          "stack_effect_status": "unverified",
+          "source_stack_comment": null
+        },
+        {
+          "name": "_ratio_to_edo_delta",
+          "line": 867,
+          "visibility": "internal_by_convention",
+          "locals": [
+            "num",
+            "den"
+          ],
+          "stack_effect": null,
+          "stack_effect_status": "unverified",
+          "source_stack_comment": null
+        },
+        {
+          "name": "_process_keyval_token",
+          "line": 877,
+          "visibility": "internal_by_convention",
+          "locals": [
+            "tok"
+          ],
+          "stack_effect": null,
+          "stack_effect_status": "unverified",
+          "source_stack_comment": null
+        },
+        {
+          "name": "_process_duration_token",
+          "line": 883,
+          "visibility": "internal_by_convention",
+          "locals": [
+            "tok"
+          ],
+          "stack_effect": null,
+          "stack_effect_status": "unverified",
+          "source_stack_comment": null
+        },
+        {
+          "name": "_parse_abs_ratio_token",
+          "line": 892,
+          "visibility": "internal_by_convention",
+          "locals": [
+            "tok"
+          ],
+          "stack_effect": null,
+          "stack_effect_status": "unverified",
+          "source_stack_comment": null
+        },
+        {
+          "name": "_parse_rel_ratio_token",
+          "line": 898,
+          "visibility": "internal_by_convention",
+          "locals": [
+            "tok"
+          ],
+          "stack_effect": null,
+          "stack_effect_status": "unverified",
+          "source_stack_comment": null
+        },
+        {
+          "name": "_parse_rel_ratio_token_silent",
+          "line": 907,
+          "visibility": "internal_by_convention",
+          "locals": [
+            "tok"
+          ],
+          "stack_effect": null,
+          "stack_effect_status": "unverified",
+          "source_stack_comment": null
+        },
+        {
+          "name": "_token_has_equals?",
+          "line": 914,
+          "visibility": "internal_by_convention",
+          "locals": [],
+          "stack_effect": null,
+          "stack_effect_status": "unverified",
+          "source_stack_comment": null
+        },
+        {
+          "name": "_token_has_semicolon?",
+          "line": 915,
+          "visibility": "internal_by_convention",
+          "locals": [],
+          "stack_effect": null,
+          "stack_effect_status": "unverified",
+          "source_stack_comment": null
+        },
+        {
+          "name": "_token_has_colon?",
+          "line": 916,
+          "visibility": "internal_by_convention",
+          "locals": [],
+          "stack_effect": null,
+          "stack_effect_status": "unverified",
+          "source_stack_comment": null
+        },
+        {
+          "name": "_token_has_slash?",
+          "line": 917,
+          "visibility": "internal_by_convention",
+          "locals": [],
+          "stack_effect": null,
+          "stack_effect_status": "unverified",
+          "source_stack_comment": null
+        },
+        {
+          "name": "_token_has_letter?",
+          "line": 918,
+          "visibility": "internal_by_convention",
+          "locals": [],
+          "stack_effect": null,
+          "stack_effect_status": "unverified",
+          "source_stack_comment": null
+        },
+        {
+          "name": "_copy_next_token",
+          "line": 920,
+          "visibility": "internal_by_convention",
+          "locals": [],
+          "stack_effect": null,
+          "stack_effect_status": "unverified",
+          "source_stack_comment": null
+        },
+        {
+          "name": "_process_next_event",
+          "line": 956,
+          "visibility": "internal_by_convention",
+          "locals": [],
+          "stack_effect": null,
+          "stack_effect_status": "unverified",
+          "source_stack_comment": null
+        },
+        {
+          "name": "do_seq_string",
+          "line": 1034,
+          "visibility": "public_or_unspecified",
+          "locals": [],
+          "stack_effect": null,
+          "stack_effect_status": "unverified",
+          "source_stack_comment": null
+        }
+      ],
+      "word_count": 50
+    },
+    {
+      "module": "music_keyval.dc",
+      "imports": [
+        "string.dc",
+        "clock_sleep.dc"
+      ],
+      "words": [
+        {
+          "name": "keyval_get",
+          "line": 21,
+          "visibility": "public_or_unspecified",
+          "locals": [
+            "key"
+          ],
+          "stack_effect": null,
+          "stack_effect_status": "unverified",
+          "source_stack_comment": null
+        },
+        {
+          "name": "keyval_set",
+          "line": 33,
+          "visibility": "public_or_unspecified",
+          "locals": [
+            "val",
+            "key"
+          ],
+          "stack_effect": null,
+          "stack_effect_status": "unverified",
+          "source_stack_comment": null
+        },
+        {
+          "name": "tonum_free",
+          "line": 49,
+          "visibility": "public_or_unspecified",
+          "locals": [],
+          "stack_effect": null,
+          "stack_effect_status": "unverified",
+          "source_stack_comment": null
+        },
+        {
+          "name": "_get_duration",
+          "line": 106,
+          "visibility": "internal_by_convention",
+          "locals": [],
+          "stack_effect": null,
+          "stack_effect_status": "unverified",
+          "source_stack_comment": null
+        },
+        {
+          "name": "synchronized_start",
+          "line": 114,
+          "visibility": "public_or_unspecified",
+          "locals": [],
+          "stack_effect": null,
+          "stack_effect_status": "unverified",
+          "source_stack_comment": null
+        },
+        {
+          "name": "get_x_tempo",
+          "line": 128,
+          "visibility": "public_or_unspecified",
+          "locals": [
+            "which_str"
+          ],
+          "stack_effect": null,
+          "stack_effect_status": "unverified",
+          "source_stack_comment": null
+        },
+        {
+          "name": "get_drum_vol",
+          "line": 136,
+          "visibility": "public_or_unspecified",
+          "locals": [],
+          "stack_effect": null,
+          "stack_effect_status": "unverified",
+          "source_stack_comment": null
+        },
+        {
+          "name": "get_bass_vol",
+          "line": 140,
+          "visibility": "public_or_unspecified",
+          "locals": [],
+          "stack_effect": null,
+          "stack_effect_status": "unverified",
+          "source_stack_comment": null
+        },
+        {
+          "name": "get_lead_vol",
+          "line": 144,
+          "visibility": "public_or_unspecified",
+          "locals": [],
+          "stack_effect": null,
+          "stack_effect_status": "unverified",
+          "source_stack_comment": null
+        },
+        {
+          "name": "set_clock_start",
+          "line": 161,
+          "visibility": "public_or_unspecified",
+          "locals": [],
+          "stack_effect": null,
+          "stack_effect_status": "unverified",
+          "source_stack_comment": null
+        },
+        {
+          "name": "_iterate_clock",
+          "line": 165,
+          "visibility": "internal_by_convention",
+          "locals": [
+            "length",
+            "gate"
+          ],
+          "stack_effect": null,
+          "stack_effect_status": "unverified",
+          "source_stack_comment": null
+        },
+        {
+          "name": "get_on_gate",
+          "line": 178,
+          "visibility": "public_or_unspecified",
+          "locals": [
+            "length",
+            "gate"
+          ],
+          "stack_effect": null,
+          "stack_effect_status": "unverified",
+          "source_stack_comment": null
+        },
+        {
+          "name": "get_off_gate",
+          "line": 183,
+          "visibility": "public_or_unspecified",
+          "locals": [],
+          "stack_effect": null,
+          "stack_effect_status": "unverified",
+          "source_stack_comment": null
+        },
+        {
+          "name": "get_mode",
+          "line": 191,
+          "visibility": "public_or_unspecified",
+          "locals": [],
+          "stack_effect": null,
+          "stack_effect_status": "unverified",
+          "source_stack_comment": null
+        },
+        {
+          "name": "get_transpose",
+          "line": 195,
+          "visibility": "public_or_unspecified",
+          "locals": [],
+          "stack_effect": null,
+          "stack_effect_status": "unverified",
+          "source_stack_comment": null
+        },
+        {
+          "name": "get_base_pitch",
+          "line": 203,
+          "visibility": "public_or_unspecified",
+          "locals": [],
+          "stack_effect": null,
+          "stack_effect_status": "unverified",
+          "source_stack_comment": null
+        },
+        {
+          "name": "get_edo",
+          "line": 214,
+          "visibility": "public_or_unspecified",
+          "locals": [],
+          "stack_effect": null,
+          "stack_effect_status": "unverified",
+          "source_stack_comment": null
+        },
+        {
+          "name": "get_scale",
+          "line": 225,
+          "visibility": "public_or_unspecified",
+          "locals": [],
+          "stack_effect": null,
+          "stack_effect_status": "unverified",
+          "source_stack_comment": null
+        },
+        {
+          "name": "get_gamut",
+          "line": 237,
+          "visibility": "public_or_unspecified",
+          "locals": [],
+          "stack_effect": null,
+          "stack_effect_status": "unverified",
+          "source_stack_comment": null
+        },
+        {
+          "name": "get_rhythm_type",
+          "line": 249,
+          "visibility": "public_or_unspecified",
+          "locals": [],
+          "stack_effect": null,
+          "stack_effect_status": "unverified",
+          "source_stack_comment": null
+        },
+        {
+          "name": "get_remainder",
+          "line": 267,
+          "visibility": "public_or_unspecified",
+          "locals": [],
+          "stack_effect": null,
+          "stack_effect_status": "unverified",
+          "source_stack_comment": null
+        },
+        {
+          "name": "set_remainder",
+          "line": 268,
+          "visibility": "public_or_unspecified",
+          "locals": [],
+          "stack_effect": null,
+          "stack_effect_status": "unverified",
+          "source_stack_comment": null
+        },
+        {
+          "name": "get_base",
+          "line": 270,
+          "visibility": "public_or_unspecified",
+          "locals": [],
+          "stack_effect": null,
+          "stack_effect_status": "unverified",
+          "source_stack_comment": null
+        },
+        {
+          "name": "get_div",
+          "line": 275,
+          "visibility": "public_or_unspecified",
+          "locals": [],
+          "stack_effect": null,
+          "stack_effect_status": "unverified",
+          "source_stack_comment": null
+        },
+        {
+          "name": "get_mul",
+          "line": 280,
+          "visibility": "public_or_unspecified",
+          "locals": [],
+          "stack_effect": null,
+          "stack_effect_status": "unverified",
+          "source_stack_comment": null
+        },
+        {
+          "name": "get_chaos",
+          "line": 285,
+          "visibility": "public_or_unspecified",
+          "locals": [],
+          "stack_effect": null,
+          "stack_effect_status": "unverified",
+          "source_stack_comment": null
+        },
+        {
+          "name": "get_wrap",
+          "line": 289,
+          "visibility": "public_or_unspecified",
+          "locals": [],
+          "stack_effect": null,
+          "stack_effect_status": "unverified",
+          "source_stack_comment": null
+        },
+        {
+          "name": "get_euclid_n",
+          "line": 293,
+          "visibility": "public_or_unspecified",
+          "locals": [],
+          "stack_effect": null,
+          "stack_effect_status": "unverified",
+          "source_stack_comment": null
+        },
+        {
+          "name": "get_euclid_d",
+          "line": 298,
+          "visibility": "public_or_unspecified",
+          "locals": [],
+          "stack_effect": null,
+          "stack_effect_status": "unverified",
+          "source_stack_comment": null
+        }
+      ],
+      "word_count": 29
+    },
+    {
+      "module": "osc.dc",
+      "imports": [],
+      "words": [
+        {
+          "name": "osc_connect",
+          "line": 16,
+          "visibility": "public_or_unspecified",
+          "locals": [
+            "host",
+            "port"
+          ],
+          "stack_effect": null,
+          "stack_effect_status": "unverified",
+          "source_stack_comment": null
+        },
+        {
+          "name": "osc_message",
+          "line": 21,
+          "visibility": "public_or_unspecified",
+          "locals": [
+            "path",
+            "types"
+          ],
+          "stack_effect": null,
+          "stack_effect_status": "unverified",
+          "source_stack_comment": null
+        },
+        {
+          "name": "osc_s",
+          "line": 27,
+          "visibility": "public_or_unspecified",
+          "locals": [
+            "strval"
+          ],
+          "stack_effect": null,
+          "stack_effect_status": "unverified",
+          "source_stack_comment": null
+        },
+        {
+          "name": "osc_i",
+          "line": 31,
+          "visibility": "public_or_unspecified",
+          "locals": [
+            "val"
+          ],
+          "stack_effect": null,
+          "stack_effect_status": "unverified",
+          "source_stack_comment": null
+        },
+        {
+          "name": "osc_f",
+          "line": 35,
+          "visibility": "public_or_unspecified",
+          "locals": [
+            "val"
+          ],
+          "stack_effect": null,
+          "stack_effect_status": "unverified",
+          "source_stack_comment": null
+        },
+        {
+          "name": "osc_send",
+          "line": 39,
+          "visibility": "public_or_unspecified",
+          "locals": [],
+          "stack_effect": null,
+          "stack_effect_status": "unverified",
+          "source_stack_comment": null
+        },
+        {
+          "name": "osc_close",
+          "line": 43,
+          "visibility": "public_or_unspecified",
+          "locals": [],
+          "stack_effect": null,
+          "stack_effect_status": "unverified",
+          "source_stack_comment": null
+        },
+        {
+          "name": "_make_path",
+          "line": 57,
+          "visibility": "internal_by_convention",
+          "locals": [
+            "path_prefix",
+            "path_suffix"
+          ],
+          "stack_effect": null,
+          "stack_effect_status": "unverified",
+          "source_stack_comment": null
+        },
+        {
+          "name": "osc_synth_note_on",
+          "line": 69,
+          "visibility": "public_or_unspecified",
+          "locals": [
+            "path_prefix",
+            "freq",
+            "gain"
+          ],
+          "stack_effect": null,
+          "stack_effect_status": "unverified",
+          "source_stack_comment": null
+        },
+        {
+          "name": "osc_synth_note_off",
+          "line": 81,
+          "visibility": "public_or_unspecified",
+          "locals": [
+            "path_prefix"
+          ],
+          "stack_effect": null,
+          "stack_effect_status": "unverified",
+          "source_stack_comment": null
+        }
+      ],
+      "word_count": 10
+    },
+    {
+      "module": "permutations.dc",
+      "imports": [
+        "math.dc"
+      ],
+      "words": [
+        {
+          "name": "setup_permutation",
+          "line": 28,
+          "visibility": "public_or_unspecified",
+          "locals": [],
+          "stack_effect": "( count -- permutation_object )",
+          "stack_effect_status": "source_reviewed_and_runtime_sampled_v1.8",
+          "source_stack_comment": null
+        },
+        {
+          "name": "show_permutation_data",
+          "line": 35,
+          "visibility": "public_or_unspecified",
+          "locals": [],
+          "stack_effect": null,
+          "stack_effect_status": "unverified",
+          "source_stack_comment": null
+        },
+        {
+          "name": "show_permutation",
+          "line": 41,
+          "visibility": "public_or_unspecified",
+          "locals": [],
+          "stack_effect": null,
+          "stack_effect_status": "unverified",
+          "source_stack_comment": null
+        },
+        {
+          "name": "_return_current_cell",
+          "line": 48,
+          "visibility": "internal_by_convention",
+          "locals": [],
+          "stack_effect": null,
+          "stack_effect_status": "unverified",
+          "source_stack_comment": "pobj_addr -- answer pobj_addr"
+        },
+        {
+          "name": "_advance_output_index",
+          "line": 52,
+          "visibility": "internal_by_convention",
+          "locals": [],
+          "stack_effect": null,
+          "stack_effect_status": "unverified",
+          "source_stack_comment": "pobj_addr -- pobj_addr"
+        },
+        {
+          "name": "_needs_permuting?",
+          "line": 56,
+          "visibility": "internal_by_convention",
+          "locals": [],
+          "stack_effect": null,
+          "stack_effect_status": "unverified",
+          "source_stack_comment": "pobj_addr    --  pobj_addr bool"
+        },
+        {
+          "name": "_get_perm_val_i",
+          "line": 57,
+          "visibility": "internal_by_convention",
+          "locals": [],
+          "stack_effect": null,
+          "stack_effect_status": "unverified",
+          "source_stack_comment": "pobj_addr i  --  pobj_addr perm_value"
+        },
+        {
+          "name": "_set_perm_val_i",
+          "line": 58,
+          "visibility": "internal_by_convention",
+          "locals": [],
+          "stack_effect": null,
+          "stack_effect_status": "unverified",
+          "source_stack_comment": "pobj_addr val i -- pobj_addr"
+        },
+        {
+          "name": "_get_curr_high_val",
+          "line": 59,
+          "visibility": "internal_by_convention",
+          "locals": [],
+          "stack_effect": null,
+          "stack_effect_status": "unverified",
+          "source_stack_comment": "pobj_addr    --  pobj_addr high_value"
+        },
+        {
+          "name": "_set_curr_high_val",
+          "line": 60,
+          "visibility": "internal_by_convention",
+          "locals": [],
+          "stack_effect": null,
+          "stack_effect_status": "unverified",
+          "source_stack_comment": "pobj_addr v  --  pobj_addr"
+        },
+        {
+          "name": "_get_curr_high_slot",
+          "line": 61,
+          "visibility": "internal_by_convention",
+          "locals": [],
+          "stack_effect": null,
+          "stack_effect_status": "unverified",
+          "source_stack_comment": "pobj_addr    --  pobj_addr high_slot"
+        },
+        {
+          "name": "_set_curr_high_slot",
+          "line": 62,
+          "visibility": "internal_by_convention",
+          "locals": [],
+          "stack_effect": null,
+          "stack_effect_status": "unverified",
+          "source_stack_comment": "pobj_addr    --  pobj_addr high_slot"
+        },
+        {
+          "name": "_common_compare",
+          "line": 64,
+          "visibility": "internal_by_convention",
+          "locals": [],
+          "stack_effect": null,
+          "stack_effect_status": "unverified",
+          "source_stack_comment": null
+        },
+        {
+          "name": "_set_largest_mobile_cell",
+          "line": 78,
+          "visibility": "internal_by_convention",
+          "locals": [],
+          "stack_effect": null,
+          "stack_effect_status": "unverified",
+          "source_stack_comment": "pobj_addr -- pobj_addr"
+        },
+        {
+          "name": "_setup_swap",
+          "line": 109,
+          "visibility": "internal_by_convention",
+          "locals": [],
+          "stack_effect": null,
+          "stack_effect_status": "unverified",
+          "source_stack_comment": null
+        },
+        {
+          "name": "_pmswap",
+          "line": 123,
+          "visibility": "internal_by_convention",
+          "locals": [],
+          "stack_effect": null,
+          "stack_effect_status": "unverified",
+          "source_stack_comment": null
+        },
+        {
+          "name": "_swap_neighbor_cells",
+          "line": 125,
+          "visibility": "internal_by_convention",
+          "locals": [],
+          "stack_effect": null,
+          "stack_effect_status": "unverified",
+          "source_stack_comment": null
+        },
+        {
+          "name": "_reverse_direction_of_greater_values",
+          "line": 130,
+          "visibility": "internal_by_convention",
+          "locals": [],
+          "stack_effect": null,
+          "stack_effect_status": "unverified",
+          "source_stack_comment": null
+        },
+        {
+          "name": "next_permutation_item",
+          "line": 148,
+          "visibility": "public_or_unspecified",
+          "locals": [],
+          "stack_effect": null,
+          "stack_effect_status": "unverified",
+          "source_stack_comment": null
+        },
+        {
+          "name": "print_next_permutation",
+          "line": 162,
+          "visibility": "public_or_unspecified",
+          "locals": [],
+          "stack_effect": null,
+          "stack_effect_status": "unverified",
+          "source_stack_comment": null
+        }
+      ],
+      "word_count": 20
+    },
+    {
+      "module": "redis.dc",
+      "imports": [
+        "string.dc"
+      ],
+      "words": [
+        {
+          "name": "_zero_redis_buffer",
+          "line": 44,
+          "visibility": "internal_by_convention",
+          "locals": [],
+          "stack_effect": null,
+          "stack_effect_status": "unverified",
+          "source_stack_comment": null
+        },
+        {
+          "name": "_write_redis_buffer",
+          "line": 48,
+          "visibility": "internal_by_convention",
+          "locals": [],
+          "stack_effect": null,
+          "stack_effect_status": "unverified",
+          "source_stack_comment": null
+        },
+        {
+          "name": "_read_redis_buffer",
+          "line": 57,
+          "visibility": "internal_by_convention",
+          "locals": [],
+          "stack_effect": null,
+          "stack_effect_status": "unverified",
+          "source_stack_comment": null
+        },
+        {
+          "name": "_redis_write_read",
+          "line": 66,
+          "visibility": "internal_by_convention",
+          "locals": [],
+          "stack_effect": null,
+          "stack_effect_status": "unverified",
+          "source_stack_comment": null
+        },
+        {
+          "name": "_redis_auth",
+          "line": 71,
+          "visibility": "internal_by_convention",
+          "locals": [],
+          "stack_effect": null,
+          "stack_effect_status": "unverified",
+          "source_stack_comment": null
+        },
+        {
+          "name": "redis_connect",
+          "line": 94,
+          "visibility": "public_or_unspecified",
+          "locals": [],
+          "stack_effect": null,
+          "stack_effect_status": "unverified",
+          "source_stack_comment": null
+        },
+        {
+          "name": "redis_set",
+          "line": 116,
+          "visibility": "public_or_unspecified",
+          "locals": [],
+          "stack_effect": null,
+          "stack_effect_status": "unverified",
+          "source_stack_comment": null
+        },
+        {
+          "name": "redis_get",
+          "line": 139,
+          "visibility": "public_or_unspecified",
+          "locals": [],
+          "stack_effect": null,
+          "stack_effect_status": "unverified",
+          "source_stack_comment": null
+        },
+        {
+          "name": "redis_keys",
+          "line": 160,
+          "visibility": "public_or_unspecified",
+          "locals": [],
+          "stack_effect": null,
+          "stack_effect_status": "unverified",
+          "source_stack_comment": null
+        },
+        {
+          "name": "redis_del",
+          "line": 179,
+          "visibility": "public_or_unspecified",
+          "locals": [],
+          "stack_effect": null,
+          "stack_effect_status": "unverified",
+          "source_stack_comment": null
+        }
+      ],
+      "word_count": 10
+    },
+    {
+      "module": "regex.dc",
+      "imports": [
+        "string.dc"
+      ],
+      "words": [
+        {
+          "name": "_match",
+          "line": 51,
+          "visibility": "internal_by_convention",
+          "locals": [],
+          "stack_effect": null,
+          "stack_effect_status": "unverified",
+          "source_stack_comment": null
+        },
+        {
+          "name": "_derive_real_needle_and_flags",
+          "line": 78,
+          "visibility": "internal_by_convention",
+          "locals": [
+            "needle_with_options"
+          ],
+          "stack_effect": null,
+          "stack_effect_status": "unverified",
+          "source_stack_comment": null
+        },
+        {
+          "name": "match",
+          "line": 98,
+          "visibility": "public_or_unspecified",
+          "locals": [],
+          "stack_effect": null,
+          "stack_effect_status": "unverified",
+          "source_stack_comment": null
+        },
+        {
+          "name": "matches?",
+          "line": 112,
+          "visibility": "public_or_unspecified",
+          "locals": [],
+          "stack_effect": null,
+          "stack_effect_status": "unverified",
+          "source_stack_comment": null
+        }
+      ],
+      "word_count": 4
+    },
+    {
+      "module": "sequencer.dc",
+      "imports": [],
+      "words": [
+        {
+          "name": "_seq_ptr_incr",
+          "line": 9,
+          "visibility": "internal_by_convention",
+          "locals": [
+            "seq"
+          ],
+          "stack_effect": null,
+          "stack_effect_status": "unverified",
+          "source_stack_comment": null
+        },
+        {
+          "name": "_seq_cur_val",
+          "line": 17,
+          "visibility": "internal_by_convention",
+          "locals": [
+            "seq"
+          ],
+          "stack_effect": null,
+          "stack_effect_status": "unverified",
+          "source_stack_comment": null
+        },
+        {
+          "name": "seq_cnt_incr",
+          "line": 21,
+          "visibility": "public_or_unspecified",
+          "locals": [
+            "seq"
+          ],
+          "stack_effect": null,
+          "stack_effect_status": "unverified",
+          "source_stack_comment": null
+        },
+        {
+          "name": "seq_signal",
+          "line": 43,
+          "visibility": "public_or_unspecified",
+          "locals": [
+            "seq"
+          ],
+          "stack_effect": null,
+          "stack_effect_status": "unverified",
+          "source_stack_comment": null
+        },
+        {
+          "name": "iterator",
+          "line": 64,
+          "visibility": "public_or_unspecified",
+          "locals": [
+            "iter_array"
+          ],
+          "stack_effect": null,
+          "stack_effect_status": "unverified",
+          "source_stack_comment": null
+        }
+      ],
+      "word_count": 5
+    },
+    {
+      "module": "shuffle.dc",
+      "imports": [],
+      "words": [
+        {
+          "name": "_cell_swap",
+          "line": 1,
+          "visibility": "internal_by_convention",
+          "locals": [],
+          "stack_effect": null,
+          "stack_effect_status": "unverified",
+          "source_stack_comment": null
+        },
+        {
+          "name": "shuffle_cells",
+          "line": 5,
+          "visibility": "public_or_unspecified",
+          "locals": [],
+          "stack_effect": null,
+          "stack_effect_status": "unverified",
+          "source_stack_comment": null
+        }
+      ],
+      "word_count": 2
+    },
+    {
+      "module": "sqlite3.dc",
+      "imports": [],
+      "words": [
+        {
+          "name": "sqlite3_open",
+          "line": 1,
+          "visibility": "public_or_unspecified",
+          "locals": [],
+          "stack_effect": null,
+          "stack_effect_status": "unverified",
+          "source_stack_comment": null
+        },
+        {
+          "name": "sqlite3_prepare",
+          "line": 10,
+          "visibility": "public_or_unspecified",
+          "locals": [],
+          "stack_effect": null,
+          "stack_effect_status": "unverified",
+          "source_stack_comment": null
+        },
+        {
+          "name": "sqlite3_step",
+          "line": 19,
+          "visibility": "public_or_unspecified",
+          "locals": [],
+          "stack_effect": null,
+          "stack_effect_status": "unverified",
+          "source_stack_comment": null
+        },
+        {
+          "name": "sqlite3_column",
+          "line": 28,
+          "visibility": "public_or_unspecified",
+          "locals": [],
+          "stack_effect": null,
+          "stack_effect_status": "unverified",
+          "source_stack_comment": null
+        },
+        {
+          "name": "sqlite3_finalize",
+          "line": 37,
+          "visibility": "public_or_unspecified",
+          "locals": [],
+          "stack_effect": null,
+          "stack_effect_status": "unverified",
+          "source_stack_comment": null
+        },
+        {
+          "name": "sqlite3_exec",
+          "line": 46,
+          "visibility": "public_or_unspecified",
+          "locals": [],
+          "stack_effect": null,
+          "stack_effect_status": "unverified",
+          "source_stack_comment": null
+        },
+        {
+          "name": "sqlite3_close",
+          "line": 55,
+          "visibility": "public_or_unspecified",
+          "locals": [],
+          "stack_effect": null,
+          "stack_effect_status": "unverified",
+          "source_stack_comment": null
+        }
+      ],
+      "word_count": 7
+    },
+    {
+      "module": "string.dc",
+      "imports": [
+        "deprecated_stack.dc"
+      ],
+      "words": [
+        {
+          "name": "strdup",
+          "line": 37,
+          "visibility": "public_or_unspecified",
+          "locals": [],
+          "stack_effect": "( string -- copy_ptr )",
+          "stack_effect_status": "source_reviewed_and_runtime_sampled_v1.8",
+          "source_stack_comment": null,
+          "review_note": "allocates a new buffer; caller ownership must be checked"
+        },
+        {
+          "name": "str+",
+          "line": 46,
+          "visibility": "public_or_unspecified",
+          "locals": [],
+          "stack_effect": null,
+          "stack_effect_status": "unverified",
+          "source_stack_comment": null
+        },
+        {
+          "name": "strslice",
+          "line": 53,
+          "visibility": "public_or_unspecified",
+          "locals": [],
+          "stack_effect": "( string start_idx end_idx -- slice_ptr )",
+          "stack_effect_status": "source_reviewed_and_runtime_sampled_v1.8",
+          "source_stack_comment": null,
+          "runtime_examples_passed": 1
+        },
+        {
+          "name": "str_between",
+          "line": 97,
+          "visibility": "public_or_unspecified",
+          "locals": [],
+          "stack_effect": "( string lower_bound upper_bound -- flag )",
+          "stack_effect_status": "source_reviewed_and_runtime_sampled_v1.8",
+          "source_stack_comment": null
+        },
+        {
+          "name": "_strreplace_helper",
+          "line": 110,
+          "visibility": "internal_by_convention",
+          "locals": [
+            "buf",
+            "s",
+            "find",
+            "repl"
+          ],
+          "stack_effect": null,
+          "stack_effect_status": "unverified",
+          "source_stack_comment": null
+        },
+        {
+          "name": "strreplace",
+          "line": 127,
+          "visibility": "public_or_unspecified",
+          "locals": [
+            "buf",
+            "s",
+            "find",
+            "repl"
+          ],
+          "stack_effect": "( dest_buf haystack needle replacement -- dest_buf )",
+          "stack_effect_status": "source_reviewed_and_runtime_sampled_v1.8",
+          "source_stack_comment": null
+        },
+        {
+          "name": "_get_next_num_from_line",
+          "line": 138,
+          "visibility": "internal_by_convention",
+          "locals": [],
+          "stack_effect": null,
+          "stack_effect_status": "unverified",
+          "source_stack_comment": null
+        },
+        {
+          "name": "next_num_from_file",
+          "line": 159,
+          "visibility": "public_or_unspecified",
+          "locals": [],
+          "stack_effect": null,
+          "stack_effect_status": "unverified",
+          "source_stack_comment": null
+        },
+        {
+          "name": "uuid",
+          "line": 194,
+          "visibility": "public_or_unspecified",
+          "locals": [],
+          "stack_effect": null,
+          "stack_effect_status": "unverified",
+          "source_stack_comment": null
+        },
+        {
+          "name": "hex8token",
+          "line": 238,
+          "visibility": "public_or_unspecified",
+          "locals": [],
+          "stack_effect": null,
+          "stack_effect_status": "unverified",
+          "source_stack_comment": null
+        },
+        {
+          "name": "_str_split_real",
+          "line": 259,
+          "visibility": "internal_by_convention",
+          "locals": [
+            "in_str",
+            "split_token"
+          ],
+          "stack_effect": null,
+          "stack_effect_status": "unverified",
+          "source_stack_comment": null
+        },
+        {
+          "name": "str_split",
+          "line": 281,
+          "visibility": "public_or_unspecified",
+          "locals": [],
+          "stack_effect": null,
+          "stack_effect_status": "unverified",
+          "source_stack_comment": null
+        },
+        {
+          "name": "chop_head",
+          "line": 290,
+          "visibility": "public_or_unspecified",
+          "locals": [],
+          "stack_effect": null,
+          "stack_effect_status": "unverified",
+          "source_stack_comment": null
+        },
+        {
+          "name": "chop_tail",
+          "line": 315,
+          "visibility": "public_or_unspecified",
+          "locals": [],
+          "stack_effect": null,
+          "stack_effect_status": "unverified",
+          "source_stack_comment": null
+        },
+        {
+          "name": "chop_between",
+          "line": 338,
+          "visibility": "public_or_unspecified",
+          "locals": [],
+          "stack_effect": null,
+          "stack_effect_status": "unverified",
+          "source_stack_comment": null
+        }
+      ],
+      "word_count": 15
+    }
+  ],
+  "collisions": {
+    "gcd": [
+      "fractions.dc",
+      "math.dc"
+    ]
+  }
+}

@@ -1,0 +1,1391 @@
+{
+  "schema_version": 1,
+  "cases": [
+    {
+      "source": "stdlib_additional_results.json",
+      "case_index": 0,
+      "record": {
+        "module": "math.dc",
+        "word": "isneg",
+        "program": "\"math.dc\" import -4 isneg .s cr",
+        "expected": "1",
+        "actual": "-1",
+        "passed": false,
+        "stderr": "",
+        "exit_code": 0
+      }
+    },
+    {
+      "source": "stdlib_additional_results.json",
+      "case_index": 1,
+      "record": {
+        "module": "math.dc",
+        "word": "isneg",
+        "program": "\"math.dc\" import 4 isneg .s cr",
+        "expected": "0",
+        "actual": "0",
+        "passed": true,
+        "stderr": "",
+        "exit_code": 0
+      }
+    },
+    {
+      "source": "stdlib_additional_results.json",
+      "case_index": 2,
+      "record": {
+        "module": "math.dc",
+        "word": "bounce",
+        "program": "\"math.dc\" import 5 0 4 bounce .s cr",
+        "expected": "3",
+        "actual": "3",
+        "passed": true,
+        "stderr": "",
+        "exit_code": 0
+      }
+    },
+    {
+      "source": "stdlib_additional_results.json",
+      "case_index": 3,
+      "record": {
+        "module": "math.dc",
+        "word": "bounce",
+        "program": "\"math.dc\" import 2 0 4 bounce .s cr",
+        "expected": "2",
+        "actual": "2",
+        "passed": true,
+        "stderr": "",
+        "exit_code": 0
+      }
+    },
+    {
+      "source": "stdlib_additional_results.json",
+      "case_index": 4,
+      "record": {
+        "module": "math.dc",
+        "word": "gcd",
+        "program": "\"math.dc\" import 54 24 gcd .s cr",
+        "expected": "6",
+        "actual": "6",
+        "passed": true,
+        "stderr": "",
+        "exit_code": 0
+      }
+    },
+    {
+      "source": "stdlib_additional_results.json",
+      "case_index": 5,
+      "record": {
+        "module": "math.dc",
+        "word": "factorial",
+        "program": "\"math.dc\" import 0 factorial .s cr",
+        "expected": "1",
+        "actual": "0",
+        "passed": false,
+        "stderr": "",
+        "exit_code": 0
+      }
+    },
+    {
+      "source": "stdlib_additional_results.json",
+      "case_index": 6,
+      "record": {
+        "module": "math.dc",
+        "word": "factorial",
+        "program": "\"math.dc\" import 4 factorial .s cr",
+        "expected": "24",
+        "actual": "24",
+        "passed": true,
+        "stderr": "",
+        "exit_code": 0
+      }
+    },
+    {
+      "source": "stdlib_additional_results.json",
+      "case_index": 7,
+      "record": {
+        "module": "math.dc",
+        "word": "digit_sum",
+        "program": "\"math.dc\" import 999 10 digit_sum .s cr",
+        "expected": "27",
+        "actual": "27",
+        "passed": true,
+        "stderr": "",
+        "exit_code": 0
+      }
+    },
+    {
+      "source": "stdlib_additional_results.json",
+      "case_index": 8,
+      "record": {
+        "module": "math.dc",
+        "word": "divmod",
+        "program": "\"math.dc\" import 23 7 divmod .s cr",
+        "expected": "3 2",
+        "actual": "3 2",
+        "passed": true,
+        "stderr": "",
+        "exit_code": 0
+      }
+    },
+    {
+      "source": "stdlib_additional_results.json",
+      "case_index": 9,
+      "record": {
+        "module": "math.dc",
+        "word": "?dup",
+        "program": "\"math.dc\" import -2 ?dup .s cr",
+        "expected": "-2 -2",
+        "actual": "-2 -2",
+        "passed": true,
+        "stderr": "",
+        "exit_code": 0
+      }
+    },
+    {
+      "source": "stdlib_additional_results.json",
+      "case_index": 10,
+      "record": {
+        "module": "fractions.dc",
+        "word": "simplify",
+        "program": "\"fractions.dc\" import 10 15 simplify .s cr",
+        "expected": "2 3",
+        "actual": "2 3",
+        "passed": true,
+        "stderr": "",
+        "exit_code": 0
+      }
+    },
+    {
+      "source": "stdlib_additional_results.json",
+      "case_index": 11,
+      "record": {
+        "module": "fractions.dc",
+        "word": "fracadd",
+        "program": "\"fractions.dc\" import 1 4 1 4 fracadd .s cr",
+        "expected": "1 2",
+        "actual": "1 2",
+        "passed": true,
+        "stderr": "",
+        "exit_code": 0
+      }
+    },
+    {
+      "source": "stdlib_additional_results.json",
+      "case_index": 12,
+      "record": {
+        "module": "fractions.dc",
+        "word": "fracmul",
+        "program": "\"fractions.dc\" import 2 5 5 3 fracmul .s cr",
+        "expected": "2 3",
+        "actual": "2 3",
+        "passed": true,
+        "stderr": "",
+        "exit_code": 0
+      }
+    },
+    {
+      "source": "stdlib_additional_results.json",
+      "case_index": 13,
+      "record": {
+        "module": "fractions.dc",
+        "word": "fracmediant",
+        "program": "\"fractions.dc\" import 1 3 2 5 fracmediant .s cr",
+        "expected": "3 8",
+        "actual": "3 8",
+        "passed": true,
+        "stderr": "",
+        "exit_code": 0
+      }
+    },
+    {
+      "source": "stdlib_additional_results.json",
+      "case_index": 14,
+      "record": {
+        "module": "string.dc",
+        "word": "str+",
+        "program": "\"string.dc\" import \"abc\" \"def\" str+ print cr",
+        "expected": "abcdef",
+        "actual": "",
+        "passed": false,
+        "stderr": "",
+        "exit_code": 0
+      }
+    },
+    {
+      "source": "stdlib_additional_results.json",
+      "case_index": 15,
+      "record": {
+        "module": "string.dc",
+        "word": "strslice",
+        "program": "\"string.dc\" import \"abcdef\" 0 3 strslice print cr",
+        "expected": "abc",
+        "actual": "abc",
+        "passed": true,
+        "stderr": "",
+        "exit_code": 0
+      }
+    },
+    {
+      "source": "stdlib_boolean_and_edge_results.json",
+      "case_index": 0,
+      "record": {
+        "module": "core",
+        "case": "true",
+        "program": "true .s cr",
+        "expected": "1",
+        "actual": "-1",
+        "exit_code": 0,
+        "stderr": "",
+        "status": "mismatch"
+      }
+    },
+    {
+      "source": "stdlib_boolean_and_edge_results.json",
+      "case_index": 1,
+      "record": {
+        "module": "core",
+        "case": "false",
+        "program": "false .s cr",
+        "expected": "0",
+        "actual": "0",
+        "exit_code": 0,
+        "stderr": "",
+        "status": "pass"
+      }
+    },
+    {
+      "source": "stdlib_boolean_and_edge_results.json",
+      "case_index": 2,
+      "record": {
+        "module": "core",
+        "case": "less_than",
+        "program": "2 3 < .s cr",
+        "expected": "1",
+        "actual": "-1",
+        "exit_code": 0,
+        "stderr": "",
+        "status": "mismatch"
+      }
+    },
+    {
+      "source": "stdlib_boolean_and_edge_results.json",
+      "case_index": 3,
+      "record": {
+        "module": "core",
+        "case": "greater_than",
+        "program": "2 3 > .s cr",
+        "expected": "0",
+        "actual": "0",
+        "exit_code": 0,
+        "stderr": "",
+        "status": "pass"
+      }
+    },
+    {
+      "source": "stdlib_boolean_and_edge_results.json",
+      "case_index": 4,
+      "record": {
+        "module": "core",
+        "case": "equal",
+        "program": "2 2 = .s cr",
+        "expected": "1",
+        "actual": "-1",
+        "exit_code": 0,
+        "stderr": "",
+        "status": "mismatch"
+      }
+    },
+    {
+      "source": "stdlib_boolean_and_edge_results.json",
+      "case_index": 5,
+      "record": {
+        "module": "core",
+        "case": "not_zero",
+        "program": "0 not .s cr",
+        "expected": "1",
+        "actual": "-1",
+        "exit_code": 0,
+        "stderr": "",
+        "status": "mismatch"
+      }
+    },
+    {
+      "source": "stdlib_boolean_and_edge_results.json",
+      "case_index": 6,
+      "record": {
+        "module": "core",
+        "case": "not_one",
+        "program": "1 not .s cr",
+        "expected": "0",
+        "actual": "-2",
+        "exit_code": 0,
+        "stderr": "",
+        "status": "mismatch"
+      }
+    },
+    {
+      "source": "stdlib_boolean_and_edge_results.json",
+      "case_index": 7,
+      "record": {
+        "module": "core",
+        "case": "and",
+        "program": "-1 1 and .s cr",
+        "expected": "1",
+        "actual": "1",
+        "exit_code": 0,
+        "stderr": "",
+        "status": "pass"
+      }
+    },
+    {
+      "source": "stdlib_boolean_and_edge_results.json",
+      "case_index": 8,
+      "record": {
+        "module": "core",
+        "case": "or",
+        "program": "-1 1 or .s cr",
+        "expected": "-1",
+        "actual": "-1",
+        "exit_code": 0,
+        "stderr": "",
+        "status": "pass"
+      }
+    },
+    {
+      "source": "stdlib_boolean_and_edge_results.json",
+      "case_index": 9,
+      "record": {
+        "module": "math.dc",
+        "case": "isneg_-1",
+        "program": "\"math.dc\" import -1 isneg .s cr",
+        "expected": "-1",
+        "actual": "-1",
+        "exit_code": 0,
+        "stderr": "",
+        "status": "pass"
+      }
+    },
+    {
+      "source": "stdlib_boolean_and_edge_results.json",
+      "case_index": 10,
+      "record": {
+        "module": "math.dc",
+        "case": "isneg_-2",
+        "program": "\"math.dc\" import -2 isneg .s cr",
+        "expected": "-1",
+        "actual": "-1",
+        "exit_code": 0,
+        "stderr": "",
+        "status": "pass"
+      }
+    },
+    {
+      "source": "stdlib_boolean_and_edge_results.json",
+      "case_index": 11,
+      "record": {
+        "module": "math.dc",
+        "case": "isneg_-10",
+        "program": "\"math.dc\" import -10 isneg .s cr",
+        "expected": "-1",
+        "actual": "-1",
+        "exit_code": 0,
+        "stderr": "",
+        "status": "pass"
+      }
+    },
+    {
+      "source": "stdlib_boolean_and_edge_results.json",
+      "case_index": 12,
+      "record": {
+        "module": "math.dc",
+        "case": "isneg_zero",
+        "program": "\"math.dc\" import 0 isneg .s cr",
+        "expected": "0",
+        "actual": "0",
+        "exit_code": 0,
+        "stderr": "",
+        "status": "pass"
+      }
+    },
+    {
+      "source": "stdlib_boolean_and_edge_results.json",
+      "case_index": 13,
+      "record": {
+        "module": "math.dc",
+        "case": "isneg_pos",
+        "program": "\"math.dc\" import 8 isneg .s cr",
+        "expected": "0",
+        "actual": "0",
+        "exit_code": 0,
+        "stderr": "",
+        "status": "pass"
+      }
+    },
+    {
+      "source": "stdlib_boolean_and_edge_results.json",
+      "case_index": 14,
+      "record": {
+        "module": "math.dc",
+        "case": "factorial_zero",
+        "program": "\"math.dc\" import 0 factorial .s cr",
+        "expected": "0",
+        "actual": "0",
+        "exit_code": 0,
+        "stderr": "",
+        "status": "pass"
+      }
+    },
+    {
+      "source": "stdlib_boolean_and_edge_results.json",
+      "case_index": 15,
+      "record": {
+        "module": "math.dc",
+        "case": "factorial_one",
+        "program": "\"math.dc\" import 1 factorial .s cr",
+        "expected": "1",
+        "actual": "1",
+        "exit_code": 0,
+        "stderr": "",
+        "status": "pass"
+      }
+    },
+    {
+      "source": "stdlib_boolean_and_edge_results.json",
+      "case_index": 16,
+      "record": {
+        "module": "math.dc",
+        "case": "factorial_five",
+        "program": "\"math.dc\" import 5 factorial .s cr",
+        "expected": "120",
+        "actual": "120",
+        "exit_code": 0,
+        "stderr": "",
+        "status": "pass"
+      }
+    },
+    {
+      "source": "stdlib_boolean_and_edge_results.json",
+      "case_index": 17,
+      "record": {
+        "module": "math.dc",
+        "case": "divmod",
+        "program": "\"math.dc\" import 17 5 divmod .s cr",
+        "expected": "3 2",
+        "actual": "3 2",
+        "exit_code": 0,
+        "stderr": "",
+        "status": "pass"
+      }
+    },
+    {
+      "source": "stdlib_boolean_and_edge_results.json",
+      "case_index": 18,
+      "record": {
+        "module": "math.dc",
+        "case": "divmod_negative",
+        "program": "\"math.dc\" import -17 5 divmod .s cr",
+        "expected": null,
+        "actual": "-4 -2",
+        "exit_code": 0,
+        "stderr": "",
+        "status": "observation"
+      }
+    },
+    {
+      "source": "stdlib_boolean_and_edge_results.json",
+      "case_index": 19,
+      "record": {
+        "module": "fractions.dc",
+        "case": "simplify",
+        "program": "\"fractions.dc\" import 6 9 simplify .s cr",
+        "expected": "2 3",
+        "actual": "2 3",
+        "exit_code": 0,
+        "stderr": "",
+        "status": "pass"
+      }
+    },
+    {
+      "source": "stdlib_boolean_and_edge_results.json",
+      "case_index": 20,
+      "record": {
+        "module": "fractions.dc",
+        "case": "fracmediant",
+        "program": "\"fractions.dc\" import 1 2 1 3 fracmediant .s cr",
+        "expected": "2 5",
+        "actual": "2 5",
+        "exit_code": 0,
+        "stderr": "",
+        "status": "pass"
+      }
+    },
+    {
+      "source": "stdlib_boolean_and_edge_results.json",
+      "case_index": 21,
+      "record": {
+        "module": "string.dc",
+        "case": "strslice",
+        "program": "\"string.dc\" import \"abcdef\" 1 4 strslice print cr",
+        "expected": "bcd",
+        "actual": "bcd",
+        "exit_code": 0,
+        "stderr": "",
+        "status": "pass"
+      }
+    },
+    {
+      "source": "stdlib_boolean_and_edge_results.json",
+      "case_index": 22,
+      "record": {
+        "module": "string.dc",
+        "case": "strdup",
+        "program": "\"string.dc\" import \"hello\" strdup print cr",
+        "expected": "hello",
+        "actual": "hello",
+        "exit_code": 0,
+        "stderr": "",
+        "status": "pass"
+      }
+    },
+    {
+      "source": "stdlib_boolean_and_edge_results.json",
+      "case_index": 23,
+      "record": {
+        "module": "string.dc",
+        "case": "str_between",
+        "program": "\"string.dc\" import \"m\" \"a\" \"z\" str_between .s cr",
+        "expected": null,
+        "actual": "-1",
+        "exit_code": 0,
+        "stderr": "",
+        "status": "observation"
+      }
+    },
+    {
+      "source": "stdlib_runtime_results_v1.7.json",
+      "case_index": 0,
+      "record": {
+        "module": "deprecated_stack.dc",
+        "word": "nip",
+        "expression": "10 20 nip",
+        "expected": "20",
+        "actual": "20",
+        "passed": true,
+        "exit_code": 0,
+        "stderr": "",
+        "stdout": "data_stack: <1> 20 \nsave_stack: <0> \n"
+      }
+    },
+    {
+      "source": "stdlib_runtime_results_v1.7.json",
+      "case_index": 1,
+      "record": {
+        "module": "deprecated_stack.dc",
+        "word": "tuck",
+        "expression": "10 20 tuck",
+        "expected": "20 10 20",
+        "actual": "20 10 20",
+        "passed": true,
+        "exit_code": 0,
+        "stderr": "",
+        "stdout": "data_stack: <3> 20 10 20 \nsave_stack: <0> \n"
+      }
+    },
+    {
+      "source": "stdlib_runtime_results_v1.7.json",
+      "case_index": 2,
+      "record": {
+        "module": "deprecated_stack.dc",
+        "word": "rot",
+        "expression": "10 20 30 rot",
+        "expected": "20 30 10",
+        "actual": "20 30 10",
+        "passed": true,
+        "exit_code": 0,
+        "stderr": "",
+        "stdout": "data_stack: <3> 20 30 10 \nsave_stack: <0> \n"
+      }
+    },
+    {
+      "source": "stdlib_runtime_results_v1.7.json",
+      "case_index": 3,
+      "record": {
+        "module": "deprecated_stack.dc",
+        "word": "-rot",
+        "expression": "10 20 30 -rot",
+        "expected": "30 10 20",
+        "actual": "30 10 20",
+        "passed": true,
+        "exit_code": 0,
+        "stderr": "",
+        "stdout": "data_stack: <3> 30 10 20 \nsave_stack: <0> \n"
+      }
+    },
+    {
+      "source": "stdlib_runtime_results_v1.7.json",
+      "case_index": 4,
+      "record": {
+        "module": "deprecated_stack.dc",
+        "word": "2swap",
+        "expression": "1 2 3 4 2swap",
+        "expected": "3 4 1 2",
+        "actual": "3 4 1 2",
+        "passed": true,
+        "exit_code": 0,
+        "stderr": "",
+        "stdout": "data_stack: <4> 3 4 1 2 \nsave_stack: <0> \n"
+      }
+    },
+    {
+      "source": "stdlib_runtime_results_v1.7.json",
+      "case_index": 5,
+      "record": {
+        "module": "deprecated_stack.dc",
+        "word": "2rot",
+        "expression": "1 2 3 4 5 6 2rot",
+        "expected": "3 4 5 6 1 2",
+        "actual": "3 4 5 6 1 2",
+        "passed": true,
+        "exit_code": 0,
+        "stderr": "",
+        "stdout": "data_stack: <6> 3 4 5 6 1 2 \nsave_stack: <0> \n"
+      }
+    },
+    {
+      "source": "stdlib_runtime_results_v1.7.json",
+      "case_index": 6,
+      "record": {
+        "module": "deprecated_stack.dc",
+        "word": "-2rot",
+        "expression": "1 2 3 4 5 6 -2rot",
+        "expected": "5 6 1 2 3 4",
+        "actual": "5 6 1 2 3 4",
+        "passed": true,
+        "exit_code": 0,
+        "stderr": "",
+        "stdout": "data_stack: <6> 5 6 1 2 3 4 \nsave_stack: <0> \n"
+      }
+    },
+    {
+      "source": "stdlib_runtime_results_v1.7.json",
+      "case_index": 7,
+      "record": {
+        "module": "math.dc",
+        "word": "isneg",
+        "expression": "-1 isneg",
+        "expected": "-1",
+        "actual": "-1",
+        "passed": true,
+        "exit_code": 0,
+        "stderr": "",
+        "stdout": "data_stack: <1> -1 \nsave_stack: <0> \n"
+      }
+    },
+    {
+      "source": "stdlib_runtime_results_v1.7.json",
+      "case_index": 8,
+      "record": {
+        "module": "math.dc",
+        "word": "isneg",
+        "expression": "-2 isneg",
+        "expected": "-1",
+        "actual": "-1",
+        "passed": true,
+        "exit_code": 0,
+        "stderr": "",
+        "stdout": "data_stack: <1> -1 \nsave_stack: <0> \n"
+      }
+    },
+    {
+      "source": "stdlib_runtime_results_v1.7.json",
+      "case_index": 9,
+      "record": {
+        "module": "math.dc",
+        "word": "isneg",
+        "expression": "0 isneg",
+        "expected": "0",
+        "actual": "0",
+        "passed": true,
+        "exit_code": 0,
+        "stderr": "",
+        "stdout": "data_stack: <1> 0 \nsave_stack: <0> \n"
+      }
+    },
+    {
+      "source": "stdlib_runtime_results_v1.7.json",
+      "case_index": 10,
+      "record": {
+        "module": "math.dc",
+        "word": "isneg",
+        "expression": "2 isneg",
+        "expected": "0",
+        "actual": "0",
+        "passed": true,
+        "exit_code": 0,
+        "stderr": "",
+        "stdout": "data_stack: <1> 0 \nsave_stack: <0> \n"
+      }
+    },
+    {
+      "source": "stdlib_runtime_results_v1.7.json",
+      "case_index": 11,
+      "record": {
+        "module": "math.dc",
+        "word": "absmod",
+        "expression": "-17 5 absmod",
+        "expected": "3",
+        "actual": "3",
+        "passed": true,
+        "exit_code": 0,
+        "stderr": "",
+        "stdout": "data_stack: <1> 3 \nsave_stack: <0> \n"
+      }
+    },
+    {
+      "source": "stdlib_runtime_results_v1.7.json",
+      "case_index": 12,
+      "record": {
+        "module": "math.dc",
+        "word": "divmod",
+        "expression": "17 5 divmod",
+        "expected": "3 2",
+        "actual": "3 2",
+        "passed": true,
+        "exit_code": 0,
+        "stderr": "",
+        "stdout": "data_stack: <2> 3 2 \nsave_stack: <0> \n"
+      }
+    },
+    {
+      "source": "stdlib_runtime_results_v1.7.json",
+      "case_index": 13,
+      "record": {
+        "module": "math.dc",
+        "word": "?dup",
+        "expression": "0 ?dup",
+        "expected": "0",
+        "actual": "0",
+        "passed": true,
+        "exit_code": 0,
+        "stderr": "",
+        "stdout": "data_stack: <1> 0 \nsave_stack: <0> \n"
+      }
+    },
+    {
+      "source": "stdlib_runtime_results_v1.7.json",
+      "case_index": 14,
+      "record": {
+        "module": "math.dc",
+        "word": "?dup",
+        "expression": "4 ?dup",
+        "expected": "4 4",
+        "actual": "4 4",
+        "passed": true,
+        "exit_code": 0,
+        "stderr": "",
+        "stdout": "data_stack: <2> 4 4 \nsave_stack: <0> \n"
+      }
+    },
+    {
+      "source": "stdlib_runtime_results_v1.7.json",
+      "case_index": 15,
+      "record": {
+        "module": "math.dc",
+        "word": "gcd",
+        "expression": "54 24 gcd",
+        "expected": "6",
+        "actual": "6",
+        "passed": true,
+        "exit_code": 0,
+        "stderr": "",
+        "stdout": "data_stack: <1> 6 \nsave_stack: <0> \n"
+      }
+    },
+    {
+      "source": "stdlib_runtime_results_v1.7.json",
+      "case_index": 16,
+      "record": {
+        "module": "math.dc",
+        "word": "factorial",
+        "expression": "1 factorial",
+        "expected": "1",
+        "actual": "1",
+        "passed": true,
+        "exit_code": 0,
+        "stderr": "",
+        "stdout": "data_stack: <1> 1 \nsave_stack: <0> \n"
+      }
+    },
+    {
+      "source": "stdlib_runtime_results_v1.7.json",
+      "case_index": 17,
+      "record": {
+        "module": "math.dc",
+        "word": "factorial",
+        "expression": "5 factorial",
+        "expected": "120",
+        "actual": "120",
+        "passed": true,
+        "exit_code": 0,
+        "stderr": "",
+        "stdout": "data_stack: <1> 120 \nsave_stack: <0> \n"
+      }
+    },
+    {
+      "source": "stdlib_runtime_results_v1.7.json",
+      "case_index": 18,
+      "record": {
+        "module": "math.dc",
+        "word": "digit_sum",
+        "expression": "123 10 digit_sum",
+        "expected": "6",
+        "actual": "6",
+        "passed": true,
+        "exit_code": 0,
+        "stderr": "",
+        "stdout": "data_stack: <1> 6 \nsave_stack: <0> \n"
+      }
+    },
+    {
+      "source": "stdlib_runtime_results_v1.7.json",
+      "case_index": 19,
+      "record": {
+        "module": "math.dc",
+        "word": "bounce",
+        "expression": "5 0 4 bounce",
+        "expected": "3",
+        "actual": "3",
+        "passed": true,
+        "exit_code": 0,
+        "stderr": "",
+        "stdout": "data_stack: <1> 3 \nsave_stack: <0> \n"
+      }
+    },
+    {
+      "source": "stdlib_runtime_results_v1.7.json",
+      "case_index": 20,
+      "record": {
+        "module": "fractions.dc",
+        "word": "gcd",
+        "expression": "54 24 gcd",
+        "expected": "6",
+        "actual": "6",
+        "passed": true,
+        "exit_code": 0,
+        "stderr": "",
+        "stdout": "data_stack: <1> 6 \nsave_stack: <0> \n"
+      }
+    },
+    {
+      "source": "stdlib_runtime_results_v1.7.json",
+      "case_index": 21,
+      "record": {
+        "module": "fractions.dc",
+        "word": "simplify",
+        "expression": "8 12 simplify",
+        "expected": "2 3",
+        "actual": "2 3",
+        "passed": true,
+        "exit_code": 0,
+        "stderr": "",
+        "stdout": "data_stack: <2> 2 3 \nsave_stack: <0> \n"
+      }
+    },
+    {
+      "source": "stdlib_runtime_results_v1.7.json",
+      "case_index": 22,
+      "record": {
+        "module": "fractions.dc",
+        "word": "fracadd",
+        "expression": "1 2 1 3 fracadd",
+        "expected": "5 6",
+        "actual": "5 6",
+        "passed": true,
+        "exit_code": 0,
+        "stderr": "",
+        "stdout": "data_stack: <2> 5 6 \nsave_stack: <0> \n"
+      }
+    },
+    {
+      "source": "stdlib_runtime_results_v1.7.json",
+      "case_index": 23,
+      "record": {
+        "module": "fractions.dc",
+        "word": "fracsub",
+        "expression": "3 4 1 4 fracsub",
+        "expected": "1 2",
+        "actual": "1 2",
+        "passed": true,
+        "exit_code": 0,
+        "stderr": "",
+        "stdout": "data_stack: <2> 1 2 \nsave_stack: <0> \n"
+      }
+    },
+    {
+      "source": "stdlib_runtime_results_v1.7.json",
+      "case_index": 24,
+      "record": {
+        "module": "fractions.dc",
+        "word": "fracmul",
+        "expression": "2 3 3 4 fracmul",
+        "expected": "1 2",
+        "actual": "1 2",
+        "passed": true,
+        "exit_code": 0,
+        "stderr": "",
+        "stdout": "data_stack: <2> 1 2 \nsave_stack: <0> \n"
+      }
+    },
+    {
+      "source": "stdlib_runtime_results_v1.7.json",
+      "case_index": 25,
+      "record": {
+        "module": "fractions.dc",
+        "word": "fracdiv",
+        "expression": "1 2 3 4 fracdiv",
+        "expected": "2 3",
+        "actual": "2 3",
+        "passed": true,
+        "exit_code": 0,
+        "stderr": "",
+        "stdout": "data_stack: <2> 2 3 \nsave_stack: <0> \n"
+      }
+    },
+    {
+      "source": "stdlib_runtime_results_v1.7.json",
+      "case_index": 26,
+      "record": {
+        "module": "fractions.dc",
+        "word": "fracmediant",
+        "expression": "1 2 1 3 fracmediant",
+        "expected": "2 5",
+        "actual": "2 5",
+        "passed": true,
+        "exit_code": 0,
+        "stderr": "",
+        "stdout": "data_stack: <2> 2 5 \nsave_stack: <0> \n"
+      }
+    },
+    {
+      "source": "stdlib_runtime_results_v1.8.json",
+      "case_index": 0,
+      "record": {
+        "module": "string.dc",
+        "word": "strdup",
+        "expression": "\"hello\" strdup dup strlen swap print cr",
+        "expected": "hello",
+        "actual": "hello",
+        "passed": true,
+        "exit_code": 0,
+        "stderr": ""
+      }
+    },
+    {
+      "source": "stdlib_runtime_results_v1.8.json",
+      "case_index": 1,
+      "record": {
+        "module": "string.dc",
+        "word": "strslice",
+        "expression": "\"abcdef\" 1 4 strslice print cr",
+        "expected": "bcd",
+        "actual": "bcd",
+        "passed": true,
+        "exit_code": 0,
+        "stderr": ""
+      }
+    },
+    {
+      "source": "stdlib_runtime_results_v1.8.json",
+      "case_index": 2,
+      "record": {
+        "module": "string.dc",
+        "word": "strslice",
+        "expression": "\"abcdef\" 0 0 strslice print cr",
+        "expected": "",
+        "actual": "",
+        "passed": true,
+        "exit_code": 0,
+        "stderr": ""
+      }
+    },
+    {
+      "source": "stdlib_runtime_results_v1.8.json",
+      "case_index": 3,
+      "record": {
+        "module": "string.dc",
+        "word": "strslice",
+        "expression": "\"abcdef\" 2 6 strslice print cr",
+        "expected": "cdef",
+        "actual": "cdef",
+        "passed": true,
+        "exit_code": 0,
+        "stderr": ""
+      }
+    },
+    {
+      "source": "stdlib_runtime_results_v1.8.json",
+      "case_index": 4,
+      "record": {
+        "module": "string.dc",
+        "word": "strreplace",
+        "expression": "64 mkbuf \"banana\" \"na\" \"XY\" strreplace print cr",
+        "expected": "baXYXY",
+        "actual": "baXYXY",
+        "passed": true,
+        "exit_code": 0,
+        "stderr": ""
+      }
+    },
+    {
+      "source": "stdlib_runtime_results_v1.8.json",
+      "case_index": 5,
+      "record": {
+        "module": "string.dc",
+        "word": "strreplace",
+        "expression": "64 mkbuf \"abc\" \"z\" \"Q\" strreplace print cr",
+        "expected": "abc",
+        "actual": "abc",
+        "passed": true,
+        "exit_code": 0,
+        "stderr": ""
+      }
+    },
+    {
+      "source": "stdlib_runtime_results_v1.8.json",
+      "case_index": 6,
+      "record": {
+        "module": "string.dc",
+        "word": "strreplace",
+        "expression": "64 mkbuf \"abc\" \"\" \"Q\" strreplace print cr",
+        "expected": "abc",
+        "actual": "abc",
+        "passed": true,
+        "exit_code": 0,
+        "stderr": ""
+      }
+    },
+    {
+      "source": "stdlib_runtime_results_v1.8.json",
+      "case_index": 7,
+      "record": {
+        "module": "string.dc",
+        "word": "str_between",
+        "expression": "\"m\" \"a\" \"z\" str_between .s cr",
+        "expected": "data_stack: <1> -1 \nsave_stack: <0>",
+        "actual": "data_stack: <1> -1 \nsave_stack: <0>",
+        "passed": true,
+        "exit_code": 0,
+        "stderr": ""
+      }
+    },
+    {
+      "source": "stdlib_runtime_results_v1.8.json",
+      "case_index": 8,
+      "record": {
+        "module": "string.dc",
+        "word": "str_between",
+        "expression": "\"z\" \"a\" \"m\" str_between .s cr",
+        "expected": "data_stack: <1> 0 \nsave_stack: <0>",
+        "actual": "data_stack: <1> 0 \nsave_stack: <0>",
+        "passed": true,
+        "exit_code": 0,
+        "stderr": ""
+      }
+    },
+    {
+      "source": "stdlib_runtime_results_v1.8.json",
+      "case_index": 9,
+      "record": {
+        "module": "linked_list.dc",
+        "word": "linit",
+        "expression": "\"1 2 3\" \"tonum\" linit lsize .s cr",
+        "expected": "data_stack: <1> 3 \nsave_stack: <0>",
+        "actual": "data_stack: <1> 3 \nsave_stack: <0>",
+        "passed": true,
+        "exit_code": 0,
+        "stderr": ""
+      }
+    },
+    {
+      "source": "stdlib_runtime_results_v1.8.json",
+      "case_index": 10,
+      "record": {
+        "module": "linked_list.dc",
+        "word": "lmap",
+        "expression": " : inc 1 + ; \"1 2 3\" \"tonum\" linit \"inc\" lmap lsize .s cr",
+        "expected": "data_stack: <1> 3 \nsave_stack: <0>",
+        "actual": "data_stack: <1> 3 \nsave_stack: <0>",
+        "passed": true,
+        "exit_code": 0,
+        "stderr": ""
+      }
+    },
+    {
+      "source": "stdlib_runtime_results_v1.8.json",
+      "case_index": 11,
+      "record": {
+        "module": "linked_list.dc",
+        "word": "lmap",
+        "expression": " : inc 1 + ; \"1 2 3\" \"tonum\" linit \"inc\" lmap 0 l@ .s cr",
+        "expected": "data_stack: <1> 2 \nsave_stack: <0>",
+        "actual": "data_stack: <1> 2 \nsave_stack: <0>",
+        "passed": true,
+        "exit_code": 0,
+        "stderr": ""
+      }
+    },
+    {
+      "source": "stdlib_runtime_results_v1.8.json",
+      "case_index": 12,
+      "record": {
+        "module": "permutations.dc",
+        "word": "setup_permutation",
+        "expression": "3 setup_permutation dup @ .s cr",
+        "expected": "data_stack: <2>",
+        "actual": "data_stack: <2> 0 3 \nsave_stack: <0>",
+        "passed": true,
+        "exit_code": 0,
+        "stderr": ""
+      }
+    },
+    {
+      "source": "stdlib_runtime_results_v1.8.json",
+      "case_index": 13,
+      "record": {
+        "module": "shuffle.dc",
+        "word": "shuffle_cells",
+        "expression": "10 20 30 3 shuffle_cells .s cr",
+        "expected": "data_stack: <0>",
+        "actual": "data_stack: <2> 10 20 \nsave_stack: <0>",
+        "passed": false,
+        "exit_code": 0,
+        "stderr": ""
+      }
+    },
+    {
+      "source": "stdlib_test_results.json",
+      "case_index": 0,
+      "record": {
+        "module": "math.dc",
+        "word": "divmod",
+        "program": "\"math.dc\" import 17 5 divmod .s cr",
+        "expected": "3 2",
+        "actual": "3 2",
+        "passed": true,
+        "exit_code": 0,
+        "stderr": ""
+      }
+    },
+    {
+      "source": "stdlib_test_results.json",
+      "case_index": 1,
+      "record": {
+        "module": "math.dc",
+        "word": "divmod",
+        "program": "\"math.dc\" import 18 5 divmod .s cr",
+        "expected": "3 3",
+        "actual": "3 3",
+        "passed": true,
+        "exit_code": 0,
+        "stderr": ""
+      }
+    },
+    {
+      "source": "stdlib_test_results.json",
+      "case_index": 2,
+      "record": {
+        "module": "math.dc",
+        "word": "absmod",
+        "program": "\"math.dc\" import -17 5 absmod .s cr",
+        "expected": "3",
+        "actual": "3",
+        "passed": true,
+        "exit_code": 0,
+        "stderr": ""
+      }
+    },
+    {
+      "source": "stdlib_test_results.json",
+      "case_index": 3,
+      "record": {
+        "module": "math.dc",
+        "word": "?dup",
+        "program": "\"math.dc\" import 0 ?dup .s cr",
+        "expected": "0",
+        "actual": "0",
+        "passed": true,
+        "exit_code": 0,
+        "stderr": ""
+      }
+    },
+    {
+      "source": "stdlib_test_results.json",
+      "case_index": 4,
+      "record": {
+        "module": "math.dc",
+        "word": "?dup",
+        "program": "\"math.dc\" import 9 ?dup .s cr",
+        "expected": "9 9",
+        "actual": "9 9",
+        "passed": true,
+        "exit_code": 0,
+        "stderr": ""
+      }
+    },
+    {
+      "source": "stdlib_test_results.json",
+      "case_index": 5,
+      "record": {
+        "module": "math.dc",
+        "word": "gcd",
+        "program": "\"math.dc\" import 48 18 gcd .s cr",
+        "expected": "6",
+        "actual": "6",
+        "passed": true,
+        "exit_code": 0,
+        "stderr": ""
+      }
+    },
+    {
+      "source": "stdlib_test_results.json",
+      "case_index": 6,
+      "record": {
+        "module": "math.dc",
+        "word": "factorial",
+        "program": "\"math.dc\" import 5 factorial .s cr",
+        "expected": "120",
+        "actual": "120",
+        "passed": true,
+        "exit_code": 0,
+        "stderr": ""
+      }
+    },
+    {
+      "source": "stdlib_test_results.json",
+      "case_index": 7,
+      "record": {
+        "module": "math.dc",
+        "word": "digit_sum",
+        "program": "\"math.dc\" import 123 10 digit_sum .s cr",
+        "expected": "6",
+        "actual": "6",
+        "passed": true,
+        "exit_code": 0,
+        "stderr": ""
+      }
+    },
+    {
+      "source": "stdlib_test_results.json",
+      "case_index": 8,
+      "record": {
+        "module": "fractions.dc",
+        "word": "gcd",
+        "program": "\"fractions.dc\" import 48 18 gcd .s cr",
+        "expected": "6",
+        "actual": "6",
+        "passed": true,
+        "exit_code": 0,
+        "stderr": ""
+      }
+    },
+    {
+      "source": "stdlib_test_results.json",
+      "case_index": 9,
+      "record": {
+        "module": "fractions.dc",
+        "word": "simplify",
+        "program": "\"fractions.dc\" import 6 8 simplify .s cr",
+        "expected": "3 4",
+        "actual": "3 4",
+        "passed": true,
+        "exit_code": 0,
+        "stderr": ""
+      }
+    },
+    {
+      "source": "stdlib_test_results.json",
+      "case_index": 10,
+      "record": {
+        "module": "fractions.dc",
+        "word": "fracadd",
+        "program": "\"fractions.dc\" import 1 2 1 3 fracadd .s cr",
+        "expected": "5 6",
+        "actual": "5 6",
+        "passed": true,
+        "exit_code": 0,
+        "stderr": ""
+      }
+    },
+    {
+      "source": "stdlib_test_results.json",
+      "case_index": 11,
+      "record": {
+        "module": "fractions.dc",
+        "word": "fracsub",
+        "program": "\"fractions.dc\" import 3 4 1 4 fracsub .s cr",
+        "expected": "1 2",
+        "actual": "1 2",
+        "passed": true,
+        "exit_code": 0,
+        "stderr": ""
+      }
+    },
+    {
+      "source": "stdlib_test_results.json",
+      "case_index": 12,
+      "record": {
+        "module": "fractions.dc",
+        "word": "fracmul",
+        "program": "\"fractions.dc\" import 2 3 3 4 fracmul .s cr",
+        "expected": "1 2",
+        "actual": "1 2",
+        "passed": true,
+        "exit_code": 0,
+        "stderr": ""
+      }
+    },
+    {
+      "source": "stdlib_test_results.json",
+      "case_index": 13,
+      "record": {
+        "module": "fractions.dc",
+        "word": "fracdiv",
+        "program": "\"fractions.dc\" import 1 2 3 4 fracdiv .s cr",
+        "expected": "2 3",
+        "actual": "2 3",
+        "passed": true,
+        "exit_code": 0,
+        "stderr": ""
+      }
+    },
+    {
+      "source": "stdlib_test_results.json",
+      "case_index": 14,
+      "record": {
+        "module": "fractions.dc",
+        "word": "fracmediant",
+        "program": "\"fractions.dc\" import 1 2 1 3 fracmediant .s cr",
+        "expected": "2 5",
+        "actual": "2 5",
+        "passed": true,
+        "exit_code": 0,
+        "stderr": ""
+      }
+    },
+    {
+      "source": "stdlib_test_results.json",
+      "case_index": 15,
+      "record": {
+        "module": "string.dc",
+        "word": "strslice",
+        "program": "\"string.dc\" import \"abcdef\" 1 4 strslice print cr",
+        "expected": "bcd",
+        "actual": "bcd",
+        "passed": true,
+        "exit_code": 0,
+        "stderr": ""
+      }
+    }
+  ],
+  "summaries": {}
+}

@@ -33,16 +33,13 @@
     +
 ;
 
-: ?dup
-  dup 0 =
-  if else dup endif
-;
-
 : gcd
-  ?dup
+  swap over %
+  dup 0 <>
   if
-    swap over %
     gcd
+  else
+    drop
   endif
 ;
 

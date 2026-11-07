@@ -1,0 +1,3001 @@
+{
+  "schema_version": "0.3",
+  "source": "libdclang.c:add_all_primitives",
+  "execution_verified": false,
+  "primitives": [
+    {
+      "name": "drop",
+      "category": "Stack Ops",
+      "opcode": "OP_DROP",
+      "registration_line": 3422,
+      "visibility": "public",
+      "stack_effect": "( x -- )",
+      "verification": "source-reviewed (opcode body)",
+      "runtime_observations_v0.7": [
+        {
+          "program": "4 5 drop",
+          "stack": "4"
+        }
+      ],
+      "runtime_status": "observed; not exhaustively verified",
+      "stack_effect_status": "source-reviewed",
+      "runtime_evidence_status": "observed (not exhaustive)"
+    },
+    {
+      "name": "dup",
+      "category": "Stack Ops",
+      "opcode": "OP_DUP",
+      "registration_line": 3423,
+      "visibility": "public",
+      "stack_effect": "( x -- x x )",
+      "verification": "source-reviewed (opcode body)",
+      "runtime_observations_v0.7": [
+        {
+          "program": "4 dup",
+          "stack": "4 4"
+        }
+      ],
+      "runtime_status": "observed; not exhaustively verified",
+      "stack_effect_status": "source-reviewed",
+      "runtime_evidence_status": "observed (not exhaustive)"
+    },
+    {
+      "name": "over",
+      "category": "Stack Ops",
+      "opcode": "OP_OVER",
+      "registration_line": 3424,
+      "visibility": "public",
+      "stack_effect": "( a b -- a b a )",
+      "verification": "source-reviewed (opcode body)",
+      "runtime_observations_v0.7": [
+        {
+          "program": "4 5 over",
+          "stack": "4 5 4"
+        }
+      ],
+      "runtime_status": "observed; not exhaustively verified",
+      "stack_effect_status": "source-reviewed",
+      "runtime_evidence_status": "observed (not exhaustive)"
+    },
+    {
+      "name": "pick",
+      "category": "Stack Ops",
+      "opcode": "OP_PICK",
+      "registration_line": 3425,
+      "visibility": "public",
+      "stack_effect": "( ... x_n ... x_0 n -- ... x_n ... x_0 x_n )",
+      "verification": "source-reviewed (opcode body)",
+      "runtime_observations_v0.7": [
+        {
+          "program": "4 5 6 1 pick",
+          "stack": "4 5 6 5"
+        }
+      ],
+      "runtime_status": "observed; not exhaustively verified",
+      "stack_effect_status": "source-reviewed",
+      "runtime_evidence_status": "observed (not exhaustive)"
+    },
+    {
+      "name": "swap",
+      "category": "Stack Ops",
+      "opcode": "OP_SWAP",
+      "registration_line": 3426,
+      "visibility": "public",
+      "stack_effect": "( a b -- b a )",
+      "verification": "source-reviewed (opcode body)",
+      "runtime_observations_v0.7": [
+        {
+          "program": "4 5 swap",
+          "stack": "5 4"
+        }
+      ],
+      "runtime_status": "observed; not exhaustively verified",
+      "stack_effect_status": "source-reviewed",
+      "runtime_evidence_status": "observed (not exhaustive)"
+    },
+    {
+      "name": "2drop",
+      "category": "Stack Ops",
+      "opcode": "OP_DROP2",
+      "registration_line": 3427,
+      "visibility": "public",
+      "stack_effect": "( a b -- )",
+      "verification": "source-reviewed (opcode body)",
+      "runtime_observations_v0.7": [
+        {
+          "program": "1 2 3 2drop",
+          "stack": "1"
+        }
+      ],
+      "runtime_status": "observed; not exhaustively verified",
+      "stack_effect_status": "source-reviewed",
+      "runtime_evidence_status": "observed (not exhaustive)"
+    },
+    {
+      "name": "2dup",
+      "category": "Stack Ops",
+      "opcode": "OP_DUP2",
+      "registration_line": 3428,
+      "visibility": "public",
+      "stack_effect": "( a b -- a b a b )",
+      "verification": "source-reviewed (opcode body)",
+      "runtime_observations_v0.7": [
+        {
+          "program": "1 2 2dup",
+          "stack": "1 2 1 2"
+        }
+      ],
+      "runtime_status": "observed; not exhaustively verified",
+      "stack_effect_status": "source-reviewed",
+      "runtime_evidence_status": "observed (not exhaustive)"
+    },
+    {
+      "name": "2over",
+      "category": "Stack Ops",
+      "opcode": "OP_OVER2",
+      "registration_line": 3429,
+      "visibility": "public",
+      "stack_effect": "( a b c d -- a b c d a b )",
+      "verification": "source-reviewed (opcode body)",
+      "runtime_observations_v0.7": [
+        {
+          "program": "1 2 3 4 2over",
+          "stack": "1 2 3 4 1 2"
+        }
+      ],
+      "runtime_status": "observed; not exhaustively verified",
+      "stack_effect_status": "source-reviewed",
+      "runtime_evidence_status": "observed (not exhaustive)"
+    },
+    {
+      "name": "depth",
+      "category": "Stack Ops",
+      "opcode": "OP_DEPTH",
+      "registration_line": 3430,
+      "visibility": "public",
+      "stack_effect": "( ... -- ... n )",
+      "verification": "source-reviewed (opcode body)",
+      "runtime_observations_v0.7": [
+        {
+          "program": "1 2 depth",
+          "stack": "1 2 2"
+        }
+      ],
+      "runtime_status": "observed; not exhaustively verified",
+      "stack_effect_status": "source-reviewed",
+      "runtime_evidence_status": "observed (not exhaustive)"
+    },
+    {
+      "name": "clear",
+      "category": "Stack Ops",
+      "opcode": "OP_CLEAR",
+      "registration_line": 3431,
+      "visibility": "public",
+      "stack_effect": "( ... -- )",
+      "verification": "source-reviewed (opcode body)",
+      "runtime_observations_v0.7": [
+        {
+          "program": "1 2 clear",
+          "stack": ""
+        }
+      ],
+      "runtime_status": "observed; not exhaustively verified",
+      "stack_effect_status": "source-reviewed",
+      "runtime_evidence_status": "observed (not exhaustive)"
+    },
+    {
+      "name": "svpush",
+      "category": "Save Stack Ops",
+      "opcode": "OP_SVPUSH",
+      "registration_line": 3433,
+      "visibility": "public",
+      "stack_effect": "( x -- ) [save: ... -- ... x]",
+      "verification": "source-reviewed (opcode body)",
+      "runtime_observations_v0.7": [
+        {
+          "program": "7 svpush",
+          "stack": ""
+        }
+      ],
+      "runtime_status": "observed; not exhaustively verified",
+      "stack_effect_status": "source-reviewed",
+      "runtime_evidence_status": "observed (not exhaustive)"
+    },
+    {
+      "name": "svpop",
+      "category": "Save Stack Ops",
+      "opcode": "OP_SVPOP",
+      "registration_line": 3434,
+      "visibility": "public",
+      "stack_effect": "( -- x ) [save: ... x -- ...]",
+      "verification": "source-reviewed (opcode body)",
+      "runtime_observations_v0.7": [
+        {
+          "program": "7 svpush svpop",
+          "stack": "7"
+        }
+      ],
+      "runtime_status": "observed; not exhaustively verified",
+      "stack_effect_status": "source-reviewed",
+      "runtime_evidence_status": "observed (not exhaustive)"
+    },
+    {
+      "name": "svdrop",
+      "category": "Save Stack Ops",
+      "opcode": "OP_SVDROP",
+      "registration_line": 3435,
+      "visibility": "public",
+      "stack_effect": "( S: x -- )",
+      "verification": "source-reviewed in libdclang.c (v1.4); not a new runtime verification",
+      "runtime_observations_v0.7": [
+        {
+          "program": "7 svpush svdrop",
+          "stack": ""
+        }
+      ],
+      "runtime_status": "observed; not exhaustively verified",
+      "stack_effect_status": "source-reviewed",
+      "runtime_evidence_status": "observed (not exhaustive)",
+      "stack_effect_source": "libdclang.c opcode OP_SVDROP"
+    },
+    {
+      "name": "svpick",
+      "category": "Save Stack Ops",
+      "opcode": "OP_SVPICK",
+      "registration_line": 3436,
+      "visibility": "public",
+      "stack_effect": "( index -- value ; S: unchanged )",
+      "verification": "source-reviewed in libdclang.c (v1.4); not a new runtime verification",
+      "stack_effect_status": "source-reviewed",
+      "runtime_evidence_status": "not linked in registry",
+      "stack_effect_source": "libdclang.c opcode OP_SVPICK"
+    },
+    {
+      "name": "svdepth",
+      "category": "Save Stack Ops",
+      "opcode": "OP_SVDEPTH",
+      "registration_line": 3437,
+      "visibility": "public",
+      "stack_effect": "( -- value )",
+      "verification": "source-reviewed in libdclang.c (v1.4); not a new runtime verification",
+      "runtime_observations_v0.7": [
+        {
+          "program": "7 svpush svdepth",
+          "stack": "1"
+        }
+      ],
+      "runtime_status": "observed; not exhaustively verified",
+      "stack_effect_status": "source-reviewed",
+      "runtime_evidence_status": "observed (not exhaustive)",
+      "stack_effect_source": "libdclang.c opcode OP_SVDEPTH"
+    },
+    {
+      "name": "svclear",
+      "category": "Save Stack Ops",
+      "opcode": "OP_SVCLEAR",
+      "registration_line": 3438,
+      "visibility": "public",
+      "stack_effect": "( -- )",
+      "verification": "source-reviewed in libdclang.c (v1.4); not a new runtime verification",
+      "runtime_observations_v0.7": [
+        {
+          "program": "7 svpush svclear svdepth",
+          "stack": "0"
+        }
+      ],
+      "runtime_status": "observed; not exhaustively verified",
+      "stack_effect_status": "source-reviewed",
+      "runtime_evidence_status": "observed (not exhaustive)",
+      "stack_effect_source": "libdclang.c opcode OP_SVCLEAR"
+    },
+    {
+      "name": ".",
+      "category": "Stack Output",
+      "opcode": "OP_SHOW",
+      "registration_line": 3440,
+      "visibility": "public",
+      "stack_effect": "( value -- )",
+      "verification": "source-reviewed in libdclang.c (v1.4); not a new runtime verification",
+      "stack_effect_status": "source-reviewed",
+      "runtime_evidence_status": "not linked in registry",
+      "stack_effect_source": "libdclang.c opcode OP_SHOW"
+    },
+    {
+      "name": "..",
+      "category": "Stack Output",
+      "opcode": "OP_SHOWNOSPACE",
+      "registration_line": 3441,
+      "visibility": "public",
+      "stack_effect": "( value -- )",
+      "verification": "source-reviewed in libdclang.c (v1.4); not a new runtime verification",
+      "stack_effect_status": "source-reviewed",
+      "runtime_evidence_status": "not linked in registry",
+      "stack_effect_source": "libdclang.c opcode OP_SHOWNOSPACE"
+    },
+    {
+      "name": ".rj",
+      "category": "Stack Output",
+      "opcode": "OP_SHOWRJ",
+      "registration_line": 3442,
+      "visibility": "public",
+      "stack_effect": "( value width precision -- )",
+      "verification": "source-reviewed in libdclang.c (v1.4); not a new runtime verification",
+      "stack_effect_status": "source-reviewed",
+      "runtime_evidence_status": "not linked in registry",
+      "stack_effect_source": "libdclang.c opcode OP_SHOWRJ"
+    },
+    {
+      "name": ".pz",
+      "category": "Stack Output",
+      "opcode": "OP_SHOWPZ",
+      "registration_line": 3443,
+      "visibility": "public",
+      "stack_effect": "( value width precision -- )",
+      "verification": "source-reviewed in libdclang.c (v1.4); not a new runtime verification",
+      "stack_effect_status": "source-reviewed",
+      "runtime_evidence_status": "not linked in registry",
+      "stack_effect_source": "libdclang.c opcode OP_SHOWPZ"
+    },
+    {
+      "name": ".s",
+      "category": "Stack Output",
+      "opcode": "OP_SHOWSTACK",
+      "registration_line": 3444,
+      "visibility": "public",
+      "stack_effect": "( -- )",
+      "verification": "source-reviewed in libdclang.c (v1.4); not a new runtime verification",
+      "stack_effect_status": "source-reviewed",
+      "runtime_evidence_status": "not linked in registry",
+      "stack_effect_source": "libdclang.c opcode OP_SHOWSTACK"
+    },
+    {
+      "name": "null",
+      "category": "Boolean",
+      "opcode": "OP_NULL",
+      "registration_line": 3446,
+      "visibility": "public",
+      "stack_effect": "( -- value )",
+      "verification": "source-reviewed in libdclang.c (v1.4); not a new runtime verification",
+      "runtime_observations_v0.7": [
+        {
+          "program": "null",
+          "stack": "0"
+        }
+      ],
+      "runtime_status": "observed; not exhaustively verified",
+      "stack_effect_status": "source-reviewed",
+      "runtime_evidence_status": "observed (not exhaustive)",
+      "stack_effect_source": "libdclang.c opcode OP_NULL"
+    },
+    {
+      "name": "false",
+      "category": "Boolean",
+      "opcode": "OP_FALSE",
+      "registration_line": 3447,
+      "visibility": "public",
+      "stack_effect": "( -- value )",
+      "verification": "source-reviewed in libdclang.c (v1.4); not a new runtime verification",
+      "runtime_observations_v0.7": [
+        {
+          "program": "false",
+          "stack": "0"
+        }
+      ],
+      "runtime_status": "observed; not exhaustively verified",
+      "stack_effect_status": "source-reviewed",
+      "runtime_evidence_status": "observed (not exhaustive)",
+      "stack_effect_source": "libdclang.c opcode OP_FALSE"
+    },
+    {
+      "name": "true",
+      "category": "Boolean",
+      "opcode": "OP_TRUE",
+      "registration_line": 3448,
+      "visibility": "public",
+      "stack_effect": "( -- value )",
+      "verification": "source-reviewed in libdclang.c (v1.4); not a new runtime verification",
+      "runtime_observations_v0.7": [
+        {
+          "program": "true",
+          "stack": "-1"
+        }
+      ],
+      "runtime_status": "observed; not exhaustively verified",
+      "stack_effect_status": "source-reviewed",
+      "runtime_evidence_status": "observed (not exhaustive)",
+      "stack_effect_source": "libdclang.c opcode OP_TRUE"
+    },
+    {
+      "name": "=",
+      "category": "Boolean",
+      "opcode": "OP_EQ",
+      "registration_line": 3449,
+      "visibility": "public",
+      "stack_effect": "( a b -- result )",
+      "verification": "source-reviewed in libdclang.c (v1.4); not a new runtime verification",
+      "runtime_observations_v0.7": [
+        {
+          "program": "4 4 =",
+          "stack": "-1"
+        }
+      ],
+      "runtime_status": "observed; not exhaustively verified",
+      "stack_effect_status": "source-reviewed",
+      "runtime_evidence_status": "observed (not exhaustive)",
+      "stack_effect_source": "libdclang.c opcode OP_EQ",
+      "result_convention": "-1 true, 0 false"
+    },
+    {
+      "name": "<>",
+      "category": "Boolean",
+      "opcode": "OP_NOTEQ",
+      "registration_line": 3450,
+      "visibility": "public",
+      "stack_effect": "( a b -- result )",
+      "verification": "source-reviewed in libdclang.c (v1.4); not a new runtime verification",
+      "runtime_observations_v0.7": [
+        {
+          "program": "4 5 <>",
+          "stack": "-1"
+        }
+      ],
+      "runtime_status": "observed; not exhaustively verified",
+      "stack_effect_status": "source-reviewed",
+      "runtime_evidence_status": "observed (not exhaustive)",
+      "stack_effect_source": "libdclang.c opcode OP_NOTEQ",
+      "result_convention": "-1 true, 0 false"
+    },
+    {
+      "name": "<",
+      "category": "Boolean",
+      "opcode": "OP_LT",
+      "registration_line": 3451,
+      "visibility": "public",
+      "stack_effect": "( a b -- result )",
+      "verification": "source-reviewed in libdclang.c (v1.4); not a new runtime verification",
+      "runtime_observations_v0.7": [
+        {
+          "program": "4 5 <",
+          "stack": "-1"
+        }
+      ],
+      "runtime_status": "observed; not exhaustively verified",
+      "stack_effect_status": "source-reviewed",
+      "runtime_evidence_status": "observed (not exhaustive)",
+      "stack_effect_source": "libdclang.c opcode OP_LT",
+      "result_convention": "-1 true, 0 false"
+    },
+    {
+      "name": ">",
+      "category": "Boolean",
+      "opcode": "OP_GT",
+      "registration_line": 3452,
+      "visibility": "public",
+      "stack_effect": "( a b -- result )",
+      "verification": "source-reviewed in libdclang.c (v1.4); not a new runtime verification",
+      "runtime_observations_v0.7": [
+        {
+          "program": "4 5 >",
+          "stack": "0"
+        }
+      ],
+      "runtime_status": "observed; not exhaustively verified",
+      "stack_effect_status": "source-reviewed",
+      "runtime_evidence_status": "observed (not exhaustive)",
+      "stack_effect_source": "libdclang.c opcode OP_GT",
+      "result_convention": "-1 true, 0 false"
+    },
+    {
+      "name": "<=",
+      "category": "Boolean",
+      "opcode": "OP_LTE",
+      "registration_line": 3453,
+      "visibility": "public",
+      "stack_effect": "( a b -- result )",
+      "verification": "source-reviewed in libdclang.c (v1.4); not a new runtime verification",
+      "runtime_observations_v0.7": [
+        {
+          "program": "4 4 <=",
+          "stack": "-1"
+        }
+      ],
+      "runtime_status": "observed; not exhaustively verified",
+      "stack_effect_status": "source-reviewed",
+      "runtime_evidence_status": "observed (not exhaustive)",
+      "stack_effect_source": "libdclang.c opcode OP_LTE",
+      "result_convention": "-1 true, 0 false"
+    },
+    {
+      "name": ">=",
+      "category": "Boolean",
+      "opcode": "OP_GTE",
+      "registration_line": 3454,
+      "visibility": "public",
+      "stack_effect": "( a b -- result )",
+      "verification": "source-reviewed in libdclang.c (v1.4); not a new runtime verification",
+      "runtime_observations_v0.7": [
+        {
+          "program": "4 5 >=",
+          "stack": "0"
+        }
+      ],
+      "runtime_status": "observed; not exhaustively verified",
+      "stack_effect_status": "source-reviewed",
+      "runtime_evidence_status": "observed (not exhaustive)",
+      "stack_effect_source": "libdclang.c opcode OP_GTE",
+      "result_convention": "-1 true, 0 false"
+    },
+    {
+      "name": "assert",
+      "category": "Boolean",
+      "opcode": "OP_ASSERT",
+      "registration_line": 3455,
+      "visibility": "public",
+      "stack_effect": "( condition -- )",
+      "verification": "source-reviewed in libdclang.c (v1.4); not a new runtime verification",
+      "stack_effect_status": "source-reviewed",
+      "runtime_evidence_status": "not linked in registry",
+      "stack_effect_source": "libdclang.c opcode OP_ASSERT"
+    },
+    {
+      "name": "and",
+      "category": "Bit manipulation",
+      "opcode": "OP_AND",
+      "registration_line": 3457,
+      "visibility": "public",
+      "stack_effect": "( a b -- result )",
+      "verification": "source-reviewed in libdclang.c (v1.4); not a new runtime verification",
+      "runtime_observations_v0.7": [
+        {
+          "program": "6 3 and",
+          "stack": "2"
+        }
+      ],
+      "runtime_status": "observed; not exhaustively verified",
+      "stack_effect_status": "source-reviewed",
+      "runtime_evidence_status": "observed (not exhaustive)",
+      "stack_effect_source": "libdclang.c opcode OP_AND",
+      "result_convention": "bitwise, not boolean normalization"
+    },
+    {
+      "name": "or",
+      "category": "Bit manipulation",
+      "opcode": "OP_OR",
+      "registration_line": 3458,
+      "visibility": "public",
+      "stack_effect": "( a b -- result )",
+      "verification": "source-reviewed in libdclang.c (v1.4); not a new runtime verification",
+      "runtime_observations_v0.7": [
+        {
+          "program": "6 3 or",
+          "stack": "7"
+        }
+      ],
+      "runtime_status": "observed; not exhaustively verified",
+      "stack_effect_status": "source-reviewed",
+      "runtime_evidence_status": "observed (not exhaustive)",
+      "stack_effect_source": "libdclang.c opcode OP_OR",
+      "result_convention": "bitwise, not boolean normalization"
+    },
+    {
+      "name": "xor",
+      "category": "Bit manipulation",
+      "opcode": "OP_XOR",
+      "registration_line": 3459,
+      "visibility": "public",
+      "stack_effect": "( a b -- result )",
+      "verification": "source-reviewed in libdclang.c (v1.4); not a new runtime verification",
+      "runtime_observations_v0.7": [
+        {
+          "program": "6 3 xor",
+          "stack": "5"
+        }
+      ],
+      "runtime_status": "observed; not exhaustively verified",
+      "stack_effect_status": "source-reviewed",
+      "runtime_evidence_status": "observed (not exhaustive)",
+      "stack_effect_source": "libdclang.c opcode OP_XOR",
+      "result_convention": "bitwise, not boolean normalization"
+    },
+    {
+      "name": "not",
+      "category": "Bit manipulation",
+      "opcode": "OP_NOT",
+      "registration_line": 3460,
+      "visibility": "public",
+      "stack_effect": "( bits -- complement )",
+      "verification": "source-reviewed in libdclang.c (v1.4); not a new runtime verification",
+      "runtime_observations_v0.7": [
+        {
+          "program": "1 not",
+          "stack": "-2"
+        }
+      ],
+      "runtime_status": "observed; not exhaustively verified",
+      "stack_effect_status": "source-reviewed",
+      "runtime_evidence_status": "observed (not exhaustive)",
+      "stack_effect_source": "libdclang.c opcode OP_NOT",
+      "result_convention": "bitwise, not boolean normalization"
+    },
+    {
+      "name": "<<",
+      "category": "Bit manipulation",
+      "opcode": "OP_LSHIFT",
+      "registration_line": 3461,
+      "visibility": "public",
+      "stack_effect": "( value shift -- result )",
+      "verification": "source-reviewed (opcode body)",
+      "runtime_observations_v0.7": [
+        {
+          "program": "3 2 <<",
+          "stack": "12"
+        }
+      ],
+      "runtime_status": "observed; not exhaustively verified",
+      "stack_effect_status": "source-reviewed",
+      "runtime_evidence_status": "observed (not exhaustive)",
+      "result_convention": "bitwise, not boolean normalization"
+    },
+    {
+      "name": ">>",
+      "category": "Bit manipulation",
+      "opcode": "OP_RSHIFT",
+      "registration_line": 3462,
+      "visibility": "public",
+      "stack_effect": "( value shift -- result )",
+      "verification": "source-reviewed (opcode body)",
+      "runtime_observations_v0.7": [
+        {
+          "program": "12 2 >>",
+          "stack": "3"
+        }
+      ],
+      "runtime_status": "observed; not exhaustively verified",
+      "stack_effect_status": "source-reviewed",
+      "runtime_evidence_status": "observed (not exhaustive)",
+      "result_convention": "bitwise, not boolean normalization"
+    },
+    {
+      "name": "+",
+      "category": "Arithmetic",
+      "opcode": "OP_ADD",
+      "registration_line": 3464,
+      "visibility": "public",
+      "stack_effect": "( a b -- a+b )",
+      "verification": "source-reviewed (opcode body)",
+      "runtime_observations_v0.7": [
+        {
+          "program": "8 3 +",
+          "stack": "11"
+        }
+      ],
+      "runtime_status": "observed; not exhaustively verified",
+      "stack_effect_status": "source-reviewed",
+      "runtime_evidence_status": "observed (not exhaustive)"
+    },
+    {
+      "name": "-",
+      "category": "Arithmetic",
+      "opcode": "OP_SUB",
+      "registration_line": 3465,
+      "visibility": "public",
+      "stack_effect": "( a b -- a-b )",
+      "verification": "source-reviewed (opcode body)",
+      "runtime_observations_v0.7": [
+        {
+          "program": "8 3 -",
+          "stack": "5"
+        }
+      ],
+      "runtime_status": "observed; not exhaustively verified",
+      "stack_effect_status": "source-reviewed",
+      "runtime_evidence_status": "observed (not exhaustive)"
+    },
+    {
+      "name": "*",
+      "category": "Arithmetic",
+      "opcode": "OP_MUL",
+      "registration_line": 3466,
+      "visibility": "public",
+      "stack_effect": "( a b -- a*b )",
+      "verification": "source-reviewed (opcode body)",
+      "runtime_observations_v0.7": [
+        {
+          "program": "8 3 *",
+          "stack": "24"
+        }
+      ],
+      "runtime_status": "observed; not exhaustively verified",
+      "stack_effect_status": "source-reviewed",
+      "runtime_evidence_status": "observed (not exhaustive)"
+    },
+    {
+      "name": "/",
+      "category": "Arithmetic",
+      "opcode": "OP_DIV",
+      "registration_line": 3467,
+      "visibility": "public",
+      "stack_effect": "( a b -- a/b )",
+      "verification": "source-reviewed (opcode body)",
+      "runtime_observations_v0.7": [
+        {
+          "program": "8 2 /",
+          "stack": "4"
+        }
+      ],
+      "runtime_status": "observed; not exhaustively verified",
+      "stack_effect_status": "source-reviewed",
+      "runtime_evidence_status": "observed (not exhaustive)"
+    },
+    {
+      "name": "%",
+      "category": "Arithmetic",
+      "opcode": "OP_MOD",
+      "registration_line": 3468,
+      "visibility": "public",
+      "stack_effect": "( a b -- fmod(a,b) )",
+      "verification": "source-reviewed (opcode body)",
+      "runtime_observations_v0.7": [
+        {
+          "program": "8 3 %",
+          "stack": "2"
+        }
+      ],
+      "runtime_status": "observed; not exhaustively verified",
+      "stack_effect_status": "source-reviewed",
+      "runtime_evidence_status": "observed (not exhaustive)"
+    },
+    {
+      "name": "abs",
+      "category": "Arithmetic",
+      "opcode": "OP_ABS",
+      "registration_line": 3469,
+      "visibility": "public",
+      "stack_effect": "( x -- abs(x) )",
+      "verification": "source-reviewed (opcode body)",
+      "runtime_observations_v0.7": [
+        {
+          "program": "-8 abs",
+          "stack": "8"
+        }
+      ],
+      "runtime_status": "observed; not exhaustively verified",
+      "stack_effect_status": "source-reviewed",
+      "runtime_evidence_status": "observed (not exhaustive)"
+    },
+    {
+      "name": "min",
+      "category": "Arithmetic",
+      "opcode": "OP_MIN",
+      "registration_line": 3470,
+      "visibility": "public",
+      "stack_effect": "( a b -- min(a,b) )",
+      "verification": "source-reviewed (opcode body)",
+      "runtime_observations_v0.7": [
+        {
+          "program": "8 3 min",
+          "stack": "3"
+        }
+      ],
+      "runtime_status": "observed; not exhaustively verified",
+      "stack_effect_status": "source-reviewed",
+      "runtime_evidence_status": "observed (not exhaustive)"
+    },
+    {
+      "name": "max",
+      "category": "Arithmetic",
+      "opcode": "OP_MAX",
+      "registration_line": 3471,
+      "visibility": "public",
+      "stack_effect": "( a b -- max(a,b) )",
+      "verification": "source-reviewed (opcode body)",
+      "runtime_observations_v0.7": [
+        {
+          "program": "8 3 max",
+          "stack": "8"
+        }
+      ],
+      "runtime_status": "observed; not exhaustively verified",
+      "stack_effect_status": "source-reviewed",
+      "runtime_evidence_status": "observed (not exhaustive)"
+    },
+    {
+      "name": "round",
+      "category": "Float -> Integer",
+      "opcode": "OP_ROUND",
+      "registration_line": 3473,
+      "visibility": "public",
+      "stack_effect": "( x -- round(x) )",
+      "verification": "source-reviewed (opcode body)",
+      "runtime_observations_v0.7": [
+        {
+          "program": "2.6 round",
+          "stack": "3"
+        }
+      ],
+      "runtime_status": "observed; not exhaustively verified",
+      "stack_effect_status": "source-reviewed",
+      "runtime_evidence_status": "observed (not exhaustive)"
+    },
+    {
+      "name": "ceil",
+      "category": "Float -> Integer",
+      "opcode": "OP_CEIL",
+      "registration_line": 3474,
+      "visibility": "public",
+      "stack_effect": "( x -- ceil(x) )",
+      "verification": "source-reviewed (opcode body)",
+      "runtime_observations_v0.7": [
+        {
+          "program": "2.1 ceil",
+          "stack": "3"
+        }
+      ],
+      "runtime_status": "observed; not exhaustively verified",
+      "stack_effect_status": "source-reviewed",
+      "runtime_evidence_status": "observed (not exhaustive)"
+    },
+    {
+      "name": "floor",
+      "category": "Float -> Integer",
+      "opcode": "OP_FLOOR",
+      "registration_line": 3475,
+      "visibility": "public",
+      "stack_effect": "( x -- floor(x) )",
+      "verification": "source-reviewed (opcode body)",
+      "runtime_observations_v0.7": [
+        {
+          "program": "2.6 floor",
+          "stack": "2"
+        }
+      ],
+      "runtime_status": "observed; not exhaustively verified",
+      "stack_effect_status": "source-reviewed",
+      "runtime_evidence_status": "observed (not exhaustive)"
+    },
+    {
+      "name": "pow",
+      "category": "Higher Math",
+      "opcode": "OP_POWER",
+      "registration_line": 3477,
+      "visibility": "public",
+      "stack_effect": "( a b -- result )",
+      "verification": "source-reviewed in libdclang.c (v1.4); not a new runtime verification",
+      "runtime_observations_v0.7": [
+        {
+          "program": "2 3 pow",
+          "stack": "8"
+        }
+      ],
+      "runtime_status": "observed; not exhaustively verified",
+      "stack_effect_status": "source-reviewed",
+      "runtime_evidence_status": "observed (not exhaustive)",
+      "stack_effect_source": "libdclang.c opcode OP_POWER"
+    },
+    {
+      "name": "sqrt",
+      "category": "Higher Math",
+      "opcode": "OP_SQRT",
+      "registration_line": 3478,
+      "visibility": "public",
+      "stack_effect": "( x -- result )",
+      "verification": "source-reviewed in libdclang.c (v1.4); not a new runtime verification",
+      "runtime_observations_v0.7": [
+        {
+          "program": "9 sqrt",
+          "stack": "3"
+        }
+      ],
+      "runtime_status": "observed; not exhaustively verified",
+      "stack_effect_status": "source-reviewed",
+      "runtime_evidence_status": "observed (not exhaustive)",
+      "stack_effect_source": "libdclang.c opcode OP_SQRT"
+    },
+    {
+      "name": "exp",
+      "category": "Higher Math",
+      "opcode": "OP_EXP",
+      "registration_line": 3479,
+      "visibility": "public",
+      "stack_effect": "( x -- result )",
+      "verification": "source-reviewed in libdclang.c (v1.4); not a new runtime verification",
+      "stack_effect_status": "source-reviewed",
+      "runtime_evidence_status": "not linked in registry",
+      "stack_effect_source": "libdclang.c opcode OP_EXP"
+    },
+    {
+      "name": "log",
+      "category": "Higher Math",
+      "opcode": "OP_LOG",
+      "registration_line": 3480,
+      "visibility": "public",
+      "stack_effect": "( x -- result )",
+      "verification": "source-reviewed in libdclang.c (v1.4); not a new runtime verification",
+      "stack_effect_status": "source-reviewed",
+      "runtime_evidence_status": "not linked in registry",
+      "stack_effect_source": "libdclang.c opcode OP_LOG"
+    },
+    {
+      "name": "log2",
+      "category": "Higher Math",
+      "opcode": "OP_LOG2",
+      "registration_line": 3481,
+      "visibility": "public",
+      "stack_effect": "( x -- result )",
+      "verification": "source-reviewed in libdclang.c (v1.4); not a new runtime verification",
+      "stack_effect_status": "source-reviewed",
+      "runtime_evidence_status": "not linked in registry",
+      "stack_effect_source": "libdclang.c opcode OP_LOG2"
+    },
+    {
+      "name": "log10",
+      "category": "Higher Math",
+      "opcode": "OP_LOG10",
+      "registration_line": 3482,
+      "visibility": "public",
+      "stack_effect": "( x -- result )",
+      "verification": "source-reviewed in libdclang.c (v1.4); not a new runtime verification",
+      "stack_effect_status": "source-reviewed",
+      "runtime_evidence_status": "not linked in registry",
+      "stack_effect_source": "libdclang.c opcode OP_LOG10"
+    },
+    {
+      "name": "e",
+      "category": "Higher Math",
+      "opcode": "OP_E",
+      "registration_line": 3483,
+      "visibility": "public",
+      "stack_effect": "( -- value )",
+      "verification": "source-reviewed in libdclang.c (v1.4); not a new runtime verification",
+      "stack_effect_status": "source-reviewed",
+      "runtime_evidence_status": "not linked in registry",
+      "stack_effect_source": "libdclang.c opcode OP_E"
+    },
+    {
+      "name": "pi",
+      "category": "Trigonometry",
+      "opcode": "OP_PI",
+      "registration_line": 3485,
+      "visibility": "public",
+      "stack_effect": "( -- value )",
+      "verification": "source-reviewed in libdclang.c (v1.4); not a new runtime verification",
+      "stack_effect_status": "source-reviewed",
+      "runtime_evidence_status": "not linked in registry",
+      "stack_effect_source": "libdclang.c opcode OP_PI"
+    },
+    {
+      "name": "sin",
+      "category": "Trigonometry",
+      "opcode": "OP_SINE",
+      "registration_line": 3486,
+      "visibility": "public",
+      "stack_effect": "( x -- result )",
+      "verification": "source-reviewed in libdclang.c (v1.4); not a new runtime verification",
+      "stack_effect_status": "source-reviewed",
+      "runtime_evidence_status": "not linked in registry",
+      "stack_effect_source": "libdclang.c opcode OP_SINE"
+    },
+    {
+      "name": "cos",
+      "category": "Trigonometry",
+      "opcode": "OP_COS",
+      "registration_line": 3487,
+      "visibility": "public",
+      "stack_effect": "( x -- result )",
+      "verification": "source-reviewed in libdclang.c (v1.4); not a new runtime verification",
+      "stack_effect_status": "source-reviewed",
+      "runtime_evidence_status": "not linked in registry",
+      "stack_effect_source": "libdclang.c opcode OP_COS"
+    },
+    {
+      "name": "tan",
+      "category": "Trigonometry",
+      "opcode": "OP_TAN",
+      "registration_line": 3488,
+      "visibility": "public",
+      "stack_effect": "( x -- result )",
+      "verification": "source-reviewed in libdclang.c (v1.4); not a new runtime verification",
+      "stack_effect_status": "source-reviewed",
+      "runtime_evidence_status": "not linked in registry",
+      "stack_effect_source": "libdclang.c opcode OP_TAN"
+    },
+    {
+      "name": "asin",
+      "category": "Trigonometry",
+      "opcode": "OP_ASINE",
+      "registration_line": 3489,
+      "visibility": "public",
+      "stack_effect": "( x -- result )",
+      "verification": "source-reviewed in libdclang.c (v1.4); not a new runtime verification",
+      "stack_effect_status": "source-reviewed",
+      "runtime_evidence_status": "not linked in registry",
+      "stack_effect_source": "libdclang.c opcode OP_ASINE"
+    },
+    {
+      "name": "acos",
+      "category": "Trigonometry",
+      "opcode": "OP_ACOS",
+      "registration_line": 3490,
+      "visibility": "public",
+      "stack_effect": "( x -- result )",
+      "verification": "source-reviewed in libdclang.c (v1.4); not a new runtime verification",
+      "stack_effect_status": "source-reviewed",
+      "runtime_evidence_status": "not linked in registry",
+      "stack_effect_source": "libdclang.c opcode OP_ACOS"
+    },
+    {
+      "name": "atan",
+      "category": "Trigonometry",
+      "opcode": "OP_ATAN",
+      "registration_line": 3491,
+      "visibility": "public",
+      "stack_effect": "( x -- result )",
+      "verification": "source-reviewed in libdclang.c (v1.4); not a new runtime verification",
+      "stack_effect_status": "source-reviewed",
+      "runtime_evidence_status": "not linked in registry",
+      "stack_effect_source": "libdclang.c opcode OP_ATAN"
+    },
+    {
+      "name": "atan2",
+      "category": "Trigonometry",
+      "opcode": "OP_ATAN2",
+      "registration_line": 3492,
+      "visibility": "public",
+      "stack_effect": "( a b -- result )",
+      "verification": "source-reviewed in libdclang.c (v1.4); not a new runtime verification",
+      "stack_effect_status": "source-reviewed",
+      "runtime_evidence_status": "not linked in registry",
+      "stack_effect_source": "libdclang.c opcode OP_ATAN2"
+    },
+    {
+      "name": "sinh",
+      "category": "Trigonometry",
+      "opcode": "OP_SINH",
+      "registration_line": 3493,
+      "visibility": "public",
+      "stack_effect": "( x -- result )",
+      "verification": "source-reviewed in libdclang.c (v1.4); not a new runtime verification",
+      "stack_effect_status": "source-reviewed",
+      "runtime_evidence_status": "not linked in registry",
+      "stack_effect_source": "libdclang.c opcode OP_SINH"
+    },
+    {
+      "name": "cosh",
+      "category": "Trigonometry",
+      "opcode": "OP_COSH",
+      "registration_line": 3494,
+      "visibility": "public",
+      "stack_effect": "( x -- result )",
+      "verification": "source-reviewed in libdclang.c (v1.4); not a new runtime verification",
+      "stack_effect_status": "source-reviewed",
+      "runtime_evidence_status": "not linked in registry",
+      "stack_effect_source": "libdclang.c opcode OP_COSH"
+    },
+    {
+      "name": "tanh",
+      "category": "Trigonometry",
+      "opcode": "OP_TANH",
+      "registration_line": 3495,
+      "visibility": "public",
+      "stack_effect": "( x -- result )",
+      "verification": "source-reviewed in libdclang.c (v1.4); not a new runtime verification",
+      "stack_effect_status": "source-reviewed",
+      "runtime_evidence_status": "not linked in registry",
+      "stack_effect_source": "libdclang.c opcode OP_TANH"
+    },
+    {
+      "name": "rand",
+      "category": "Randomness",
+      "opcode": "OP_RAND",
+      "registration_line": 3497,
+      "visibility": "public",
+      "stack_effect": "( -- value )",
+      "verification": "source-reviewed in libdclang.c (v1.4); not a new runtime verification",
+      "stack_effect_status": "source-reviewed",
+      "runtime_evidence_status": "not linked in registry",
+      "stack_effect_source": "libdclang.c opcode OP_RAND"
+    },
+    {
+      "name": "var",
+      "category": "Variables & Arrays",
+      "opcode": "OP_VARIABLE",
+      "registration_line": 3499,
+      "visibility": "public",
+      "stack_effect": "( -- )",
+      "verification": "source-reviewed (topical reference; requires independent C recheck)",
+      "stack_effect_source": "MEMORY_PRIMITIVES.md",
+      "stack_effect_status": "source-reviewed",
+      "runtime_evidence_status": "not linked in registry"
+    },
+    {
+      "name": "!",
+      "category": "Variables & Arrays",
+      "opcode": "OP_POKE",
+      "registration_line": 3500,
+      "visibility": "public",
+      "stack_effect": "( value slot -- )",
+      "verification": "source-reviewed (topical reference; requires independent C recheck)",
+      "stack_effect_source": "MEMORY_PRIMITIVES.md",
+      "stack_effect_status": "source-reviewed",
+      "runtime_evidence_status": "not linked in registry"
+    },
+    {
+      "name": "@",
+      "category": "Variables & Arrays",
+      "opcode": "OP_PEEK",
+      "registration_line": 3501,
+      "visibility": "public",
+      "stack_effect": "( slot -- value )",
+      "verification": "source-reviewed (topical reference; requires independent C recheck)",
+      "stack_effect_source": "MEMORY_PRIMITIVES.md",
+      "stack_effect_status": "source-reviewed",
+      "runtime_evidence_status": "not linked in registry"
+    },
+    {
+      "name": "allot",
+      "category": "Variables & Arrays",
+      "opcode": "OP_ALLOT",
+      "registration_line": 3502,
+      "visibility": "public",
+      "stack_effect": "( count -- )",
+      "verification": "source-reviewed (topical reference; requires independent C recheck)",
+      "stack_effect_source": "MEMORY_PRIMITIVES.md",
+      "stack_effect_status": "source-reviewed",
+      "runtime_evidence_status": "not linked in registry"
+    },
+    {
+      "name": "create",
+      "category": "Variables & Arrays",
+      "opcode": "OP_CREATE",
+      "registration_line": 3503,
+      "visibility": "public",
+      "stack_effect": "( -- )",
+      "verification": "source-reviewed (topical reference; requires independent C recheck)",
+      "stack_effect_source": "MEMORY_PRIMITIVES.md",
+      "stack_effect_status": "source-reviewed",
+      "runtime_evidence_status": "not linked in registry"
+    },
+    {
+      "name": ",",
+      "category": "Variables & Arrays",
+      "opcode": "OP_COMMA",
+      "registration_line": 3504,
+      "visibility": "public",
+      "stack_effect": "( value -- )",
+      "verification": "source-reviewed (topical reference; requires independent C recheck)",
+      "stack_effect_source": "MEMORY_PRIMITIVES.md",
+      "stack_effect_status": "source-reviewed",
+      "runtime_evidence_status": "not linked in registry"
+    },
+    {
+      "name": "here",
+      "category": "Variables & Arrays",
+      "opcode": "OP_HERE",
+      "registration_line": 3505,
+      "visibility": "public",
+      "stack_effect": "( -- slot )",
+      "verification": "source-reviewed (topical reference; requires independent C recheck)",
+      "stack_effect_source": "MEMORY_PRIMITIVES.md",
+      "stack_effect_status": "source-reviewed",
+      "runtime_evidence_status": "not linked in registry"
+    },
+    {
+      "name": "const",
+      "category": "Variables & Arrays",
+      "opcode": "OP_CONSTANT",
+      "registration_line": 3506,
+      "visibility": "public",
+      "stack_effect": "( value -- )",
+      "verification": "source-reviewed (topical reference; requires independent C recheck)",
+      "stack_effect_source": "MEMORY_PRIMITIVES.md",
+      "stack_effect_status": "source-reviewed",
+      "runtime_evidence_status": "not linked in registry"
+    },
+    {
+      "name": "envget",
+      "category": "Variables & Arrays",
+      "opcode": "OP_ENVGET",
+      "registration_line": 3507,
+      "visibility": "public",
+      "stack_effect": "( key-string -- value-string )",
+      "verification": "source-reviewed (topical reference; requires independent C recheck)",
+      "stack_effect_source": "MEMORY_PRIMITIVES.md",
+      "stack_effect_status": "source-reviewed",
+      "runtime_evidence_status": "not linked in registry"
+    },
+    {
+      "name": "envset",
+      "category": "Variables & Arrays",
+      "opcode": "OP_ENVSET",
+      "registration_line": 3508,
+      "visibility": "public",
+      "stack_effect": "( value-string key-string -- )",
+      "verification": "source-reviewed (topical reference; requires independent C recheck)",
+      "stack_effect_source": "MEMORY_PRIMITIVES.md",
+      "stack_effect_status": "source-reviewed",
+      "runtime_evidence_status": "not linked in registry"
+    },
+    {
+      "name": "sortnums",
+      "category": "Array Sorting",
+      "opcode": "OP_SORTNUMS",
+      "registration_line": 3510,
+      "visibility": "public",
+      "stack_effect": "( array-start-index count -- )",
+      "verification": "source-reviewed in libdclang.c opcode body (v1.5)",
+      "stack_effect_status": "source-reviewed",
+      "runtime_evidence_status": "exploratory runtime observation (see primitive_source_audit_v1.5.json)",
+      "stack_effect_source": "libdclang.c OP_SORTNUMS",
+      "behavior_note": "In-place qsort of vars[] numeric slots; caller must ensure valid array range."
+    },
+    {
+      "name": "sortstrs",
+      "category": "Array Sorting",
+      "opcode": "OP_SORTSTRS",
+      "registration_line": 3511,
+      "visibility": "public",
+      "stack_effect": "( array-start-index count -- )",
+      "verification": "source-reviewed in libdclang.c opcode body (v1.5)",
+      "stack_effect_status": "source-reviewed",
+      "runtime_evidence_status": "exploratory runtime observation (see primitive_source_audit_v1.5.json)",
+      "stack_effect_source": "libdclang.c OP_SORTSTRS",
+      "behavior_note": "In-place qsort of vars[] string pointers; source underflow check prints but does not return (potential safety concern)."
+    },
+    {
+      "name": "h!",
+      "category": "Hashes",
+      "opcode": "OP_HASHSET",
+      "registration_line": 3513,
+      "visibility": "public",
+      "stack_effect": "( value key-string -- )",
+      "verification": "source-reviewed (topical reference; requires independent C recheck)",
+      "stack_effect_source": "COLLECTION_PRIMITIVES.md",
+      "stack_effect_status": "source-reviewed",
+      "runtime_evidence_status": "not linked in registry"
+    },
+    {
+      "name": "h@",
+      "category": "Hashes",
+      "opcode": "OP_HASHGET",
+      "registration_line": 3514,
+      "visibility": "public",
+      "stack_effect": "( key-string -- value )",
+      "verification": "source-reviewed (topical reference; requires independent C recheck)",
+      "stack_effect_source": "COLLECTION_PRIMITIVES.md",
+      "stack_effect_status": "source-reviewed",
+      "runtime_evidence_status": "not linked in registry"
+    },
+    {
+      "name": "hkeys",
+      "category": "Hashes",
+      "opcode": "OP_HASHKEYS",
+      "registration_line": 3515,
+      "visibility": "public",
+      "stack_effect": "( key-index -- key-string )",
+      "verification": "source-reviewed (topical reference; requires independent C recheck)",
+      "stack_effect_source": "COLLECTION_PRIMITIVES.md",
+      "stack_effect_status": "source-reviewed",
+      "runtime_evidence_status": "not linked in registry"
+    },
+    {
+      "name": "tmake",
+      "category": "Trees",
+      "opcode": "OP_TREEMAKE",
+      "registration_line": 3517,
+      "visibility": "public",
+      "stack_effect": "( -- tree-id )",
+      "verification": "source-reviewed (topical reference; requires independent C recheck)",
+      "stack_effect_source": "COLLECTION_PRIMITIVES.md",
+      "stack_effect_status": "source-reviewed",
+      "runtime_evidence_status": "not linked in registry"
+    },
+    {
+      "name": "t!",
+      "category": "Trees",
+      "opcode": "OP_TREESET",
+      "registration_line": 3518,
+      "visibility": "public",
+      "stack_effect": "( tree-id key-string value -- value )",
+      "verification": "source-reviewed (topical reference; requires independent C recheck)",
+      "stack_effect_source": "COLLECTION_PRIMITIVES.md",
+      "stack_effect_status": "source-reviewed",
+      "runtime_evidence_status": "not linked in registry"
+    },
+    {
+      "name": "t@",
+      "category": "Trees",
+      "opcode": "OP_TREEGET",
+      "registration_line": 3519,
+      "visibility": "public",
+      "stack_effect": "( tree-id key-string -- value )",
+      "verification": "source-reviewed (topical reference; requires independent C recheck)",
+      "stack_effect_source": "COLLECTION_PRIMITIVES.md",
+      "stack_effect_status": "source-reviewed",
+      "runtime_evidence_status": "not linked in registry"
+    },
+    {
+      "name": "twalk",
+      "category": "Trees",
+      "opcode": "OP_TREEWALK",
+      "registration_line": 3520,
+      "visibility": "public",
+      "stack_effect": "( tree-index -- )",
+      "verification": "source-reviewed in libdclang.c opcode body (v1.5)",
+      "stack_effect_status": "source-reviewed",
+      "runtime_evidence_status": "not tested in v1.5",
+      "stack_effect_source": "libdclang.c OP_TREEWALK",
+      "behavior_note": "Prints tree nodes via twalk callback; consumes root index."
+    },
+    {
+      "name": "tdel",
+      "category": "Trees",
+      "opcode": "OP_TREEDELETE",
+      "registration_line": 3521,
+      "visibility": "public",
+      "stack_effect": "( tree-id key-string -- )",
+      "verification": "source-reviewed (topical reference; requires independent C recheck)",
+      "stack_effect_source": "COLLECTION_PRIMITIVES.md",
+      "stack_effect_status": "source-reviewed",
+      "runtime_evidence_status": "not linked in registry"
+    },
+    {
+      "name": "tdestroy",
+      "category": "Trees",
+      "opcode": "OP_TREEDESTROY",
+      "registration_line": 3522,
+      "visibility": "public",
+      "stack_effect": "( tree-id -- )",
+      "verification": "source-reviewed (topical reference; requires independent C recheck)",
+      "stack_effect_source": "COLLECTION_PRIMITIVES.md",
+      "stack_effect_status": "source-reviewed",
+      "runtime_evidence_status": "not linked in registry"
+    },
+    {
+      "name": "lmake",
+      "category": "Lists",
+      "opcode": "OP_LISTMAKE",
+      "registration_line": 3524,
+      "visibility": "public",
+      "stack_effect": "( -- list )",
+      "verification": "source-reviewed (topical reference; requires independent C recheck)",
+      "stack_effect_source": "COLLECTION_PRIMITIVES.md",
+      "stack_effect_status": "source-reviewed",
+      "runtime_evidence_status": "not linked in registry"
+    },
+    {
+      "name": "_lnext",
+      "category": "Lists",
+      "opcode": "OP_LISTNEXT",
+      "registration_line": 3525,
+      "visibility": "private",
+      "stack_effect": "( node-pointer -- next-node-pointer )",
+      "verification": "source-reviewed in libdclang.c opcode body (v1.5)",
+      "stack_effect_status": "source-reviewed",
+      "runtime_evidence_status": "not tested in v1.5",
+      "stack_effect_source": "libdclang.c OP_LISTNEXT",
+      "behavior_note": "Private; returns next linked-list node pointer or null."
+    },
+    {
+      "name": "l!",
+      "category": "Lists",
+      "opcode": "OP_LISTSET",
+      "registration_line": 3526,
+      "visibility": "public",
+      "stack_effect": "( list index value -- )",
+      "verification": "source-reviewed (topical reference; requires independent C recheck)",
+      "stack_effect_source": "COLLECTION_PRIMITIVES.md",
+      "stack_effect_status": "source-reviewed",
+      "runtime_evidence_status": "not linked in registry"
+    },
+    {
+      "name": "l@",
+      "category": "Lists",
+      "opcode": "OP_LISTGET",
+      "registration_line": 3527,
+      "visibility": "public",
+      "stack_effect": "( list index -- value )",
+      "verification": "source-reviewed (topical reference; requires independent C recheck)",
+      "stack_effect_source": "COLLECTION_PRIMITIVES.md",
+      "stack_effect_status": "source-reviewed",
+      "runtime_evidence_status": "not linked in registry"
+    },
+    {
+      "name": "lpush",
+      "category": "Lists",
+      "opcode": "OP_LISTPUSH",
+      "registration_line": 3528,
+      "visibility": "public",
+      "stack_effect": "( list value -- )",
+      "verification": "source-reviewed (topical reference; requires independent C recheck)",
+      "stack_effect_source": "COLLECTION_PRIMITIVES.md",
+      "stack_effect_status": "source-reviewed",
+      "runtime_evidence_status": "not linked in registry"
+    },
+    {
+      "name": "lpop",
+      "category": "Lists",
+      "opcode": "OP_LISTPOP",
+      "registration_line": 3529,
+      "visibility": "public",
+      "stack_effect": "( list -- value )",
+      "verification": "source-reviewed (topical reference; requires independent C recheck)",
+      "stack_effect_source": "COLLECTION_PRIMITIVES.md",
+      "stack_effect_status": "source-reviewed",
+      "runtime_evidence_status": "not linked in registry"
+    },
+    {
+      "name": "lins",
+      "category": "Lists",
+      "opcode": "OP_LISTINSERT",
+      "registration_line": 3530,
+      "visibility": "public",
+      "stack_effect": "( list index value -- )",
+      "verification": "source-reviewed (topical reference; requires independent C recheck)",
+      "stack_effect_source": "COLLECTION_PRIMITIVES.md",
+      "stack_effect_status": "source-reviewed",
+      "runtime_evidence_status": "not linked in registry"
+    },
+    {
+      "name": "lrem",
+      "category": "Lists",
+      "opcode": "OP_LISTREMOVE",
+      "registration_line": 3531,
+      "visibility": "public",
+      "stack_effect": "( list index -- )",
+      "verification": "source-reviewed (topical reference; requires independent C recheck)",
+      "stack_effect_source": "COLLECTION_PRIMITIVES.md",
+      "stack_effect_status": "source-reviewed",
+      "runtime_evidence_status": "not linked in registry"
+    },
+    {
+      "name": "lsize",
+      "category": "Lists",
+      "opcode": "OP_LISTSIZE",
+      "registration_line": 3532,
+      "visibility": "public",
+      "stack_effect": "( list -- count )",
+      "verification": "source-reviewed (topical reference; requires independent C recheck)",
+      "stack_effect_source": "COLLECTION_PRIMITIVES.md",
+      "stack_effect_status": "source-reviewed",
+      "runtime_evidence_status": "not linked in registry"
+    },
+    {
+      "name": "ldel",
+      "category": "Lists",
+      "opcode": "OP_LISTDELETE",
+      "registration_line": 3533,
+      "visibility": "public",
+      "stack_effect": "( list -- )",
+      "verification": "source-reviewed (topical reference; requires independent C recheck)",
+      "stack_effect_source": "COLLECTION_PRIMITIVES.md",
+      "stack_effect_status": "source-reviewed",
+      "runtime_evidence_status": "not linked in registry"
+    },
+    {
+      "name": "times",
+      "category": "Branching",
+      "opcode": "OP_TIMES",
+      "registration_line": 3535,
+      "visibility": "public",
+      "stack_effect": "( count -- )",
+      "verification": "source-reviewed in libdclang.c opcode body (v1.6)",
+      "stack_effect_status": "source-reviewed",
+      "runtime_evidence_status": "not runtime-tested in v1.6",
+      "stack_effect_source": "libdclang.c OP_TIMES",
+      "behavior_note": "Runtime loop setup. Known behavior: zero/negative count still executes body once; compiled-word context required."
+    },
+    {
+      "name": "again",
+      "category": "Branching",
+      "opcode": "OP_AGAIN",
+      "registration_line": 3536,
+      "visibility": "public",
+      "stack_effect": "( -- )",
+      "verification": "source-reviewed in libdclang.c opcode body (v1.6)",
+      "stack_effect_status": "source-reviewed",
+      "runtime_evidence_status": "not runtime-tested in v1.6",
+      "stack_effect_source": "libdclang.c OP_AGAIN",
+      "behavior_note": "Runtime loop back-edge; requires active times loop."
+    },
+    {
+      "name": "exittimes",
+      "category": "Branching",
+      "opcode": "OP_EXITTIMES",
+      "registration_line": 3537,
+      "visibility": "public",
+      "stack_effect": "( -- )",
+      "verification": "source-reviewed in libdclang.c opcode body (v1.6)",
+      "stack_effect_status": "source-reviewed",
+      "runtime_evidence_status": "not runtime-tested in v1.6",
+      "stack_effect_source": "libdclang.c OP_EXITTIMES",
+      "behavior_note": "Exit active times loop; does not restore arbitrary stack state."
+    },
+    {
+      "name": "for",
+      "category": "Branching",
+      "opcode": "OP_FOR",
+      "registration_line": 3538,
+      "visibility": "public",
+      "stack_effect": "( limit start step -- )",
+      "verification": "source-reviewed in libdclang.c opcode body (v1.6)",
+      "stack_effect_status": "source-reviewed",
+      "runtime_evidence_status": "not runtime-tested in v1.6",
+      "stack_effect_source": "libdclang.c OP_FOR",
+      "behavior_note": "Runtime loop setup: pops step, start, limit; zero step can produce nonterminating loop."
+    },
+    {
+      "name": "next",
+      "category": "Branching",
+      "opcode": "OP_NEXT",
+      "registration_line": 3539,
+      "visibility": "public",
+      "stack_effect": "( -- )",
+      "verification": "source-reviewed in libdclang.c opcode body (v1.6)",
+      "stack_effect_status": "source-reviewed",
+      "runtime_evidence_status": "not runtime-tested in v1.6",
+      "stack_effect_source": "libdclang.c OP_NEXT",
+      "behavior_note": "Runtime for-loop back-edge."
+    },
+    {
+      "name": "exitfor",
+      "category": "Branching",
+      "opcode": "OP_EXITFOR",
+      "registration_line": 3540,
+      "visibility": "public",
+      "stack_effect": "( -- )",
+      "verification": "source-reviewed in libdclang.c opcode body (v1.6)",
+      "stack_effect_status": "source-reviewed",
+      "runtime_evidence_status": "not runtime-tested in v1.6",
+      "stack_effect_source": "libdclang.c OP_EXITFOR",
+      "behavior_note": "Exit active for-loop."
+    },
+    {
+      "name": "i",
+      "category": "Branching",
+      "opcode": "OP_I",
+      "registration_line": 3541,
+      "visibility": "public",
+      "stack_effect": "( -- current-loop-index )",
+      "verification": "source-reviewed in libdclang.c opcode body (v1.6)",
+      "stack_effect_status": "source-reviewed",
+      "runtime_evidence_status": "not runtime-tested in v1.6",
+      "stack_effect_source": "libdclang.c OP_I",
+      "behavior_note": "Topmost loop counter; requires active loop."
+    },
+    {
+      "name": "j",
+      "category": "Branching",
+      "opcode": "OP_J",
+      "registration_line": 3542,
+      "visibility": "public",
+      "stack_effect": "( -- enclosing-loop-index )",
+      "verification": "source-reviewed in libdclang.c opcode body (v1.6)",
+      "stack_effect_status": "source-reviewed",
+      "runtime_evidence_status": "not runtime-tested in v1.6",
+      "stack_effect_source": "libdclang.c OP_J",
+      "behavior_note": "Second most recent loop counter; requires at least two active loops."
+    },
+    {
+      "name": "k",
+      "category": "Branching",
+      "opcode": "OP_K",
+      "registration_line": 3543,
+      "visibility": "public",
+      "stack_effect": "( -- outer-loop-index )",
+      "verification": "source-reviewed in libdclang.c opcode body (v1.6)",
+      "stack_effect_status": "source-reviewed",
+      "runtime_evidence_status": "not runtime-tested in v1.6",
+      "stack_effect_source": "libdclang.c OP_K",
+      "behavior_note": "Third most recent loop counter; requires at least three active loops."
+    },
+    {
+      "name": "if",
+      "category": "Branching",
+      "opcode": "OP_IF",
+      "registration_line": 3544,
+      "visibility": "public",
+      "stack_effect": "( flag -- )",
+      "verification": "source-reviewed in libdclang.c opcode body (v1.6)",
+      "stack_effect_status": "source-reviewed",
+      "runtime_evidence_status": "not runtime-tested in v1.6",
+      "stack_effect_source": "libdclang.c OP_IF",
+      "behavior_note": "COMPILE-TIME conditional syntax: rewrites instruction into OP_JUMPZ; the flag is consumed at runtime by generated jump, not by OP_IF itself."
+    },
+    {
+      "name": "else",
+      "category": "Branching",
+      "opcode": "OP_ELSE",
+      "registration_line": 3545,
+      "visibility": "public",
+      "stack_effect": "( -- )",
+      "verification": "source-reviewed in libdclang.c opcode body (v1.6)",
+      "stack_effect_status": "source-reviewed",
+      "runtime_evidence_status": "not runtime-tested in v1.6",
+      "stack_effect_source": "libdclang.c OP_ELSE",
+      "behavior_note": "COMPILE-TIME syntax: patches previous conditional jump; not a runtime data-stack operation."
+    },
+    {
+      "name": "endif",
+      "category": "Branching",
+      "opcode": "OP_ENDIF",
+      "registration_line": 3546,
+      "visibility": "public",
+      "stack_effect": "( -- )",
+      "verification": "source-reviewed in libdclang.c opcode body (v1.6)",
+      "stack_effect_status": "source-reviewed",
+      "runtime_evidence_status": "not runtime-tested in v1.6",
+      "stack_effect_source": "libdclang.c OP_ENDIF",
+      "behavior_note": "COMPILE-TIME syntax: patches pending jump; not a runtime data-stack operation."
+    },
+    {
+      "name": "return",
+      "category": "Branching",
+      "opcode": "OP_RETURN",
+      "registration_line": 3547,
+      "visibility": "public",
+      "stack_effect": "( -- )",
+      "verification": "source-reviewed in libdclang.c opcode body (v1.6)",
+      "stack_effect_status": "source-reviewed",
+      "runtime_evidence_status": "not runtime-tested in v1.6",
+      "stack_effect_source": "libdclang.c OP_RETURN",
+      "behavior_note": "Runtime return from compiled word; restores instruction pointer and local-variable base."
+    },
+    {
+      "name": "clock",
+      "category": "Time",
+      "opcode": "OP_CLOCK",
+      "registration_line": 3549,
+      "visibility": "public",
+      "stack_effect": "( -- timestamp-float )",
+      "verification": "source-reviewed (topical reference; requires independent C recheck)",
+      "stack_effect_source": "FILE_TIME_DYNAMIC_PRIMITIVES.md",
+      "stack_effect_status": "source-reviewed",
+      "runtime_evidence_status": "not linked in registry"
+    },
+    {
+      "name": "epoch",
+      "category": "Time",
+      "opcode": "OP_EPOCH",
+      "registration_line": 3550,
+      "visibility": "public",
+      "stack_effect": "( -- epoch-seconds )",
+      "verification": "source-reviewed (topical reference; requires independent C recheck)",
+      "stack_effect_source": "FILE_TIME_DYNAMIC_PRIMITIVES.md",
+      "stack_effect_status": "source-reviewed",
+      "runtime_evidence_status": "not linked in registry"
+    },
+    {
+      "name": "epoch->dt",
+      "category": "Time",
+      "opcode": "OP_EPOCH_TO_DT",
+      "registration_line": 3551,
+      "visibility": "public",
+      "stack_effect": "( epoch format-string -- formatted-string )",
+      "verification": "source-reviewed (topical reference; requires independent C recheck)",
+      "stack_effect_source": "FILE_TIME_DYNAMIC_PRIMITIVES.md",
+      "stack_effect_status": "source-reviewed",
+      "runtime_evidence_status": "not linked in registry"
+    },
+    {
+      "name": "dt->epoch",
+      "category": "Time",
+      "opcode": "OP_DT_TO_EPOCH",
+      "registration_line": 3552,
+      "visibility": "public",
+      "stack_effect": "( date-string format-string -- epoch-seconds )",
+      "verification": "source-reviewed (C opcode, v1.2)",
+      "runtime_observations_v1.2": [
+        {
+          "program": "\"1970-01-01 00:00:00\" \"%Y-%m-%d %H:%M:%S\" dt->epoch 0 >=",
+          "stack": "-1"
+        }
+      ],
+      "runtime_status": "observed; not exhaustively verified",
+      "stack_effect_status": "source-reviewed",
+      "runtime_evidence_status": "observed (not exhaustive)"
+    },
+    {
+      "name": "sleep",
+      "category": "Time",
+      "opcode": "OP_SLEEP",
+      "registration_line": 3553,
+      "visibility": "public",
+      "stack_effect": "( seconds -- )",
+      "verification": "source-reviewed (C opcode, v1.2)",
+      "runtime_observations_v1.2": [
+        {
+          "program": "0 sleep 42",
+          "stack": "42"
+        }
+      ],
+      "runtime_status": "observed; not exhaustively verified",
+      "stack_effect_status": "source-reviewed",
+      "runtime_evidence_status": "observed (not exhaustive)"
+    },
+    {
+      "name": "cr",
+      "category": "String Output",
+      "opcode": "OP_CR",
+      "registration_line": 3555,
+      "visibility": "public",
+      "stack_effect": "( -- )",
+      "verification": "source-reviewed in libdclang.c (v1.4); not a new runtime verification",
+      "stack_effect_status": "source-reviewed",
+      "runtime_evidence_status": "not linked in registry",
+      "stack_effect_source": "libdclang.c opcode OP_CR"
+    },
+    {
+      "name": "print",
+      "category": "String Output",
+      "opcode": "OP_PRINT",
+      "registration_line": 3556,
+      "visibility": "public",
+      "stack_effect": "( string -- )",
+      "verification": "source-reviewed in libdclang.c (v1.4); not a new runtime verification",
+      "stack_effect_status": "source-reviewed",
+      "runtime_evidence_status": "not linked in registry",
+      "stack_effect_source": "libdclang.c opcode OP_PRINT"
+    },
+    {
+      "name": "emit",
+      "category": "Character Emitters",
+      "opcode": "OP_EMIT",
+      "registration_line": 3558,
+      "visibility": "public",
+      "stack_effect": "( codepoint -- )",
+      "verification": "source-reviewed in libdclang.c (v1.4); not a new runtime verification",
+      "stack_effect_status": "source-reviewed",
+      "runtime_evidence_status": "not linked in registry",
+      "stack_effect_source": "libdclang.c opcode OP_EMIT"
+    },
+    {
+      "name": "uemit",
+      "category": "Character Emitters",
+      "opcode": "OP_UEMIT",
+      "registration_line": 3559,
+      "visibility": "public",
+      "stack_effect": "( codepoint -- )",
+      "verification": "source-reviewed in libdclang.c (v1.4); not a new runtime verification",
+      "stack_effect_status": "source-reviewed",
+      "runtime_evidence_status": "not linked in registry",
+      "stack_effect_source": "libdclang.c opcode OP_UEMIT"
+    },
+    {
+      "name": "_stereo_out32",
+      "category": "Character Emitters",
+      "opcode": "OP_STEREO_OUT32",
+      "registration_line": 3560,
+      "visibility": "private",
+      "stack_effect": "( left right -- )",
+      "verification": "source-reviewed in libdclang.c (v1.4); not a new runtime verification",
+      "stack_effect_status": "source-reviewed",
+      "runtime_evidence_status": "not linked in registry",
+      "stack_effect_source": "libdclang.c opcode OP_STEREO_OUT32"
+    },
+    {
+      "name": "_stereo_in32",
+      "category": "Character Emitters",
+      "opcode": "OP_STEREO_IN32",
+      "registration_line": 3561,
+      "visibility": "private",
+      "stack_effect": "( -- left right )",
+      "verification": "source-reviewed in libdclang.c (v1.4); not a new runtime verification",
+      "stack_effect_status": "source-reviewed",
+      "runtime_evidence_status": "not linked in registry",
+      "stack_effect_source": "libdclang.c opcode OP_STEREO_IN32"
+    },
+    {
+      "name": "isalnum",
+      "category": "Character Types",
+      "opcode": "OP_ISALNUM",
+      "registration_line": 3563,
+      "visibility": "public",
+      "stack_effect": "( x -- result )",
+      "verification": "source-reviewed in libdclang.c (v1.4); not a new runtime verification",
+      "stack_effect_status": "source-reviewed",
+      "runtime_evidence_status": "not linked in registry",
+      "stack_effect_source": "libdclang.c opcode OP_ISALNUM"
+    },
+    {
+      "name": "isalpha",
+      "category": "Character Types",
+      "opcode": "OP_ISALPHA",
+      "registration_line": 3564,
+      "visibility": "public",
+      "stack_effect": "( x -- result )",
+      "verification": "source-reviewed in libdclang.c (v1.4); not a new runtime verification",
+      "stack_effect_status": "source-reviewed",
+      "runtime_evidence_status": "not linked in registry",
+      "stack_effect_source": "libdclang.c opcode OP_ISALPHA"
+    },
+    {
+      "name": "iscntrl",
+      "category": "Character Types",
+      "opcode": "OP_ISCNTRL",
+      "registration_line": 3565,
+      "visibility": "public",
+      "stack_effect": "( x -- result )",
+      "verification": "source-reviewed in libdclang.c (v1.4); not a new runtime verification",
+      "stack_effect_status": "source-reviewed",
+      "runtime_evidence_status": "not linked in registry",
+      "stack_effect_source": "libdclang.c opcode OP_ISCNTRL"
+    },
+    {
+      "name": "isdigit",
+      "category": "Character Types",
+      "opcode": "OP_ISDIGIT",
+      "registration_line": 3566,
+      "visibility": "public",
+      "stack_effect": "( x -- result )",
+      "verification": "source-reviewed in libdclang.c (v1.4); not a new runtime verification",
+      "stack_effect_status": "source-reviewed",
+      "runtime_evidence_status": "not linked in registry",
+      "stack_effect_source": "libdclang.c opcode OP_ISDIGIT"
+    },
+    {
+      "name": "isgraph",
+      "category": "Character Types",
+      "opcode": "OP_ISGRAPH",
+      "registration_line": 3567,
+      "visibility": "public",
+      "stack_effect": "( x -- result )",
+      "verification": "source-reviewed in libdclang.c (v1.4); not a new runtime verification",
+      "stack_effect_status": "source-reviewed",
+      "runtime_evidence_status": "not linked in registry",
+      "stack_effect_source": "libdclang.c opcode OP_ISGRAPH"
+    },
+    {
+      "name": "islower",
+      "category": "Character Types",
+      "opcode": "OP_ISLOWER",
+      "registration_line": 3568,
+      "visibility": "public",
+      "stack_effect": "( x -- result )",
+      "verification": "source-reviewed in libdclang.c (v1.4); not a new runtime verification",
+      "stack_effect_status": "source-reviewed",
+      "runtime_evidence_status": "not linked in registry",
+      "stack_effect_source": "libdclang.c opcode OP_ISLOWER"
+    },
+    {
+      "name": "isprint",
+      "category": "Character Types",
+      "opcode": "OP_ISPRINT",
+      "registration_line": 3569,
+      "visibility": "public",
+      "stack_effect": "( x -- result )",
+      "verification": "source-reviewed in libdclang.c (v1.4); not a new runtime verification",
+      "stack_effect_status": "source-reviewed",
+      "runtime_evidence_status": "not linked in registry",
+      "stack_effect_source": "libdclang.c opcode OP_ISPRINT"
+    },
+    {
+      "name": "ispunct",
+      "category": "Character Types",
+      "opcode": "OP_ISPUNCT",
+      "registration_line": 3570,
+      "visibility": "public",
+      "stack_effect": "( x -- result )",
+      "verification": "source-reviewed in libdclang.c (v1.4); not a new runtime verification",
+      "stack_effect_status": "source-reviewed",
+      "runtime_evidence_status": "not linked in registry",
+      "stack_effect_source": "libdclang.c opcode OP_ISPUNCT"
+    },
+    {
+      "name": "isspace",
+      "category": "Character Types",
+      "opcode": "OP_ISSPACE",
+      "registration_line": 3571,
+      "visibility": "public",
+      "stack_effect": "( x -- result )",
+      "verification": "source-reviewed in libdclang.c (v1.4); not a new runtime verification",
+      "stack_effect_status": "source-reviewed",
+      "runtime_evidence_status": "not linked in registry",
+      "stack_effect_source": "libdclang.c opcode OP_ISSPACE"
+    },
+    {
+      "name": "isupper",
+      "category": "Character Types",
+      "opcode": "OP_ISUPPER",
+      "registration_line": 3572,
+      "visibility": "public",
+      "stack_effect": "( x -- result )",
+      "verification": "source-reviewed in libdclang.c (v1.4); not a new runtime verification",
+      "stack_effect_status": "source-reviewed",
+      "runtime_evidence_status": "not linked in registry",
+      "stack_effect_source": "libdclang.c opcode OP_ISUPPER"
+    },
+    {
+      "name": "isxdigit",
+      "category": "Character Types",
+      "opcode": "OP_ISXDIGIT",
+      "registration_line": 3573,
+      "visibility": "public",
+      "stack_effect": "( x -- result )",
+      "verification": "source-reviewed in libdclang.c (v1.4); not a new runtime verification",
+      "stack_effect_status": "source-reviewed",
+      "runtime_evidence_status": "not linked in registry",
+      "stack_effect_source": "libdclang.c opcode OP_ISXDIGIT"
+    },
+    {
+      "name": "tohex",
+      "category": "String Conversion",
+      "opcode": "OP_TOHEX",
+      "registration_line": 3575,
+      "visibility": "public",
+      "stack_effect": "( x -- result )",
+      "verification": "source-reviewed in libdclang.c (v1.4); not a new runtime verification",
+      "stack_effect_status": "source-reviewed",
+      "runtime_evidence_status": "not linked in registry",
+      "stack_effect_source": "libdclang.c opcode OP_TOHEX"
+    },
+    {
+      "name": "tostr",
+      "category": "String Conversion",
+      "opcode": "OP_TOSTR",
+      "registration_line": 3576,
+      "visibility": "public",
+      "stack_effect": "( x -- result )",
+      "verification": "source-reviewed in libdclang.c (v1.4); not a new runtime verification",
+      "stack_effect_status": "source-reviewed",
+      "runtime_evidence_status": "not linked in registry",
+      "stack_effect_source": "libdclang.c opcode OP_TOSTR"
+    },
+    {
+      "name": "tonum",
+      "category": "String Conversion",
+      "opcode": "OP_TONUM",
+      "registration_line": 3577,
+      "visibility": "public",
+      "stack_effect": "( x -- result )",
+      "verification": "source-reviewed in libdclang.c (v1.4); not a new runtime verification",
+      "stack_effect_status": "source-reviewed",
+      "runtime_evidence_status": "not linked in registry",
+      "stack_effect_source": "libdclang.c opcode OP_TONUM"
+    },
+    {
+      "name": "ord",
+      "category": "String Conversion",
+      "opcode": "OP_ORD",
+      "registration_line": 3578,
+      "visibility": "public",
+      "stack_effect": "( x -- result )",
+      "verification": "source-reviewed in libdclang.c (v1.4); not a new runtime verification",
+      "runtime_observations_v0.7": [
+        {
+          "program": "\"A\" ord",
+          "stack": "65"
+        }
+      ],
+      "runtime_status": "observed; not exhaustively verified",
+      "stack_effect_status": "source-reviewed",
+      "runtime_evidence_status": "observed (not exhaustive)",
+      "stack_effect_source": "libdclang.c opcode OP_ORD"
+    },
+    {
+      "name": "tolower",
+      "category": "String Conversion",
+      "opcode": "OP_TOLOWER",
+      "registration_line": 3579,
+      "visibility": "public",
+      "stack_effect": "( x -- result )",
+      "verification": "source-reviewed in libdclang.c (v1.4); not a new runtime verification",
+      "stack_effect_status": "source-reviewed",
+      "runtime_evidence_status": "not linked in registry",
+      "stack_effect_source": "libdclang.c opcode OP_TOLOWER"
+    },
+    {
+      "name": "toupper",
+      "category": "String Conversion",
+      "opcode": "OP_TOUPPER",
+      "registration_line": 3580,
+      "visibility": "public",
+      "stack_effect": "( x -- result )",
+      "verification": "source-reviewed in libdclang.c (v1.4); not a new runtime verification",
+      "stack_effect_status": "source-reviewed",
+      "runtime_evidence_status": "not linked in registry",
+      "stack_effect_source": "libdclang.c opcode OP_TOUPPER"
+    },
+    {
+      "name": "strlen",
+      "category": "String Ops",
+      "opcode": "OP_STRLEN",
+      "registration_line": 3582,
+      "visibility": "public",
+      "stack_effect": "( x -- result )",
+      "verification": "source-reviewed in libdclang.c (v1.4); not a new runtime verification",
+      "runtime_observations_v0.7": [
+        {
+          "program": "\"abcd\" strlen",
+          "stack": "4"
+        }
+      ],
+      "runtime_status": "observed; not exhaustively verified",
+      "stack_effect_status": "source-reviewed",
+      "runtime_evidence_status": "observed (not exhaustive)",
+      "stack_effect_source": "libdclang.c opcode OP_STRLEN"
+    },
+    {
+      "name": "str=",
+      "category": "String Ops",
+      "opcode": "OP_STREQ",
+      "registration_line": 3583,
+      "visibility": "public",
+      "stack_effect": "( a b -- result )",
+      "verification": "source-reviewed in libdclang.c (v1.4); not a new runtime verification",
+      "runtime_observations_v0.7": [
+        {
+          "program": "\"abc\" \"abc\" str=",
+          "stack": "-1"
+        }
+      ],
+      "runtime_status": "observed; not exhaustively verified",
+      "stack_effect_status": "source-reviewed",
+      "runtime_evidence_status": "observed (not exhaustive)",
+      "stack_effect_source": "libdclang.c opcode OP_STREQ",
+      "result_convention": "-1 true, 0 false"
+    },
+    {
+      "name": "str<",
+      "category": "String Ops",
+      "opcode": "OP_STRLT",
+      "registration_line": 3584,
+      "visibility": "public",
+      "stack_effect": "( a b -- result )",
+      "verification": "source-reviewed in libdclang.c (v1.4); not a new runtime verification",
+      "runtime_observations_v0.7": [
+        {
+          "program": "\"abc\" \"abd\" str<",
+          "stack": "-1"
+        }
+      ],
+      "runtime_status": "observed; not exhaustively verified",
+      "stack_effect_status": "source-reviewed",
+      "runtime_evidence_status": "observed (not exhaustive)",
+      "stack_effect_source": "libdclang.c opcode OP_STRLT",
+      "result_convention": "-1 true, 0 false"
+    },
+    {
+      "name": "str>",
+      "category": "String Ops",
+      "opcode": "OP_STRGT",
+      "registration_line": 3585,
+      "visibility": "public",
+      "stack_effect": "( a b -- result )",
+      "verification": "source-reviewed in libdclang.c (v1.4); not a new runtime verification",
+      "stack_effect_status": "source-reviewed",
+      "runtime_evidence_status": "not linked in registry",
+      "stack_effect_source": "libdclang.c opcode OP_STRGT",
+      "result_convention": "-1 true, 0 false"
+    },
+    {
+      "name": "strfind",
+      "category": "String Ops",
+      "opcode": "OP_STRFIND",
+      "registration_line": 3586,
+      "visibility": "public",
+      "stack_effect": "( haystack needle -- pointer-or-null )",
+      "verification": "source-reviewed (topical reference; requires independent C recheck)",
+      "stack_effect_source": "STRING_DYNAMIC_PRIMITIVES.md",
+      "stack_effect_status": "source-reviewed",
+      "runtime_evidence_status": "not linked in registry"
+    },
+    {
+      "name": "strspn",
+      "category": "String Ops",
+      "opcode": "OP_STRSPN",
+      "registration_line": 3587,
+      "visibility": "public",
+      "stack_effect": "( string accepted-chars -- count )",
+      "verification": "source-reviewed (topical reference; requires independent C recheck)",
+      "stack_effect_source": "STRING_DYNAMIC_PRIMITIVES.md",
+      "stack_effect_status": "source-reviewed",
+      "runtime_evidence_status": "not linked in registry"
+    },
+    {
+      "name": "strcspn",
+      "category": "String Ops",
+      "opcode": "OP_STRCSPN",
+      "registration_line": 3588,
+      "visibility": "public",
+      "stack_effect": "( string rejected-chars -- count )",
+      "verification": "source-reviewed (topical reference; requires independent C recheck)",
+      "stack_effect_source": "STRING_DYNAMIC_PRIMITIVES.md",
+      "stack_effect_status": "source-reviewed",
+      "runtime_evidence_status": "not linked in registry"
+    },
+    {
+      "name": "strtok",
+      "category": "String Ops",
+      "opcode": "OP_STRTOK",
+      "registration_line": 3589,
+      "visibility": "public",
+      "stack_effect": "( string-or-null delimiters save-slot -- token-pointer )",
+      "verification": "source-reviewed (topical reference; requires independent C recheck)",
+      "stack_effect_source": "STRING_DYNAMIC_PRIMITIVES.md",
+      "stack_effect_status": "source-reviewed",
+      "runtime_evidence_status": "not linked in registry"
+    },
+    {
+      "name": "mempcpy",
+      "category": "String Ops",
+      "opcode": "OP_MEMPCPY",
+      "registration_line": 3590,
+      "visibility": "public",
+      "stack_effect": "( destination source size -- destination+size )",
+      "verification": "source-reviewed (topical reference; requires independent C recheck)",
+      "stack_effect_source": "STRING_DYNAMIC_PRIMITIVES.md",
+      "stack_effect_status": "source-reviewed",
+      "runtime_evidence_status": "not linked in registry"
+    },
+    {
+      "name": "memset",
+      "category": "String Ops",
+      "opcode": "OP_MEMSET",
+      "registration_line": 3591,
+      "visibility": "public",
+      "stack_effect": "( destination byte count -- destination )",
+      "verification": "source-reviewed (topical reference; requires independent C recheck)",
+      "stack_effect_source": "STRING_DYNAMIC_PRIMITIVES.md",
+      "stack_effect_status": "source-reviewed",
+      "runtime_evidence_status": "not linked in registry"
+    },
+    {
+      "name": "mkbuf",
+      "category": "Memory",
+      "opcode": "OP_MKBUF",
+      "registration_line": 3593,
+      "visibility": "public",
+      "stack_effect": "( size -- pointer )",
+      "verification": "source-reviewed (topical reference; requires independent C recheck)",
+      "stack_effect_source": "MEMORY_PRIMITIVES.md",
+      "stack_effect_status": "source-reviewed",
+      "runtime_evidence_status": "not linked in registry"
+    },
+    {
+      "name": "free",
+      "category": "Memory",
+      "opcode": "OP_FREE",
+      "registration_line": 3594,
+      "visibility": "public",
+      "stack_effect": "( pointer -- )",
+      "verification": "source-reviewed (topical reference; requires independent C recheck)",
+      "stack_effect_source": "MEMORY_PRIMITIVES.md",
+      "stack_effect_status": "source-reviewed",
+      "runtime_evidence_status": "not linked in registry"
+    },
+    {
+      "name": "mark",
+      "category": "Memory",
+      "opcode": "OP_MARK",
+      "registration_line": 3595,
+      "visibility": "public",
+      "stack_effect": "( -- )",
+      "verification": "source-reviewed (topical reference; requires independent C recheck)",
+      "stack_effect_source": "MEMORY_PRIMITIVES.md",
+      "stack_effect_status": "source-reviewed",
+      "runtime_evidence_status": "not linked in registry"
+    },
+    {
+      "name": "rewind",
+      "category": "Memory",
+      "opcode": "OP_REWIND",
+      "registration_line": 3596,
+      "visibility": "public",
+      "stack_effect": "( -- )",
+      "verification": "source-reviewed (topical reference; requires independent C recheck)",
+      "stack_effect_source": "MEMORY_PRIMITIVES.md",
+      "stack_effect_status": "source-reviewed",
+      "runtime_evidence_status": "not linked in registry"
+    },
+    {
+      "name": "memused",
+      "category": "Memory",
+      "opcode": "OP_MEMUSED",
+      "registration_line": 3597,
+      "visibility": "public",
+      "stack_effect": "( -- fraction )",
+      "verification": "source-reviewed (topical reference; requires independent C recheck)",
+      "stack_effect_source": "MEMORY_PRIMITIVES.md",
+      "stack_effect_status": "source-reviewed",
+      "runtime_evidence_status": "not linked in registry"
+    },
+    {
+      "name": "import",
+      "category": "Files",
+      "opcode": "OP_IMPORT",
+      "registration_line": 3599,
+      "visibility": "public",
+      "stack_effect": "( filename-string -- )",
+      "verification": "source-reviewed in libdclang.c opcode body (v1.5)",
+      "stack_effect_status": "source-reviewed",
+      "runtime_evidence_status": "not tested in v1.5",
+      "stack_effect_source": "libdclang.c OP_IMPORT",
+      "behavior_note": "Imports a named file; library search path applies."
+    },
+    {
+      "name": "fopen",
+      "category": "Files",
+      "opcode": "OP_FILEOPEN",
+      "registration_line": 3600,
+      "visibility": "public",
+      "stack_effect": "( filename mode -- file-pointer )",
+      "verification": "source-reviewed (topical reference; requires independent C recheck)",
+      "stack_effect_source": "FILE_TIME_DYNAMIC_PRIMITIVES.md",
+      "stack_effect_status": "source-reviewed",
+      "runtime_evidence_status": "not linked in registry"
+    },
+    {
+      "name": "fmemopen",
+      "category": "Files",
+      "opcode": "OP_FILEMEMOPEN",
+      "registration_line": 3601,
+      "visibility": "public",
+      "stack_effect": "( buffer size mode -- file-pointer )",
+      "verification": "source-reviewed (topical reference; requires independent C recheck)",
+      "stack_effect_source": "FILE_TIME_DYNAMIC_PRIMITIVES.md",
+      "stack_effect_status": "source-reviewed",
+      "runtime_evidence_status": "not linked in registry"
+    },
+    {
+      "name": "fread",
+      "category": "Files",
+      "opcode": "OP_FILEREAD",
+      "registration_line": 3602,
+      "visibility": "public",
+      "stack_effect": "( destination byte-count file-pointer -- bytes-read )",
+      "verification": "source-reviewed (topical reference; requires independent C recheck)",
+      "stack_effect_source": "FILE_TIME_DYNAMIC_PRIMITIVES.md",
+      "stack_effect_status": "source-reviewed",
+      "runtime_evidence_status": "not linked in registry"
+    },
+    {
+      "name": "freadline",
+      "category": "Files",
+      "opcode": "OP_FILEREADLINE",
+      "registration_line": 3603,
+      "visibility": "public",
+      "stack_effect": "( file-pointer -- line-pointer byte-count )",
+      "verification": "source-reviewed in libdclang.c opcode body (v1.5)",
+      "stack_effect_status": "source-reviewed",
+      "runtime_evidence_status": "not tested in v1.5",
+      "stack_effect_source": "libdclang.c OP_FILEREADLINE",
+      "behavior_note": "getline-managed line buffer; pointer lifetime and EOF behavior need further testing."
+    },
+    {
+      "name": "freadall",
+      "category": "Files",
+      "opcode": "OP_FILEREADALL",
+      "registration_line": 3604,
+      "visibility": "public",
+      "stack_effect": "( file-pointer -- buffer-pointer byte-count )",
+      "verification": "source-reviewed in libdclang.c opcode body (v1.5)",
+      "stack_effect_status": "source-reviewed",
+      "runtime_evidence_status": "not tested in v1.5",
+      "stack_effect_source": "libdclang.c OP_FILEREADALL",
+      "behavior_note": "Allocates via custom allocator; returns buffer and byte length."
+    },
+    {
+      "name": "fseek",
+      "category": "Files",
+      "opcode": "OP_FILESEEK",
+      "registration_line": 3605,
+      "visibility": "public",
+      "stack_effect": "( file-pointer offset whence -- )",
+      "verification": "source-reviewed (topical reference; requires independent C recheck)",
+      "stack_effect_source": "FILE_TIME_DYNAMIC_PRIMITIVES.md",
+      "stack_effect_status": "source-reviewed",
+      "runtime_evidence_status": "not linked in registry"
+    },
+    {
+      "name": "ftell",
+      "category": "Files",
+      "opcode": "OP_FILETELL",
+      "registration_line": 3606,
+      "visibility": "public",
+      "stack_effect": "( file-pointer -- offset )",
+      "verification": "source-reviewed (topical reference; requires independent C recheck)",
+      "stack_effect_source": "FILE_TIME_DYNAMIC_PRIMITIVES.md",
+      "stack_effect_status": "source-reviewed",
+      "runtime_evidence_status": "not linked in registry"
+    },
+    {
+      "name": "fwrite",
+      "category": "Files",
+      "opcode": "OP_FILEWRITE",
+      "registration_line": 3607,
+      "visibility": "public",
+      "stack_effect": "( source byte-count file-pointer -- bytes-written )",
+      "verification": "source-reviewed (topical reference; requires independent C recheck)",
+      "stack_effect_source": "FILE_TIME_DYNAMIC_PRIMITIVES.md",
+      "stack_effect_status": "source-reviewed",
+      "runtime_evidence_status": "not linked in registry"
+    },
+    {
+      "name": "fflush",
+      "category": "Files",
+      "opcode": "OP_FILEFLUSH",
+      "registration_line": 3608,
+      "visibility": "public",
+      "stack_effect": "( file-pointer -- )",
+      "verification": "source-reviewed (topical reference; requires independent C recheck)",
+      "stack_effect_source": "FILE_TIME_DYNAMIC_PRIMITIVES.md",
+      "stack_effect_status": "source-reviewed",
+      "runtime_evidence_status": "not linked in registry"
+    },
+    {
+      "name": "fclose",
+      "category": "Files",
+      "opcode": "OP_FILECLOSE",
+      "registration_line": 3609,
+      "visibility": "public",
+      "stack_effect": "( file-pointer -- )",
+      "verification": "source-reviewed (topical reference; requires independent C recheck)",
+      "stack_effect_source": "FILE_TIME_DYNAMIC_PRIMITIVES.md",
+      "stack_effect_status": "source-reviewed",
+      "runtime_evidence_status": "not linked in registry"
+    },
+    {
+      "name": "redirect",
+      "category": "Files",
+      "opcode": "OP_REDIRECT",
+      "registration_line": 3610,
+      "visibility": "public",
+      "stack_effect": "( file-pointer -- )",
+      "verification": "source-reviewed in libdclang.c opcode body (v1.5)",
+      "stack_effect_status": "source-reviewed",
+      "runtime_evidence_status": "not tested in v1.5",
+      "stack_effect_source": "libdclang.c OP_REDIRECT",
+      "behavior_note": "Changes interpreter output FILE*; preserve valid stream lifetime."
+    },
+    {
+      "name": "seterr",
+      "category": "Files",
+      "opcode": "OP_SETERR",
+      "registration_line": 3611,
+      "visibility": "public",
+      "stack_effect": "( -- )",
+      "verification": "source-reviewed in libdclang.c opcode body (v1.5)",
+      "stack_effect_status": "source-reviewed",
+      "runtime_evidence_status": "not tested in v1.5",
+      "stack_effect_source": "libdclang.c OP_SETERR",
+      "behavior_note": "Redirects interpreter output to stderr."
+    },
+    {
+      "name": "setout",
+      "category": "Files",
+      "opcode": "OP_SETOUT",
+      "registration_line": 3612,
+      "visibility": "public",
+      "stack_effect": "( -- )",
+      "verification": "source-reviewed in libdclang.c opcode body (v1.5)",
+      "stack_effect_status": "source-reviewed",
+      "runtime_evidence_status": "not tested in v1.5",
+      "stack_effect_source": "libdclang.c OP_SETOUT",
+      "behavior_note": "Redirects interpreter output to stdout."
+    },
+    {
+      "name": "flush",
+      "category": "Files",
+      "opcode": "OP_FLUSH",
+      "registration_line": 3613,
+      "visibility": "public",
+      "stack_effect": "( -- )",
+      "verification": "source-reviewed in libdclang.c opcode body (v1.5)",
+      "stack_effect_status": "source-reviewed",
+      "runtime_evidence_status": "not tested in v1.5",
+      "stack_effect_source": "libdclang.c OP_FLUSH",
+      "behavior_note": "Flushes current interpreter output stream."
+    },
+    {
+      "name": "open",
+      "category": "Files (no buffer)",
+      "opcode": "OP_OPEN",
+      "registration_line": 3615,
+      "visibility": "public",
+      "stack_effect": "( path flags -- fd )",
+      "verification": "source-reviewed (C opcode, v1.2)",
+      "runtime_observations_v1.2": [
+        {
+          "program": "\"/dev/null\" 0 open close",
+          "stack": "0"
+        },
+        {
+          "program": "\"/dev/null\" 0 open 8 mkbuf 0 read",
+          "stack": "0"
+        },
+        {
+          "program": "\"/dev/null\" 1 open \"abc\" 0 write",
+          "stack": "0"
+        }
+      ],
+      "runtime_status": "observed; not exhaustively verified",
+      "stack_effect_status": "source-reviewed",
+      "runtime_evidence_status": "observed (not exhaustive)"
+    },
+    {
+      "name": "read",
+      "category": "Files (no buffer)",
+      "opcode": "OP_READ",
+      "registration_line": 3616,
+      "visibility": "public",
+      "stack_effect": "( fd buffer byte-count -- bytes-read )",
+      "verification": "source-reviewed (C opcode, v1.2)",
+      "runtime_observations_v1.2": [
+        {
+          "program": "\"/dev/null\" 0 open 8 mkbuf 0 read",
+          "stack": "0"
+        }
+      ],
+      "runtime_status": "observed; not exhaustively verified",
+      "stack_effect_status": "source-reviewed",
+      "runtime_evidence_status": "observed (not exhaustive)"
+    },
+    {
+      "name": "write",
+      "category": "Files (no buffer)",
+      "opcode": "OP_WRITE",
+      "registration_line": 3617,
+      "visibility": "public",
+      "stack_effect": "( fd buffer byte-count -- bytes-written )",
+      "verification": "source-reviewed (C opcode, v1.2)",
+      "runtime_observations_v1.2": [
+        {
+          "program": "\"/dev/null\" 1 open \"abc\" 0 write",
+          "stack": "0"
+        }
+      ],
+      "runtime_status": "observed; not exhaustively verified",
+      "stack_effect_status": "source-reviewed",
+      "runtime_evidence_status": "observed (not exhaustive)"
+    },
+    {
+      "name": "close",
+      "category": "Files (no buffer)",
+      "opcode": "OP_CLOSE",
+      "registration_line": 3618,
+      "visibility": "public",
+      "stack_effect": "( fd -- status )",
+      "verification": "source-reviewed (C opcode, v1.2)",
+      "runtime_observations_v1.2": [
+        {
+          "program": "\"/dev/null\" 0 open close",
+          "stack": "0"
+        }
+      ],
+      "runtime_status": "observed; not exhaustively verified",
+      "stack_effect_status": "source-reviewed",
+      "runtime_evidence_status": "observed (not exhaustive)"
+    },
+    {
+      "name": "tcplisten",
+      "category": "Sockets",
+      "opcode": "OP_TCPLISTEN",
+      "registration_line": 3620,
+      "visibility": "public",
+      "stack_effect": "( port -- socket-fd )",
+      "verification": "source-reviewed (C opcode, v1.2)",
+      "stack_effect_status": "source-reviewed",
+      "runtime_evidence_status": "not linked in registry"
+    },
+    {
+      "name": "tcpaccept",
+      "category": "Sockets",
+      "opcode": "OP_TCPACCEPT",
+      "registration_line": 3621,
+      "visibility": "public",
+      "stack_effect": "( socket-fd -- client-fd )",
+      "verification": "source-reviewed (C opcode, v1.2)",
+      "stack_effect_status": "source-reviewed",
+      "runtime_evidence_status": "not linked in registry"
+    },
+    {
+      "name": "tcpconnect",
+      "category": "Sockets",
+      "opcode": "OP_TCPCONNECT",
+      "registration_line": 3622,
+      "visibility": "public",
+      "stack_effect": "( host port -- socket-fd )",
+      "verification": "source-reviewed (C opcode, v1.2)",
+      "stack_effect_status": "source-reviewed",
+      "runtime_evidence_status": "not linked in registry"
+    },
+    {
+      "name": "udpsocket",
+      "category": "Sockets",
+      "opcode": "OP_UDPSOCKET",
+      "registration_line": 3623,
+      "visibility": "public",
+      "stack_effect": "( -- socket-fd )",
+      "verification": "source-reviewed (C opcode, v1.2)",
+      "runtime_observations_v1.2": [
+        {
+          "program": "udpsocket udpclose",
+          "stack": "0"
+        },
+        {
+          "program": "udpsocket -1 udpbind",
+          "stack": "-1"
+        },
+        {
+          "program": "udpsocket \"127.0.0.1\" -1 udpconnect",
+          "stack": "-1"
+        }
+      ],
+      "runtime_status": "observed; not exhaustively verified",
+      "stack_effect_status": "source-reviewed",
+      "runtime_evidence_status": "observed (not exhaustive)"
+    },
+    {
+      "name": "udpbind",
+      "category": "Sockets",
+      "opcode": "OP_UDPBIND",
+      "registration_line": 3624,
+      "visibility": "public",
+      "stack_effect": "( socket-fd port -- status )",
+      "verification": "source-reviewed (C opcode, v1.2)",
+      "runtime_observations_v1.2": [
+        {
+          "program": "udpsocket -1 udpbind",
+          "stack": "-1"
+        }
+      ],
+      "runtime_status": "observed; not exhaustively verified",
+      "stack_effect_status": "source-reviewed",
+      "runtime_evidence_status": "observed (not exhaustive)"
+    },
+    {
+      "name": "udpconnect",
+      "category": "Sockets",
+      "opcode": "OP_UDPCONNECT",
+      "registration_line": 3625,
+      "visibility": "public",
+      "stack_effect": "( socket-fd host port -- status )",
+      "verification": "source-reviewed (C opcode, v1.2)",
+      "runtime_observations_v1.2": [
+        {
+          "program": "udpsocket \"127.0.0.1\" -1 udpconnect",
+          "stack": "-1"
+        }
+      ],
+      "runtime_status": "observed; not exhaustively verified",
+      "stack_effect_status": "source-reviewed",
+      "runtime_evidence_status": "observed (not exhaustive)"
+    },
+    {
+      "name": "udpsend",
+      "category": "Sockets",
+      "opcode": "OP_UDPSEND",
+      "registration_line": 3626,
+      "visibility": "public",
+      "stack_effect": "( socket-fd buffer byte-count -- bytes-sent )",
+      "verification": "source-reviewed (C opcode, v1.2)",
+      "stack_effect_status": "source-reviewed",
+      "runtime_evidence_status": "not linked in registry"
+    },
+    {
+      "name": "udprecv",
+      "category": "Sockets",
+      "opcode": "OP_UDPRECV",
+      "registration_line": 3627,
+      "visibility": "public",
+      "stack_effect": "( socket-fd timeout-ms max-bytes buffer -- bytes-received )",
+      "verification": "source-reviewed (C opcode, v1.2)",
+      "stack_effect_status": "source-reviewed",
+      "runtime_evidence_status": "not linked in registry"
+    },
+    {
+      "name": "udpclose",
+      "category": "Sockets",
+      "opcode": "OP_UDPCLOSE",
+      "registration_line": 3628,
+      "visibility": "public",
+      "stack_effect": "( socket-fd -- status )",
+      "verification": "source-reviewed (C opcode, v1.2)",
+      "runtime_observations_v1.2": [
+        {
+          "program": "udpsocket udpclose",
+          "stack": "0"
+        }
+      ],
+      "runtime_status": "observed; not exhaustively verified",
+      "stack_effect_status": "source-reviewed",
+      "runtime_evidence_status": "observed (not exhaustive)"
+    },
+    {
+      "name": "block_sigint",
+      "category": "Interrupt Blocking",
+      "opcode": "OP_BLOCKSIGINT",
+      "registration_line": 3630,
+      "visibility": "public",
+      "stack_effect": "( -- )",
+      "verification": "source-reviewed in libdclang.c (v1.4); not a new runtime verification",
+      "stack_effect_status": "source-reviewed",
+      "runtime_evidence_status": "not linked in registry",
+      "stack_effect_source": "libdclang.c opcode OP_BLOCKSIGINT"
+    },
+    {
+      "name": "unblock_sigint",
+      "category": "Interrupt Blocking",
+      "opcode": "OP_UNBLOCKSIGINT",
+      "registration_line": 3631,
+      "visibility": "public",
+      "stack_effect": "( -- )",
+      "verification": "source-reviewed in libdclang.c (v1.4); not a new runtime verification",
+      "stack_effect_status": "source-reviewed",
+      "runtime_evidence_status": "not linked in registry",
+      "stack_effect_source": "libdclang.c opcode OP_UNBLOCKSIGINT"
+    },
+    {
+      "name": "fork",
+      "category": "Operating System",
+      "opcode": "OP_FORK",
+      "registration_line": 3633,
+      "visibility": "public",
+      "stack_effect": "( -- process-id )",
+      "verification": "source-reviewed in libdclang.c opcode body (v1.5)",
+      "stack_effect_status": "source-reviewed",
+      "runtime_evidence_status": "not tested in v1.5",
+      "stack_effect_source": "libdclang.c OP_FORK",
+      "behavior_note": "Creates child process; do not exercise in routine test harness."
+    },
+    {
+      "name": "exit",
+      "category": "Operating System",
+      "opcode": "OP_EXIT",
+      "registration_line": 3634,
+      "visibility": "public",
+      "stack_effect": "( exit-code -- [process terminates] )",
+      "verification": "source-reviewed in libdclang.c opcode body (v1.5)",
+      "stack_effect_status": "source-reviewed",
+      "runtime_evidence_status": "not tested in v1.5",
+      "stack_effect_source": "libdclang.c OP_EXIT",
+      "behavior_note": "Terminates interpreter process; use subprocess-only testing."
+    },
+    {
+      "name": "primitives",
+      "category": "Info",
+      "opcode": "OP_SHOWPRIMITIVES",
+      "registration_line": 3636,
+      "visibility": "public",
+      "stack_effect": "( -- )",
+      "verification": "source-reviewed in libdclang.c (v1.4); not a new runtime verification",
+      "stack_effect_status": "source-reviewed",
+      "runtime_evidence_status": "not linked in registry",
+      "stack_effect_source": "libdclang.c opcode OP_SHOWPRIMITIVES"
+    },
+    {
+      "name": "words",
+      "category": "Info",
+      "opcode": "OP_SHOWWORDS",
+      "registration_line": 3637,
+      "visibility": "public",
+      "stack_effect": "( -- )",
+      "verification": "source-reviewed in libdclang.c (v1.4); not a new runtime verification",
+      "stack_effect_status": "source-reviewed",
+      "runtime_evidence_status": "not linked in registry",
+      "stack_effect_source": "libdclang.c opcode OP_SHOWWORDS"
+    },
+    {
+      "name": "constants",
+      "category": "Info",
+      "opcode": "OP_SHOWCONSTS",
+      "registration_line": 3638,
+      "visibility": "public",
+      "stack_effect": "( -- )",
+      "verification": "source-reviewed in libdclang.c (v1.4); not a new runtime verification",
+      "stack_effect_status": "source-reviewed",
+      "runtime_evidence_status": "not linked in registry",
+      "stack_effect_source": "libdclang.c opcode OP_SHOWCONSTS"
+    },
+    {
+      "name": "variables",
+      "category": "Info",
+      "opcode": "OP_SHOWVARS",
+      "registration_line": 3639,
+      "visibility": "public",
+      "stack_effect": "( -- )",
+      "verification": "source-reviewed in libdclang.c (v1.4); not a new runtime verification",
+      "stack_effect_status": "source-reviewed",
+      "runtime_evidence_status": "not linked in registry",
+      "stack_effect_source": "libdclang.c opcode OP_SHOWVARS"
+    },
+    {
+      "name": "exec",
+      "category": "Dynamic Input",
+      "opcode": "OP_EXEC",
+      "registration_line": 3641,
+      "visibility": "public",
+      "stack_effect": "( ... word_name -- ... ; effect depends on invoked word )",
+      "verification": "source-reviewed in libdclang.c (v1.4); not a new runtime verification",
+      "stack_effect_status": "source-reviewed",
+      "runtime_evidence_status": "not linked in registry",
+      "stack_effect_source": "libdclang.c opcode OP_EXEC"
+    },
+    {
+      "name": "input",
+      "category": "Dynamic Input",
+      "opcode": "OP_INPUT",
+      "registration_line": 3642,
+      "visibility": "public",
+      "stack_effect": "( -- string )",
+      "verification": "source-reviewed (topical reference; requires independent C recheck)",
+      "stack_effect_source": "STRING_DYNAMIC_PRIMITIVES.md",
+      "stack_effect_status": "source-reviewed",
+      "runtime_evidence_status": "not linked in registry"
+    },
+    {
+      "name": "_regcomp",
+      "category": "Regex",
+      "opcode": "_OP_REGCOMP",
+      "registration_line": 3644,
+      "visibility": "private",
+      "stack_effect": "( pattern regex-flags -- regex-pointer | -1 )",
+      "verification": "source-reviewed in libdclang.c opcode body (v1.6)",
+      "stack_effect_status": "source-reviewed",
+      "runtime_evidence_status": "not runtime-tested in v1.6",
+      "stack_effect_source": "libdclang.c _OP_REGCOMP",
+      "behavior_note": "Allocates compiled regex with custom allocator; compilation failure pushes -1; regex flags follow POSIX regcomp."
+    },
+    {
+      "name": "_regexec",
+      "category": "Regex",
+      "opcode": "_OP_REGEXEC",
+      "registration_line": 3645,
+      "visibility": "private",
+      "stack_effect": "( regex-pointer input-string exec-flags -- matches-pointer | -1 )",
+      "verification": "source-reviewed in libdclang.c opcode body (v1.6)",
+      "stack_effect_status": "source-reviewed",
+      "runtime_evidence_status": "not runtime-tested in v1.6",
+      "stack_effect_source": "libdclang.c _OP_REGEXEC",
+      "behavior_note": "Allocates 10 match slots on each call; returns -1 on no match; allocation lifecycle needs review."
+    },
+    {
+      "name": "_regread",
+      "category": "Regex",
+      "opcode": "_OP_REGREAD",
+      "registration_line": 3646,
+      "visibility": "private",
+      "stack_effect": "( matches-pointer match-index -- start end )",
+      "verification": "source-reviewed in libdclang.c opcode body (v1.6)",
+      "stack_effect_status": "source-reviewed",
+      "runtime_evidence_status": "not runtime-tested in v1.6",
+      "stack_effect_source": "libdclang.c _OP_REGREAD",
+      "behavior_note": "Returns rm_so and rm_eo; match-index bounds are not checked in opcode."
+    },
+    {
+      "name": "_sqlite_open",
+      "category": "SQLite",
+      "opcode": "_OP_SQLITEOPEN",
+      "registration_line": 3648,
+      "visibility": "private",
+      "stack_effect": "( database-path -- database-pointer [on success] )",
+      "verification": "source-reviewed in libdclang.c opcode body (v1.6)",
+      "stack_effect_status": "source-reviewed",
+      "runtime_evidence_status": "not runtime-tested in v1.6",
+      "stack_effect_source": "libdclang.c _OP_SQLITEOPEN",
+      "behavior_note": "On sqlite3_open failure prints diagnostic and returns without pushing a result."
+    },
+    {
+      "name": "_sqlite_prepare",
+      "category": "SQLite",
+      "opcode": "_OP_SQLITEPREPARE",
+      "registration_line": 3649,
+      "visibility": "private",
+      "stack_effect": "( database-pointer sql-string -- statement-pointer [on success] )",
+      "verification": "source-reviewed in libdclang.c opcode body (v1.6)",
+      "stack_effect_status": "source-reviewed",
+      "runtime_evidence_status": "not runtime-tested in v1.6",
+      "stack_effect_source": "libdclang.c _OP_SQLITEPREPARE",
+      "behavior_note": "On prepare failure prints diagnostic and returns without pushing a result."
+    },
+    {
+      "name": "_sqlite_step",
+      "category": "SQLite",
+      "opcode": "_OP_SQLITESTEP",
+      "registration_line": 3650,
+      "visibility": "private",
+      "stack_effect": "( statement-pointer -- sqlite-result-code [on success] )",
+      "verification": "source-reviewed in libdclang.c opcode body (v1.6)",
+      "stack_effect_status": "source-reviewed",
+      "runtime_evidence_status": "not runtime-tested in v1.6",
+      "stack_effect_source": "libdclang.c _OP_SQLITESTEP",
+      "behavior_note": "Pushes SQLITE_ROW or SQLITE_DONE on success; error branch returns without pushing."
+    },
+    {
+      "name": "_sqlite_column",
+      "category": "SQLite",
+      "opcode": "_OP_SQLITECOLUMN",
+      "registration_line": 3651,
+      "visibility": "private",
+      "stack_effect": "( statement-pointer column-index -- text-pointer [on success] )",
+      "verification": "source-reviewed in libdclang.c opcode body (v1.6)",
+      "stack_effect_status": "source-reviewed",
+      "runtime_evidence_status": "not runtime-tested in v1.6",
+      "stack_effect_source": "libdclang.c _OP_SQLITECOLUMN",
+      "behavior_note": "Returns sqlite3_column_text pointer; assumes non-NULL text and calls strlen, unsafe for SQL NULL; pointer owned by SQLite."
+    },
+    {
+      "name": "_sqlite_finalize",
+      "category": "SQLite",
+      "opcode": "_OP_SQLITEFINALIZE",
+      "registration_line": 3652,
+      "visibility": "private",
+      "stack_effect": "( statement-pointer -- )",
+      "verification": "source-reviewed in libdclang.c opcode body (v1.6)",
+      "stack_effect_status": "source-reviewed",
+      "runtime_evidence_status": "not runtime-tested in v1.6",
+      "stack_effect_source": "libdclang.c _OP_SQLITEFINALIZE",
+      "behavior_note": "Consumes statement; error branch calls sqlite3_db_handle on finalized statement, potentially unsafe."
+    },
+    {
+      "name": "_sqlite_exec",
+      "category": "SQLite",
+      "opcode": "_OP_SQLITEEXEC",
+      "registration_line": 3653,
+      "visibility": "private",
+      "stack_effect": "( database-pointer sql-string -- )",
+      "verification": "source-reviewed in libdclang.c opcode body (v1.6)",
+      "stack_effect_status": "source-reviewed",
+      "runtime_evidence_status": "not runtime-tested in v1.6",
+      "stack_effect_source": "libdclang.c _OP_SQLITEEXEC",
+      "behavior_note": "Executes SQL with callback; prints errors but does not push status."
+    },
+    {
+      "name": "_sqlite_close",
+      "category": "SQLite",
+      "opcode": "_OP_SQLITECLOSE",
+      "registration_line": 3654,
+      "visibility": "private",
+      "stack_effect": "( database-pointer -- )",
+      "verification": "source-reviewed in libdclang.c opcode body (v1.6)",
+      "stack_effect_status": "source-reviewed",
+      "runtime_evidence_status": "not runtime-tested in v1.6",
+      "stack_effect_source": "libdclang.c _OP_SQLITECLOSE",
+      "behavior_note": "Consumes database pointer; prints errors but does not push status."
+    },
+    {
+      "name": "_pm_list",
+      "category": "MIDI",
+      "opcode": "_OP_PM_LIST",
+      "registration_line": 3656,
+      "visibility": "private",
+      "stack_effect": "( -- )",
+      "verification": "source-reviewed in libdclang.c opcode body (v1.6)",
+      "stack_effect_status": "source-reviewed",
+      "runtime_evidence_status": "not runtime-tested in v1.6",
+      "stack_effect_source": "libdclang.c _OP_PM_LIST",
+      "behavior_note": "Prints PortMidi devices to stderr; no stack effect."
+    },
+    {
+      "name": "_pm_open_out",
+      "category": "MIDI",
+      "opcode": "_OP_PM_OPENOUT",
+      "registration_line": 3657,
+      "visibility": "private",
+      "stack_effect": "( device-id -- )",
+      "verification": "source-reviewed in libdclang.c opcode body (v1.6)",
+      "stack_effect_status": "source-reviewed",
+      "runtime_evidence_status": "not runtime-tested in v1.6",
+      "stack_effect_source": "libdclang.c _OP_PM_OPENOUT",
+      "behavior_note": "Opens selected MIDI output; return status not checked."
+    },
+    {
+      "name": "_pm_ws",
+      "category": "MIDI",
+      "opcode": "_OP_PM_WS",
+      "registration_line": 3658,
+      "visibility": "private",
+      "stack_effect": "( status data1 data2 -- )",
+      "verification": "source-reviewed in libdclang.c opcode body (v1.6)",
+      "stack_effect_status": "source-reviewed",
+      "runtime_evidence_status": "not runtime-tested in v1.6",
+      "stack_effect_source": "libdclang.c _OP_PM_WS",
+      "behavior_note": "Writes short MIDI message with PortMidi timestamp; status,data1,data2 pop order."
+    },
+    {
+      "name": "_pm_wsr",
+      "category": "MIDI",
+      "opcode": "_OP_PM_WSR",
+      "registration_line": 3659,
+      "visibility": "private",
+      "stack_effect": "( data2 data1 status -- )",
+      "verification": "source-reviewed in libdclang.c opcode body (v1.6)",
+      "stack_effect_status": "source-reviewed",
+      "runtime_evidence_status": "not runtime-tested in v1.6",
+      "stack_effect_source": "libdclang.c _OP_PM_WSR",
+      "behavior_note": "Writes short MIDI message timestamp 0; NOTE reverse argument order vs _pm_ws."
+    },
+    {
+      "name": "_pm_open_in",
+      "category": "MIDI",
+      "opcode": "_OP_PM_OPENIN",
+      "registration_line": 3660,
+      "visibility": "private",
+      "stack_effect": "( device-id -- )",
+      "verification": "source-reviewed in libdclang.c opcode body (v1.6)",
+      "stack_effect_status": "source-reviewed",
+      "runtime_evidence_status": "not runtime-tested in v1.6",
+      "stack_effect_source": "libdclang.c _OP_PM_OPENIN",
+      "behavior_note": "Opens MIDI input; sets active/sysex filter; errors printed to stderr."
+    },
+    {
+      "name": "_pm_read",
+      "category": "MIDI",
+      "opcode": "_OP_PM_READ",
+      "registration_line": 3661,
+      "visibility": "private",
+      "stack_effect": "( -- data2 data1 status-or-result )",
+      "verification": "source-reviewed in libdclang.c opcode body (v1.6)",
+      "stack_effect_status": "source-reviewed",
+      "runtime_evidence_status": "not runtime-tested in v1.6",
+      "stack_effect_source": "libdclang.c _OP_PM_READ",
+      "behavior_note": "If event available returns data2,data1,status; otherwise returns -1,-1,event_status (0 or negative)."
+    },
+    {
+      "name": "_pm_close",
+      "category": "MIDI",
+      "opcode": "_OP_PM_CLOSE",
+      "registration_line": 3662,
+      "visibility": "private",
+      "stack_effect": "( -- )",
+      "verification": "source-reviewed in libdclang.c opcode body (v1.6)",
+      "stack_effect_status": "source-reviewed",
+      "runtime_evidence_status": "not runtime-tested in v1.6",
+      "stack_effect_source": "libdclang.c _OP_PM_CLOSE",
+      "behavior_note": "Closes open MIDI streams; prints confirmation."
+    },
+    {
+      "name": "_pm_terminate",
+      "category": "MIDI",
+      "opcode": "_OP_PM_TERMINATE",
+      "registration_line": 3663,
+      "visibility": "private",
+      "stack_effect": "( -- )",
+      "verification": "source-reviewed in libdclang.c opcode body (v1.6)",
+      "stack_effect_status": "source-reviewed",
+      "runtime_evidence_status": "not runtime-tested in v1.6",
+      "stack_effect_source": "libdclang.c _OP_PM_TERMINATE",
+      "behavior_note": "Terminates PortMidi process; prints confirmation."
+    },
+    {
+      "name": "_osc_put_str",
+      "category": "OSC",
+      "opcode": "_OP_OSC_PUT_STR",
+      "registration_line": 3665,
+      "visibility": "private",
+      "stack_effect": "( buffer offset string -- new-offset | -1 )",
+      "verification": "source-reviewed in libdclang.c opcode body (v1.6)",
+      "stack_effect_status": "source-reviewed",
+      "runtime_evidence_status": "not runtime-tested in v1.6",
+      "stack_effect_source": "libdclang.c _OP_OSC_PUT_STR",
+      "behavior_note": "Writes NUL-terminated OSC string padded to 4 bytes; updates offset. No destination-capacity check."
+    },
+    {
+      "name": "_osc_put_i32",
+      "category": "OSC",
+      "opcode": "_OP_OSC_PUT_I32",
+      "registration_line": 3666,
+      "visibility": "private",
+      "stack_effect": "( buffer offset integer -- new-offset | -1 )",
+      "verification": "source-reviewed in libdclang.c opcode body (v1.6)",
+      "stack_effect_status": "source-reviewed",
+      "runtime_evidence_status": "not runtime-tested in v1.6",
+      "stack_effect_source": "libdclang.c _OP_OSC_PUT_I32",
+      "behavior_note": "Writes network-byte-order 32-bit integer; no destination-capacity check."
+    },
+    {
+      "name": "_osc_put_f32",
+      "category": "OSC",
+      "opcode": "_OP_OSC_PUT_F32",
+      "registration_line": 3667,
+      "visibility": "private",
+      "stack_effect": "( buffer offset float -- new-offset | -1 )",
+      "verification": "source-reviewed in libdclang.c opcode body (v1.6)",
+      "stack_effect_status": "source-reviewed",
+      "runtime_evidence_status": "not runtime-tested in v1.6",
+      "stack_effect_source": "libdclang.c _OP_OSC_PUT_F32",
+      "behavior_note": "Casts to 32-bit float and writes network-byte-order bits; no destination-capacity check."
+    }
+  ],
+  "consolidation_note": "v1.4: added conservative C-source-reviewed signatures; no additional runtime execution. Generic x/result types require finer typing review."
+}

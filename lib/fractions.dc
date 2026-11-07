@@ -4,7 +4,7 @@
 # Numerators and denominators are laid out on the stack in `n d` "pairs". #
 ###########################################################################
 
-: gcd swap over % dup 0 <> if gcd else drop endif ;
+"math.dc" import
 
 : simplify { n d }  # ( n d - n d )
   n d gcd n over / swap d swap /
