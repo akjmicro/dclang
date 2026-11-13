@@ -415,41 +415,84 @@ set_scale
 ##############################
 # Euclidean rhythm algorithm #
 ##############################
-var cur_euclid_count
-1 cur_euclid_count !
-var prev_euclid_int
+: make_euc_space
+  create 0 , 0 , 0 , 0 , 0 , 0 , 0 , 0 ,
+;
 
-: euclidean_rhythm
+make_euc_space my_euc
+
+: _get_euc_n         @ ;
+: _get_euc_k     1 + @ ;
+: _get_euc_usr_p 2 + @ ;
+: _get_euc_l     3 + @ ;
+: _get_euc_s     4 + @ ;
+: _get_euc_q     5 + @ ;
+: _get_euc_r     6 + @ ;
+: _get_euc_p     7 + @ ;
+
+: _set_euc_n         ! ;
+: _set_euc_k     1 + ! ;
+: _set_euc_usr_p 2 + ! ;
+: _set_euc_l     3 + ! ;
+: _set_euc_s     4 + ! ;
+: _set_euc_q     5 + ! ;
+: _set_euc_r     6 + ! ;
+: _set_euc_p     7 + ! ;
+
+: euc_init { which en ek ep el es }
+  en which _set_euc_n
+  ek which _set_euc_k
+  ep ek %
+    dup which _set_euc_usr_p
+    which _set_euc_p
+  el which _set_euc_l
+  es which _set_euc_s
+  en ek divmod
+    which _set_euc_r
+  which _set_euc_q
+;
+
+: _euc_conf_check_init { which vn vk vp vl vs }
+  which _get_euc_n      vn  <>
+  which _get_euc_k      vk  <>
+  which _get_euc_usr_p  vp  <>
+  which _get_euc_l      vl  <>
+  which _get_euc_s      vs  <>
+  or or or or
+  if
+    which vn vk vp vl vs  euc_init
+  endif
+;
+
+: _euc { which }
+  which
     get_euclid_n
-      get_euclid_d
-    /
-      cur_euclid_count @
-    *
-    round
-      prev_euclid_int @
+      get_euclid_k
+        get_euclid_p
+          get_euclid_l
+            get_euclid_s
+  _euc_conf_check_init
+    which _get_euc_p
+      which _get_euc_r
+    +
+      which _get_euc_k
           2dup
-        -
-      svpush
-    drop
-  prev_euclid_int !
-  cur_euclid_count @ 1 + cur_euclid_count !
-    svpop
-      dup
-      1 <
-        over
-        get_euclid_n >
-      or
+        >=
       if
-        drop
-        euclidean_rhythm
+  - which _set_euc_p
+    which _get_euc_q 1 +
+      which _get_euc_l
+    +
+      else
+    drop
+  which _set_euc_p
+    which _get_euc_q
+      which _get_euc_s
+    +
       endif
 ;
 
-: euclidean_test_loop
-  euclidean_rhythm .
-  0.5 sleep
-  euclidean_test_loop
-;
+: euclidean_rhythm my_euc _euc ;
 
 ##################################
 # End Euclidean rhythm algorithm #

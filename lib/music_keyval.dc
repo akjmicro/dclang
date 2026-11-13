@@ -78,8 +78,14 @@ var remainder 1 remainder !
 # rhythm stuff
 "eun" make_channel_string
                    const :EUCLID_N
-"eud" make_channel_string
-                   const :EUCLID_D
+"euk" make_channel_string
+                   const :EUCLID_K
+"eup" make_channel_string
+                   const :EUCLID_P
+"eul" make_channel_string
+                   const :EUCLID_L
+"eus" make_channel_string
+                   const :EUCLID_S
 "rhythm_type"      const :RHYTHM_TYPE
 # used for keeping a value within a certain range:
 "wr" make_channel_string
@@ -291,11 +297,31 @@ var rhythm_type_buf 16 mkbuf rhythm_type_buf !
 ;
 
 : get_euclid_n
+  # Euclidean total number of pulses to divide
   :EUCLID_N keyval_get tonum_free
   dup 1 < if drop 1 endif
 ;
 
-: get_euclid_d
-  :EUCLID_D keyval_get tonum_free
+: get_euclid_k
+  # Euclidean number of onset events
+  :EUCLID_K keyval_get tonum_free
   dup 1 < if drop 1 endif
+;
+
+: get_euclid_p
+  # Euclidean phase, typically (k - 1)
+  :EUCLID_P keyval_get tonum_free
+  dup 0 < if drop 0 endif
+;
+
+: get_euclid_l
+  # Euclidean large onset additional pulses
+  :EUCLID_L keyval_get tonum_free
+  dup 0 < if drop 0 endif
+;
+
+: get_euclid_s
+  # Euclidean small onset additional pulses
+  :EUCLID_S keyval_get tonum_free
+  dup 0 < if drop 0 endif
 ;
