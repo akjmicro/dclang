@@ -61,7 +61,7 @@ Born on 2018-05-05 */
 #define RETURN_STACK_SIZE 128
 #define MAXWORD           1048576
 #define EXEC_TRAMPOLINE   (MAXWORD - 4)
-#define MAX_OPCODES       216
+#define MAX_OPCODES       219
 #define IBUFSIZE          128
 #define NUMLOCALS         8
 #define NUMVARS           16777216
@@ -429,7 +429,10 @@ enum dclang_opcodes {
     _OP_PM_TERMINATE,
     _OP_OSC_PUT_STR,
     _OP_OSC_PUT_I32,
-    _OP_OSC_PUT_F32
+    _OP_OSC_PUT_F32,
+    _OP_OSC_GET_STR,
+    _OP_OSC_GET_I32,
+    _OP_OSC_GET_F32
 };
 
 // user words

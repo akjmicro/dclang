@@ -282,6 +282,24 @@ static int __sqlcallback(void *NotUsed, int argc, char **argv, char **azColName)
     return 0;
 }
 
+// OSC read helper
+
+/* Validate a field within a received OSC packet.
+ * offset and size must fit inside packet_len.
+ */
+static inline int osc_field_ok(
+    DCLANG_LONG packet_len,
+    DCLANG_LONG offset,
+    DCLANG_LONG size
+) {
+    return packet_len >= 0 &&
+           offset >= 0 &&
+           size >= 0 &&
+           offset <= packet_len &&
+           size <= packet_len - offset &&
+           (offset & 3) == 0;
+}
+
 // END HELPERS
 
 void dclang_execute() {
@@ -524,7 +542,10 @@ void dclang_execute() {
         &&_OP_PM_TERMINATE,
         &&_OP_OSC_PUT_STR,
         &&_OP_OSC_PUT_I32,
-        &&_OP_OSC_PUT_F32
+        &&_OP_OSC_PUT_F32,
+        &&_OP_OSC_GET_STR,
+        &&_OP_OSC_GET_I32,
+        &&_OP_OSC_GET_F32
     };
 
     while (1) {
@@ -3384,6 +3405,101 @@ void dclang_execute() {
             memcpy(oscbuf + osclen, &bits, sizeof(bits));
             push((DCLANG_INT)(osclen + 4));
             NEXT;
+        _OP_OSC_GET_STR: {
+            if (data_stack_ptr < 3) {
+                printf("_osc_get_str -- stack underflow\n");
+                return;
+            }
+            DCLANG_LONG offset = (DCLANG_LONG)POP;
+            DCLANG_LONG len = (DCLANG_LONG)POP;
+            unsigned char *buf =
+                (unsigned char *)(DCLANG_PTR)POP;
+            if ((DCLANG_PTR)buf < MIN_STR ||
+                (DCLANG_PTR)buf > MAX_STR ||
+                !osc_field_ok(len, offset, 1)) {
+                push(0);
+                push(-1);
+                NEXT;
+            }
+            /* Search only within the received packet. */
+            size_t remaining = (size_t)(len - offset);
+            unsigned char *end =
+                memchr(buf + offset, '\0', remaining);
+            if (!end) {
+                push(0);
+                push(-1);
+                NEXT;
+            }
+            size_t strbytes =
+                (size_t)(end - (buf + offset)) + 1;
+            /* Avoid overflow when rounding up. */
+            if (strbytes > remaining ||
+                strbytes > SIZE_MAX - 3) {
+                push(0);
+                push(-1);
+                NEXT;
+            }
+            size_t padded = (strbytes + 3) & ~(size_t)3;
+            if (padded > remaining) {
+                push(0);
+                push(-1);
+                NEXT;
+            }
+            /* Return pointer into original buffer. */
+            push((DCLANG_PTR)(buf + offset));
+            push((DCLANG_LONG)(offset + padded));
+            NEXT;
+        }
+        _OP_OSC_GET_I32: {
+            if (data_stack_ptr < 3) {
+                printf("_osc_get_i32 -- stack underflow\n");
+                return;
+            }
+            DCLANG_LONG offset = (DCLANG_LONG)POP;
+            DCLANG_LONG len = (DCLANG_LONG)POP;
+            unsigned char *buf =
+                (unsigned char *)(DCLANG_PTR)POP;
+            if ((DCLANG_PTR)buf < MIN_STR ||
+                (DCLANG_PTR)buf > MAX_STR ||
+                !osc_field_ok(len, offset, 4)) {
+                push(0);
+                push(-1);
+                NEXT;
+            }
+            uint32_t net;
+            memcpy(&net, buf + offset, sizeof(net));
+            uint32_t host = ntohl(net);
+            int32_t value;
+            memcpy(&value, &host, sizeof(value));
+            push((DCLANG_LONG)value);
+            push(offset + 4);
+            NEXT;
+        }
+        _OP_OSC_GET_F32: {
+            if (data_stack_ptr < 3) {
+                printf("_osc_get_f32 -- stack underflow\n");
+                return;
+            }
+            DCLANG_LONG offset = (DCLANG_LONG)POP;
+            DCLANG_LONG len = (DCLANG_LONG)POP;
+            unsigned char *buf =
+                (unsigned char *)(DCLANG_PTR)POP;
+            if ((DCLANG_PTR)buf < MIN_STR ||
+                (DCLANG_PTR)buf > MAX_STR ||
+                !osc_field_ok(len, offset, 4)) {
+                push(0);
+                push(-1);
+                NEXT;
+            }
+            uint32_t net;
+            memcpy(&net, buf + offset, sizeof(net));
+            uint32_t bits = ntohl(net);
+            float value;
+            memcpy(&value, &bits, sizeof(value));
+            push((DCLANG_FLT)value);
+            push(offset + 4);
+            NEXT;
+        }
     }
 }
 
@@ -3417,7 +3533,7 @@ void add_primitive(char *name, char *category, int opcode) {
 };
 
 void add_all_primitives() {
-    primitives = (struct primitive *)dclang_malloc(216*sizeof(primitive));
+    primitives = (struct primitive *)dclang_malloc(MAX_OPCODES*sizeof(primitive));
     // stack manipulation
     add_primitive("drop", "Stack Ops", OP_DROP);
     add_primitive("dup", "Stack Ops", OP_DUP);
@@ -3665,6 +3781,9 @@ void add_all_primitives() {
     add_primitive("_osc_put_str", "OSC", _OP_OSC_PUT_STR);
     add_primitive("_osc_put_i32", "OSC", _OP_OSC_PUT_I32);
     add_primitive("_osc_put_f32", "OSC", _OP_OSC_PUT_F32);
+    add_primitive("_osc_get_str", "OSC", _OP_OSC_GET_STR);
+    add_primitive("_osc_get_i32", "OSC", _OP_OSC_GET_I32);
+    add_primitive("_osc_get_f32", "OSC", _OP_OSC_GET_F32);
     // END
     add_primitive(0, 0, 0);  // end of primitives 'barrier'
 };

@@ -1,7 +1,7 @@
 # osc.dc
 # Simple OSC message builder/sender.
 #
-# Requires C primitives:
+# publically wraps C primitives:
 #   _osc_put_str  ( buf len str -- len' )
 #   _osc_put_i32  ( buf len int -- len' )
 #   _osc_put_f32  ( buf len float -- len' )
@@ -44,6 +44,89 @@ var osc_sock
   osc_sock @ udpclose drop
 ;
 
+
+#######################################
+# OSC message receiving and decoding  #
+#######################################
+# Publically wraps C primitives:
+#   _osc_get_str ( buf len offset -- str next_offset )
+#   _osc_get_i32 ( buf len offset -- int next_offset )
+#   _osc_get_f32 ( buf len offset -- float next_offset )
+#
+# On decode failure, next_offset = -1.
+#
+# String pointers refer directly to OSC_RX_BUF.
+# They remain valid until the buffer is overwritten.
+
+4096 mkbuf const :OSC_RX_BUF
+
+var osc_rx_sock
+var osc_rx_len
+var osc_rx_pos
+
+# ( port -- )
+# Open a UDP socket for incoming OSC packets.
+: osc_listen { port }
+  udpsocket osc_rx_sock !
+  osc_rx_sock @ port udpbind drop
+;
+
+# ( -- nbytes )
+# Receive into OSC_RX_BUF.
+# Returns the byte count (or UDP error result).
+: osc_recv
+  osc_rx_sock @ 0 4096 :OSC_RX_BUF udprecv
+;
+
+# ( nbytes -- )
+# Initialize the decoder for a received packet.
+: osc_parse { nbytes }
+  nbytes osc_rx_len !
+  0 osc_rx_pos !
+;
+
+# ( -- flag )
+# True while the decoder cursor is valid.
+: osc_parse_ok?
+  osc_rx_pos @ 0 >=
+  osc_rx_pos @ osc_rx_len @ <=
+  and
+;
+
+# ( -- string )
+# Decode a padded OSC string and advance cursor.
+# Returns 0 on failure.
+: osc_get_s
+  :OSC_RX_BUF osc_rx_len @ osc_rx_pos @
+  _osc_get_str
+  osc_rx_pos !
+;
+
+# ( -- integer )
+# Decode a signed, big-endian OSC int32.
+# Returns 0 on failure.
+: osc_get_i
+  :OSC_RX_BUF osc_rx_len @ osc_rx_pos @
+  _osc_get_i32
+  osc_rx_pos !
+;
+
+# ( -- float )
+# Decode a big-endian OSC float32.
+# Returns 0 on failure.
+: osc_get_f
+  :OSC_RX_BUF osc_rx_len @ osc_rx_pos @
+  _osc_get_f32
+  osc_rx_pos !
+;
+
+# ( -- )
+# Close the receiving socket.
+: osc_rx_close
+  osc_rx_sock @ udpclose drop
+;
+
+
 #######################################
 # Special synth communication helpers #
 #######################################
@@ -82,4 +165,104 @@ var osc_sock
   # send gate
   path_prefix :gate_path _make_path :osc_float_type osc_message
   0.0 osc_f osc_send
+;
+
+
+#######################################
+# Synth introspection helpers         #
+#######################################
+#
+# Supports synths that respond to:
+#
+#   /path ,s "get"
+#
+# with:
+#
+#   /path ,fff current minimum maximum
+#
+# Other OSC messages are ignored.
+#
+# A successfully decoded response leaves:
+#
+#   ( path current min max true )
+#
+# An unrecognized or malformed packet leaves:
+#
+#   ( false )
+#
+# Returned path points into OSC_RX_BUF.
+# It remains valid until the next osc_recv.
+
+",fff" const :OSC_SYNTH_FFF
+",s"   const :OSC_SYNTH_STRING
+"get"  const :OSC_SYNTH_GET
+
+# ( path -- )
+# Request introspection from the currently
+# selected OSC transmit socket.
+: osc_synth_get { path }
+  path :OSC_SYNTH_STRING osc_message
+  :OSC_SYNTH_GET osc_s
+  osc_send
+;
+
+# ( path -- path current min max true | false )
+# Decode three floats from the current packet.
+: osc_synth_floats { path }
+  path
+  osc_get_f
+  osc_get_f
+  osc_get_f
+
+  osc_parse_ok?
+  if
+    1
+  else
+    2drop 2drop
+    0
+  endif
+;
+
+# ( path types -- path current min max true | false )
+# Accept only the expected OSC type signature.
+: osc_synth_typed { path types }
+  types :OSC_SYNTH_FFF str=
+  if
+    path osc_synth_floats
+  else
+    0
+  endif
+;
+
+# ( nbytes -- path current min max true | false )
+# Decode one received synth response.
+: osc_synth_parse { nbytes }
+  nbytes 0 >
+  if
+    nbytes osc_parse
+
+    osc_get_s
+    osc_parse_ok?
+    if
+      osc_get_s
+      osc_parse_ok?
+      if
+        osc_synth_typed
+      else
+        2drop
+        0
+      endif
+    else
+      drop
+      0
+    endif
+  else
+    0
+  endif
+;
+
+# ( -- path current min max true | false )
+# Receive and decode one synth response.
+: osc_synth_recv
+  osc_recv osc_synth_parse
 ;

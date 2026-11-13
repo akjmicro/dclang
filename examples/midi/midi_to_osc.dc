@@ -1,0 +1,340 @@
+
+# midi_to_osc.dc
+#
+# Novation Launch Control -> OSC synth bridge
+#
+# Features:
+#   - MIDI CC change detection
+#   - Synth introspection via OSC
+#   - Automatic parameter range scaling
+#   - Soft takeover with +/- 2 CC tolerance
+#   - Separate synth and drone destinations
+#
+# Requires:
+#   midi.dc
+#   osc.dc with osc_synth_* helpers
+#   PM_IN environment variable
+
+"midi.dc" import
+"osc.dc" import
+
+# ---------------- CONSTANTS ----------------
+
+"127.0.0.1" const :LOCALHOST
+
+"MIDI/OSC bridge running" const :RUNNING_MSG
+"[INIT] "  const :INIT_MSG
+"[WAIT] "  const :WAIT_MSG
+"[LATCH] " const :LATCH_MSG
+"[SEND] "  const :SEND_MSG
+" "        const :SPACE
+
+5513 const SYNTH_PORT
+5514 const DRONE_PORT
+5516 const REPLY_PORT
+
+0.001 const POLL_SLEEP
+2     const PICKUP_TOL
+
+# ---------------- SOCKETS ----------------
+
+var synth_sock
+var drone_sock
+
+: open_osc
+  :LOCALHOST SYNTH_PORT osc_connect
+  osc_sock @ synth_sock !
+
+  :LOCALHOST DRONE_PORT osc_connect
+  osc_sock @ drone_sock !
+
+  REPLY_PORT osc_listen
+
+  "OSC sockets initialized" print cr
+;
+
+# ---------------- CC MAPPINGS ----------------
+
+var cc_paths   128 allot
+var cc_socks   128 allot
+var cc_last    128 allot
+
+var cc_min     128 allot
+var cc_max     128 allot
+var cc_target  128 allot
+var cc_ready   128 allot
+var cc_caught  128 allot
+
+# ( cc socket path -- )
+: map_cc { cc sock path }
+  path cc_paths cc + !
+  sock cc_socks cc + !
+
+  cc midictl cc_last cc + !
+
+  0 cc_ready cc + !
+  0 cc_caught cc + !
+;
+
+: init_cc_map
+  21 synth_sock @ "/synth/wave"  map_cc
+  22 synth_sock @ "/synth/duty"  map_cc
+  23 synth_sock @ "/synth/att"   map_cc
+  24 synth_sock @ "/synth/rel"   map_cc
+  25 synth_sock @ "/synth/cfmin" map_cc
+  26 synth_sock @ "/synth/cfrng" map_cc
+  27 synth_sock @ "/synth/res"   map_cc
+  28 synth_sock @ "/synth/vol"   map_cc
+
+  41 drone_sock @ "/drone/wave"  map_cc
+  42 drone_sock @ "/drone/duty"  map_cc
+  43 drone_sock @ "/drone/att"   map_cc
+  44 drone_sock @ "/drone/rel"   map_cc
+  45 drone_sock @ "/drone/cfmin" map_cc
+  46 drone_sock @ "/drone/cfrng" map_cc
+  47 drone_sock @ "/drone/res"   map_cc
+  48 drone_sock @ "/drone/vol"   map_cc
+;
+
+# ---------------- INTROSPECTION REQUESTS ----------------
+
+# ( cc -- )
+: request_cc { cc }
+  cc_socks cc + @ osc_sock !
+  cc_paths cc + @ osc_synth_get
+;
+
+: request_all
+  21 request_cc
+  22 request_cc
+  23 request_cc
+  24 request_cc
+  25 request_cc
+  26 request_cc
+  27 request_cc
+  28 request_cc
+
+  41 request_cc
+  42 request_cc
+  43 request_cc
+  44 request_cc
+  45 request_cc
+  46 request_cc
+  47 request_cc
+  48 request_cc
+;
+
+# ---------------- RANGE INITIALIZATION ----------------
+
+# ( value -- clamped-value )
+: clamp_cc { value }
+  value 0 <
+  if
+    0
+  else
+    value 127 >
+    if
+      127
+    else
+      value
+    endif
+  endif
+;
+
+# ( cc current lo hi -- )
+: store_synth_values { cc current lo hi }
+  hi lo >
+  if
+    lo cc_min cc + !
+    hi cc_max cc + !
+
+    current lo -
+    hi lo -
+    /
+    127.0 *
+    clamp_cc
+    cc_target cc + !
+
+    1 cc_ready cc + !
+    0 cc_caught cc + !
+
+    :INIT_MSG print
+    cc_paths cc + @ print
+    :SPACE print
+    "CC=" print cc .
+    "target=" print cc_target cc + @ .
+    "min=" print lo .
+    "max=" print hi . cr
+  endif
+;
+
+# ( cc path current lo hi -- )
+: update_if_match { cc path current lo hi }
+  path cc_paths cc + @ str=
+  if
+    cc current lo hi store_synth_values
+  endif
+;
+
+# ( path current lo hi -- )
+: handle_synth_values { path current lo hi }
+  21 path current lo hi update_if_match
+  22 path current lo hi update_if_match
+  23 path current lo hi update_if_match
+  24 path current lo hi update_if_match
+  25 path current lo hi update_if_match
+  26 path current lo hi update_if_match
+  27 path current lo hi update_if_match
+  28 path current lo hi update_if_match
+
+  41 path current lo hi update_if_match
+  42 path current lo hi update_if_match
+  43 path current lo hi update_if_match
+  44 path current lo hi update_if_match
+  45 path current lo hi update_if_match
+  46 path current lo hi update_if_match
+  47 path current lo hi update_if_match
+  48 path current lo hi update_if_match
+;
+
+: poll_synth
+  osc_synth_recv
+  if
+    handle_synth_values
+  endif
+;
+
+# ---------------- OSC TRANSMISSION ----------------
+
+# ( socket path value -- )
+: send_float { sock path value }
+  sock osc_sock !
+  path :osc_float_type osc_message
+  value osc_f
+  osc_send
+;
+
+# ( scaled-value socket path -- )
+: send_cc_scaled { value sock path }
+  :SEND_MSG print
+  path print
+  :SPACE print
+  value . cr
+
+  sock path value send_float
+;
+
+# ( cc midi-value -- )
+: send_cc { cc midi_value }
+  cc_max cc + @
+  cc_min cc + @
+  -
+  midi_value 127.0 /
+  *
+  cc_min cc + @
+  +
+
+  # Stack: scaled-value
+
+  cc_socks cc + @
+  cc_paths cc + @
+
+  # Arrange arguments through an entry-local word.
+  send_cc_scaled
+;
+
+# ---------------- SOFT TAKEOVER ----------------
+
+# ( cc value -- flag )
+: within_pickup { cc value }
+  value cc_target cc + @ PICKUP_TOL - >=
+  value cc_target cc + @ PICKUP_TOL + <=
+  and
+;
+
+# ( cc value -- )
+: process_cc_change { cc value }
+  cc_ready cc + @
+  if
+    cc_caught cc + @
+    if
+      cc value send_cc
+    else
+      cc value within_pickup
+      if
+        1 cc_caught cc + !
+
+        :LATCH_MSG print
+        cc_paths cc + @ print
+        :SPACE print
+        "CC=" print cc .
+        "value=" print value . cr
+      else
+        :WAIT_MSG print
+        cc_paths cc + @ print
+        :SPACE print
+        "CC=" print cc .
+        "raw=" print value .
+        "target=" print cc_target cc + @ . cr
+      endif
+    endif
+  endif
+;
+
+# ( cc new-value -- )
+: check_cc_value { cc new_val }
+  cc_last cc + @ new_val <>
+  if
+    new_val cc_last cc + !
+    cc new_val process_cc_change
+  endif
+;
+
+# ( cc -- )
+: check_cc
+  dup midictl check_cc_value
+;
+
+: scan_ccs
+  21 check_cc
+  22 check_cc
+  23 check_cc
+  24 check_cc
+  25 check_cc
+  26 check_cc
+  27 check_cc
+  28 check_cc
+
+  41 check_cc
+  42 check_cc
+  43 check_cc
+  44 check_cc
+  45 check_cc
+  46 check_cc
+  47 check_cc
+  48 check_cc
+;
+
+# ---------------- MAIN LOOP ----------------
+
+: poll_midi
+  refresh_midictl
+  scan_ccs
+;
+
+: run_bridge
+  :RUNNING_MSG print cr
+
+  inf times
+    poll_midi
+    poll_synth
+    POLL_SLEEP sleep
+  again
+;
+
+# ---------------- INITIALIZATION ----------------
+
+open_osc
+init_cc_map
+request_all
+run_bridge
