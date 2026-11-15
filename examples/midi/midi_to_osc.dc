@@ -1,10 +1,14 @@
-
 ##################################################
 # Config-driven MIDI -> OSC bridge for Faust.    #
 #                                                #
-# Supports startup introspection, MIDI scaling,  #
-# soft takeover, and external OSC change         #
-# detection with 500 ms polling.                 #
+# Features:                                      #
+#   - Configurable MIDI CC -> OSC mappings       #
+#   - Startup discovery of OSC endpoints         #
+#   - Ignore unavailable synths                  #
+#   - Faust parameter introspection              #
+#   - MIDI soft takeover                         #
+#   - External OSC change detection              #
+#   - 500 ms polling of active synths only       #
 #                                                #
 # Mappings: midi_to_osc.conf                     #
 ##################################################
@@ -19,40 +23,41 @@
 ":"                  const :COLON
 "127.0.0.1"          const :OSC_HOST
 ",f"                 const :OSC_FLOAT_TYPE
+
 "Missing controller" const :MISSING_CONTROLLER
 "Missing port"       const :MISSING_PORT
 "Missing OSC path"   const :MISSING_OSC_PATH
+
 "[INIT] "            const :INIT_MSG
 "[WAIT] "            const :WAIT_MSG
 "[LATCH] "           const :LATCH_MSG
 "[UNLATCH] "         const :UNLATCH_MSG
 "[SEND] "            const :SEND_MSG
+"[ONLINE] "          const :ONLINE_MSG
+"[WARNING] No OSC response from "
+                     const :OFFLINE_MSG
+"; ignoring mappings" const :IGNORING_MSG
+
 " value="            const :VALUE_EQ
 "Mapped: "           const :MAPPED
 " CC="               const :CC_EQ
 " target="           const :TARGET_EQ
+
 "Duplicate MIDI mapping: "
                      const :DUPLICATE_MIDI_MAPPING
 "Invalid MIDI channel/controller"
                      const :INVALID_MIDI_CHAN
 "Invalid OSC port"   const :INVALID_OSC_PORT
-" awaiting introspection"
-                     const :AWAITING_INTROSPECTION
 
-5520                 const TEST_OSC_PORT
 16                   const MAX_OSC_RECEIVERS
 2                    const PICKUP_TOLERANCE
 
-# Seconds between introspection cycles.
 0.5                  const POLL_INTERVAL
-
-# Ignore potentially stale introspection responses
-# briefly after a MIDI-driven OSC send.
 0.15                 const SEND_GRACE
-
-# Allowed introspection discrepancy, expressed
-# in equivalent MIDI controller steps.
 0.5                  const CHANGE_TOLERANCE
+
+# Startup discovery duration in milliseconds.
+500                  const DISCOVERY_MS
 
 # Mapping record offsets.
 0 const MAP_CHANNEL
@@ -75,13 +80,19 @@ var mapping_count
 
 var mapping_base
 
+# Endpoint arrays. Each index describes one
+# unique OSC command port.
 var rx_count
 0 rx_count !
-var rx_ports MAX_OSC_RECEIVERS allot
-var rx_socks MAX_OSC_RECEIVERS allot
+
+var rx_ports  MAX_OSC_RECEIVERS allot
+var rx_socks  MAX_OSC_RECEIVERS allot
+var rx_active MAX_OSC_RECEIVERS allot
+var rx_paths  MAX_OSC_RECEIVERS allot
 
 var config_buf
 var line_save
+var line_ptr
 var field_save
 var current_osc_port
 
@@ -89,6 +100,10 @@ var last_poll
 var last_send
 
 64 mkbuf const :KEY_BUF
+
+##################################################
+# Mapping storage and lookup
+##################################################
 
 # ( one_based_index -- record_address )
 : mapping_record { idx }
@@ -100,11 +115,13 @@ var last_send
 : make_key { channel cc }
   :KEY_BUF 0 64 memset drop
 
+  mark
   :KEY_BUF
     channel tostr str+
     :COLON str+
     cc tostr str+
   drop
+  rewind
 
   :KEY_BUF
 ;
@@ -137,7 +154,7 @@ var last_send
   MIDI_TREE
   channel cc make_key
   mapping_count @ 1 +
-  t!
+  t! drop
 
   :MAPPED print
   channel . cc . port .
@@ -174,6 +191,10 @@ var last_send
   validate_mapping
 ;
 
+##################################################
+# Configuration parsing
+##################################################
+
 # ( line -- )
 : parse_line { line }
   line :FIELDS field_save strtok
@@ -184,6 +205,7 @@ var last_send
     return
   endif
 
+  # Ignore comment lines.
   dup ord 35 =
   if
     drop
@@ -217,19 +239,20 @@ var last_send
   parse_mapping_fields
 ;
 
-# ( line -- )
-: parse_config_line { line }
-  line 0 <>
-  if
-    line parse_line
-    null :NEWLINE line_save strtok
-    parse_config_line
-  endif
-;
-
+# Iterative parser: no recursive call per line.
 : parse_config
   config_buf @ :NEWLINE line_save strtok
-  parse_config_line
+  line_ptr !
+
+  2048 0 1 for
+    line_ptr @ 0 =
+    if
+      return
+    endif
+    line_ptr @ parse_line
+    null :NEWLINE line_save strtok
+    line_ptr !
+  next
 ;
 
 : load_config
@@ -266,10 +289,9 @@ var last_send
   endif
 ;
 
-: init_osc
-  :OSC_HOST TEST_OSC_PORT osc_connect
-  "OSC test socket initialized" print cr
-;
+##################################################
+# OSC sending
+##################################################
 
 # ( port -- )
 : select_osc_port { port }
@@ -280,18 +302,10 @@ var last_send
   endif
 ;
 
-# ( port path midi_value -- )
-: send_test_osc { port path midi_value }
-  port select_osc_port
-
-  path :OSC_FLOAT_TYPE osc_message
-  midi_value 127.0 / osc_f
-  osc_send
-;
-
 # ( port path scaled_value -- )
 : send_scaled_osc { port path scaled_value }
   port select_osc_port
+
   path :OSC_FLOAT_TYPE osc_message
   scaled_value osc_f
   osc_send
@@ -303,33 +317,61 @@ var last_send
   record MAP_PATH + @ osc_synth_get
 ;
 
-# ( -- )
-: request_all
-  mapping_count @ 0 1
-  for
-    i 1 + mapping_record request_mapping
-  next
-;
+##################################################
+# OSC endpoint registry
+##################################################
 
-# ( port idx -- flag )
-: rx_port_exists_from { port idx }
+# ( port idx -- index | -1 )
+: find_endpoint_from { port idx }
   idx rx_count @ >=
   if
-    0
+    -1
     return
   endif
 
   port rx_ports idx + @ =
   if
-    1
+    idx
   else
-    port idx 1 + rx_port_exists_from
+    port idx 1 + find_endpoint_from
   endif
 ;
 
+# ( port -- index | -1 )
+: find_endpoint { port }
+  port 0 find_endpoint_from
+;
+
+# ( port -- flag )
+: endpoint_active { port }
+  port find_endpoint
+
+  dup 0 <
+  if
+    drop
+    0
+    return
+  endif
+
+  rx_active + @
+;
+
 # ( port -- )
-: add_response_socket { port }
-  port 0 rx_port_exists_from
+: mark_endpoint_active { port }
+  port find_endpoint
+
+  dup 0 <
+  if
+    drop
+    return
+  endif
+
+  rx_active + 1 swap !
+;
+
+# ( port path -- )
+: add_response_socket { port path }
+  port find_endpoint 0 >=
   if
     return
   endif
@@ -340,10 +382,13 @@ var last_send
     return
   endif
 
+  # Faust responds on command port + 1.
   port 1 + osc_listen
 
-  port          rx_ports rx_count @ + !
-  osc_rx_sock @ rx_socks rx_count @ + !
+  port          rx_ports  rx_count @ + !
+  osc_rx_sock @ rx_socks  rx_count @ + !
+  0             rx_active rx_count @ + !
+  path          rx_paths  rx_count @ + !
 
   rx_count @ 1 + rx_count !
 ;
@@ -352,15 +397,20 @@ var last_send
 : init_response_sockets
   mapping_count @ 0 1 for
     i 1 + mapping_record
-    MAP_PORT + @
+    dup MAP_PORT + @
+    swap MAP_PATH + @
     add_response_socket
   next
 
-  "OSC receivers initialized: " print
+  "OSC endpoints configured: " print
   rx_count @ . cr
 ;
 
-# ( input_port path idx -- record_address | -1 )
+##################################################
+# Response lookup and introspection
+##################################################
+
+# ( input_port path idx -- record | -1 )
 : lookup_response_from { input_port path idx }
   idx mapping_count @ >=
   if
@@ -369,6 +419,7 @@ var last_send
   endif
 
   idx 1 + mapping_record
+
   dup MAP_PORT + @ input_port =
   over MAP_PATH + @ path str=
   and
@@ -380,7 +431,7 @@ var last_send
   endif
 ;
 
-# ( input_port path -- record_address | -1 )
+# ( input_port path -- record | -1 )
 : lookup_response { input_port path }
   input_port path 0 lookup_response_from
 ;
@@ -424,8 +475,6 @@ var last_send
 
 # ( record current -- )
 : update_record { record current }
-  # A recently sent MIDI value may not yet have
-  # reached Faust when an earlier get was answered.
   clock last_send @ -
   SEND_GRACE <
   if
@@ -444,8 +493,6 @@ var last_send
       " current=" print current . cr
     endif
 
-    # Whether latched or not, use the observed
-    # Faust value as the new pickup target.
     current record MAP_CURRENT + !
     current record MAP_EXPECTED + !
   endif
@@ -453,6 +500,10 @@ var last_send
 
 # ( path current minim maxim input_port -- )
 : initialize_mapping { path current minim maxim input_port }
+  # Any valid introspection response establishes
+  # that the endpoint is available.
+  input_port mark_endpoint_active
+
   input_port path lookup_response
 
   dup 0 <
@@ -461,25 +512,12 @@ var last_send
     return
   endif
 
-  # Stack: record
   dup MAP_INITIALIZED + @
   if
     current update_record
   else
     current minim maxim init_record
   endif
-;
-
-# ( path current min max input_port -- )
-: print_introspection { path current minim maxim input_port }
-  "OSC response from input port " print
-  input_port . cr
-
-  "  Path: " print
-  path print cr
-
-  "  Current/min/max: " print
-  current . minim . maxim . cr
 ;
 
 # ( socket input_port -- )
@@ -492,13 +530,89 @@ var last_send
   endif
 ;
 
-: poll_responses
+# Poll every discovery socket. This is used
+# only during the startup discovery window.
+: poll_discovery_responses
   rx_count @ 0 1 for
     rx_socks i + @
     rx_ports i + @
     poll_response_socket
   next
 ;
+
+# Poll only confirmed active endpoints.
+: poll_responses
+  rx_count @ 0 1 for
+    rx_active i + @
+    if
+      rx_socks i + @
+      rx_ports i + @
+      poll_response_socket
+    endif
+  next
+;
+
+##################################################
+# Startup discovery
+##################################################
+
+# Send exactly one introspection request
+# per unique OSC command port.
+: probe_endpoints
+  rx_count @ 0 1 for
+    rx_ports i + @ select_osc_port
+    rx_paths i + @ osc_synth_get
+  next
+;
+
+# Wait for startup responses, then freeze
+# the active endpoint set.
+: discover_endpoints
+  "Discovering OSC endpoints..." print cr
+
+  probe_endpoints
+
+  DISCOVERY_MS 0 1 for
+    poll_discovery_responses
+    0.001 sleep
+  next
+
+  "OSC discovery results:" print cr
+
+  rx_count @ 0 1 for
+    rx_active i + @
+    if
+      :ONLINE_MSG print
+      rx_ports i + @ . cr
+    else
+      :OFFLINE_MSG print
+      rx_ports i + @ .
+      :IGNORING_MSG print cr
+    endif
+  next
+;
+
+##################################################
+# Runtime introspection
+##################################################
+
+# Send get requests only to active endpoints.
+: request_all
+  mapping_count @ 0 1 for
+    i 1 + mapping_record
+
+    dup MAP_PORT + @ endpoint_active
+    if
+      request_mapping
+    else
+      drop
+    endif
+  next
+;
+
+##################################################
+# MIDI soft takeover
+##################################################
 
 # ( record_address -- target )
 : mapping_target { record }
@@ -519,9 +633,6 @@ var last_send
   *
   +
 
-  # Stack: scaled OSC value
-  #
-  # Update our expected value before transmission.
   dup record MAP_EXPECTED + !
   dup record MAP_CURRENT + !
 
@@ -529,7 +640,6 @@ var last_send
   record MAP_PATH + @ print
   :VALUE_EQ print dup . cr
 
-  # Start the stale-response grace period.
   clock last_send !
 
   record MAP_PORT + @
@@ -541,11 +651,17 @@ var last_send
 
 # ( record_address midi_value -- )
 : process_mapping { record midi_value }
+  # Ignore mappings belonging to unavailable
+  # endpoints, without logging or sending.
+  record MAP_PORT + @ endpoint_active 0 =
+  if
+    return
+  endif
+
+  # Also ignore parameters that have not yet
+  # returned valid introspection.
   record MAP_INITIALIZED + @ 0 =
   if
-    :WAIT_MSG print
-    record MAP_PATH + @ print
-    :AWAITING_INTROSPECTION print cr
     return
   endif
 
@@ -592,7 +708,10 @@ var last_send
   endif
 ;
 
-# ( -- )
+##################################################
+# Main loop
+##################################################
+
 : poll_due
   clock last_poll @ -
   POLL_INTERVAL >=
@@ -613,15 +732,27 @@ var last_send
   again
 ;
 
+##################################################
+# Initialization
+##################################################
+
 # Mapping records are appended after this point.
 here mapping_base !
 
 load_config
 
+# Initialize the shared OSC sending socket.
 :OSC_HOST 5530 osc_connect
 0 current_osc_port !
 
+# Create temporary discovery receivers.
 init_response_sockets
+
+# Probe once, classify endpoints, and exclude
+# unavailable synths from runtime operations.
+discover_endpoints
+
+# Initialize remaining parameters of active synths.
 request_all
 
 clock last_poll !
