@@ -14,7 +14,6 @@
 " \t\r"              const :FIELDS
 "\n"                 const :NEWLINE
 ":"                  const :COLON
-"m2o:"               const :PREFIX
 "127.0.0.1"          const :OSC_HOST
 ",f"                 const :OSC_FLOAT_TYPE
 "Missing controller" const :MISSING_CONTROLLER
@@ -28,7 +27,6 @@
 "Mapped: "           const :MAPPED
 " CC="               const :CC_EQ
 " target="           const :TARGET_EQ
-"Too many mappings!" const :TOO_MANY_MAPPINGS
 "Duplicate MIDI mapping: "
                      const :DUPLICATE_MIDI_MAPPING
 "Invalid MIDI channel/controller"
@@ -36,28 +34,37 @@
 "Invalid OSC port"   const :INVALID_OSC_PORT
 " awaiting introspection"
                      const :AWAITING_INTROSPECTION
+
 5520                 const TEST_OSC_PORT
-2048                 const MAX_MAPPINGS
 16                   const MAX_OSC_RECEIVERS
 2                    const PICKUP_TOLERANCE
 
+# Mapping record offsets.
+0 const MAP_CHANNEL
+1 const MAP_CC
+2 const MAP_PORT
+3 const MAP_PATH
+4 const MAP_CURRENT
+5 const MAP_MINIMUM
+6 const MAP_MAXIMUM
+7 const MAP_INITIALIZED
+8 const MAP_LATCHED
+9 const MAP_EXPECTED
+
+10 const MAP_RECORD_SIZE
+
+tmake const MIDI_TREE
+
 var mapping_count
 0 mapping_count !
+
+var mapping_base
 
 var rx_count
 0 rx_count !
 var rx_ports MAX_OSC_RECEIVERS allot
 var rx_socks MAX_OSC_RECEIVERS allot
 
-var map_channels     MAX_MAPPINGS allot
-var map_ccs          MAX_MAPPINGS allot
-var map_ports        MAX_MAPPINGS allot
-var map_paths        MAX_MAPPINGS allot
-var map_current      MAX_MAPPINGS allot
-var map_minimum      MAX_MAPPINGS allot
-var map_maximum      MAX_MAPPINGS allot
-var map_initialized  MAX_MAPPINGS allot
-var map_latched      MAX_MAPPINGS allot
 var config_buf
 var line_save
 var field_save
@@ -65,12 +72,17 @@ var current_osc_port
 
 64 mkbuf const :KEY_BUF
 
+# ( one_based_index -- record_address )
+: mapping_record { idx }
+  mapping_base @
+  idx 1 - MAP_RECORD_SIZE * +
+;
+
 # ( channel cc -- key )
 : make_key { channel cc }
   :KEY_BUF 0 64 memset drop
 
   :KEY_BUF
-    :PREFIX str+
     channel tostr str+
     :COLON str+
     cc tostr str+
@@ -79,36 +91,37 @@ var current_osc_port
   :KEY_BUF
 ;
 
-# ( channel cc port path idx -- )
-: store_mapping { channel cc port path idx }
-  channel map_channels    idx + !
-  cc      map_ccs         idx + !
-  port    map_ports       idx + !
-  path    map_paths       idx + !
-  0       map_initialized idx + !
-  0       map_latched     idx + !
+# ( channel cc port path -- )
+: store_mapping { channel cc port path }
+  channel ,
+  cc ,
+  port ,
+  path ,
+  0 ,  # current
+  0 ,  # minimum
+  0 ,  # maximum
+  0 ,  # initialized
+  0 ,  # latched
+  0 ,  # expected
 ;
 
 # ( channel cc port path -- )
 : add_mapping { channel cc port path }
-  mapping_count @ MAX_MAPPINGS >=
-  if
-    :TOO_MANY_MAPPINGS print cr
-    return
-  endif
-
-  channel cc make_key h@
+  MIDI_TREE channel cc make_key t@
   if
     :DUPLICATE_MIDI_MAPPING print
     channel cc make_key print cr
     return
   endif
 
-  channel cc port path mapping_count @ store_mapping
+  # Append one complete record to the variable array.
+  channel cc port path store_mapping
 
-  # Hash value is a persistent, one-based index string.
-  mapping_count @ 1 + tostr strdup
-  channel cc make_key h!
+  # Tree value is a one-based record number.
+  MIDI_TREE
+  channel cc make_key
+  mapping_count @ 1 +
+  t!
 
   :MAPPED print
   channel . cc . port .
@@ -229,16 +242,16 @@ var current_osc_port
   mapping_count @ . cr
 ;
 
-# ( channel cc -- index | -1 )
+# ( channel cc -- record_address | -1 )
 : lookup_mapping { channel cc }
-  channel cc make_key h@
+  MIDI_TREE channel cc make_key t@
 
   dup 0 =
   if
     drop
     -1
   else
-    tonum 1 -
+    mapping_record
   endif
 ;
 
@@ -273,23 +286,23 @@ var current_osc_port
   osc_send
 ;
 
-# ( idx -- )
-: request_mapping { idx }
+# ( record_address -- )
+: request_mapping { record }
   # DEBUG
   "Requesting: " print
-  map_ports idx + @ .
-  map_paths idx + @ print cr
+  record MAP_PORT + @ .
+  record MAP_PATH + @ print cr
   # END DEBUG
 
-  map_ports idx + @ select_osc_port
-  map_paths idx + @ osc_synth_get
+  record MAP_PORT + @ select_osc_port
+  record MAP_PATH + @ osc_synth_get
 ;
 
 # ( -- )
 : request_all
   mapping_count @ 0 1
   for
-    i request_mapping
+    i 1 + mapping_record request_mapping
   next
 ;
 
@@ -334,14 +347,16 @@ var current_osc_port
 # ( -- )
 : init_response_sockets
   mapping_count @ 0 1 for
-    map_ports i + @ add_response_socket
+    i 1 + mapping_record
+    MAP_PORT + @
+    add_response_socket
   next
 
   "OSC receivers initialized: " print
   rx_count @ . cr
 ;
 
-# ( input_port path idx -- index | -1 )
+# ( input_port path idx -- record_address | -1 )
 : lookup_response_from { input_port path idx }
   idx mapping_count @ >=
   if
@@ -349,17 +364,19 @@ var current_osc_port
     return
   endif
 
-  input_port map_ports idx + @ =
-  path map_paths idx + @ str=
+  idx 1 + mapping_record
+  dup MAP_PORT + @ input_port =
+  over MAP_PATH + @ path str=
   and
   if
-    idx
+    # Return the record address.
   else
+    drop
     input_port path idx 1 + lookup_response_from
   endif
 ;
 
-# ( input_port path -- index | -1 )
+# ( input_port path -- record_address | -1 )
 : lookup_response { input_port path }
   input_port path 0 lookup_response_from
 ;
@@ -374,22 +391,23 @@ var current_osc_port
     return
   endif
 
-  # Stack: mapping index
-  dup map_initialized + @
+  # Stack: record address
+  dup MAP_INITIALIZED + @
   if
     drop
     return
   endif
 
-  dup map_current + current swap !
-  dup map_minimum + minim swap !
-  dup map_maximum + maxim swap !
-  dup map_latched + 0 swap !
-  dup map_initialized + 1 swap !
+  dup MAP_CURRENT + current swap !
+  dup MAP_MINIMUM + minim swap !
+  dup MAP_MAXIMUM + maxim swap !
+  dup MAP_EXPECTED + current swap !
+  dup MAP_LATCHED + 0 swap !
+  dup MAP_INITIALIZED + 1 swap !
 
   :INIT_MSG print
-  dup map_ports + @ .
-  dup map_paths + @ print
+  dup MAP_PORT + @ .
+  dup MAP_PATH + @ print
   " current=" print current .
   " min=" print minim .
   " max=" print maxim . cr
@@ -415,8 +433,8 @@ var current_osc_port
 
   osc_synth_recv
   if
-    # for debugging only:
-    # 2over  2over
+    # For debugging only:
+    # 2over 2over
     # input_port print_introspection
     input_port initialize_mapping
   endif
@@ -430,32 +448,32 @@ var current_osc_port
   next
 ;
 
-# ( index -- target )
-: mapping_target { idx }
-  map_current idx + @
-  map_minimum idx + @ -
-  map_maximum idx + @
-  map_minimum idx + @ -
+# ( record_address -- target )
+: mapping_target { record }
+  record MAP_CURRENT + @
+  record MAP_MINIMUM + @ -
+  record MAP_MAXIMUM + @
+  record MAP_MINIMUM + @ -
   /
   127.0 *
 ;
 
-# ( index midi_value -- )
-: send_mapping { idx midi_value }
-  map_minimum idx + @
+# ( record_address midi_value -- )
+: send_mapping { record midi_value }
+  record MAP_MINIMUM + @
   midi_value 127.0 /
-  map_maximum idx + @
-  map_minimum idx + @ -
+  record MAP_MAXIMUM + @
+  record MAP_MINIMUM + @ -
   *
   +
 
   # Stack: scaled OSC value
   :SEND_MSG print
-  idx map_paths + @ print
+  record MAP_PATH + @ print
   :VALUE_EQ print dup . cr
 
-  idx map_ports + @
-  idx map_paths + @
+  record MAP_PORT + @
+  record MAP_PATH + @
   rot
   # Stack: port path scaled_value
 
@@ -463,47 +481,49 @@ var current_osc_port
   send_scaled_osc
 ;
 
-# ( index midi_value -- )
-: process_mapping { idx midi_value }
-  idx map_initialized + @ 0 =
+# ( record_address midi_value -- )
+: process_mapping { record midi_value }
+  record MAP_INITIALIZED + @ 0 =
   if
     :WAIT_MSG print
-    idx map_paths + @ print
+    record MAP_PATH + @ print
     :AWAITING_INTROSPECTION print cr
     return
   endif
 
-  idx map_latched + @ 0 =
+  record MAP_LATCHED + @ 0 =
   if
-    midi_value idx mapping_target - abs
+    midi_value record mapping_target - abs
     PICKUP_TOLERANCE <=
     if
-      1 map_latched idx + !
+      1 record MAP_LATCHED + !
 
       :LATCH_MSG print
-      idx map_paths + @ print
+      record MAP_PATH + @ print
       :CC_EQ print
       midi_value . cr
     else
       :WAIT_MSG print
-      idx map_paths + @ print
+      record MAP_PATH + @ print
       :CC_EQ print midi_value .
-      :TARGET_EQ print idx mapping_target . cr
+      :TARGET_EQ print record mapping_target . cr
       return
     endif
   endif
 
-  idx midi_value send_mapping
+  record midi_value send_mapping
 ;
 
 # ( channel cc value -- )
 : dispatch_cc { channel cc value }
   channel cc lookup_mapping
+
   dup 0 <
   if
     drop
     return
   endif
+
   value process_mapping
 ;
 
@@ -522,6 +542,9 @@ var current_osc_port
     0.001 sleep
   again
 ;
+
+# All mapping records are appended after this point.
+here mapping_base !
 
 load_config
 :OSC_HOST 5530 osc_connect
