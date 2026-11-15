@@ -1,9 +1,12 @@
+
 ##################################################
-# A complete, config-driven solution for mapping #
-# MIDI chan/controller message to arbitrary OSC  #
-# ports and paths, for instance: Faust synths.   #
+# Config-driven MIDI -> OSC bridge for Faust.    #
 #                                                #
-# Mappings are declared in `midi_to_osc.conf`.   #
+# Supports startup introspection, MIDI scaling,  #
+# soft takeover, and external OSC change         #
+# detection with 500 ms polling.                 #
+#                                                #
+# Mappings: midi_to_osc.conf                     #
 ##################################################
 
 "midi.dc" import
@@ -22,6 +25,7 @@
 "[INIT] "            const :INIT_MSG
 "[WAIT] "            const :WAIT_MSG
 "[LATCH] "           const :LATCH_MSG
+"[UNLATCH] "         const :UNLATCH_MSG
 "[SEND] "            const :SEND_MSG
 " value="            const :VALUE_EQ
 "Mapped: "           const :MAPPED
@@ -38,6 +42,17 @@
 5520                 const TEST_OSC_PORT
 16                   const MAX_OSC_RECEIVERS
 2                    const PICKUP_TOLERANCE
+
+# Seconds between introspection cycles.
+0.5                  const POLL_INTERVAL
+
+# Ignore potentially stale introspection responses
+# briefly after a MIDI-driven OSC send.
+0.15                 const SEND_GRACE
+
+# Allowed introspection discrepancy, expressed
+# in equivalent MIDI controller steps.
+0.5                  const CHANGE_TOLERANCE
 
 # Mapping record offsets.
 0 const MAP_CHANNEL
@@ -69,6 +84,9 @@ var config_buf
 var line_save
 var field_save
 var current_osc_port
+
+var last_poll
+var last_send
 
 64 mkbuf const :KEY_BUF
 
@@ -114,10 +132,8 @@ var current_osc_port
     return
   endif
 
-  # Append one complete record to the variable array.
   channel cc port path store_mapping
 
-  # Tree value is a one-based record number.
   MIDI_TREE
   channel cc make_key
   mapping_count @ 1 +
@@ -168,14 +184,11 @@ var current_osc_port
     return
   endif
 
-  # Ignore comment lines.
   dup ord 35 =
   if
     drop
     return
   endif
-
-  # First token (channel) remains on stack.
 
   null :FIELDS field_save strtok
   dup 0 =
@@ -201,7 +214,6 @@ var current_osc_port
     return
   endif
 
-  # Stack: channel cc port path
   parse_mapping_fields
 ;
 
@@ -230,7 +242,6 @@ var current_osc_port
     return
   endif
 
-  # freadall: ( file -- file buffer length )
   dup freadall
   drop
   config_buf !
@@ -288,12 +299,6 @@ var current_osc_port
 
 # ( record_address -- )
 : request_mapping { record }
-  # DEBUG
-  "Requesting: " print
-  record MAP_PORT + @ .
-  record MAP_PATH + @ print cr
-  # END DEBUG
-
   record MAP_PORT + @ select_osc_port
   record MAP_PATH + @ osc_synth_get
 ;
@@ -335,7 +340,6 @@ var current_osc_port
     return
   endif
 
-  # Response port is command port + 1.
   port 1 + osc_listen
 
   port          rx_ports rx_count @ + !
@@ -369,7 +373,7 @@ var current_osc_port
   over MAP_PATH + @ path str=
   and
   if
-    # Return the record address.
+    # Return record address.
   else
     drop
     input_port path idx 1 + lookup_response_from
@@ -379,6 +383,72 @@ var current_osc_port
 # ( input_port path -- record_address | -1 )
 : lookup_response { input_port path }
   input_port path 0 lookup_response_from
+;
+
+# ( record current minim maxim -- )
+: init_record { record current minim maxim }
+  current record MAP_CURRENT + !
+  minim record MAP_MINIMUM + !
+  maxim record MAP_MAXIMUM + !
+  current record MAP_EXPECTED + !
+  0 record MAP_LATCHED + !
+  1 record MAP_INITIALIZED + !
+
+  :INIT_MSG print
+  record MAP_PORT + @ .
+  record MAP_PATH + @ print
+  " current=" print current .
+  " min=" print minim .
+  " max=" print maxim . cr
+;
+
+# ( record current -- difference_in_midi_steps )
+: observed_difference { record current }
+  record MAP_MAXIMUM + @
+  record MAP_MINIMUM + @ -
+  abs
+
+  dup 0 =
+  if
+    drop
+    current record MAP_EXPECTED + @ -
+    abs
+    return
+  endif
+
+  current record MAP_EXPECTED + @ -
+  abs
+  swap /
+  127.0 *
+;
+
+# ( record current -- )
+: update_record { record current }
+  # A recently sent MIDI value may not yet have
+  # reached Faust when an earlier get was answered.
+  clock last_send @ -
+  SEND_GRACE <
+  if
+    return
+  endif
+
+  record current observed_difference
+  CHANGE_TOLERANCE >
+  if
+    record MAP_LATCHED + @
+    if
+      0 record MAP_LATCHED + !
+
+      :UNLATCH_MSG print
+      record MAP_PATH + @ print
+      " current=" print current . cr
+    endif
+
+    # Whether latched or not, use the observed
+    # Faust value as the new pickup target.
+    current record MAP_CURRENT + !
+    current record MAP_EXPECTED + !
+  endif
 ;
 
 # ( path current minim maxim input_port -- )
@@ -391,28 +461,13 @@ var current_osc_port
     return
   endif
 
-  # Stack: record address
+  # Stack: record
   dup MAP_INITIALIZED + @
   if
-    drop
-    return
+    current update_record
+  else
+    current minim maxim init_record
   endif
-
-  dup MAP_CURRENT + current swap !
-  dup MAP_MINIMUM + minim swap !
-  dup MAP_MAXIMUM + maxim swap !
-  dup MAP_EXPECTED + current swap !
-  dup MAP_LATCHED + 0 swap !
-  dup MAP_INITIALIZED + 1 swap !
-
-  :INIT_MSG print
-  dup MAP_PORT + @ .
-  dup MAP_PATH + @ print
-  " current=" print current .
-  " min=" print minim .
-  " max=" print maxim . cr
-
-  drop
 ;
 
 # ( path current min max input_port -- )
@@ -433,9 +488,6 @@ var current_osc_port
 
   osc_synth_recv
   if
-    # For debugging only:
-    # 2over 2over
-    # input_port print_introspection
     input_port initialize_mapping
   endif
 ;
@@ -468,16 +520,22 @@ var current_osc_port
   +
 
   # Stack: scaled OSC value
+  #
+  # Update our expected value before transmission.
+  dup record MAP_EXPECTED + !
+  dup record MAP_CURRENT + !
+
   :SEND_MSG print
   record MAP_PATH + @ print
   :VALUE_EQ print dup . cr
 
+  # Start the stale-response grace period.
+  clock last_send !
+
   record MAP_PORT + @
   record MAP_PATH + @
   rot
-  # Stack: port path scaled_value
 
-  # Send the already-scaled value directly.
   send_scaled_osc
 ;
 
@@ -534,21 +592,39 @@ var current_osc_port
   endif
 ;
 
+# ( -- )
+: poll_due
+  clock last_poll @ -
+  POLL_INTERVAL >=
+  if
+    request_all
+    clock last_poll !
+  endif
+;
+
 : run
   "MIDI->OSC routing running..." print cr
+
   inf times
     poll_midi
     poll_responses
+    poll_due
     0.001 sleep
   again
 ;
 
-# All mapping records are appended after this point.
+# Mapping records are appended after this point.
 here mapping_base !
 
 load_config
+
 :OSC_HOST 5530 osc_connect
 0 current_osc_port !
+
 init_response_sockets
 request_all
+
+clock last_poll !
+0 last_send !
+
 run
