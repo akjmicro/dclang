@@ -1,340 +1,531 @@
-
-# midi_to_osc.dc
-#
-# Novation Launch Control -> OSC synth bridge
-#
-# Features:
-#   - MIDI CC change detection
-#   - Synth introspection via OSC
-#   - Automatic parameter range scaling
-#   - Soft takeover with +/- 2 CC tolerance
-#   - Separate synth and drone destinations
-#
-# Requires:
-#   midi.dc
-#   osc.dc with osc_synth_* helpers
-#   PM_IN environment variable
+##################################################
+# A complete, config-driven solution for mapping #
+# MIDI chan/controller message to arbitrary OSC  #
+# ports and paths, for instance: Faust synths.   #
+#                                                #
+# Mappings are declared in `midi_to_osc.conf`.   #
+##################################################
 
 "midi.dc" import
-"osc.dc" import
+"osc.dc"  import
 
-# ---------------- CONSTANTS ----------------
+"midi_to_osc.conf"   const :CONFIG_FILE
+"r"                  const :READ_MODE
+" \t\r"              const :FIELDS
+"\n"                 const :NEWLINE
+":"                  const :COLON
+"m2o:"               const :PREFIX
+"127.0.0.1"          const :OSC_HOST
+",f"                 const :OSC_FLOAT_TYPE
+"Missing controller" const :MISSING_CONTROLLER
+"Missing port"       const :MISSING_PORT
+"Missing OSC path"   const :MISSING_OSC_PATH
+"[INIT] "            const :INIT_MSG
+"[WAIT] "            const :WAIT_MSG
+"[LATCH] "           const :LATCH_MSG
+"[SEND] "            const :SEND_MSG
+" value="            const :VALUE_EQ
+"Mapped: "           const :MAPPED
+" CC="               const :CC_EQ
+" target="           const :TARGET_EQ
+"Too many mappings!" const :TOO_MANY_MAPPINGS
+"Duplicate MIDI mapping: "
+                     const :DUPLICATE_MIDI_MAPPING
+"Invalid MIDI channel/controller"
+                     const :INVALID_MIDI_CHAN
+"Invalid OSC port"   const :INVALID_OSC_PORT
+" awaiting introspection"
+                     const :AWAITING_INTROSPECTION
+5520                 const TEST_OSC_PORT
+2048                 const MAX_MAPPINGS
+16                   const MAX_OSC_RECEIVERS
+2                    const PICKUP_TOLERANCE
 
-"127.0.0.1" const :LOCALHOST
+var mapping_count
+0 mapping_count !
 
-"MIDI/OSC bridge running" const :RUNNING_MSG
-"[INIT] "  const :INIT_MSG
-"[WAIT] "  const :WAIT_MSG
-"[LATCH] " const :LATCH_MSG
-"[SEND] "  const :SEND_MSG
-" "        const :SPACE
+var rx_count
+0 rx_count !
+var rx_ports MAX_OSC_RECEIVERS allot
+var rx_socks MAX_OSC_RECEIVERS allot
 
-5513 const SYNTH_PORT
-5514 const DRONE_PORT
-5516 const REPLY_PORT
+var map_channels     MAX_MAPPINGS allot
+var map_ccs          MAX_MAPPINGS allot
+var map_ports        MAX_MAPPINGS allot
+var map_paths        MAX_MAPPINGS allot
+var map_current      MAX_MAPPINGS allot
+var map_minimum      MAX_MAPPINGS allot
+var map_maximum      MAX_MAPPINGS allot
+var map_initialized  MAX_MAPPINGS allot
+var map_latched      MAX_MAPPINGS allot
+var config_buf
+var line_save
+var field_save
+var current_osc_port
 
-0.001 const POLL_SLEEP
-2     const PICKUP_TOL
+64 mkbuf const :KEY_BUF
 
-# ---------------- SOCKETS ----------------
+# ( channel cc -- key )
+: make_key { channel cc }
+  :KEY_BUF 0 64 memset drop
 
-var synth_sock
-var drone_sock
+  :KEY_BUF
+    :PREFIX str+
+    channel tostr str+
+    :COLON str+
+    cc tostr str+
+  drop
 
-: open_osc
-  :LOCALHOST SYNTH_PORT osc_connect
-  osc_sock @ synth_sock !
-
-  :LOCALHOST DRONE_PORT osc_connect
-  osc_sock @ drone_sock !
-
-  REPLY_PORT osc_listen
-
-  "OSC sockets initialized" print cr
+  :KEY_BUF
 ;
 
-# ---------------- CC MAPPINGS ----------------
-
-var cc_paths   128 allot
-var cc_socks   128 allot
-var cc_last    128 allot
-
-var cc_min     128 allot
-var cc_max     128 allot
-var cc_target  128 allot
-var cc_ready   128 allot
-var cc_caught  128 allot
-
-# ( cc socket path -- )
-: map_cc { cc sock path }
-  path cc_paths cc + !
-  sock cc_socks cc + !
-
-  cc midictl cc_last cc + !
-
-  0 cc_ready cc + !
-  0 cc_caught cc + !
+# ( channel cc port path idx -- )
+: store_mapping { channel cc port path idx }
+  channel map_channels    idx + !
+  cc      map_ccs         idx + !
+  port    map_ports       idx + !
+  path    map_paths       idx + !
+  0       map_initialized idx + !
+  0       map_latched     idx + !
 ;
 
-: init_cc_map
-  21 synth_sock @ "/synth/wave"  map_cc
-  22 synth_sock @ "/synth/duty"  map_cc
-  23 synth_sock @ "/synth/att"   map_cc
-  24 synth_sock @ "/synth/rel"   map_cc
-  25 synth_sock @ "/synth/cfmin" map_cc
-  26 synth_sock @ "/synth/cfrng" map_cc
-  27 synth_sock @ "/synth/res"   map_cc
-  28 synth_sock @ "/synth/vol"   map_cc
-
-  41 drone_sock @ "/drone/wave"  map_cc
-  42 drone_sock @ "/drone/duty"  map_cc
-  43 drone_sock @ "/drone/att"   map_cc
-  44 drone_sock @ "/drone/rel"   map_cc
-  45 drone_sock @ "/drone/cfmin" map_cc
-  46 drone_sock @ "/drone/cfrng" map_cc
-  47 drone_sock @ "/drone/res"   map_cc
-  48 drone_sock @ "/drone/vol"   map_cc
-;
-
-# ---------------- INTROSPECTION REQUESTS ----------------
-
-# ( cc -- )
-: request_cc { cc }
-  cc_socks cc + @ osc_sock !
-  cc_paths cc + @ osc_synth_get
-;
-
-: request_all
-  21 request_cc
-  22 request_cc
-  23 request_cc
-  24 request_cc
-  25 request_cc
-  26 request_cc
-  27 request_cc
-  28 request_cc
-
-  41 request_cc
-  42 request_cc
-  43 request_cc
-  44 request_cc
-  45 request_cc
-  46 request_cc
-  47 request_cc
-  48 request_cc
-;
-
-# ---------------- RANGE INITIALIZATION ----------------
-
-# ( value -- clamped-value )
-: clamp_cc { value }
-  value 0 <
+# ( channel cc port path -- )
+: add_mapping { channel cc port path }
+  mapping_count @ MAX_MAPPINGS >=
   if
-    0
+    :TOO_MANY_MAPPINGS print cr
+    return
+  endif
+
+  channel cc make_key h@
+  if
+    :DUPLICATE_MIDI_MAPPING print
+    channel cc make_key print cr
+    return
+  endif
+
+  channel cc port path mapping_count @ store_mapping
+
+  # Hash value is a persistent, one-based index string.
+  mapping_count @ 1 + tostr strdup
+  channel cc make_key h!
+
+  :MAPPED print
+  channel . cc . port .
+  path print cr
+
+  mapping_count @ 1 + mapping_count !
+;
+
+# ( channel cc port path -- )
+: validate_mapping { channel cc port path }
+  channel 1 < channel 16 > or
+  cc 0 < cc 127 > or
+  or
+  if
+    :INVALID_MIDI_CHAN print cr
+    return
+  endif
+
+  port 1 < port 65535 > or
+  if
+    :INVALID_OSC_PORT print cr
+    return
+  endif
+
+  channel cc port path add_mapping
+;
+
+# ( channel-str cc-str port-str path -- )
+: parse_mapping_fields { channel cc port path }
+  channel tonum
+  cc tonum
+  port tonum
+  path
+  validate_mapping
+;
+
+# ( line -- )
+: parse_line { line }
+  line :FIELDS field_save strtok
+
+  dup 0 =
+  if
+    drop
+    return
+  endif
+
+  # Ignore comment lines.
+  dup ord 35 =
+  if
+    drop
+    return
+  endif
+
+  # First token (channel) remains on stack.
+
+  null :FIELDS field_save strtok
+  dup 0 =
+  if
+    2drop
+    :MISSING_CONTROLLER print cr
+    return
+  endif
+
+  null :FIELDS field_save strtok
+  dup 0 =
+  if
+    drop 2drop
+    :MISSING_PORT print cr
+    return
+  endif
+
+  null :FIELDS field_save strtok
+  dup 0 =
+  if
+    drop 2drop drop
+    :MISSING_OSC_PATH print cr
+    return
+  endif
+
+  # Stack: channel cc port path
+  parse_mapping_fields
+;
+
+# ( line -- )
+: parse_config_line { line }
+  line 0 <>
+  if
+    line parse_line
+    null :NEWLINE line_save strtok
+    parse_config_line
+  endif
+;
+
+: parse_config
+  config_buf @ :NEWLINE line_save strtok
+  parse_config_line
+;
+
+: load_config
+  :CONFIG_FILE :READ_MODE fopen
+
+  dup 0 =
+  if
+    drop
+    "Cannot open configuration file" print cr
+    return
+  endif
+
+  # freadall: ( file -- file buffer length )
+  dup freadall
+  drop
+  config_buf !
+  fclose
+
+  parse_config
+
+  "Loaded mappings: " print
+  mapping_count @ . cr
+;
+
+# ( channel cc -- index | -1 )
+: lookup_mapping { channel cc }
+  channel cc make_key h@
+
+  dup 0 =
+  if
+    drop
+    -1
   else
-    value 127 >
-    if
-      127
-    else
-      value
-    endif
+    tonum 1 -
   endif
 ;
 
-# ( cc current lo hi -- )
-: store_synth_values { cc current lo hi }
-  hi lo >
+: init_osc
+  :OSC_HOST TEST_OSC_PORT osc_connect
+  "OSC test socket initialized" print cr
+;
+
+# ( port -- )
+: select_osc_port { port }
+  port current_osc_port @ <>
   if
-    lo cc_min cc + !
-    hi cc_max cc + !
-
-    current lo -
-    hi lo -
-    /
-    127.0 *
-    clamp_cc
-    cc_target cc + !
-
-    1 cc_ready cc + !
-    0 cc_caught cc + !
-
-    :INIT_MSG print
-    cc_paths cc + @ print
-    :SPACE print
-    "CC=" print cc .
-    "target=" print cc_target cc + @ .
-    "min=" print lo .
-    "max=" print hi . cr
+    osc_sock @ :OSC_HOST port udpconnect drop
+    port current_osc_port !
   endif
 ;
 
-# ( cc path current lo hi -- )
-: update_if_match { cc path current lo hi }
-  path cc_paths cc + @ str=
-  if
-    cc current lo hi store_synth_values
-  endif
-;
+# ( port path midi_value -- )
+: send_test_osc { port path midi_value }
+  port select_osc_port
 
-# ( path current lo hi -- )
-: handle_synth_values { path current lo hi }
-  21 path current lo hi update_if_match
-  22 path current lo hi update_if_match
-  23 path current lo hi update_if_match
-  24 path current lo hi update_if_match
-  25 path current lo hi update_if_match
-  26 path current lo hi update_if_match
-  27 path current lo hi update_if_match
-  28 path current lo hi update_if_match
-
-  41 path current lo hi update_if_match
-  42 path current lo hi update_if_match
-  43 path current lo hi update_if_match
-  44 path current lo hi update_if_match
-  45 path current lo hi update_if_match
-  46 path current lo hi update_if_match
-  47 path current lo hi update_if_match
-  48 path current lo hi update_if_match
-;
-
-: poll_synth
-  osc_synth_recv
-  if
-    handle_synth_values
-  endif
-;
-
-# ---------------- OSC TRANSMISSION ----------------
-
-# ( socket path value -- )
-: send_float { sock path value }
-  sock osc_sock !
-  path :osc_float_type osc_message
-  value osc_f
+  path :OSC_FLOAT_TYPE osc_message
+  midi_value 127.0 / osc_f
   osc_send
 ;
 
-# ( scaled-value socket path -- )
-: send_cc_scaled { value sock path }
-  :SEND_MSG print
-  path print
-  :SPACE print
-  value . cr
-
-  sock path value send_float
+# ( port path scaled_value -- )
+: send_scaled_osc { port path scaled_value }
+  port select_osc_port
+  path :OSC_FLOAT_TYPE osc_message
+  scaled_value osc_f
+  osc_send
 ;
 
-# ( cc midi-value -- )
-: send_cc { cc midi_value }
-  cc_max cc + @
-  cc_min cc + @
-  -
+# ( idx -- )
+: request_mapping { idx }
+  # DEBUG
+  "Requesting: " print
+  map_ports idx + @ .
+  map_paths idx + @ print cr
+  # END DEBUG
+
+  map_ports idx + @ select_osc_port
+  map_paths idx + @ osc_synth_get
+;
+
+# ( -- )
+: request_all
+  mapping_count @ 0 1
+  for
+    i request_mapping
+  next
+;
+
+# ( port idx -- flag )
+: rx_port_exists_from { port idx }
+  idx rx_count @ >=
+  if
+    0
+    return
+  endif
+
+  port rx_ports idx + @ =
+  if
+    1
+  else
+    port idx 1 + rx_port_exists_from
+  endif
+;
+
+# ( port -- )
+: add_response_socket { port }
+  port 0 rx_port_exists_from
+  if
+    return
+  endif
+
+  rx_count @ MAX_OSC_RECEIVERS >=
+  if
+    "Too many OSC receivers!" print cr
+    return
+  endif
+
+  # Response port is command port + 1.
+  port 1 + osc_listen
+
+  port          rx_ports rx_count @ + !
+  osc_rx_sock @ rx_socks rx_count @ + !
+
+  rx_count @ 1 + rx_count !
+;
+
+# ( -- )
+: init_response_sockets
+  mapping_count @ 0 1 for
+    map_ports i + @ add_response_socket
+  next
+
+  "OSC receivers initialized: " print
+  rx_count @ . cr
+;
+
+# ( input_port path idx -- index | -1 )
+: lookup_response_from { input_port path idx }
+  idx mapping_count @ >=
+  if
+    -1
+    return
+  endif
+
+  input_port map_ports idx + @ =
+  path map_paths idx + @ str=
+  and
+  if
+    idx
+  else
+    input_port path idx 1 + lookup_response_from
+  endif
+;
+
+# ( input_port path -- index | -1 )
+: lookup_response { input_port path }
+  input_port path 0 lookup_response_from
+;
+
+# ( path current minim maxim input_port -- )
+: initialize_mapping { path current minim maxim input_port }
+  input_port path lookup_response
+
+  dup 0 <
+  if
+    drop
+    return
+  endif
+
+  # Stack: mapping index
+  dup map_initialized + @
+  if
+    drop
+    return
+  endif
+
+  dup map_current + current swap !
+  dup map_minimum + minim swap !
+  dup map_maximum + maxim swap !
+  dup map_latched + 0 swap !
+  dup map_initialized + 1 swap !
+
+  :INIT_MSG print
+  dup map_ports + @ .
+  dup map_paths + @ print
+  " current=" print current .
+  " min=" print minim .
+  " max=" print maxim . cr
+
+  drop
+;
+
+# ( path current min max input_port -- )
+: print_introspection { path current minim maxim input_port }
+  "OSC response from input port " print
+  input_port . cr
+
+  "  Path: " print
+  path print cr
+
+  "  Current/min/max: " print
+  current . minim . maxim . cr
+;
+
+# ( socket input_port -- )
+: poll_response_socket { sock input_port }
+  sock osc_rx_sock !
+
+  osc_synth_recv
+  if
+    # for debugging only:
+    # 2over  2over
+    # input_port print_introspection
+    input_port initialize_mapping
+  endif
+;
+
+: poll_responses
+  rx_count @ 0 1 for
+    rx_socks i + @
+    rx_ports i + @
+    poll_response_socket
+  next
+;
+
+# ( index -- target )
+: mapping_target { idx }
+  map_current idx + @
+  map_minimum idx + @ -
+  map_maximum idx + @
+  map_minimum idx + @ -
+  /
+  127.0 *
+;
+
+# ( index midi_value -- )
+: send_mapping { idx midi_value }
+  map_minimum idx + @
   midi_value 127.0 /
+  map_maximum idx + @
+  map_minimum idx + @ -
   *
-  cc_min cc + @
   +
 
-  # Stack: scaled-value
+  # Stack: scaled OSC value
+  :SEND_MSG print
+  idx map_paths + @ print
+  :VALUE_EQ print dup . cr
 
-  cc_socks cc + @
-  cc_paths cc + @
+  idx map_ports + @
+  idx map_paths + @
+  rot
+  # Stack: port path scaled_value
 
-  # Arrange arguments through an entry-local word.
-  send_cc_scaled
+  # Send the already-scaled value directly.
+  send_scaled_osc
 ;
 
-# ---------------- SOFT TAKEOVER ----------------
-
-# ( cc value -- flag )
-: within_pickup { cc value }
-  value cc_target cc + @ PICKUP_TOL - >=
-  value cc_target cc + @ PICKUP_TOL + <=
-  and
-;
-
-# ( cc value -- )
-: process_cc_change { cc value }
-  cc_ready cc + @
+# ( index midi_value -- )
+: process_mapping { idx midi_value }
+  idx map_initialized + @ 0 =
   if
-    cc_caught cc + @
-    if
-      cc value send_cc
-    else
-      cc value within_pickup
-      if
-        1 cc_caught cc + !
+    :WAIT_MSG print
+    idx map_paths + @ print
+    :AWAITING_INTROSPECTION print cr
+    return
+  endif
 
-        :LATCH_MSG print
-        cc_paths cc + @ print
-        :SPACE print
-        "CC=" print cc .
-        "value=" print value . cr
-      else
-        :WAIT_MSG print
-        cc_paths cc + @ print
-        :SPACE print
-        "CC=" print cc .
-        "raw=" print value .
-        "target=" print cc_target cc + @ . cr
-      endif
+  idx map_latched + @ 0 =
+  if
+    midi_value idx mapping_target - abs
+    PICKUP_TOLERANCE <=
+    if
+      1 map_latched idx + !
+
+      :LATCH_MSG print
+      idx map_paths + @ print
+      :CC_EQ print
+      midi_value . cr
+    else
+      :WAIT_MSG print
+      idx map_paths + @ print
+      :CC_EQ print midi_value .
+      :TARGET_EQ print idx mapping_target . cr
+      return
     endif
   endif
+
+  idx midi_value send_mapping
 ;
 
-# ( cc new-value -- )
-: check_cc_value { cc new_val }
-  cc_last cc + @ new_val <>
+# ( channel cc value -- )
+: dispatch_cc { channel cc value }
+  channel cc lookup_mapping
+  dup 0 <
   if
-    new_val cc_last cc + !
-    cc new_val process_cc_change
+    drop
+    return
+  endif
+  value process_mapping
+;
+
+: poll_midi
+  midi_cc_event
+  if
+    dispatch_cc
   endif
 ;
 
-# ( cc -- )
-: check_cc
-  dup midictl check_cc_value
-;
-
-: scan_ccs
-  21 check_cc
-  22 check_cc
-  23 check_cc
-  24 check_cc
-  25 check_cc
-  26 check_cc
-  27 check_cc
-  28 check_cc
-
-  41 check_cc
-  42 check_cc
-  43 check_cc
-  44 check_cc
-  45 check_cc
-  46 check_cc
-  47 check_cc
-  48 check_cc
-;
-
-# ---------------- MAIN LOOP ----------------
-
-: poll_midi
-  refresh_midictl
-  scan_ccs
-;
-
-: run_bridge
-  :RUNNING_MSG print cr
-
+: run
+  "MIDI->OSC routing running..." print cr
   inf times
     poll_midi
-    poll_synth
-    POLL_SLEEP sleep
+    poll_responses
+    0.001 sleep
   again
 ;
 
-# ---------------- INITIALIZATION ----------------
-
-open_osc
-init_cc_map
+load_config
+:OSC_HOST 5530 osc_connect
+0 current_osc_port !
+init_response_sockets
 request_all
-run_bridge
+run

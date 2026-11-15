@@ -99,6 +99,25 @@ check_mididev
   endif
 ;
 
+# ( -- channel cc value true | false )
+# Read one PortMidi event.
+# Return only Control Change messages.
+# Channel is 1-based, CC and value are 0..127.
+: midi_cc_event
+  _pm_read
+  { value cc status }
+
+  status 0xf0 and 0xb0 =
+  if
+    status 0x0f and 1 +
+    cc
+    value
+    1
+  else
+    0
+  endif
+;
+
 # This is the main API for grabbing a controller variable
 # ( ctrlnum -- sig )
 : midictl midi_ctl_slots + @ ;

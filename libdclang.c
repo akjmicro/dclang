@@ -3316,7 +3316,7 @@ void dclang_execute() {
             Pm_GetDefaultInputDeviceID();
             DCLANG_INT midi_in_device = (DCLANG_LONG)POP;
             PmError open_status;
-            open_status = Pm_OpenInput(&midi_in_stream, midi_in_device, NULL, 1, NULL, NULL);
+            open_status = Pm_OpenInput(&midi_in_stream, midi_in_device, NULL, 64, NULL, NULL);
             if (open_status != 0) fprintf(stderr, "Error opening MIDI input: %i\n", open_status);
             Pm_SetFilter(midi_in_stream, PM_FILT_ACTIVE | PM_FILT_SYSEX);
             NEXT;
