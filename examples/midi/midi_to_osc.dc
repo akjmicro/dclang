@@ -89,12 +89,12 @@ var rx_ports  MAX_OSC_RECEIVERS allot
 var rx_socks  MAX_OSC_RECEIVERS allot
 var rx_active MAX_OSC_RECEIVERS allot
 var rx_paths  MAX_OSC_RECEIVERS allot
+var tx_socks  MAX_OSC_RECEIVERS allot
 
 var config_buf
 var line_save
 var line_ptr
 var field_save
-var current_osc_port
 
 var last_poll
 var last_send
@@ -290,34 +290,6 @@ var last_send
 ;
 
 ##################################################
-# OSC sending
-##################################################
-
-# ( port -- )
-: select_osc_port { port }
-  port current_osc_port @ <>
-  if
-    osc_sock @ :OSC_HOST port udpconnect drop
-    port current_osc_port !
-  endif
-;
-
-# ( port path scaled_value -- )
-: send_scaled_osc { port path scaled_value }
-  port select_osc_port
-
-  path :OSC_FLOAT_TYPE osc_message
-  scaled_value osc_f
-  osc_send
-;
-
-# ( record_address -- )
-: request_mapping { record }
-  record MAP_PORT + @ select_osc_port
-  record MAP_PATH + @ osc_synth_get
-;
-
-##################################################
 # OSC endpoint registry
 ##################################################
 
@@ -385,12 +357,45 @@ var last_send
   # Faust responds on command port + 1.
   port 1 + osc_listen
 
+  :OSC_HOST port osc_connect
+
   port          rx_ports  rx_count @ + !
   osc_rx_sock @ rx_socks  rx_count @ + !
+  osc_sock @    tx_socks  rx_count @ + !
   0             rx_active rx_count @ + !
   path          rx_paths  rx_count @ + !
 
   rx_count @ 1 + rx_count !
+;
+
+# ( port -- )
+: select_osc_port { port }
+  port find_endpoint
+  dup 0 <
+  if
+    drop
+    return
+  endif
+  tx_socks + @ osc_sock !
+;
+
+##################################################
+# OSC sending
+##################################################
+
+# ( port path scaled_value -- )
+: send_scaled_osc { port path scaled_value }
+  port select_osc_port
+
+  path :OSC_FLOAT_TYPE osc_message
+  scaled_value osc_f
+  osc_send
+;
+
+# ( record_address -- )
+: request_mapping { record }
+  record MAP_PORT + @ select_osc_port
+  record MAP_PATH + @ osc_synth_get
 ;
 
 # ( -- )
@@ -740,10 +745,6 @@ var last_send
 here mapping_base !
 
 load_config
-
-# Initialize the shared OSC sending socket.
-:OSC_HOST 5530 osc_connect
-0 current_osc_port !
 
 # Create temporary discovery receivers.
 init_response_sockets
