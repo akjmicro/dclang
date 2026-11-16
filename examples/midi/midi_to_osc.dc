@@ -80,6 +80,9 @@ var mapping_count
 
 var mapping_base
 
+var current_midi_channel
+0 current_midi_channel !
+
 # Endpoint arrays. Each index describes one
 # unique OSC command port.
 var rx_count
@@ -693,8 +696,23 @@ var last_send
   record midi_value send_mapping
 ;
 
+: clear_latches
+  mapping_count @ 0 1 for
+    i 1 + mapping_record
+    MAP_LATCHED + 0 swap !
+  next
+;
+
 # ( channel cc value -- )
 : dispatch_cc { channel cc value }
+
+  # clear latches if we've changed channels
+  channel current_midi_channel @ <>
+  if
+    clear_latches
+    channel current_midi_channel !
+  endif
+
   channel cc lookup_mapping
 
   dup 0 <
