@@ -13,73 +13,77 @@ make_digit_expansion_struct  digits
   again
 ;
 
-var digit_data 256 allot
+var test_base
+var test_div
+var test_rem
+var match_rem
+var test_q
+var test_period
+var coverage_word
+var coverage_count
 
-: load_digit_data { base div }
-  base digits _set_base
-  div  digits _set_div
-  256 times
-    digits gen_digit_expansion
-      digit_data i +
-    !
+: _reset_data_vars { b d }
+  b test_base !
+  d test_div !
+  1 test_rem !
+  0 match_rem !
+  0 test_q !
+  0 test_period !
+  0 coverage_word !
+  0 coverage_count !
+;
+
+"" const :BLANK
+
+: _update_coverage
+  1 test_q @ <<
+    coverage_word @
+  or
+  coverage_word !
+;
+
+: _get_coverage
+  test_base @ times
+    coverage_word @ 1 and
+    1 = if
+      coverage_count @ 1 + coverage_count !
+    endif
+    coverage_word @ 1 >> coverage_word !
   again
+  coverage_count @
 ;
 
-var four_digits 4 allot
-
-: check_period
-  digit_data 16 + @  four_digits 0 + !
-  digit_data 17 + @  four_digits 1 + !
-  digit_data 18 + @  four_digits 2 + !
-  digit_data 19 + @  four_digits 3 + !
-  256 17 1 for
-    digit_data i + 0 + @
-      four_digits 0 + @
-    =
-    digit_data i + 1 + @
-      four_digits 1 + @
-    =
-    digit_data i + 2 + @
-      four_digits 2 + @
-    =
-    digit_data i + 3 + @
-      four_digits 3 + @
-    =
-    and and and
-    if
-      i 16 -
-      exitfor return
-    else
-  next
-    endif
-  0
+: _iterate_mod
+    test_rem @
+      test_div @
+      divmod
+        test_base @
+      *
+    test_rem !
+  test_q !
 ;
 
-: _number_present? { num }
-  256 16 1 for
-    digit_data i + @
-      num
-    =
-    if
-      true
-  exitfor return
-    endif
-  next
-  false
-;
-
-: check_coverage { num count }
-  # checks if all numbers from 0 to num-1 are present in data
-  # returns the count of unique digits
-  num 1 - num!  # decrement first
-  num -1 = if
-    count return
-  endif
-  num _number_present?
+: _find_period_and_coverage
+  _iterate_mod
+  _update_coverage
+  test_rem @ match_rem @ =
   if
-    count 1 + count!
+    test_period @ 1 + _get_coverage
+  else
+    test_period @ 1 + test_period !
+    _find_period_and_coverage
   endif
-  num count check_coverage
+;
+
+# ( b d -- period coverage )
+: find_period_and_coverage { b d }
+  b d _reset_data_vars
+  b d gcd 1 > if
+    0 0 return
+  endif
+  _iterate_mod
+  test_rem @ match_rem !
+  _find_period_and_coverage
 ;
 
 "|" const :PIPE
@@ -89,13 +93,18 @@ var four_digits 4 allot
 : create_digits_database
   # This will write-out a CSV. Can be imported into sqlite3, etc.
   "base|div|period|coverage" print cr
-  33 2 1 for
-    312 2 1 for
-      j i load_digit_data
-      j .. :PIPE print
-      i .. :PIPE print
-      check_period .. :PIPE print
-      j 0 check_coverage .. cr
+  64 2 1 for
+    1024 2 1 for
+      j i find_period_and_coverage
+      2dup 0 = swap 0 = and
+      if
+        2drop
+      else
+        j .. :PIPE print
+        i .. :PIPE print
+        swap .. :PIPE print
+        .. cr
+      endif
     next
   next
 ;
