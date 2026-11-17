@@ -44,7 +44,10 @@
         }
       },
       {
-        "scope": "keyword.declaration.dclang",
+        "scope": [
+          "punctuation.definition.dclang",
+          "punctuation.definition.function.dclang"
+        ],
         "settings": {
           "foreground": "#FF0000"
         }
@@ -73,7 +76,7 @@
       {
         "scope": "string.quoted.double.dclang",
         "settings": {
-          "foreground": "#FFFF00"
+          "foreground": "#00FFFF"
         }
       },
       {

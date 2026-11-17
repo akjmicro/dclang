@@ -1,42 +1,43 @@
-## dclang syntax for GNU nano
+## dclang syntax for GNU nano — audited against primitive inventory (2026-11-17)
 syntax "dclang" "\.dc$"
 header "^#!.*(dclang[-0-9_]*)"
 comment "#"
 
-# General names, overridden by specific rules below
+# Fallback names; later color rules override earlier matches
 color green "[^[:space:]]+"
-# Uppercase identifiers / symbols
-color magenta "(^|[[:space:]])[_:A-Z0-9]+($|[[:space:]])"
-# Numeric literals (decimal, exponent, hexadecimal); GNU nano uses POSIX ERE
-color white,black "(^|[[:space:]])[-+]?0[xX][[:xdigit:]]+($|[[:space:]])"
-color white,black "(^|[[:space:]])[-+]?([0-9]+(\.[0-9]*)?|\.[0-9]+)([eE][-+]?[0-9]+)?($|[[:space:]])"
 
-# constant
-color brightmagenta "(^|[[:space:]])(false|null|true|pi|e)($|[[:space:]])"
+# Uppercase identifiers (including colon-prefixed named constants)
+color magenta "(^|[[:space:]])(([_:A-Z0-9]+)($|[[:space:]]))*"
 
-# math
-color brightyellow "(^|[[:space:]])(assert|atan2|floor|log10|round|acos|asin|atan|ceil|cosh|log2|rand|sinh|sqrt|tanh|abs|and|cos|exp|log|max|min|not|pow|sin|tan|xor|<<|<=|<>|>=|>>|or|%|\*|\+|-|/|<|=|>)($|[[:space:]])"
+# Numbers
+color white,black "(^|[[:space:]])((-?0[xX][[:xdigit:]]+)($|[[:space:]]))*"
+color white,black "(^|[[:space:]])(([-+]?([0-9]+(\.[0-9]*)?|\.[0-9]+)([eE][-+]?[0-9]+)?)($|[[:space:]]))*"
 
-# stack
-color brightblue "(^|[[:space:]])(svclear|svdepth|svdrop|svpick|svpush|2drop|2over|clear|depth|svpop|2dup|drop|over|pick|swap|\.pz|\.rj|dup|\.\.|\.s|\.)($|[[:space:]])"
+# constant primitives
+color brightmagenta "(^|[[:space:]])((false|null|true|pi|e)($|[[:space:]]))*"
 
-# memory
-color brightred "(^|[[:space:]])(sortnums|sortstrs|tdestroy|create|envget|envset|allot|const|hkeys|lmake|lpush|lsize|tmake|twalk|here|ldel|lins|lpop|lrem|tdel|var|h!|h@|l!|l@|t!|t@|!|,|@)($|[[:space:]])"
+# math primitives
+color brightyellow "(^|[[:space:]])((assert|atan2|floor|log10|round|acos|asin|atan|ceil|cosh|log2|rand|sinh|sqrt|tanh|abs|and|cos|exp|log|max|min|not|pow|sin|tan|xor|<<|<=|<>|>=|>>|or|%|\*|\+|-|/|<|=|>)($|[[:space:]]))*"
 
-# control
-color brightgreen "(^|[[:space:]])(exittimes|exitfor|return|again|endif|times|else|next|for|if|i|j|k)($|[[:space:]])"
+# stack primitives
+color brightblue "(^|[[:space:]])((svclear|svdepth|svdrop|svpick|svpush|2drop|2over|clear|depth|svpop|2dup|drop|over|pick|swap|\.pz|\.rj|dup|\.\.|\.s|\.)($|[[:space:]]))*"
 
-# other
-color cyan "(^|[[:space:]])(unblock_sigint|block_sigint|tcpconnect|udpconnect|dt->epoch|epoch->dt|freadline|tcpaccept|tcplisten|udpsocket|fmemopen|freadall|redirect|udpclose|mempcpy|memused|strcspn|strfind|tolower|toupper|udpbind|udprecv|udpsend|fclose|fflush|fwrite|memset|rewind|seterr|setout|strlen|strspn|strtok|clock|close|epoch|flush|fopen|fread|fseek|ftell|mkbuf|print|sleep|tohex|tonum|tostr|uemit|write|emit|exit|fork|free|mark|open|read|str<|str=|str>|ord|cr)($|[[:space:]])"
+# memory primitives
+color brightred "(^|[[:space:]])((sortnums|sortstrs|tdestroy|create|envget|envset|allot|const|hkeys|lmake|lpush|lsize|tmake|twalk|here|ldel|lins|lpop|lrem|tdel|var|h!|h@|l!|l@|t!|t@|!|,|@)($|[[:space:]]))*"
 
-# special
-color yellow "(^|[[:space:]])(primitives|constants|variables|import|input|words|exec)($|[[:space:]])"
+# control primitives
+color brightgreen "(^|[[:space:]])((exittimes|exitfor|return|again|endif|times|else|next|for|if|i|j|k)($|[[:space:]]))*"
 
-# delimiter
-color brightred "(^|[[:space:]])(:|;|\{|\})($|[[:space:]])"
+# other primitives
+color cyan "(^|[[:space:]])((unblock_sigint|block_sigint|tcpconnect|udpconnect|dt->epoch|epoch->dt|freadline|tcpaccept|tcplisten|udpsocket|fmemopen|freadall|isxdigit|redirect|udpclose|isalnum|isalpha|iscntrl|isdigit|isgraph|islower|isprint|ispunct|isspace|isupper|mempcpy|memused|strcspn|strfind|tolower|toupper|udpbind|udprecv|udpsend|fclose|fflush|fwrite|memset|rewind|seterr|setout|strlen|strspn|strtok|clock|close|epoch|flush|fopen|fread|fseek|ftell|mkbuf|print|sleep|tohex|tonum|tostr|uemit|write|emit|exit|fork|free|mark|open|read|str<|str=|str>|ord|cr)($|[[:space:]]))*"
 
-# Strings and comments: nano cannot perfectly distinguish # inside a quoted string
-color yellow start="\"" end="\""
-color white,black "#.*$"
-# Highlight trailing whitespace last
+# special primitives
+color yellow "(^|[[:space:]])((primitives|constants|variables|import|input|words|exec)($|[[:space:]]))*"
+
+# delimiter primitives
+color brightred "(^|[[:space:]])(((;|\{|\})($|[[:space:]]))*|[:] )"
+
+# Strings, comments, and trailing whitespace
+color brightcyan start="\"" end="\""
+color brightwhite,black "(^|[[:space:]])#.*$"
 color ,red "[[:space:]]+$"
