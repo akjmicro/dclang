@@ -92,9 +92,12 @@ var coverage_count
 
 : create_digits_database
   # This will write-out a CSV. Can be imported into sqlite3, etc.
+  # Since we're tracking coverage with bits in an IEEE-754 floating-point
+  # number, the safest integer we can test w/o losing accuracy is 53-bits.
+  # Hence, we'll put the outer loop here to 54 (which ranges from 0-53).
   "base|div|period|coverage" print cr
-  64 2 1 for
-    1024 2 1 for
+  54 2 1 for
+    1025 2 1 for
       j i find_period_and_coverage
       2dup 0 = swap 0 = and
       if
