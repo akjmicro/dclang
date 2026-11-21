@@ -649,11 +649,54 @@ var _phasor_array 64 allot
 
 0.1 seconds2samples  const REV_DELAY_SIZE
 REV_DELAY_SIZE 2 +   const REV_MEM_SIZE
-17                   const REV_LFO_FREQS
-25                   const REV_LFO_DEPTHS
+1                    const REV_FLT_0
+2                    const REV_FLT_1
+3                    const REV_FLT_2
+4                    const REV_FLT_3
+5                    const REV_FLT_4
+6                    const REV_FLT_5
+7                    const REV_FLT_6
+9                    const REV_DELTM_0
+10                   const REV_DELTM_1
+11                   const REV_DELTM_2
+12                   const REV_DELTM_3
+13                   const REV_DELTM_4
+14                   const REV_DELTM_5
+15                   const REV_DELTM_6
+16                   const REV_DELTM_7
+17                   const REV_LFO_FREQ_0
+18                   const REV_LFO_FREQ_1
+19                   const REV_LFO_FREQ_2
+20                   const REV_LFO_FREQ_3
+21                   const REV_LFO_FREQ_4
+22                   const REV_LFO_FREQ_5
+23                   const REV_LFO_FREQ_6
+24                   const REV_LFO_FREQ_7
+25                   const REV_LFO_DEPTH_0
+26                   const REV_LFO_DEPTH_1
+27                   const REV_LFO_DEPTH_2
+28                   const REV_LFO_DEPTH_3
+29                   const REV_LFO_DEPTH_4
+30                   const REV_LFO_DEPTH_5
+31                   const REV_LFO_DEPTH_6
+32                   const REV_LFO_DEPTH_7
 33                   const REV_HEADER_SIZE
-9                    const REV_DELAY_LENGTHS
-1                    const REV_FILTERS
+REV_MEM_SIZE 0 * REV_HEADER_SIZE +
+                     const REV_DELAY_LINE_0
+REV_MEM_SIZE 1 * REV_HEADER_SIZE +
+                     const REV_DELAY_LINE_1
+REV_MEM_SIZE 2 * REV_HEADER_SIZE +
+                     const REV_DELAY_LINE_2
+REV_MEM_SIZE 3 * REV_HEADER_SIZE +
+                     const REV_DELAY_LINE_3
+REV_MEM_SIZE 4 * REV_HEADER_SIZE +
+                     const REV_DELAY_LINE_4
+REV_MEM_SIZE 5 * REV_HEADER_SIZE +
+                     const REV_DELAY_LINE_5
+REV_MEM_SIZE 6 * REV_HEADER_SIZE +
+                     const REV_DELAY_LINE_6
+REV_MEM_SIZE 7 * REV_HEADER_SIZE +
+                     const REV_DELAY_LINE_7
 
 : _fix 6 / ;
 
@@ -708,15 +751,15 @@ REV_DELAY_SIZE 2 +   const REV_MEM_SIZE
   # expressive, a bit of old fashioned loop-unrolling is called #
   # for here, for performance reasons.                          #
   ###############################################################
-    reverb_struct REV_MEM_SIZE 0 * REV_HEADER_SIZE + +
-      reverb_struct REV_DELAY_LENGTHS 0 + + @
-        reverb_struct REV_LFO_FREQS 0 + + @ sine
-          reverb_struct REV_LFO_DEPTHS 0 + + @
+    reverb_struct REV_DELAY_LINE_0 +
+      reverb_struct REV_DELTM_0 + @
+        reverb_struct REV_LFO_FREQ_0 + @ sine
+          reverb_struct REV_LFO_DEPTH_0 + @
         *
       +
     delay_read
     feedback *
-      reverb_struct REV_FILTERS 0 + +
+      reverb_struct REV_FLT_0 +
         cutoff
     lowpass
       dup
@@ -726,17 +769,17 @@ REV_DELAY_SIZE 2 +   const REV_MEM_SIZE
         sigL
       +
     +
-      reverb_struct REV_MEM_SIZE 0 * REV_HEADER_SIZE + +
+      reverb_struct REV_DELAY_LINE_0 +
   delay_write
-    reverb_struct REV_MEM_SIZE 1 * REV_HEADER_SIZE + +
-      reverb_struct REV_DELAY_LENGTHS 1 + + @
-        reverb_struct REV_LFO_FREQS 1 + + @ sine
-          reverb_struct REV_LFO_DEPTHS 2 + + @
+    reverb_struct REV_DELAY_LINE_1 +
+      reverb_struct REV_DELTM_1 + @
+        reverb_struct REV_LFO_FREQ_1 + @ sine
+          reverb_struct REV_LFO_DEPTH_2 + @
         *
       +
     delay_read
     feedback *
-      reverb_struct REV_FILTERS 1 + +
+      reverb_struct REV_FLT_1 +
         cutoff
     lowpass
       dup
@@ -746,17 +789,17 @@ REV_DELAY_SIZE 2 +   const REV_MEM_SIZE
         sigR
       +
     +
-      reverb_struct REV_MEM_SIZE 1 * REV_HEADER_SIZE + +
+      reverb_struct REV_DELAY_LINE_1 +
   delay_write
-    reverb_struct REV_MEM_SIZE 2 * REV_HEADER_SIZE + +
-      reverb_struct REV_DELAY_LENGTHS 2 + + @
-        reverb_struct REV_LFO_FREQS 2 + + @ sine
-          reverb_struct REV_LFO_DEPTHS 2 + + @
+    reverb_struct REV_DELAY_LINE_2 +
+      reverb_struct REV_DELTM_2 + @
+        reverb_struct REV_LFO_FREQ_2 + @ sine
+          reverb_struct REV_LFO_DEPTH_2 + @
         *
       +
     delay_read
     feedback *
-      reverb_struct REV_FILTERS 2 + +
+      reverb_struct REV_FLT_2 +
         cutoff
     lowpass
       dup
@@ -766,17 +809,17 @@ REV_DELAY_SIZE 2 +   const REV_MEM_SIZE
         sigL
       +
     +
-      reverb_struct REV_MEM_SIZE 2 * REV_HEADER_SIZE + +
+      reverb_struct REV_DELAY_LINE_2 +
   delay_write
-    reverb_struct REV_MEM_SIZE 3 * REV_HEADER_SIZE + +
-      reverb_struct REV_DELAY_LENGTHS 3 + + @
-        reverb_struct REV_LFO_FREQS 3 + + @ sine
-          reverb_struct REV_LFO_DEPTHS 3 + + @
+    reverb_struct REV_DELAY_LINE_3 +
+      reverb_struct REV_DELTM_3 + @
+        reverb_struct REV_LFO_FREQ_3 + @ sine
+          reverb_struct REV_LFO_DEPTH_3 + @
         *
       +
     delay_read
     feedback *
-      reverb_struct REV_FILTERS 3 + +
+      reverb_struct REV_FLT_3 +
         cutoff
     lowpass
       dup
@@ -786,17 +829,17 @@ REV_DELAY_SIZE 2 +   const REV_MEM_SIZE
         sigR
       +
     +
-      reverb_struct REV_MEM_SIZE 3 * REV_HEADER_SIZE + +
+      reverb_struct REV_DELAY_LINE_3 +
   delay_write
-    reverb_struct REV_MEM_SIZE 4 * REV_HEADER_SIZE + +
-      reverb_struct REV_DELAY_LENGTHS 4 + + @
-        reverb_struct REV_LFO_FREQS 4 + + @ sine
-          reverb_struct REV_LFO_DEPTHS 4 + + @
+    reverb_struct REV_DELAY_LINE_4 +
+      reverb_struct REV_DELTM_4 + @
+        reverb_struct REV_LFO_FREQ_4 + @ sine
+          reverb_struct REV_LFO_DEPTH_4 + @
         *
       +
     delay_read
     feedback *
-      reverb_struct REV_FILTERS 4 + +
+      reverb_struct REV_FLT_4 +
         cutoff
     lowpass
       dup
@@ -806,17 +849,17 @@ REV_DELAY_SIZE 2 +   const REV_MEM_SIZE
         sigL
       +
     +
-      reverb_struct REV_MEM_SIZE 4 * REV_HEADER_SIZE + +
+      reverb_struct REV_DELAY_LINE_4 +
   delay_write
-    reverb_struct REV_MEM_SIZE 5 * REV_HEADER_SIZE + +
-      reverb_struct REV_DELAY_LENGTHS 5 + + @
-        reverb_struct REV_LFO_FREQS 5 + + @ sine
-          reverb_struct REV_LFO_DEPTHS 5 + + @
+    reverb_struct REV_DELAY_LINE_5 +
+      reverb_struct REV_DELTM_5 + @
+        reverb_struct REV_LFO_FREQ_5 + @ sine
+          reverb_struct REV_LFO_DEPTH_5 + @
         *
       +
     delay_read
     feedback *
-      reverb_struct REV_FILTERS 5 + +
+      reverb_struct REV_FLT_5 +
         cutoff
     lowpass
       dup
@@ -826,17 +869,17 @@ REV_DELAY_SIZE 2 +   const REV_MEM_SIZE
         sigR
       +
     +
-      reverb_struct REV_MEM_SIZE 5 * REV_HEADER_SIZE + +
+      reverb_struct REV_DELAY_LINE_5 +
   delay_write
-    reverb_struct REV_MEM_SIZE 6 * REV_HEADER_SIZE + +
-      reverb_struct REV_DELAY_LENGTHS 6 + + @
-        reverb_struct REV_LFO_FREQS 6 + + @ sine
-          reverb_struct REV_LFO_DEPTHS 6 + + @
+    reverb_struct REV_DELAY_LINE_6 +
+      reverb_struct REV_DELTM_6 + @
+        reverb_struct REV_LFO_FREQ_6 + @ sine
+          reverb_struct REV_LFO_DEPTH_6 + @
         *
       +
     delay_read
     feedback *
-      reverb_struct REV_FILTERS 6 + +
+      reverb_struct REV_FLT_6 +
         cutoff
     lowpass
       dup
@@ -846,17 +889,17 @@ REV_DELAY_SIZE 2 +   const REV_MEM_SIZE
         sigL
       +
     +
-      reverb_struct REV_MEM_SIZE 6 * REV_HEADER_SIZE + +
+      reverb_struct REV_DELAY_LINE_6 +
   delay_write
-    reverb_struct REV_MEM_SIZE 7 * REV_HEADER_SIZE + +
-      reverb_struct REV_DELAY_LENGTHS 7 + + @
-        reverb_struct REV_LFO_FREQS 7 + + @ sine
-          reverb_struct REV_LFO_DEPTHS 7 + + @
+    reverb_struct REV_DELAY_LINE_7 +
+      reverb_struct REV_DELTM_7 + @
+        reverb_struct REV_LFO_FREQ_7 + @ sine
+          reverb_struct REV_LFO_DEPTH_7 + @
         *
       +
     delay_read
     feedback *
-      reverb_struct REV_FILTERS 7 + +
+      reverb_struct REV_FLT_7 +
         cutoff
     lowpass
       dup
@@ -866,7 +909,7 @@ REV_DELAY_SIZE 2 +   const REV_MEM_SIZE
         sigR
       +
     +
-      reverb_struct REV_MEM_SIZE 7 * REV_HEADER_SIZE + +
+      reverb_struct REV_DELAY_LINE_7 +
   delay_write
   ##################################################################
   # Set the saved lowpass signals onto the stack.                  #
