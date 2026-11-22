@@ -79,32 +79,8 @@ var _phasor_array 64 allot
 
 : phasor_pointer _phasor_array _phasor_count @ + ;
 
-: phasor { freq }
-    _phasor_array _phasor_count @ +
-    dup @ swap over              # ( old_phase addr old_phase )
-        freq INV_SAMPLE_RATE *
-      +
-      1.0 %
-      #########################
-      # FP drift checks/reset #
-      #########################
-      dup INV_BIT_DEPTH <=
-      if
-        drop
-        0
-      endif
-      dup PHASE_UPPER_LIMIT >=
-      if
-        drop
-        0
-      endif
-      ##########################
-      # End drift checks/reset #
-      ##########################
-    # store the updated phase
-    swap !                       # ( old_phase )
-    # increment _phasor_count by 1
-    _phasor_count inc!
+: phasor
+  INV_SAMPLE_RATE * _phasor_array _phasor_count _phasor
 ;
 
 : sawtooth # ( freq -- sig )
@@ -261,18 +237,8 @@ var _phasor_array 64 allot
   +
 ;
 
-: delay_read { delay_struct time }      # ( delay_struct time -- delsig )
-  # calc distance in delay-line:
-  delay_struct 1 +@             # ( dpos )
-    time SAMPLE_RATE *                  # ( dpos tsmp )
-  -                                     # ( dpos-tsmp )
-                                        # ( val )
-      delay_struct over                 # ( val ds val )
-    _get_floor_val                      # ( val fl_val )
-      over                              # ( val fl_val val )
-        delay_struct swap               # ( val fl_val ds val )
-      _get_ceil_val                     # ( val fl_val ceil_val )
-  _interpolate                          # ( interp_val )
+: delay_read
+  SAMPLE_RATE * _delay
 ;
 
 : delay_write { sig delay_struct }      # ( sig delay_struct -- )
@@ -736,202 +702,8 @@ REV_MEM_SIZE 7 * REV_HEADER_SIZE +
 ;
 
 # cutoff and feedback are in the 0-1 range
-: reverb { sigL sigR reverb_struct cutoff feedback }
-  ######################################################################
-  # First, normalize and adjust cutoff.                                #
-  # Map 0 -> 1 and 1 -> 0.5 so that our input is 0 for dark (total     #
-  # filtering) and 1 is bright (half-filtering). This is b/c `lowpass` #
-  # uses a pole as input, so 0 would be no filtering and 1 would be    #
-  # total filtering....                                                #
-  ######################################################################
-  1 cutoff - 0.5 * 0.5 + cutoff!
-  ###############################################################
-  # For each delay line, add the alternating sigL/sigR input    #
-  # together with the junction signal (which starts as 0)       #
-  # minus the lowpass filter instance output.                   #
-  # Although we _could_ do this as a times/again loop to be     #
-  # expressive, a bit of old fashioned loop-unrolling is called #
-  # for here, for performance reasons.                          #
-  ###############################################################
-    reverb_struct REV_DELAY_LINE_0 +
-      reverb_struct REV_DELTM_0 +@
-        reverb_struct REV_LFO_FREQ_0 +@ sine
-          reverb_struct REV_LFO_DEPTH_0 +@
-        *
-      +
-    delay_read
-    feedback *
-      reverb_struct REV_FLT_0 +
-        cutoff
-    lowpass
-      dup
-    svpush
-    -1 *
-      reverb_struct @
-        sigL
-      +
-    +
-      reverb_struct REV_DELAY_LINE_0 +
-  delay_write
-    reverb_struct REV_DELAY_LINE_1 +
-      reverb_struct REV_DELTM_1 +@
-        reverb_struct REV_LFO_FREQ_1 +@ sine
-          reverb_struct REV_LFO_DEPTH_1 +@
-        *
-      +
-    delay_read
-    feedback *
-      reverb_struct REV_FLT_1 +
-        cutoff
-    lowpass
-      dup
-    svpush
-    -1 *
-      reverb_struct @
-        sigR
-      +
-    +
-      reverb_struct REV_DELAY_LINE_1 +
-  delay_write
-    reverb_struct REV_DELAY_LINE_2 +
-      reverb_struct REV_DELTM_2 +@
-        reverb_struct REV_LFO_FREQ_2 +@ sine
-          reverb_struct REV_LFO_DEPTH_2 +@
-        *
-      +
-    delay_read
-    feedback *
-      reverb_struct REV_FLT_2 +
-        cutoff
-    lowpass
-      dup
-    svpush
-    -1 *
-      reverb_struct @
-        sigL
-      +
-    +
-      reverb_struct REV_DELAY_LINE_2 +
-  delay_write
-    reverb_struct REV_DELAY_LINE_3 +
-      reverb_struct REV_DELTM_3 +@
-        reverb_struct REV_LFO_FREQ_3 +@ sine
-          reverb_struct REV_LFO_DEPTH_3 +@
-        *
-      +
-    delay_read
-    feedback *
-      reverb_struct REV_FLT_3 +
-        cutoff
-    lowpass
-      dup
-    svpush
-    -1 *
-      reverb_struct @
-        sigR
-      +
-    +
-      reverb_struct REV_DELAY_LINE_3 +
-  delay_write
-    reverb_struct REV_DELAY_LINE_4 +
-      reverb_struct REV_DELTM_4 +@
-        reverb_struct REV_LFO_FREQ_4 +@ sine
-          reverb_struct REV_LFO_DEPTH_4 +@
-        *
-      +
-    delay_read
-    feedback *
-      reverb_struct REV_FLT_4 +
-        cutoff
-    lowpass
-      dup
-    svpush
-    -1 *
-      reverb_struct @
-        sigL
-      +
-    +
-      reverb_struct REV_DELAY_LINE_4 +
-  delay_write
-    reverb_struct REV_DELAY_LINE_5 +
-      reverb_struct REV_DELTM_5 +@
-        reverb_struct REV_LFO_FREQ_5 +@ sine
-          reverb_struct REV_LFO_DEPTH_5 +@
-        *
-      +
-    delay_read
-    feedback *
-      reverb_struct REV_FLT_5 +
-        cutoff
-    lowpass
-      dup
-    svpush
-    -1 *
-      reverb_struct @
-        sigR
-      +
-    +
-      reverb_struct REV_DELAY_LINE_5 +
-  delay_write
-    reverb_struct REV_DELAY_LINE_6 +
-      reverb_struct REV_DELTM_6 +@
-        reverb_struct REV_LFO_FREQ_6 +@ sine
-          reverb_struct REV_LFO_DEPTH_6 +@
-        *
-      +
-    delay_read
-    feedback *
-      reverb_struct REV_FLT_6 +
-        cutoff
-    lowpass
-      dup
-    svpush
-    -1 *
-      reverb_struct @
-        sigL
-      +
-    +
-      reverb_struct REV_DELAY_LINE_6 +
-  delay_write
-    reverb_struct REV_DELAY_LINE_7 +
-      reverb_struct REV_DELTM_7 +@
-        reverb_struct REV_LFO_FREQ_7 +@ sine
-          reverb_struct REV_LFO_DEPTH_7 +@
-        *
-      +
-    delay_read
-    feedback *
-      reverb_struct REV_FLT_7 +
-        cutoff
-    lowpass
-      dup
-    svpush
-    -1 *
-      reverb_struct @
-        sigR
-      +
-    +
-      reverb_struct REV_DELAY_LINE_7 +
-  delay_write
-  ##################################################################
-  # Set the saved lowpass signals onto the stack.                  #
-  #                                                                #
-  # Top-of-stack at the end will be rchan, so ideally, user pans   #
-  # that hard right. Under that will be lchan, so pan hard left.   #
-  # Although of course, one is free to do whatever, including      #
-  # mixing them both center, or adding them and mixing them center #
-  # Or whatever...                                                 #
-  ##################################################################
-    1 svpick 3 svpick 5 svpick 7 svpick + + + 0.25 *
-      0 svpick 2 svpick 4 svpick 6 svpick + + + 0.25 *
-        ###################################################################
-        # Now, pop the save stack all off, add together and scale for the #
-        # next iteration of the scattering juncture.                      #
-        ###################################################################
-        svpop svpop svpop svpop svpop svpop svpop svpop
-        + + + + + + +
-        0.25 *
-      reverb_struct !
+: reverb  # ( sigL sigR struct cutoff feedback -- wetL wetR )
+  REV_MEM_SIZE SAMPLE_RATE _phasor_array _phasor_count t _reverb
 ;
 
 ##########

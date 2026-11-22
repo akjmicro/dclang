@@ -302,6 +302,49 @@ static inline int osc_field_ok(
 
 // END HELPERS
 
+static inline int dsp_phase_step(DCLANG_FLT step, DCLANG_FLT base, DCLANG_FLT count_addr,
+                                 DCLANG_FLT *old_phase)
+{
+    if (!(count_addr >= 0 && count_addr < NUMVARS)) {
+        return 0;
+    }
+    DCLANG_PTR count = (DCLANG_PTR)count_addr;
+    DCLANG_FLT address = base + vars[count];
+    if (!(address >= 0 && address < NUMVARS)) {
+        return 0;
+    }
+    DCLANG_PTR phase_cell = (DCLANG_PTR)address;
+    *old_phase = vars[phase_cell];
+    DCLANG_FLT phase = fmod(*old_phase + step, 1.0);
+    const DCLANG_FLT drift = 1.0 / 2147483647.0;
+    if (phase <= drift || phase >= 1.0 - drift) {
+        phase = 0.0;
+    }
+    vars[phase_cell] = phase;
+    vars[count] += 1.0;
+    return 1;
+}
+
+static inline int dsp_delay_read(DCLANG_PTR delay, DCLANG_FLT distance, DCLANG_FLT *sample)
+{
+    DCLANG_FLT length = vars[delay];
+    if (!(length >= 1 && length <= NUMVARS - delay - 2)) {
+        return 0;
+    }
+    DCLANG_FLT position = vars[delay + 1] - distance;
+    DCLANG_FLT lower = fmod(fmod(floor(position), length) + length, length);
+    DCLANG_FLT upper = fmod(fmod(ceil(position), length) + length, length);
+    if (!isfinite(lower) || !isfinite(upper)) {
+        return 0;
+    }
+    DCLANG_FLT first = vars[delay + 2 + (DCLANG_PTR)lower];
+    DCLANG_FLT second = vars[delay + 2 + (DCLANG_PTR)upper];
+    // Match the interpreter's separate multiply and add rounding.
+    volatile DCLANG_FLT interpolated = (second - first) * fmod(position, 1.0);
+    *sample = interpolated + first;
+    return 1;
+}
+
 void dclang_execute() {
     char *char_ptr, *env_key, *env_val, *key, *search_key, *str, *str1, *str2, *buf, *mode, *path, *host, *sql;
     char *oscstr;
@@ -554,11 +597,110 @@ void dclang_execute() {
         &&_OP_OSC_PUT_F32,
         &&_OP_OSC_GET_STR,
         &&_OP_OSC_GET_I32,
-        &&_OP_OSC_GET_F32
+        &&_OP_OSC_GET_F32,
+        &&_OP_DSP_PHASOR,
+        &&_OP_DSP_DELAY,
+        &&_OP_DSP_REVERB
     };
 
     while (1) {
         goto *dispatch_table[prog[iptr].opcode];
+
+        _OP_DSP_PHASOR: {
+            if (data_stack_ptr < 3) {
+                return;
+            }
+            DCLANG_FLT count = POP;
+            DCLANG_FLT base = POP;
+            DCLANG_FLT step = POP;
+            DCLANG_FLT old_phase;
+            if (!dsp_phase_step(step, base, count, &old_phase)) {
+                return;
+            }
+            push(old_phase);
+            NEXT;
+        }
+        _OP_DSP_DELAY: {
+            if (data_stack_ptr < 2) {
+                return;
+            }
+            DCLANG_FLT distance = POP;
+            DCLANG_FLT base = POP;
+            DCLANG_FLT sample;
+            if (!(base >= 0 && base < NUMVARS - 1)
+                || !dsp_delay_read((DCLANG_PTR)base, distance, &sample)) {
+                return;
+            }
+            push(sample);
+            NEXT;
+        }
+        _OP_DSP_REVERB: {
+            if (data_stack_ptr < 10) {
+                return;
+            }
+            DCLANG_FLT frame = POP;
+            DCLANG_FLT phase_count = POP;
+            DCLANG_FLT phase_base = POP;
+            DCLANG_FLT sample_rate = POP;
+            DCLANG_FLT stride_arg = POP;
+            DCLANG_FLT feedback = POP;
+            DCLANG_FLT cutoff = POP;
+            DCLANG_FLT base_arg = POP;
+            DCLANG_FLT right = POP;
+            DCLANG_FLT left = POP;
+            // Offsets in make_reverb_struct in lib/dsp.dc.
+            enum { LINES = 8, HEADER = 33, TIME = 9, FREQ = 17, DEPTH = 25 };
+            if (!isfinite(frame) || frame < 0
+                || !(sample_rate > 0 && isfinite(sample_rate))
+                || !(base_arg >= 0 && base_arg <= NUMVARS - HEADER)
+                || !(stride_arg >= 3 && stride_arg <= (NUMVARS - HEADER - base_arg) / LINES)) {
+                return;
+            }
+            DCLANG_PTR base = (DCLANG_PTR)base_arg;
+            DCLANG_PTR stride = (DCLANG_PTR)stride_arg;
+            DCLANG_FLT inverse_rate = 1.0 / sample_rate;
+            DCLANG_FLT pole = (1.0 - cutoff) * 0.5 + 0.5;
+            DCLANG_FLT filtered[LINES];
+            for (int line = 0; line < LINES; ++line) {
+                DCLANG_PTR delay = base + HEADER + line * stride;
+                DCLANG_FLT length = vars[delay];
+                DCLANG_FLT position = vars[delay + 1];
+                if (!(length >= 1 && length <= stride - 2)
+                    || !(position >= 0 && position < length)) {
+                    return;
+                }
+                DCLANG_FLT phase;
+                volatile DCLANG_FLT step = vars[base + FREQ + line] * inverse_rate;
+                if (!dsp_phase_step(step, phase_base, phase_count, &phase)) {
+                    return;
+                }
+                volatile DCLANG_FLT modulation = sin(phase * (2.0 * M_PI)) * vars[base + DEPTH + line];
+                DCLANG_FLT seconds = vars[base + TIME + line] + modulation;
+                volatile DCLANG_FLT distance = seconds * sample_rate;
+                DCLANG_FLT delayed;
+                if (!dsp_delay_read(delay, distance, &delayed)) {
+                    return;
+                }
+                DCLANG_PTR filter = base + 1 + line;
+                DCLANG_FLT signal = delayed * feedback;
+                volatile DCLANG_FLT feedforward = signal * (1.0 - pole);
+                volatile DCLANG_FLT previous = vars[filter] * pole;
+                filtered[line] = feedforward + previous;
+                vars[filter] = filtered[line];
+                DCLANG_FLT input = line % 2 ? right : left;
+                vars[delay + 2 + (DCLANG_PTR)position] =
+                    filtered[line] * -1.0 + (vars[base] + input);
+                vars[delay + 1] = fmod(frame, length);
+            }
+            DCLANG_FLT junction = filtered[0];
+            for (int line = 1; line < LINES; ++line) {
+                junction = filtered[line] + junction;
+            }
+            vars[base] = junction * 0.25;
+            push((filtered[6] + (filtered[4] + (filtered[2] + filtered[0]))) * 0.25);
+            push((filtered[7] + (filtered[5] + (filtered[3] + filtered[1]))) * 0.25);
+            NEXT;
+        }
 
         OP_NOOP:
             return;
@@ -3923,6 +4065,9 @@ void add_all_primitives() {
     add_primitive("_osc_get_str", "OSC", _OP_OSC_GET_STR);
     add_primitive("_osc_get_i32", "OSC", _OP_OSC_GET_I32);
     add_primitive("_osc_get_f32", "OSC", _OP_OSC_GET_F32);
+    add_primitive("_phasor", "DSP", _OP_DSP_PHASOR);
+    add_primitive("_delay", "DSP", _OP_DSP_DELAY);
+    add_primitive("_reverb", "DSP", _OP_DSP_REVERB);
     // END
     add_primitive(0, 0, 0);  // end of primitives 'barrier'
 };
