@@ -4,7 +4,17 @@
 
 # sample rate and bit depth here
 # can be 8000, 44100, 48000, etc.
-48000 const SAMPLE_RATE
+: _get_sr
+  "SR" envget dup 0 =
+  if
+    drop
+    44100
+  else
+    tonum
+  endif
+;
+
+_get_sr const SAMPLE_RATE
 
 # more efficient, for multiplication
 1 SAMPLE_RATE / const INV_SAMPLE_RATE
@@ -93,7 +103,7 @@ var _phasor_array 64 allot
     # increment phasor_pointer's value
     phasor_pointer !
     # increment _phasor_count by 1
-    _phasor_count dup @ 1 + swap !
+    _phasor_count inc!
 ;
 
 : sawtooth # ( freq -- sig )
@@ -656,6 +666,7 @@ REV_DELAY_SIZE 2 +   const REV_MEM_SIZE
 5                    const REV_FLT_4
 6                    const REV_FLT_5
 7                    const REV_FLT_6
+8                    const REV_FLT_7
 9                    const REV_DELTM_0
 10                   const REV_DELTM_1
 11                   const REV_DELTM_2

@@ -20,10 +20,10 @@ color brightmagenta "(^|[[:space:]])((false|null|true|pi|e)($|[[:space:]]))*"
 color brightyellow "(^|[[:space:]])((assert|atan2|floor|log10|round|acos|asin|atan|ceil|cosh|log2|rand|sinh|sqrt|tanh|abs|and|cos|exp|log|max|min|not|pow|sin|tan|xor|<<|<=|<>|>=|>>|or|%|\*|\+|-|/|<|=|>)($|[[:space:]]))*"
 
 # stack primitives
-color brightblue "(^|[[:space:]])((svclear|svdepth|svdrop|svpick|svpush|2drop|2over|clear|depth|svpop|2dup|drop|over|pick|swap|\.pz|\.rj|dup|\.\.|\.s|\.)($|[[:space:]]))*"
+color brightblue "(^|[[:space:]])((svclear|svdepth|svdrop|svpick|svpush|svpop|2drop|2over|clear|depth|2dup|drop|over|pick|swap|inc|sinc|sincn|ssetn|\.pz|\.rj|dup|\.\.|\.s|\.)($|[[:space:]]))*"
 
 # memory primitives
-color brightred "(^|[[:space:]])((sortnums|sortstrs|tdestroy|create|envget|envset|allot|const|hkeys|lmake|lpush|lsize|tmake|twalk|here|ldel|lins|lpop|lrem|tdel|var|h!|h@|l!|l@|t!|t@|!|,|@)($|[[:space:]]))*"
+color brightred "(^|[[:space:]])((sortnums|sortstrs|tdestroy|create|envget|envset|allot|const|hkeys|lmake|lpush|lsize|tmake|twalk|here|ldel|lins|lpop|lrem|tdel|var|h!|h@|l!|l@|t!|t@|,|!|inc!|\+inc!|\+incn!|\+setn!|@|\+@)($|[[:space:]]))*"
 
 # control primitives
 color brightgreen "(^|[[:space:]])((exittimes|exitfor|return|again|endif|times|else|next|for|if|i|j|k)($|[[:space:]]))*"

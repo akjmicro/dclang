@@ -61,7 +61,7 @@ Born on 2018-05-05 */
 #define RETURN_STACK_SIZE 128
 #define MAXWORD           1048576
 #define EXEC_TRAMPOLINE   (MAXWORD - 4)
-#define MAX_OPCODES       219
+#define MAX_OPCODES       228
 #define IBUFSIZE          128
 #define NUMLOCALS         8
 #define NUMVARS           16777216
@@ -196,6 +196,10 @@ enum dclang_opcodes {
     OP_OVER2,
     OP_DEPTH,
     OP_CLEAR,
+    OP_INC,
+    OP_SINC,
+    OP_SINCN,
+    OP_SSETN,
     OP_SVPUSH,
     OP_SVPOP,
     OP_SVDROP,
@@ -262,8 +266,13 @@ enum dclang_opcodes {
     OP_RAND,
     // variables and arrays
     OP_VARIABLE,
-    OP_POKE,
     OP_PEEK,
+    OP_PEEKOFFSET,
+    OP_POKE,
+    OP_POKE_INC,
+    OP_POKEOFFSET_INC,
+    OP_POKEOFFSET_INCN,
+    OP_POKEOFFSET_SETN,
     OP_ALLOT,
     OP_CREATE,
     OP_COMMA,

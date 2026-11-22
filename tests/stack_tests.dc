@@ -1,0 +1,115 @@
+# drop dup over pick swap 2drop 2dup 2over depth clear inc sinc sincn ssetn
+
+# drop
+1 0
+depth 2 = assert
+drop
+depth 1 = assert
+1 = assert
+depth 0 = assert
+
+# dup
+37 dup
+depth 2 = assert
+37 = assert
+37 = assert
+depth 0 = assert
+
+# over
+1 0 over
+depth 3 = assert
+1 = assert
+0 = assert
+1 = assert
+depth 0 = assert
+
+# pick
+1 2 3 4
+depth 4 = assert
+#
+3 pick
+depth 5 = assert
+1 = assert
+depth 4 = assert
+#
+2 pick
+depth 5 = assert
+2 = assert
+depth 4 = assert
+#
+1 pick
+depth 5 = assert
+3 = assert
+depth 4 = assert
+#
+0 pick
+depth 5 = assert
+4 = assert
+depth 4 = assert
+#
+clear
+depth 0 = assert
+
+# swap
+1 0 swap
+depth 2 = assert
+1 = assert
+0 = assert
+
+# 2drop
+1 2
+2drop
+depth 0 = assert
+
+# 2dup
+1 2 2dup
+depth 4 = assert
+2 = assert
+1 = assert
+2 = assert
+1 = assert
+depth 0 = assert
+
+# 2over
+1 2 3 4 2over
+depth 6 = assert
+2 = assert
+1 = assert
+4 = assert
+3 = assert
+2drop
+depth 0 = assert
+
+# clear
+1 2 3 4 clear
+depth 0 = assert
+
+# inc
+1 inc
+2 = assert
+
+# sinc
+2 1 0
+1 sinc
+depth 3 = assert
+0 = assert
+2 = assert
+2 = assert
+depth 0 = assert
+
+# sincn
+2 1 0
+3 2 sincn
+depth 3 = assert
+0 = assert
+1 = assert
+5 = assert
+depth 0 = assert
+
+# ssetn
+2 1 0
+23 2 ssetn
+depth 3 = assert
+0 = assert
+1 = assert
+23 = assert

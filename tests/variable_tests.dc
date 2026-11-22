@@ -40,3 +40,18 @@ arr_to_sort 5 sortnums
 # prove sorting worked:
 arr_to_sort @ -19 = assert
 arr_to_sort 4 + @ 20053 = assert
+
+# test the newer offset peek/poke primitives
+create new_foo_array 0 , 1 , 2 , 3 ,
+new_foo_array 1 +@     1 = assert
+new_foo_array 2 +@     2 = assert
+new_foo_array 3 +@     3 = assert
+new_foo_array inc!
+new_foo_array @        1 = assert
+new_foo_array 0 +@     1 = assert
+new_foo_array 3 +inc!
+new_foo_array 3 +@     4 = assert
+3 new_foo_array 3 +incn!
+new_foo_array 3 +@     7 = assert
+23 new_foo_array 1 +setn!
+new_foo_array 1 +@    23 = assert

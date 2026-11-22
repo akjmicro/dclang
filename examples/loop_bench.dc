@@ -6,24 +6,20 @@
   "The time difference is: " print . "seconds" print cr
 ;
 
-: recur-loop
-  1 +        # sum cur'
-  tuck       # cur' sum cur'
-  +          # cur' sum'
-  swap       # sum' cur'
-  dup        # sum' cur' cur'
-  20000000 <>
+: recur-loop  # ( n sum cur )
+  dup 3 pick <    # ( n sum cur bool )
   if
+    inc dup 1 sincn  # ( n sum' cur' )
     recur-loop
   endif
+  drop swap drop
 ;
 
 : test-recur
   clock
-  0 0 recur-loop   # clock sum cur func
-  clock            # clock sum cur clock'
-  swap             # clock sum clock' cur
-  drop swap        # clock clock' sum
+  20000000 0 0 recur-loop
+  clock            # ( clock sum clock' )
+  swap
 ;
 
 : testfor

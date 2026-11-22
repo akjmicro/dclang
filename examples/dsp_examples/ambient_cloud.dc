@@ -260,19 +260,19 @@ make_cloud_voice_struct voice7
     ##########
     # Reverb #
     ##########
-    #  lchan @
-    #    rchan @
-    #      my_reverb
-    #        :REV_CF
-    #          :REV_FB
-    #    reverb
-    #  :REV_VOL * swap :REV_VOL *
-    #    my_dcblockR
-    #  dcblock
-    #  1.0 panmix
-    #  my_dcblockL
-    #dcblock
-    #0.0 panmix
+      lchan @
+        rchan @
+          my_reverb
+            :REV_CF
+              :REV_FB
+        reverb
+      :REV_VOL * swap :REV_VOL *
+        my_dcblockR
+      dcblock
+      1.0 panmix
+      my_dcblockL
+    dcblock
+    0.0 panmix
     stereo_out
     t+
   again
