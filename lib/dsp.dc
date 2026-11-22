@@ -24,6 +24,7 @@ _get_sr const SAMPLE_RATE
 
 # useful for correcting phase drift (see `phasor`)
 1 BIT_DEPTH / const INV_BIT_DEPTH
+1 INV_BIT_DEPTH - const PHASE_UPPER_LIMIT
 
 # definition of 2pi
 pi 2 * const 2PI
@@ -79,8 +80,8 @@ var _phasor_array 64 allot
 : phasor_pointer _phasor_array _phasor_count @ + ;
 
 : phasor { freq }
-    phasor_pointer @
-      dup
+    _phasor_array _phasor_count @ +
+    dup @ swap over              # ( old_phase addr old_phase )
         freq INV_SAMPLE_RATE *
       +
       1.0 %
@@ -92,7 +93,7 @@ var _phasor_array 64 allot
         drop
         0
       endif
-      1 over - INV_BIT_DEPTH <=
+      dup PHASE_UPPER_LIMIT >=
       if
         drop
         0
@@ -100,8 +101,8 @@ var _phasor_array 64 allot
       ##########################
       # End drift checks/reset #
       ##########################
-    # increment phasor_pointer's value
-    phasor_pointer !
+    # store the updated phase
+    swap !                       # ( old_phase )
     # increment _phasor_count by 1
     _phasor_count inc!
 ;
@@ -229,9 +230,9 @@ var _phasor_array 64 allot
 
 : _set_delay_value              # ( sig delay_struct )
    dup                          # ( sig delay_struct delay_struct )
-   1 + @                        # ( sig delay_struct dpos )
+   1 +@                         # ( sig delay_struct dpos )
    DELAY_HEADER_SIZE +          # ( sig delay_struct dpos+hdr )
-   + !                          # ( )
+   +setn!                       # ( )
 ;
 
 : _get_floor_val                # ( ds val )
@@ -240,8 +241,7 @@ var _phasor_array 64 allot
       @                         # ( ds flr_val dssize )
     %abs                        # ( ds flr_wrap )
     DELAY_HEADER_SIZE +         # ( ds flr_wrap+dhsize )
-  +                             # ( ds+flr_wrap+dhsize )
-  @                             # ( flr_val )
+  +@                            # ( flr_val )
 ;
 
 : _get_ceil_val                 # ( ds val )
@@ -250,8 +250,7 @@ var _phasor_array 64 allot
       @                         # ( ds ceil_val dssize )
     %abs                        # ( ds ceil_wrap )
     DELAY_HEADER_SIZE +         # ( ds ceil_wrap+dhsize )
-  +                             # ( ds+ceil_wrap+dhsize )
-  @                             # ( ceil_val )
+  +@                            # ( ceil_val )
 ;
 
 : _interpolate { real_val floor_val ceil_val }
@@ -264,7 +263,7 @@ var _phasor_array 64 allot
 
 : delay_read { delay_struct time }      # ( delay_struct time -- delsig )
   # calc distance in delay-line:
-  delay_struct 1 + @                    # ( dpos )
+  delay_struct 1 +@             # ( dpos )
     time SAMPLE_RATE *                  # ( dpos tsmp )
   -                                     # ( dpos-tsmp )
                                         # ( val )
@@ -281,8 +280,7 @@ var _phasor_array 64 allot
   sig delay_struct _set_delay_value
   # increment the write position
   t delay_struct @ %
-    delay_struct 1 +
-  !
+  delay_struct 1 +setn!
 ;
 
 ##############
@@ -333,11 +331,11 @@ var _phasor_array 64 allot
     sig dc_struct !
     # 0.995 * ydel:
       0.995
-        dc_struct 1 + @
+        dc_struct 1 +@
       *
     +
     # save outsig (y) for later
-    dup dc_struct 1 + !
+    dup dc_struct 1 +setn!
 ;
 
 ##################
@@ -357,8 +355,8 @@ var _phasor_array 64 allot
     allot                       # ( dltm_smps name_var )
         2dup                    # ( dltm_smps name_var dltm_smps name_var )
     !                           # ( dltm_smps name_var )
-    over + 2 +                  # ( dltm_smps (name_var+dltm_smps+2) )
-  !                             # ( )
+    over 2 +                    # ( dltm_smps name_var dltm_smps+2 )
+  +setn!                        # ( )
 ;
 
 : allpass { sig ap_struct dltm coef } # ( sig ap_struct dltm coef -- sig_out )
@@ -415,40 +413,39 @@ var _phasor_array 64 allot
 : _set_bq_type { struct type }   # ( struct type --  )
   type 0 =
   if
-     -1.0 struct :chi + !
-      2.0 struct :mu + !
-      1.0 struct :sigma + !
+     -1.0 struct :chi +setn!
+      2.0 struct :mu +setn!
+      1.0 struct :sigma +setn!
   else
   type 1 =
   if
-     1.0 struct :chi + !
-    -2.0 struct :mu + !
-     1.0 struct :sigma + !
+     1.0 struct :chi +setn!
+    -2.0 struct :mu +setn!
+     1.0 struct :sigma +setn!
   else
   type 2 =
   if
-     1.0 struct :chi + !
-     0.0 struct :mu + !
-    -1.0 struct :sigma + !
+     1.0 struct :chi +setn!
+     0.0 struct :mu +setn!
+    -1.0 struct :sigma +setn!
   endif endif endif
 ;
 
 : _set_cf_res_reinit { struct reinit cutoff res }
-  res struct :res + !
-  cutoff struct :cutoff + !
-  reinit struct :reinit + !
+  res struct :res +setn!
+  cutoff struct :cutoff +setn!
+  reinit struct :reinit +setn!
 ;
 
 : _calc_theta  { struct }        # ( struct -- )
-  struct :cutoff + @             # ( cutoff_val )
+  struct :cutoff +@             # ( cutoff_val )
   2PIDSR *                       # ( cutoff_val*2PIDSR )
-  struct :theta +                # ( cutoff_val*2PIDSR theta_addr )
-  !                              # poked into theta
+  struct :theta +setn!          # poked into theta
 ;
 
 : _calc_beta  { struct tmp }    # ( struct tmp -- )
-  struct :res + @               # ( res )
-  struct :theta + @             # ( res theta )
+  struct :res +@                # ( res )
+  struct :theta +@              # ( res theta )
   sin 0.5 *                     # ( res sin(theta)*0.5 )
   2dup                          # ( res sin(theta)*0.5 res sin(theta)*0.5 )
   +                             # ( res sin(theta)*0.5 res+sin(theta)*0.5 )
@@ -456,30 +453,28 @@ var _phasor_array 64 allot
   -                             # ( res-sin(theta)*0.5  <in_tmp> )
   tmp                           # ( res-sin(theta)*0.5 res+sin(theta)*0.5 )
   /                             # ( (res-sin(theta)*0.5)/(res+sin(theta)*0.5) ) # answer
-  struct :beta + !              # poked into beta
+  struct :beta +setn!           # poked into beta
 ;
 
 : _calc_gamma  { struct }       # ( struct -- )
-  struct :beta + @ 1 +          # ( beta+1 )
-  struct :theta + @ cos *       # ( (beta+1)*cos(theta) )
-  struct :gamma +               # ( (beta+1)*cos(theta) gamma_addr )
-  !                             # poked into gamma
+  struct :beta +@ inc          # ( beta+1 )
+  struct :theta +@ cos *       # ( (beta+1)*cos(theta) )
+  struct :gamma +setn!          # poked into gamma
 ;
 
 : _calc_alpha { struct }        # ( struct -- )
-  struct :beta + @ 1 +          # ( beta+1 )
-  struct :gamma + @             # ( beta+1 gamma )
-  struct :chi + @               # ( struct beta+1 gamma chi )
+  struct :beta +@ inc          # ( beta+1 )
+  struct :gamma +@              # ( beta+1 gamma )
+  struct :chi +@                # ( struct beta+1 gamma chi )
   * + 0.5 *                     # ( (beta+1+(gamma*chi))*0.5 )
-  struct :alpha +               # ( (beta+1+(gamma*chi))*0.5 alpha_addr )
-  !                             # poked into alpha
+  struct :alpha +setn!          # poked into alpha
 ;
 
 : _reinit_biquad { struct }     # ( struct -- )
-  0.0 struct :xt1 + !
-  0.0 struct :xt2 + !
-  0.0 struct :yt1 + !
-  0.0 struct :yt2 + !
+  0.0 struct :xt1 +setn!
+  0.0 struct :xt2 +setn!
+  0.0 struct :yt1 +setn!
+  0.0 struct :yt2 +setn!
 ;
 
 #######################################################################
@@ -493,7 +488,7 @@ var _phasor_array 64 allot
   struct                    _calc_gamma
   struct                    _calc_alpha
   # check if we should reinit!
-  struct :reinit + @ if
+  struct :reinit +@ if
     struct _reinit_biquad
   endif
 ;
@@ -501,21 +496,21 @@ var _phasor_array 64 allot
 : biquad_compute { sig struct }
   # ( sig struct -- sig_out )
   # the actual transformative equation:
-  struct :mu + @                # ( mu )
-  struct :xt1 + @               # ( mu xt1 )
+  struct :mu +@                 # ( mu )
+  struct :xt1 +@                # ( mu xt1 )
   *                             # ( mu*xt1 )
-  struct :sigma + @             # ( mu*xt1 sigma )
-  struct :xt2 + @               # ( mu*xt1 asigma xt2 )
+  struct :sigma +@              # ( mu*xt1 sigma )
+  struct :xt2 +@                # ( mu*xt1 asigma xt2 )
   *                             # ( mu*xt1 xt2*sigma)
   +                             # ( mu*xt1+xt2*sigma)
   sig +                         # ( sig+mu*xt1+sigma*xt2 )
-  struct :alpha + @             # ( sig+mu*xt1+sigma*xt2 alpha )
+  struct :alpha +@              # ( sig+mu*xt1+sigma*xt2 alpha )
   *                             # ( alpha*(sig+mu*xt1+sigma*xt2 alpha) )
-  struct :gamma + @             # ( alpha*(sig+mu*xt1+sigma*xt2) gamma )
-  struct :yt1 + @               # ( alpha*(sig+mu*xt1+sigma*xt2) gamma yt1 )
+  struct :gamma +@              # ( alpha*(sig+mu*xt1+sigma*xt2) gamma )
+  struct :yt1 +@                # ( alpha*(sig+mu*xt1+sigma*xt2) gamma yt1 )
   *                             # ( alpha*(sig+mu*xt1+sigma*xt2) gamma*yt1 )
-  struct :beta + @              # ( alpha*(sig+mu*xt1+sigma*xt2) gamma*yt1 beta )
-  struct :yt2 + @               # ( alpha*(sig+mu*xt1+sigma*xt2) gamma*yt1 beta yt2 )
+  struct :beta +@               # ( alpha*(sig+mu*xt1+sigma*xt2) gamma*yt1 beta )
+  struct :yt2 +@                # ( alpha*(sig+mu*xt1+sigma*xt2) gamma*yt1 beta yt2 )
   *                             # ( alpha*(sig+mu*xt1+sigma*xt2) gamma*yt1 beta*yt2 )
   -                             # ( alpha*(sig+mu*xt1+sigma*xt2) gamma*yt1-beta*yt2 )
   +                             # ( alpha*(sig+mu*xt1+sigma*xt2)+gamma*yt1-beta*yt2 )
@@ -524,18 +519,14 @@ var _phasor_array 64 allot
   ##################################
   # UPDATE xt2, yt2, xt1, and yt1: #
   ##################################
-  struct :xt1 + @               # ( sig_out xt1_val )
-  struct :xt2 +                 # ( sig_out xt1_val xt2_addr )
-  !                             # ( sig_out )
-  struct :yt1 + @               # ( sig_out yt1_val )
-  struct :yt2 +                 # ( sig_out yt1_val yt2_addr )
-  !                             # ( sig_out )
+  struct :xt1 +@                # ( sig_out xt1_val )
+  struct :xt2 +setn!            # ( sig_out )
+  struct :yt1 +@                # ( sig_out yt1_val )
+  struct :yt2 +setn!            # ( sig_out )
   sig                           # ( sig_out sig )
-  struct :xt1 +                 # ( sig_out sig xt1_addr )
-  !                             # ( sig_out )
+  struct :xt1 +setn!            # ( sig_out )
   dup                           # ( sig_out sig_out )
-  struct :yt1 +                 # ( sig_out sig_out yt1_addr )
-  !                             # ( sig_out )
+  struct :yt1 +setn!            # ( sig_out )
 ;
 
 #############################################
@@ -548,8 +539,8 @@ var _phasor_array 64 allot
 ;
 
 : biquad_lp  { sig struct reinit cutoff res }   # ( sig struct reinit cutoff res -- sig_out )
-  struct :cutoff + @ cutoff <>                  # ( bool_cfdiff  )
-  struct :res + @ res <>                        # ( bool_cfdiff bool_resdiff )
+  struct :cutoff +@ cutoff <>                  # ( bool_cfdiff  )
+  struct :res +@ res <>                        # ( bool_cfdiff bool_resdiff )
   or if
     struct reinit cutoff res 0    _init_biquad
   endif
@@ -557,8 +548,8 @@ var _phasor_array 64 allot
 ;
 
 : biquad_hp  { sig struct reinit cutoff res }   # ( sig struct reinit cutoff res -- sig_out )
-  struct :cutoff + @ cutoff <>                  # ( bool_cfdiff  )
-  struct :res + @ res <>                        # ( bool_cfdiff bool_resdiff )
+  struct :cutoff +@ cutoff <>                  # ( bool_cfdiff  )
+  struct :res +@ res <>                        # ( bool_cfdiff bool_resdiff )
   or if
     struct reinit cutoff res 1    _init_biquad
   endif
@@ -566,8 +557,8 @@ var _phasor_array 64 allot
 ;
 
 : biquad_bp  { sig struct reinit cutoff res }   # ( sig struct reinit cutoff res -- sig_out )
-  struct :cutoff + @ cutoff <>                  # ( bool_cfdiff  )
-  struct :res + @ res <>                        # ( bool_cfdiff bool_resdiff )
+  struct :cutoff +@ cutoff <>                  # ( bool_cfdiff  )
+  struct :res +@ res <>                        # ( bool_cfdiff bool_resdiff )
   or if
     struct reinit cutoff res 1    _init_biquad
   endif
@@ -596,56 +587,56 @@ var _phasor_array 64 allot
   ##################################
   2 res 1.995 * - res!
   fc 2PIDSR * fc!
-    struct _hc_lpdel + @
-      struct _hc_bpdel + @
+    struct _hc_lpdel +@
+      struct _hc_bpdel +@
         fc
       *
     +
       dup
-    struct _hc_lpout + !
+    struct _hc_lpout +setn!
       sig
       swap
     -
       res
-        struct _hc_bpdel + @
+        struct _hc_bpdel +@
       *
     -
       dup
-    struct _hc_hpout + !
+    struct _hc_hpout +setn!
       fc
     *
-      struct _hc_bpdel + @
+      struct _hc_bpdel +@
     +
-  struct _hc_bpout + !
-    struct _hc_hpout + @
-      struct _hc_lpout + @
+  struct _hc_bpout +setn!
+    struct _hc_hpout +@
+      struct _hc_lpout +@
     +
-  struct _hc_ntout + !
+  struct _hc_ntout +setn!
   # store delays for next go-round
-    struct _hc_bpout + @
-  struct _hc_bpdel + !
-    struct _hc_lpout + @
-  struct _hc_lpdel + !
+    struct _hc_bpout +@
+  struct _hc_bpdel +setn!
+    struct _hc_lpout +@
+  struct _hc_lpdel +setn!
 ;
 
 : hc_lowpass { sig struct fc res }   # ( sig struct fc res -- out )
   sig struct fc res  _hc_common
-  struct _hc_lpout + @
+  struct _hc_lpout +@
 ;
 
 : hc_highpass { sig struct fc res }  # ( sig struct fc res -- out )
   sig struct fc res  _hc_common
-  struct _hc_hpout + @
+  struct _hc_hpout +@
 ;
 
 : hc_bandpass { sig struct fc res }  # ( sig struct fc res -- out )
   sig struct fc res  _hc_common
-  struct _hc_bpout + @
+  struct _hc_bpout +@
 ;
 
 : hc_notch { sig struct fc res }     # ( sig struct fc res -- out )
   sig struct fc res  _hc_common
-  struct _hc_ntout + @
+  struct _hc_ntout +@
 ;
 
 ##############
@@ -763,9 +754,9 @@ REV_MEM_SIZE 7 * REV_HEADER_SIZE +
   # for here, for performance reasons.                          #
   ###############################################################
     reverb_struct REV_DELAY_LINE_0 +
-      reverb_struct REV_DELTM_0 + @
-        reverb_struct REV_LFO_FREQ_0 + @ sine
-          reverb_struct REV_LFO_DEPTH_0 + @
+      reverb_struct REV_DELTM_0 +@
+        reverb_struct REV_LFO_FREQ_0 +@ sine
+          reverb_struct REV_LFO_DEPTH_0 +@
         *
       +
     delay_read
@@ -783,9 +774,9 @@ REV_MEM_SIZE 7 * REV_HEADER_SIZE +
       reverb_struct REV_DELAY_LINE_0 +
   delay_write
     reverb_struct REV_DELAY_LINE_1 +
-      reverb_struct REV_DELTM_1 + @
-        reverb_struct REV_LFO_FREQ_1 + @ sine
-          reverb_struct REV_LFO_DEPTH_2 + @
+      reverb_struct REV_DELTM_1 +@
+        reverb_struct REV_LFO_FREQ_1 +@ sine
+          reverb_struct REV_LFO_DEPTH_1 +@
         *
       +
     delay_read
@@ -803,9 +794,9 @@ REV_MEM_SIZE 7 * REV_HEADER_SIZE +
       reverb_struct REV_DELAY_LINE_1 +
   delay_write
     reverb_struct REV_DELAY_LINE_2 +
-      reverb_struct REV_DELTM_2 + @
-        reverb_struct REV_LFO_FREQ_2 + @ sine
-          reverb_struct REV_LFO_DEPTH_2 + @
+      reverb_struct REV_DELTM_2 +@
+        reverb_struct REV_LFO_FREQ_2 +@ sine
+          reverb_struct REV_LFO_DEPTH_2 +@
         *
       +
     delay_read
@@ -823,9 +814,9 @@ REV_MEM_SIZE 7 * REV_HEADER_SIZE +
       reverb_struct REV_DELAY_LINE_2 +
   delay_write
     reverb_struct REV_DELAY_LINE_3 +
-      reverb_struct REV_DELTM_3 + @
-        reverb_struct REV_LFO_FREQ_3 + @ sine
-          reverb_struct REV_LFO_DEPTH_3 + @
+      reverb_struct REV_DELTM_3 +@
+        reverb_struct REV_LFO_FREQ_3 +@ sine
+          reverb_struct REV_LFO_DEPTH_3 +@
         *
       +
     delay_read
@@ -843,9 +834,9 @@ REV_MEM_SIZE 7 * REV_HEADER_SIZE +
       reverb_struct REV_DELAY_LINE_3 +
   delay_write
     reverb_struct REV_DELAY_LINE_4 +
-      reverb_struct REV_DELTM_4 + @
-        reverb_struct REV_LFO_FREQ_4 + @ sine
-          reverb_struct REV_LFO_DEPTH_4 + @
+      reverb_struct REV_DELTM_4 +@
+        reverb_struct REV_LFO_FREQ_4 +@ sine
+          reverb_struct REV_LFO_DEPTH_4 +@
         *
       +
     delay_read
@@ -863,9 +854,9 @@ REV_MEM_SIZE 7 * REV_HEADER_SIZE +
       reverb_struct REV_DELAY_LINE_4 +
   delay_write
     reverb_struct REV_DELAY_LINE_5 +
-      reverb_struct REV_DELTM_5 + @
-        reverb_struct REV_LFO_FREQ_5 + @ sine
-          reverb_struct REV_LFO_DEPTH_5 + @
+      reverb_struct REV_DELTM_5 +@
+        reverb_struct REV_LFO_FREQ_5 +@ sine
+          reverb_struct REV_LFO_DEPTH_5 +@
         *
       +
     delay_read
@@ -883,9 +874,9 @@ REV_MEM_SIZE 7 * REV_HEADER_SIZE +
       reverb_struct REV_DELAY_LINE_5 +
   delay_write
     reverb_struct REV_DELAY_LINE_6 +
-      reverb_struct REV_DELTM_6 + @
-        reverb_struct REV_LFO_FREQ_6 + @ sine
-          reverb_struct REV_LFO_DEPTH_6 + @
+      reverb_struct REV_DELTM_6 +@
+        reverb_struct REV_LFO_FREQ_6 +@ sine
+          reverb_struct REV_LFO_DEPTH_6 +@
         *
       +
     delay_read
@@ -903,9 +894,9 @@ REV_MEM_SIZE 7 * REV_HEADER_SIZE +
       reverb_struct REV_DELAY_LINE_6 +
   delay_write
     reverb_struct REV_DELAY_LINE_7 +
-      reverb_struct REV_DELTM_7 + @
-        reverb_struct REV_LFO_FREQ_7 + @ sine
-          reverb_struct REV_LFO_DEPTH_7 + @
+      reverb_struct REV_DELTM_7 +@
+        reverb_struct REV_LFO_FREQ_7 +@ sine
+          reverb_struct REV_LFO_DEPTH_7 +@
         *
       +
     delay_read
@@ -952,21 +943,22 @@ REV_MEM_SIZE 7 * REV_HEADER_SIZE +
 : panmix
   2dup
   PI_DIV_2 * sin
-  * rcget + rcset
+  * rchan @ + rchan !
   PI_DIV_2 * cos
-  * lcget + lcset
+  * lchan @ + lchan !
 ;
 
 # stereo version of output
 : stereo_out
-  lcget
-  rcget
+  lchan @
+  rchan @
   _stereo_out32
 ;
 
 # word to advance the clock
 : t+
-  1 sample_clock @ + sample_clock !
-  _clear_channels
-  _reset_phasor_count
+  sample_clock inc!
+  0.0 lchan !
+  0.0 rchan !
+  0 _phasor_count !
 ;
