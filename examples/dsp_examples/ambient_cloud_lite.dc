@@ -1,0 +1,277 @@
+# Seven feedback-sine voices, each with a pitch LFO.
+"dsp.dc" import
+
+261 16 15 / *
+        const :BASE_FREQ
+0.5     const :REV_VOL
+0.89    const :REV_CF
+0.987   const :REV_FB
+0.19    const :CHANCE
+0.92    const :LEAD_RES
+0.1 tau_to_alpha
+        const :LAG_0p1
+0.5 tanh const :SHAPE_NORM
+
+32 const :CONTROL_FRAMES
+1 :CONTROL_FRAMES / const :CONTROL_RAMP
+:CONTROL_FRAMES INV_SAMPLE_RATE * const :CONTROL_SECONDS
+0.02 :CONTROL_SECONDS * const :FILTER_PHASE_STEP
+
+var next_control
+var filter_phase
+var filter_cutoff
+var filter_delta
+0.51 5960 * 2000 + filter_cutoff !
+
+create durations
+  1 13 / ,
+  1  8 / ,
+  1  5 / ,
+  1  3 / ,
+  1  2 / ,
+  1 , 2 , 3 , 5 , 8 , 13 ,
+var dummy
+dummy durations -  const :NDURS
+
+create pitches
+  1  4 / ,
+  1  2 / ,
+  3  4 / ,
+  1  1 / ,
+  9  8 / ,
+ 32 27 / ,
+  4  3 / ,
+  3  2 / ,
+ 27 16 / ,
+ 16  9 / ,
+  2  1 / ,
+  9  4 / ,
+ 64 27 / ,
+  8  3 / ,
+  3  1 / ,
+ 27  8 / ,
+ 32  9 / ,
+  4  1 / ,
+var dummy2
+dummy2 pitches -  const :NPITCHES
+
+make_hc_filter     osc_fltL
+make_hc_filter     osc_fltR
+make_reverb_struct my_reverb
+make_dcblock       my_dcblockL
+make_dcblock       my_dcblockR
+
+: rand_dur  # ( -- seconds )
+  :NDURS randint durations swap + @
+;
+
+: rand_fb  # ( -- fb )
+  rand 1.3 * 0.5 +
+;
+
+: rand_freq  # ( -- hz )
+  :NPITCHES randint
+  pitches swap + @
+  :BASE_FREQ *
+;
+
+: freq_pan_width  # (freq -- width)
+  pitches @ :BASE_FREQ * / :NPITCHES /
+  dup 1 > if drop 1 endif
+;
+
+: rand_pan_for_freq  # (freq -- pan)
+  0.5 swap           # (0.5 freq)
+  freq_pan_width     # (0.5 wdt)
+  swap               # (wdt 0.5)
+  over               # (wdt 0.5 wdt)
+  0.5 *              # (wdt 0.5 half_wdt)
+  -                  # (wdt 0.5-half_wdt)
+  swap               # (centered_min wdt)
+  rand *             # (centered_min wdt*rand)
+  +                  # (res)
+;
+
+0  const :active
+1  const :vol
+2  const :env_mem
+3  const :rem
+4  const :half
+5  const :lag
+6  const :env
+7  const :sl_mem
+8  const :freq
+9  const :fb
+10 const :fb_mem
+11 const :pan_left
+12 const :lfo_freq
+13 const :lfo_depth
+14 const :pan_right
+15 const :lfo_phase
+16 const :lfo_value
+17 const :lfo_delta
+
+: make_cloud_voice_struct
+  create 0 , 0 , 0 , 0 ,
+         0 , 0 , 0 , 0 ,
+         0 , 0 , 0 , 0 ,
+         0 , 0 , 0 , 0 ,
+         0 , 0 ,
+;
+
+: init_voice { cvs } # cvs = cloud_voice_struct
+  rand_dur                   # (rand_dur)
+  SAMPLE_RATE * floor        # (rand_dur_smps)
+  dup                        # (rand_dur_smps rand_dur_smps)
+  cvs :rem + !               # (rand_dur_smps)
+  2 /                        # (half_smps)
+  dup                        # (half_smps half_smps)
+  SAMPLE_RATE / tau_to_alpha # (half_smps alpha_lag)
+  cvs :lag  + !              # (half_smps)
+  cvs :half + !              # ()
+  rand_freq
+  dup                              cvs :freq + !
+  rand_pan_for_freq PI_DIV_2 * dup
+  sin cvs :pan_right + !
+  cos cvs :pan_left + !
+  rand_fb                          cvs :fb + !
+  rand 0.25 * 0.05 +
+    rand :CHANCE < abs
+  *                                cvs :vol + !
+  rand 2 * 0.01 +                  cvs :lfo_freq + !
+  rand 0.005 *                     cvs :lfo_depth + !
+  rand :CHANCE < if 1 else 0 endif cvs :active + !
+;
+
+# These phases have dedicated cells because control ticks skip audio frames.
+: slow_sine { phase step }  # ( phase_addr step -- next_value )
+  phase @ step + 1.0 %
+  dup phase !
+  2PI * sin
+;
+
+: update_pitch_lfo { cvs }
+  cvs :lfo_phase + cvs :lfo_freq + @ :CONTROL_SECONDS * slow_sine
+  cvs :lfo_depth + @ *
+  cvs :lfo_value + @ - :CONTROL_RAMP *
+  cvs :lfo_delta + !
+;
+
+: run_voice { cvs }  # cvs = cloud_voice_struct
+  cvs :active + @ 0 =
+  if
+    cvs init_voice
+  endif
+  ###########################
+  # Active sample countdown #
+  ###########################
+  cvs :active + @
+  if
+    cvs :rem + @ 0 >
+    if
+      cvs :rem + @ 1 -
+      cvs :rem + !
+    else
+      0 cvs :active  + !
+    endif
+  endif
+  ###############################
+  # Portamento envelope shaping #
+  ###############################
+  cvs :rem + @ cvs :half + @ > abs # gate high for first half, low for release half
+    cvs :vol + @
+  *
+    # attack/release times are approximately half the total event
+    cvs :env_mem +
+      cvs :lag + @
+        dup
+  port cvs :env + !
+  # Pitch LFO and feedback sine.
+  cvs :sl_mem +
+    cvs :freq + @
+      cvs :lfo_value + @ 1 +
+    *
+      cvs :fb + @
+        cvs :env + @
+          cvs :fb_mem + :LAG_0p1 dup
+        port
+      *
+  sineloop 0.5 * tanh :SHAPE_NORM /
+  cvs :env + @ *
+  0.5 *
+  dup cvs :pan_right + @ * rchan @ + rchan !
+  cvs :pan_left + @ * lchan @ + lchan !
+  cvs :lfo_value + @ cvs :lfo_delta + @ + cvs :lfo_value + !
+;
+
+# setup voices first
+make_cloud_voice_struct voice1
+make_cloud_voice_struct voice2
+make_cloud_voice_struct voice3
+make_cloud_voice_struct voice4
+make_cloud_voice_struct voice5
+make_cloud_voice_struct voice6
+make_cloud_voice_struct voice7
+
+# Refresh the endpoints once per control tick and ramp in the sample loop.
+: update_cloud_controls
+  filter_phase :FILTER_PHASE_STEP slow_sine 0.5 * 0.51 + 5960 * 2000 +
+  filter_cutoff @ - :CONTROL_RAMP * filter_delta !
+  voice1 update_pitch_lfo
+  voice2 update_pitch_lfo
+  voice3 update_pitch_lfo
+  voice4 update_pitch_lfo
+  voice5 update_pitch_lfo
+  voice6 update_pitch_lfo
+  voice7 update_pitch_lfo
+  next_control @ :CONTROL_FRAMES + next_control !
+;
+
+: ambient_cloud_lite
+  inf times
+    t next_control @ = if update_cloud_controls endif
+    voice1 run_voice
+    voice2 run_voice
+    voice3 run_voice
+    voice4 run_voice
+    voice5 run_voice
+    voice6 run_voice
+    voice7 run_voice
+    # post-scaling
+    lchan @ 0.15 * tanh
+      osc_fltL
+        filter_cutoff @
+        :LEAD_RES
+    hc_lowpass tanh
+    0 lchan !  # zero out previous lchan sig
+    0.0 panmix
+    rchan @ 0.15 * tanh
+      osc_fltR
+        filter_cutoff @
+        :LEAD_RES
+    hc_lowpass tanh
+    0 rchan !  # zero out previous rchan sig
+    1.0 panmix
+    ##########
+    # Reverb #
+    ##########
+      lchan @
+        rchan @
+          my_reverb
+            :REV_CF
+              :REV_FB
+        reverb
+      :REV_VOL * swap :REV_VOL *
+        my_dcblockR
+      dcblock
+      1.0 panmix
+      my_dcblockL
+    dcblock
+    0.0 panmix
+    stereo_out
+    filter_cutoff @ filter_delta @ + filter_cutoff !
+    t+
+  again
+;
+
+ambient_cloud_lite

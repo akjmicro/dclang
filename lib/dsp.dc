@@ -84,66 +84,71 @@ var _phasor_array 64 allot
 ;
 
 : sawtooth # ( freq -- sig )
-  phasor
-  0.5 + 1 %
-  2 * 1 -
+  INV_SAMPLE_RATE * _phasor_array _phasor_count _sawtooth
 ;
 
 # a simple metronome trigger:
 # ( freq -- sig )
-: metro phasor 0.001 <= abs ;
+: metro
+  INV_SAMPLE_RATE * _phasor_array _phasor_count _phasor
+  0.001 <= abs
+;
 
 # a gate signal:
 # ( width freq -- sig )
-: gate phasor > abs ;
+: gate
+  INV_SAMPLE_RATE * _phasor_array _phasor_count _phasor
+  > abs
+;
 
 # like a gate, but over -1 to 1 range
 # ( width freq -- sig )
-: pulse phasor > if 1 else -1 endif ;
+: pulse
+  INV_SAMPLE_RATE * _phasor_array _phasor_count _phasor
+  > if 1 else -1 endif
+;
 
 : pulse_tanh  # ( width freq )
-  phasor
+  INV_SAMPLE_RATE * _phasor_array _phasor_count _phasor
   - 12.0 * tanh
 ;
 
 : tri  # ( freq -- tri_sig )
-  phasor 0.75 + 1 %
-  0.5 - abs
-  4 * 1 -
+  INV_SAMPLE_RATE * _phasor_array _phasor_count _tri
 ;
 
 # ( freq -- sine )
-: sine phasor 2PI * sin ;
+: sine
+  INV_SAMPLE_RATE * _phasor_array _phasor_count _phasor
+  2PI * sin
+;
 
 # ( freq phase -- sine )
 : sine_phase { freq phase }
-  freq phasor
+  freq INV_SAMPLE_RATE * _phasor_array _phasor_count _phasor
   phase +
   1.0 %
   2PI *
   sin
 ;
 
-# FM osc; basic carrier/modulator pair
-: fm { carrier_freq mod_ratio index }
-  carrier_freq
-    dup
-      mod_ratio
-    *
-    sine
-      index
-    *
-  sine_phase
+# FM phase increments can be computed whenever pitch or ratio changes.
+: fm_init { carrier_freq mod_ratio }  # ( carrier_freq mod_ratio -- carrier_step modulator_step )
+  carrier_freq INV_SAMPLE_RATE *
+  carrier_freq mod_ratio * INV_SAMPLE_RATE *
+;
+
+: fm_steps  # ( carrier_step modulator_step index -- sig )
+  _phasor_array _phasor_count _fm
+;
+
+: fm { carrier_freq mod_ratio index }  # ( carrier_freq mod_ratio index -- sig )
+  carrier_freq mod_ratio fm_init index fm_steps
 ;
 
 # sineloop, a feedback sine wave
-: sineloop { mem freq fb }
-  mem @ fb * INV_2PI *
-    freq phasor
-  +
-  2PI *
-  sin
-  dup mem !
+: sineloop { mem freq fb }  # ( mem freq fb -- sig )
+  mem freq INV_SAMPLE_RATE * fb _phasor_array _phasor_count _sineloop
 ;
 
 #########
@@ -261,14 +266,8 @@ var _phasor_array 64 allot
     1 -1 tau SAMPLE_RATE * / exp -
 ;
 
-: port { sig mem rise_alpha fall_alpha }
-    sig mem @ -
-      dup 0 >
-      if rise_alpha else fall_alpha endif
-    *
-    mem @ +
-      dup
-    mem !
+: port  # ( sig mem rise_alpha fall_alpha -- sig_out )
+  _port
 ;
 
 #################################

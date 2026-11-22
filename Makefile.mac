@@ -21,6 +21,11 @@ default: dclang
 dclang: $(OBJECTS)
 	$(CC) $(OBJECTS) -o $@ $(LDFLAGS)
 
+dclang2c: dclang2c.c libdclang.c dclang.h dclang_dsp.h dclang_osc.h token.c $(wildcard noheap/*)
+	$(CC) $(CFLAGS) -o $@ $< $(LDFLAGS)
+
+main.o libdclang.o: libdclang.c dclang.h dclang_dsp.h dclang_osc.h token.c
+
 libdclang.o:
 	$(CC) -c -fPIC -o $@ libdclang.c $(CFLAGS)
 
@@ -39,7 +44,7 @@ install: lib dclang
 	cp -a $(EXECUTABLE) $(PREFIX)/bin/
 
 clean:
-	rm -rf examples/*~ *~ dclang libtest *.o *.so
+	rm -rf examples/*~ *~ dclang dclang2c libtest *.o *.so
 
 docker-image:
 	docker build --network host \

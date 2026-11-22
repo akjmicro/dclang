@@ -462,3 +462,33 @@ that is worth it.
 Aaron Krister Johnson
 
 Please report bugs and successes to <akjmicro@gmail.com>
+
+### Compiling a DSP word to C
+
+`dclang2c` is an experimental host-side compiler for a bounded stereo DSP
+entry word with stack effect `( -- left right )`. Build it with the same
+dependencies as dclang.
+
+```sh
+make -f Makefile.linux dclang2c   # use Makefile.mac on macOS
+DCLANG_LIBS="$PWD/lib" SR=44100 ./dclang2c instrument.dc render_frame instrument.c
+cc -O3 -ffp-contract=off -I"$PWD" -c instrument.c
+```
+
+dclang2c evaluates the patch setup at compile time. Use a definition-only audio
+entry point and omit any top-level playback command. Call
+`void dclang2c_init(void)` once, then call
+`void dclang2c_render(double *output, size_t frames)` to fill a caller-owned
+buffer of `2 * frames` interleaved doubles. Link the generated code with
+`-lm`. Copy `dclang_dsp.h` and `dclang_osc.h` with the generated source when
+building on another machine. The generated program does not link against
+`libdclang`.
+
+The initial subset supports statically resolved calls, locals, balanced
+conditionals, scalar math, variable reads and writes, and the native
+oscillator, port, delay, and reverb kernels. Loops, dynamic execution, audio
+I/O inside the entry word, and unsupported primitives produce a compile-time
+diagnostic. The frontend evaluates setup, so only compile trusted inputs.
+The sample rate is fixed at compilation, the generated state is single-instance, and
+patches that use `rand` require matching host and target C-library random
+sequences for exact reproducibility.
