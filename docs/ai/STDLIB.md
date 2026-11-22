@@ -1,8 +1,8 @@
-# dclang Standard Library Reference (draft v0.5)
+# dclang Standard Library Reference (draft v0.6)
 
-> **Status:** Source inventory from the uploaded `dclang.tgz`. 16 interpreter examples passed across 14 words; this is partial runtime verification, not exhaustive semantic coverage.
+> **Status:** Source inventory reconciled with repository commit `3b333a8`. Historical runtime observations remain partial and are not exhaustive semantic coverage.
 
-**Coverage:** 20 library modules, 329 definition occurrences, 328 distinct names.
+**Coverage:** 20 library modules, 334 definition occurrences, 333 distinct names.
 
 
 ## Additional interpreter observations (v0.5)
@@ -35,7 +35,7 @@ The accompanying `stdlib_additional_results.json` contains 16 additional indepen
 | [`clock_sleep.dc`](#clock_sleepdc) | 2 | — |
 | [`csvlib.dc`](#csvlibdc) | 6 | — |
 | [`deprecated_stack.dc`](#deprecated_stackdc) | 7 | — |
-| [`dsp.dc`](#dspdc) | 64 | — |
+| [`dsp.dc`](#dspdc) | 70 | — |
 | [`fractions.dc`](#fractionsdc) | 7 | — |
 | [`http_server.dc`](#http_serverdc) | 23 | `string.dc` |
 | [`linked_list.dc`](#linked_listdc) | 8 | — |
@@ -101,72 +101,79 @@ These names are defined in more than one module; verify import order and redefin
 
 **Imports:** none detected via literal imports.
 
+The public oscillator and effect APIs retain their prior stack interfaces. Several now delegate to private native kernels. `fm_init` and `fm_steps` expose cached phase increments for compiled or control-rate DSP paths; ordinary callers may continue using `fm`.
+
 | Word | Source line | Locals | Stack effect / status |
 |---|---:|---|---|
-| `seconds2samples` | 38 | — | **Unverified** |
-| `t` | 44 | — | **Unverified** |
-| `lcget` | 45 | — | **Unverified** |
-| `lcset` | 46 | — | **Unverified** |
-| `rcget` | 47 | — | **Unverified** |
-| `rcset` | 48 | — | **Unverified** |
-| `_clear_channels` | 49 | — | **Unverified** |
-| `stereo_in` | 55 | — | **Unverified** |
-| `_reset_phasor_count` | 67 | — | **Unverified** |
-| `phasor_pointer` | 69 | — | **Unverified** |
-| `phasor` | 71 | `freq` | **Unverified** |
-| `sawtooth` | 99 | — | **Unverified** |
-| `metro` | 107 | — | **Unverified** |
-| `gate` | 111 | — | **Unverified** |
-| `pulse` | 115 | — | **Unverified** |
-| `pulse_tanh` | 117 | — | **Unverified** |
-| `tri` | 122 | — | **Unverified** |
-| `sine` | 129 | — | **Unverified** |
-| `sine_phase` | 132 | `freq`, `phase` | **Unverified** |
-| `fm` | 141 | `carrier_freq`, `mod_ratio`, `index` | **Unverified** |
-| `sineloop` | 153 | `mem`, `freq`, `fb` | **Unverified** |
-| `noise` | 169 | — | **Unverified** |
-| `randint` | 177 | `range` | **Unverified** |
-| `randtrig` | 184 | `compare_val`, `hold_var` | **Unverified** |
-| `make_delay_line` | 204 | `seconds` | **Unverified** |
-| `%abs` | 218 | `n`, `d` | **Unverified** |
-| `_set_delay_value` | 220 | — | **Unverified** |
-| `_get_floor_val` | 227 | — | **Unverified** |
-| `_get_ceil_val` | 237 | — | **Unverified** |
-| `_interpolate` | 247 | `real_val`, `floor_val`, `ceil_val` | **Unverified** |
-| `delay_read` | 255 | `delay_struct`, `time` | **Unverified** |
-| `delay_write` | 269 | `sig`, `delay_struct` | **Unverified** |
-| `tau_to_alpha` | 286 | `tau` | **Unverified** |
-| `port` | 290 | `sig`, `mem`, `rise_alpha`, `fall_alpha` | **Unverified** |
-| `lowpass` | 303 | `sig`, `memvar`, `pole` | **Unverified** |
-| `make_dcblock` | 315 | — | **Unverified** |
-| `dcblock` | 317 | `sig`, `dc_struct` | **Unverified** |
-| `make_allpass` | 341 | — | **Unverified** |
-| `allpass` | 354 | `sig`, `ap_struct`, `dltm`, `coef` | **Unverified** |
-| `_set_bq_type` | 405 | `struct`, `type` | **Unverified** |
-| `_set_cf_res_reinit` | 426 | `struct`, `reinit`, `cutoff`, `res` | **Unverified** |
-| `_calc_theta` | 432 | `struct` | **Unverified** |
-| `_calc_beta` | 439 | `struct`, `tmp` | **Unverified** |
-| `_calc_gamma` | 452 | `struct` | **Unverified** |
-| `_calc_alpha` | 459 | `struct` | **Unverified** |
-| `_reinit_biquad` | 468 | `struct` | **Unverified** |
-| `_init_biquad` | 478 | `struct`, `reinit`, `cutoff`, `res`, `type` | **Unverified** |
-| `biquad_compute` | 491 | `sig`, `struct` | **Unverified** |
-| `make_biquad` | 535 | — | **Unverified** |
-| `biquad_lp` | 540 | `sig`, `struct`, `reinit`, `cutoff`, `res` | **Unverified** |
-| `biquad_hp` | 549 | `sig`, `struct`, `reinit`, `cutoff`, `res` | **Unverified** |
-| `biquad_bp` | 558 | `sig`, `struct`, `reinit`, `cutoff`, `res` | **Unverified** |
-| `make_hc_filter` | 581 | — | **Unverified** |
-| `_hc_common` | 583 | `sig`, `struct`, `fc`, `res` | **Unverified** |
-| `hc_lowpass` | 621 | `sig`, `struct`, `fc`, `res` | **Unverified** |
-| `hc_highpass` | 626 | `sig`, `struct`, `fc`, `res` | **Unverified** |
-| `hc_bandpass` | 631 | `sig`, `struct`, `fc`, `res` | **Unverified** |
-| `hc_notch` | 636 | `sig`, `struct`, `fc`, `res` | **Unverified** |
-| `_fix` | 658 | — | **Unverified** |
-| `make_reverb_struct` | 660 | — | **Unverified** |
-| `reverb` | 694 | `sigL`, `sigR`, `reverb_struct`, `cutoff`, `feedback` | **Unverified** |
-| `panmix` | 898 | — | **Unverified** |
-| `stereo_out` | 907 | — | **Unverified** |
-| `t+` | 914 | — | **Unverified** |
+| `_get_sr` | 7 | — | `( -- sample-rate )` (source-reviewed) |
+| `seconds2samples` | 49 | — | `( seconds -- samples )` (source-reviewed) |
+| `t` | 55 | — | `( -- sample-index )` (source-reviewed) |
+| `lcget` | 56 | — | `( -- left )` (source-reviewed) |
+| `lcset` | 57 | — | `( left -- )` (source-reviewed) |
+| `rcget` | 58 | — | `( -- right )` (source-reviewed) |
+| `rcset` | 59 | — | `( right -- )` (source-reviewed) |
+| `_clear_channels` | 60 | — | `( -- )` (source-reviewed) |
+| `stereo_in` | 66 | — | `( -- left right )` (source-reviewed) |
+| `_reset_phasor_count` | 78 | — | `( -- )` (source-reviewed) |
+| `phasor_pointer` | 80 | — | `( -- phase-slot )` (source-reviewed) |
+| `phasor` | 82 | — | `( frequency -- phase )` (source-reviewed) |
+| `sawtooth` | 86 | — | `( frequency -- signal )` (source-reviewed) |
+| `metro` | 92 | — | `( frequency -- trigger )` (source-reviewed) |
+| `gate` | 99 | — | `( width frequency -- gate )` (source-reviewed) |
+| `pulse` | 106 | — | `( width frequency -- signal )` (source-reviewed) |
+| `pulse_tanh` | 111 | — | `( width frequency -- signal )` (source-reviewed) |
+| `tri` | 116 | — | `( frequency -- signal )` (source-reviewed) |
+| `sine` | 121 | — | `( frequency -- signal )` (source-reviewed) |
+| `fast_sin` | 128 | — | `( radians -- approximate-sine )` (source-reviewed) |
+| `fast_tanh` | 132 | — | `( value -- approximate-tanh )` (source-reviewed) |
+| `fast_sine` | 136 | — | `( frequency -- approximate-sine )` (source-reviewed) |
+| `sine_phase` | 142 | `freq`, `phase` | `( frequency phase-offset -- signal )` (source-reviewed) |
+| `fm_init` | 151 | `carrier_freq`, `mod_ratio` | `( carrier-frequency mod-ratio -- carrier-step modulator-step )` (source-reviewed) |
+| `fm_steps` | 156 | — | `( carrier-step modulator-step index -- signal )` (source-reviewed) |
+| `fm` | 160 | `carrier_freq`, `mod_ratio`, `index` | `( carrier-frequency mod-ratio index -- signal )` (source-reviewed) |
+| `sineloop` | 165 | `mem`, `freq`, `fb` | `( state-slot frequency feedback -- signal )` (source-reviewed) |
+| `noise` | 176 | — | `( -- signal )` (source-reviewed) |
+| `randint` | 184 | `range` | `( range -- integer )` (source-reviewed) |
+| `randtrig` | 191 | `compare_val`, `hold_var` | **Unverified** |
+| `make_delay_line` | 211 | `seconds` | `( seconds <name-token> -- )` (source-reviewed) |
+| `%abs` | 225 | `n`, `d` | `( numerator denominator -- positive-remainder )` (source-reviewed) |
+| `_set_delay_value` | 227 | — | `( signal delay-struct -- )` (source-reviewed) |
+| `_get_floor_val` | 234 | — | **Unverified** |
+| `_get_ceil_val` | 243 | — | **Unverified** |
+| `_interpolate` | 252 | `real_val`, `floor_val`, `ceil_val` | **Unverified** |
+| `delay_read` | 260 | — | `( delay-struct seconds -- signal )` (source-reviewed) |
+| `delay_write` | 264 | `sig`, `delay_struct` | `( signal delay-struct -- )` (source-reviewed) |
+| `tau_to_alpha` | 280 | `tau` | `( tau -- alpha )` (source-reviewed) |
+| `port` | 284 | — | `( signal state-slot rise-alpha fall-alpha -- output )` (source-reviewed) |
+| `lowpass` | 291 | `sig`, `memvar`, `pole` | `( signal state-slot pole -- output )` (source-reviewed) |
+| `make_dcblock` | 303 | — | `( <name-token> -- )` (source-reviewed) |
+| `dcblock` | 305 | `sig`, `dc_struct` | `( signal dc-struct -- output )` (source-reviewed) |
+| `make_allpass` | 329 | — | **Unverified** |
+| `allpass` | 342 | `sig`, `ap_struct`, `dltm`, `coef` | `( signal allpass-struct delay-time coefficient -- output )` (source-reviewed) |
+| `_set_bq_type` | 393 | `struct`, `type` | **Unverified** |
+| `_set_cf_res_reinit` | 414 | `struct`, `reinit`, `cutoff`, `res` | **Unverified** |
+| `_calc_theta` | 420 | `struct` | **Unverified** |
+| `_calc_beta` | 426 | `struct`, `tmp` | **Unverified** |
+| `_calc_gamma` | 439 | `struct` | **Unverified** |
+| `_calc_alpha` | 445 | `struct` | **Unverified** |
+| `_reinit_biquad` | 453 | `struct` | **Unverified** |
+| `_init_biquad` | 463 | `struct`, `reinit`, `cutoff`, `res`, `type` | **Unverified** |
+| `biquad_compute` | 476 | `sig`, `struct` | `( signal biquad-struct -- output )` (source-reviewed) |
+| `make_biquad` | 516 | — | **Unverified** |
+| `biquad_lp` | 521 | `sig`, `struct`, `reinit`, `cutoff`, `res` | `( signal struct reinit cutoff resonance -- output )` (source-reviewed) |
+| `biquad_hp` | 530 | `sig`, `struct`, `reinit`, `cutoff`, `res` | `( signal struct reinit cutoff resonance -- output )` (source-reviewed) |
+| `biquad_bp` | 539 | `sig`, `struct`, `reinit`, `cutoff`, `res` | `( signal struct reinit cutoff resonance -- output )` (source-reviewed) |
+| `make_hc_filter` | 562 | — | **Unverified** |
+| `_hc_common` | 564 | `sig`, `struct`, `fc`, `res` | `( signal struct cutoff resonance -- output )` (source-reviewed) |
+| `hc_lowpass` | 602 | `sig`, `struct`, `fc`, `res` | `( signal struct cutoff resonance -- output )` (source-reviewed) |
+| `hc_highpass` | 607 | `sig`, `struct`, `fc`, `res` | `( signal struct cutoff resonance -- output )` (source-reviewed) |
+| `hc_bandpass` | 612 | `sig`, `struct`, `fc`, `res` | `( signal struct cutoff resonance -- output )` (source-reviewed) |
+| `hc_notch` | 617 | `sig`, `struct`, `fc`, `res` | `( signal struct cutoff resonance -- output )` (source-reviewed) |
+| `make_reverb_struct` | 629 | — | **Unverified** |
+| `reverb` | 634 | — | `( left right struct cutoff feedback -- wet-left wet-right )` (source-reviewed) |
+| `panmix` | 644 | — | `( signal pan -- )` (source-reviewed) |
+| `stereo_out` | 653 | — | `( -- )` (source-reviewed) |
+| `t+` | 660 | — | `( -- )` (source-reviewed) |
 
 ### fractions.dc
 

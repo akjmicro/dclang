@@ -2,6 +2,7 @@
 #define DCLANG_DSP_H
 
 #include "dclang_osc.h"
+#include "dclang_phiverb.h"
 #include <stdint.h>
 
 static inline int dclang_port_sample(double *memory, size_t cells, double signal,
@@ -69,71 +70,37 @@ static inline int dclang_delay_sample(double *memory, size_t cells, double delay
     return 1;
 }
 
+#define DCLANG_PHIVERB_CELLS \
+    ((sizeof(dclang_phiverb) + sizeof(double) - 1) / sizeof(double))
+
 static inline int dclang_reverb_sample(double *memory, size_t cells, double left,
                                        double right, double base_arg, double cutoff,
-                                       double feedback, double stride_arg, double sample_rate,
-                                       double phase_base, double phase_count, double frame,
+                                       double feedback, double sample_rate,
                                        double *wet_left, double *wet_right)
 {
-    // Offsets in make_reverb_struct in lib/dsp.dc.
-    enum { LINES = 8, HEADER = 33, TIME = 9, FREQ = 17, DEPTH = 25 };
-    if (cells < HEADER || !isfinite(frame) || frame < 0
-        || !(sample_rate > 0 && isfinite(sample_rate))
-        || !(base_arg >= 0 && base_arg <= cells - HEADER)
-        || !(stride_arg >= 3 && stride_arg <= (cells - HEADER - base_arg) / LINES)) {
+    if (cells < DCLANG_PHIVERB_CELLS
+        || !(base_arg >= 0.0 && base_arg <= cells - DCLANG_PHIVERB_CELLS)
+        || !(sample_rate >= 50.0 && sample_rate <= 192000.0))
         return 0;
-    }
     size_t base = (size_t)base_arg;
-    size_t stride = (size_t)stride_arg;
-    double inverse_rate = 1.0 / sample_rate;
-    double pole = (1.0 - cutoff) * 0.5 + 0.5;
-    double filtered[LINES];
-    double cursor_length = 0.0;
-    double write_cursor = 0.0;
-    for (int line = 0; line < LINES; ++line) {
-        size_t delay = base + HEADER + line * stride;
-        double length = memory[delay];
-        double position = memory[delay + 1];
-        if (!(length >= 1 && length <= stride - 2)
-            || !(position >= 0 && position < length)) {
-            return 0;
-        }
-        double phase;
-        volatile double step = memory[base + FREQ + line] * inverse_rate;
-        if (!dclang_phase_step(memory, cells, step, phase_base, phase_count, &phase)) {
-            return 0;
-        }
-        volatile double modulation = sin(phase * DCLANG_TWO_PI) * memory[base + DEPTH + line];
-        double seconds = memory[base + TIME + line] + modulation;
-        volatile double distance = seconds * sample_rate;
-        double delayed;
-        if (!dclang_delay_sample(memory, cells, delay, distance, &delayed)) {
-            return 0;
-        }
-        size_t filter = base + 1 + line;
-        double signal = delayed * feedback;
-        volatile double feedforward = signal * (1.0 - pole);
-        volatile double previous = memory[filter] * pole;
-        filtered[line] = feedforward + previous;
-        memory[filter] = filtered[line];
-        double input = line % 2 ? right : left;
-        memory[delay + 2 + (size_t)position] =
-            filtered[line] * -1.0 + (memory[base] + input);
-        // All eight lines normally use the same length. Derive the cursor
-        // from the frame so skipped frames and separate instances still work.
-        if (length != cursor_length) {
-            write_cursor = frame < length ? frame : fmod(frame, length);
-            cursor_length = length;
-        }
-        memory[delay + 1] = write_cursor;
-    }
-    double junction = filtered[0];
-    for (int line = 1; line < LINES; ++line) {
-        junction = filtered[line] + junction;
-    }
-    memory[base] = junction * 0.25;
-    *wet_left = (filtered[6] + (filtered[4] + (filtered[2] + filtered[0]))) * 0.25;
-    *wet_right = (filtered[7] + (filtered[5] + (filtered[3] + filtered[1]))) * 0.25;
+    int rate = (int)sample_rate;
+    dclang_phiverb *state = (dclang_phiverb *)(void *)(memory + base);
+    if (state->fSampleRate != rate)
+        initdclang_phiverb(state, rate);
+    if (cutoff < 0.0) cutoff = 0.0;
+    if (cutoff > 1.0) cutoff = 1.0;
+    if (feedback < 0.0) feedback = 0.0;
+    if (feedback > 0.999) feedback = 0.999;
+    state->fHslider0 = (float)cutoff;
+    state->fHslider1 = (float)feedback;
+    float input_left = (float)left;
+    float input_right = (float)right;
+    float output_left, output_right;
+    float *inputs[] = { &input_left, &input_right };
+    float *outputs[] = { &output_left, &output_right };
+    computedclang_phiverb(state, 1, inputs, outputs);
+    *wet_left = output_left;
+    *wet_right = output_right;
     return 1;
 }
 

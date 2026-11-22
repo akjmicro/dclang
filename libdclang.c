@@ -563,7 +563,10 @@ void dclang_execute() {
         &&_OP_DSP_SINELOOP,
         &&_OP_DSP_TRI,
         &&_OP_DSP_SAWTOOTH,
-        &&_OP_DSP_PORT
+        &&_OP_DSP_PORT,
+        &&_OP_DSP_FAST_SIN,
+        &&_OP_DSP_FAST_TANH,
+        &&_OP_DSP_REVERB_CELLS
     };
 
     while (1) {
@@ -597,14 +600,10 @@ void dclang_execute() {
             NEXT;
         }
         _OP_DSP_REVERB: {
-            if (data_stack_ptr < 10) {
+            if (data_stack_ptr < 6) {
                 return;
             }
-            DCLANG_FLT frame = POP;
-            DCLANG_FLT phase_count = POP;
-            DCLANG_FLT phase_base = POP;
             DCLANG_FLT sample_rate = POP;
-            DCLANG_FLT stride_arg = POP;
             DCLANG_FLT feedback = POP;
             DCLANG_FLT cutoff = POP;
             DCLANG_FLT base_arg = POP;
@@ -612,8 +611,7 @@ void dclang_execute() {
             DCLANG_FLT left = POP;
             double wet_left, wet_right;
             if (!dclang_reverb_sample(vars, NUMVARS, left, right, base_arg, cutoff,
-                                      feedback, stride_arg, sample_rate, phase_base,
-                                      phase_count, frame, &wet_left, &wet_right))
+                                      feedback, sample_rate, &wet_left, &wet_right))
                 return;
             push(wet_left);
             push(wet_right);
@@ -688,6 +686,19 @@ void dclang_execute() {
             push(sample);
             NEXT;
         }
+        _OP_DSP_FAST_SIN:
+            if (data_stack_ptr < 1)
+                return;
+            push(dclang_fast_sin(POP));
+            NEXT;
+        _OP_DSP_FAST_TANH:
+            if (data_stack_ptr < 1)
+                return;
+            push(dclang_fast_tanh(POP));
+            NEXT;
+        _OP_DSP_REVERB_CELLS:
+            push((DCLANG_FLT)DCLANG_PHIVERB_CELLS);
+            NEXT;
 
         OP_NOOP:
             return;
@@ -4060,6 +4071,9 @@ void add_all_primitives() {
     add_primitive("_tri", "DSP", _OP_DSP_TRI);
     add_primitive("_sawtooth", "DSP", _OP_DSP_SAWTOOTH);
     add_primitive("_port", "DSP", _OP_DSP_PORT);
+    add_primitive("_fast_sin", "DSP", _OP_DSP_FAST_SIN);
+    add_primitive("_fast_tanh", "DSP", _OP_DSP_FAST_TANH);
+    add_primitive("_reverb_cells", "DSP", _OP_DSP_REVERB_CELLS);
     // END
     add_primitive(0, 0, 0);  // end of primitives 'barrier'
 };

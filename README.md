@@ -480,9 +480,16 @@ entry point and omit any top-level playback command. Call
 `void dclang2c_init(void)` once, then call
 `void dclang2c_render(double *output, size_t frames)` to fill a caller-owned
 buffer of `2 * frames` interleaved doubles. Link the generated code with
-`-lm`. Copy `dclang_dsp.h` and `dclang_osc.h` with the generated source when
-building on another machine. The generated program does not link against
+`-lm`. Copy `dclang_dsp.h`, `dclang_osc.h`, `dclang_fast_math.h`, and
+`dclang_phiverb.h` with the generated source when building on another machine. The generated program does not link against
 `libdclang`.
+
+`dclang_phiverb.h` is generated from the Faust library rather than maintained
+by hand. After editing `phiverb.lib`, regenerate the integration header with:
+
+```sh
+python3 contrib/generate_phiverb.py /path/to/phiverb.lib
+```
 
 The initial subset supports statically resolved calls, locals, balanced
 conditionals, scalar math, variable reads and writes, and the native

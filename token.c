@@ -203,5 +203,7 @@ char *get_token() {
         }
         add_to_buf(ch);
     }
-    return "EOF";
+    // EOF terminates a token just like whitespace. This matters for `-e`
+    // strings and files whose final token has no trailing newline.
+    return bufused ? buf2str() : "EOF";
 }

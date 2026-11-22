@@ -9,7 +9,7 @@ def main():
  prim=load('docs/ai/data/primitives.json');std=load('docs/ai/data/stdlib.json')
  pc=load('tests/ai/primitives.json');sc=load('tests/ai/stdlib.json')
  names=[x['name'] for x in prim['primitives']]
- assert len(names)==213 and len(set(names))==213, 'primitive inventory mismatch'
+ assert len(names)==236 and len(set(names))==236, 'primitive inventory mismatch'
  assert all(x.get('stack_effect') for x in prim['primitives']), 'missing primitive stack signature'
  assert len(std['modules'])==20, 'module inventory mismatch'
  assert all('record' in x and 'source' in x for x in pc['cases']+sc['cases'])

@@ -1,6 +1,7 @@
 #ifndef DCLANG_OSC_H
 #define DCLANG_OSC_H
 
+#include "dclang_fast_math.h"
 #include <math.h>
 #include <stddef.h>
 

@@ -61,7 +61,7 @@ Born on 2018-05-05 */
 #define RETURN_STACK_SIZE 128
 #define MAXWORD           1048576
 #define EXEC_TRAMPOLINE   (MAXWORD - 4)
-#define MAX_OPCODES       236
+#define MAX_OPCODES       239
 #define IBUFSIZE          128
 #define NUMLOCALS         8
 #define NUMVARS           16777216
@@ -449,7 +449,10 @@ enum dclang_opcodes {
     _OP_DSP_SINELOOP,
     _OP_DSP_TRI,
     _OP_DSP_SAWTOOTH,
-    _OP_DSP_PORT
+    _OP_DSP_PORT,
+    _OP_DSP_FAST_SIN,
+    _OP_DSP_FAST_TANH,
+    _OP_DSP_REVERB_CELLS
 };
 
 // user words

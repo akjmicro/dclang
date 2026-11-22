@@ -123,6 +123,21 @@ var _phasor_array 64 allot
   2PI * sin
 ;
 
+# Faster approximations for audio-rate work. Exact `sin`, `tanh`, and `sine`
+# remain available when their full libm accuracy is wanted.
+: fast_sin  # ( radians -- signal )
+  _fast_sin
+;
+
+: fast_tanh  # ( signal -- shaped-signal )
+  _fast_tanh
+;
+
+: fast_sine  # ( frequency -- signal )
+  INV_SAMPLE_RATE * _phasor_array _phasor_count _phasor
+  2PI * _fast_sin
+;
+
 # ( freq phase -- sine )
 : sine_phase { freq phase }
   freq INV_SAMPLE_RATE * _phasor_array _phasor_count _phasor
@@ -604,105 +619,20 @@ var _phasor_array 64 allot
   struct _hc_ntout +@
 ;
 
-##############
-# FDN Reverb #
-##############
+###################
+# Phiverb Reverb  #
+###################
 
-# The reverb_struct layout:
-# --------------------------------------------------------------------
-# |junction|lpf0|lpf1...|lpf8|deltime0|...|deltime7|delay0|...|delay7|
-# --------------------------------------------------------------------
-
-0.1 seconds2samples  const REV_DELAY_SIZE
-REV_DELAY_SIZE 2 +   const REV_MEM_SIZE
-1                    const REV_FLT_0
-2                    const REV_FLT_1
-3                    const REV_FLT_2
-4                    const REV_FLT_3
-5                    const REV_FLT_4
-6                    const REV_FLT_5
-7                    const REV_FLT_6
-8                    const REV_FLT_7
-9                    const REV_DELTM_0
-10                   const REV_DELTM_1
-11                   const REV_DELTM_2
-12                   const REV_DELTM_3
-13                   const REV_DELTM_4
-14                   const REV_DELTM_5
-15                   const REV_DELTM_6
-16                   const REV_DELTM_7
-17                   const REV_LFO_FREQ_0
-18                   const REV_LFO_FREQ_1
-19                   const REV_LFO_FREQ_2
-20                   const REV_LFO_FREQ_3
-21                   const REV_LFO_FREQ_4
-22                   const REV_LFO_FREQ_5
-23                   const REV_LFO_FREQ_6
-24                   const REV_LFO_FREQ_7
-25                   const REV_LFO_DEPTH_0
-26                   const REV_LFO_DEPTH_1
-27                   const REV_LFO_DEPTH_2
-28                   const REV_LFO_DEPTH_3
-29                   const REV_LFO_DEPTH_4
-30                   const REV_LFO_DEPTH_5
-31                   const REV_LFO_DEPTH_6
-32                   const REV_LFO_DEPTH_7
-33                   const REV_HEADER_SIZE
-REV_MEM_SIZE 0 * REV_HEADER_SIZE +
-                     const REV_DELAY_LINE_0
-REV_MEM_SIZE 1 * REV_HEADER_SIZE +
-                     const REV_DELAY_LINE_1
-REV_MEM_SIZE 2 * REV_HEADER_SIZE +
-                     const REV_DELAY_LINE_2
-REV_MEM_SIZE 3 * REV_HEADER_SIZE +
-                     const REV_DELAY_LINE_3
-REV_MEM_SIZE 4 * REV_HEADER_SIZE +
-                     const REV_DELAY_LINE_4
-REV_MEM_SIZE 5 * REV_HEADER_SIZE +
-                     const REV_DELAY_LINE_5
-REV_MEM_SIZE 6 * REV_HEADER_SIZE +
-                     const REV_DELAY_LINE_6
-REV_MEM_SIZE 7 * REV_HEADER_SIZE +
-                     const REV_DELAY_LINE_7
-
-: _fix 6 / ;
-
+# Reserve one Faust-generated state object in dclang's cell arena. The public
+# stack interface remains unchanged. `feedback` controls both Phiverb feedback
+# paths (the comb path uses its square root); `cutoff` maps to 1-damping.
 : make_reverb_struct
-  var                            # `var` will consume the next token as a name
-    9 allot                      # Junction, plus 8 delay line lpfilter states.
-    # Delay read times
-    2473 SAMPLE_RATE 44100 / * INV_SAMPLE_RATE * ,     # The delay read times, taken from csound's
-    2767 SAMPLE_RATE 44100 / * INV_SAMPLE_RATE * ,     # `reverbsc` code and UDO. Other primes can
-    3217 SAMPLE_RATE 44100 / * INV_SAMPLE_RATE * ,     # certainly be experimented with...N.B. these
-    3557 SAMPLE_RATE 44100 / * INV_SAMPLE_RATE * ,     # are designed for sr=44100.
-    3907 SAMPLE_RATE 44100 / * INV_SAMPLE_RATE * ,
-    4127 SAMPLE_RATE 44100 / * INV_SAMPLE_RATE * ,
-    2143 SAMPLE_RATE 44100 / * INV_SAMPLE_RATE * ,
-    1933 SAMPLE_RATE 44100 / * INV_SAMPLE_RATE * ,
-    # LFO freqs, in seconds
-    3.100 , 3.500 , 1.110 , 3.973 , 2.341 , 1.897 , 0.891 , 3.221 ,
-    # LFO depths
-    0.0010 _fix ,
-    0.0011 _fix ,
-    0.0017 _fix ,
-    0.0006 _fix ,
-    0.0010 _fix ,
-    0.0011 _fix ,
-    0.0017 _fix ,
-    0.0006 _fix ,
-    ############################
-    # Actual delay line memory #
-    ############################
-    8 times                      # The delay lines proper, 8 of them
-      REV_DELAY_SIZE ,
-      0 ,
-      REV_DELAY_SIZE 1 + allot   # added 1 to `allot` because it's normally designed to subtract 1.
-    again
+  var _reverb_cells allot
 ;
 
 # cutoff and feedback are in the 0-1 range
 : reverb  # ( sigL sigR struct cutoff feedback -- wetL wetR )
-  REV_MEM_SIZE SAMPLE_RATE _phasor_array _phasor_count t _reverb
+  SAMPLE_RATE _reverb
 ;
 
 ##########

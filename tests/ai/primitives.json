@@ -1900,6 +1900,113 @@
       },
       "new_runtime_tests": 0,
       "caveat": "Source-reviewed only; signatures for compile-time instructions reflect effective runtime behavior."
+    },
+    "post_55a6a0d_source_audit_v2.0.json": {
+      "range": "55a6a0da6e545420b8cac25245b2bfd7663427dd..3b333a8",
+      "registered_primitives": 233,
+      "public_primitives": 198,
+      "private_primitives": 35,
+      "added_signatures": {
+        "inc": "( x -- x+1 )",
+        "sinc": "( ... x_n ... x_0 n -- ... x_n+1 ... x_0 )",
+        "sincn": "( ... x_n ... x_0 increment n -- ... x_n+increment ... x_0 )",
+        "ssetn": "( ... x_n ... x_0 value n -- ... value ... x_0 )",
+        "+@": "( base offset -- value )",
+        "inc!": "( slot -- )",
+        "+inc!": "( base offset -- )",
+        "+incn!": "( increment base offset -- )",
+        "+setn!": "( value base offset -- )",
+        "_osc_get_str": "( buffer length offset -- string-pointer new-offset | 0 -1 )",
+        "_osc_get_i32": "( buffer length offset -- value new-offset | 0 -1 )",
+        "_osc_get_f32": "( buffer length offset -- value new-offset | 0 -1 )",
+        "_phasor": "( step phase-base phase-count-slot -- old-phase )",
+        "_delay": "( delay-struct distance-samples -- sample )",
+        "_reverb": "( left right struct cutoff feedback stride sample-rate phase-base phase-count-slot frame -- wet-left wet-right )",
+        "_fm": "( carrier-step modulator-step index phase-base phase-count-slot -- sample )",
+        "_sineloop": "( state-slot step feedback phase-base phase-count-slot -- sample )",
+        "_tri": "( step phase-base phase-count-slot -- sample )",
+        "_sawtooth": "( step phase-base phase-count-slot -- sample )",
+        "_port": "( signal state-slot rise-alpha fall-alpha -- output )"
+      },
+      "assertion_fixtures": [
+        "tests/stack_tests.dc",
+        "tests/variable_tests.dc"
+      ],
+      "runtime_note": "Fixtures contain executable assertions but were not rerun as part of this documentation-only reconciliation.",
+      "dsp_note": "Private DSP kernels preserve public dsp.dc stack interfaces and share C helpers with dclang2c-generated code."
+    },
+    "fast_math_working_tree_v2.1.json": {
+      "range": "55a6a0da6e545420b8cac25245b2bfd7663427dd..3b333a8 plus uncommitted fast-math additions",
+      "registered_primitives": 235,
+      "public_primitives": 198,
+      "private_primitives": 37,
+      "added_signatures": {
+        "inc": "( x -- x+1 )",
+        "sinc": "( ... x_n ... x_0 n -- ... x_n+1 ... x_0 )",
+        "sincn": "( ... x_n ... x_0 increment n -- ... x_n+increment ... x_0 )",
+        "ssetn": "( ... x_n ... x_0 value n -- ... value ... x_0 )",
+        "+@": "( base offset -- value )",
+        "inc!": "( slot -- )",
+        "+inc!": "( base offset -- )",
+        "+incn!": "( increment base offset -- )",
+        "+setn!": "( value base offset -- )",
+        "_osc_get_str": "( buffer length offset -- string-pointer new-offset | 0 -1 )",
+        "_osc_get_i32": "( buffer length offset -- value new-offset | 0 -1 )",
+        "_osc_get_f32": "( buffer length offset -- value new-offset | 0 -1 )",
+        "_phasor": "( step phase-base phase-count-slot -- old-phase )",
+        "_delay": "( delay-struct distance-samples -- sample )",
+        "_reverb": "( left right struct cutoff feedback stride sample-rate phase-base phase-count-slot frame -- wet-left wet-right )",
+        "_fm": "( carrier-step modulator-step index phase-base phase-count-slot -- sample )",
+        "_sineloop": "( state-slot step feedback phase-base phase-count-slot -- sample )",
+        "_tri": "( step phase-base phase-count-slot -- sample )",
+        "_sawtooth": "( step phase-base phase-count-slot -- sample )",
+        "_port": "( signal state-slot rise-alpha fall-alpha -- output )",
+        "_fast_sin": "( radians -- approximate-sine )",
+        "_fast_tanh": "( value -- approximate-tanh )"
+      },
+      "assertion_fixtures": [
+        "tests/stack_tests.dc",
+        "tests/variable_tests.dc"
+      ],
+      "runtime_note": "Fixtures contain executable assertions but were not rerun as part of this documentation-only reconciliation.",
+      "dsp_note": "Private DSP kernels preserve public dsp.dc stack interfaces and share C helpers with dclang2c-generated code."
+    },
+    "phiverb_working_tree_v2.2.json": {
+      "range": "55a6a0da6e545420b8cac25245b2bfd7663427dd..3b333a8 plus uncommitted fast-math and Phiverb additions",
+      "registered_primitives": 236,
+      "public_primitives": 198,
+      "private_primitives": 38,
+      "added_signatures": {
+        "inc": "( x -- x+1 )",
+        "sinc": "( ... x_n ... x_0 n -- ... x_n+1 ... x_0 )",
+        "sincn": "( ... x_n ... x_0 increment n -- ... x_n+increment ... x_0 )",
+        "ssetn": "( ... x_n ... x_0 value n -- ... value ... x_0 )",
+        "+@": "( base offset -- value )",
+        "inc!": "( slot -- )",
+        "+inc!": "( base offset -- )",
+        "+incn!": "( increment base offset -- )",
+        "+setn!": "( value base offset -- )",
+        "_osc_get_str": "( buffer length offset -- string-pointer new-offset | 0 -1 )",
+        "_osc_get_i32": "( buffer length offset -- value new-offset | 0 -1 )",
+        "_osc_get_f32": "( buffer length offset -- value new-offset | 0 -1 )",
+        "_phasor": "( step phase-base phase-count-slot -- old-phase )",
+        "_delay": "( delay-struct distance-samples -- sample )",
+        "_reverb": "( left right struct cutoff feedback sample-rate -- wet-left wet-right )",
+        "_fm": "( carrier-step modulator-step index phase-base phase-count-slot -- sample )",
+        "_sineloop": "( state-slot step feedback phase-base phase-count-slot -- sample )",
+        "_tri": "( step phase-base phase-count-slot -- sample )",
+        "_sawtooth": "( step phase-base phase-count-slot -- sample )",
+        "_port": "( signal state-slot rise-alpha fall-alpha -- output )",
+        "_fast_sin": "( radians -- approximate-sine )",
+        "_fast_tanh": "( value -- approximate-tanh )",
+        "_reverb_cells": "( -- state-cells )"
+      },
+      "assertion_fixtures": [
+        "tests/stack_tests.dc",
+        "tests/variable_tests.dc"
+      ],
+      "runtime_note": "Fixtures contain executable assertions but were not rerun as part of this documentation-only reconciliation.",
+      "dsp_note": "Private DSP kernels preserve public dsp.dc stack interfaces and share C helpers with dclang2c-generated code; _reverb now hosts the generated Phiverb core."
     }
   },
   "summaries": {

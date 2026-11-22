@@ -167,7 +167,7 @@ static int emit_range(DCLANG_PTR start, DCLANG_PTR end, int depth,
             case _OP_DSP_SINELOOP: kernel = "dclang_sineloop_sample"; operands = 5; break;
             case _OP_DSP_DELAY: kernel = "dclang_delay_sample"; operands = 2; break;
             case _OP_DSP_PORT: kernel = "dclang_port_sample"; operands = 4; break;
-            case _OP_DSP_REVERB: kernel = "dclang_reverb_sample"; operands = 10; results = 2; break;
+            case _OP_DSP_REVERB: kernel = "dclang_reverb_sample"; operands = 6; results = 2; break;
             default: break;
             }
             require_depth(depth, operands);
@@ -199,6 +199,8 @@ static int emit_range(DCLANG_PTR start, DCLANG_PTR end, int depth,
         case OP_SINE: unary = "sin"; break;
         case OP_COS: unary = "cos"; break;
         case OP_TANH: unary = "tanh"; break;
+        case _OP_DSP_FAST_SIN: unary = "dclang_fast_sin"; break;
+        case _OP_DSP_FAST_TANH: unary = "dclang_fast_tanh"; break;
         case OP_ABS: unary = "fabs"; break;
         case OP_EXP: unary = "exp"; break;
         case OP_ROUND: unary = "(long)round"; break;

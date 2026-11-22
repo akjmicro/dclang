@@ -20,10 +20,10 @@ default: dclang
 dclang: $(OBJECTS)
 	$(CC) $(OBJECTS) -o $@ $(LDFLAGS)
 
-dclang2c: dclang2c.c libdclang.c dclang.h dclang_dsp.h dclang_osc.h token.c $(wildcard noheap/*)
+dclang2c: dclang2c.c libdclang.c dclang.h dclang_dsp.h dclang_osc.h dclang_fast_math.h dclang_phiverb.h token.c $(wildcard noheap/*)
 	$(CC) $(CFLAGS) -o $@ $< $(LDFLAGS)
 
-main.o libdclang.o: libdclang.c dclang.h dclang_dsp.h dclang_osc.h token.c
+main.o libdclang.o: libdclang.c dclang.h dclang_dsp.h dclang_osc.h dclang_fast_math.h dclang_phiverb.h token.c
 
 libdclang.o:
 	$(CC) -c -fPIC -o $@ libdclang.c $(CFLAGS)

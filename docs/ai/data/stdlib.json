@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "source": "user-provided dclang.tgz, lib/*.dc",
+  "source": "repository lib/*.dc, reconciled through commit 3b333a8",
   "runtime_validation": "partial_16_examples_passed",
   "modules": [
     {
@@ -168,230 +168,285 @@
       "imports": [],
       "words": [
         {
+          "name": "_get_sr",
+          "visibility": "internal_by_convention",
+          "source_stack_comment": null,
+          "line": 7,
+          "locals": [],
+          "stack_effect": "( -- sample-rate )",
+          "stack_effect_status": "source-reviewed through commit 3b333a8"
+        },
+        {
           "name": "seconds2samples",
-          "line": 38,
+          "line": 49,
           "visibility": "public_or_unspecified",
           "locals": [],
-          "stack_effect": null,
-          "stack_effect_status": "unverified",
+          "stack_effect": "( seconds -- samples )",
+          "stack_effect_status": "source-reviewed through commit 3b333a8",
           "source_stack_comment": null
         },
         {
           "name": "t",
-          "line": 44,
+          "line": 55,
           "visibility": "public_or_unspecified",
           "locals": [],
-          "stack_effect": null,
-          "stack_effect_status": "unverified",
+          "stack_effect": "( -- sample-index )",
+          "stack_effect_status": "source-reviewed through commit 3b333a8",
           "source_stack_comment": null
         },
         {
           "name": "lcget",
-          "line": 45,
+          "line": 56,
           "visibility": "public_or_unspecified",
           "locals": [],
-          "stack_effect": null,
-          "stack_effect_status": "unverified",
+          "stack_effect": "( -- left )",
+          "stack_effect_status": "source-reviewed through commit 3b333a8",
           "source_stack_comment": null
         },
         {
           "name": "lcset",
-          "line": 46,
+          "line": 57,
           "visibility": "public_or_unspecified",
           "locals": [],
-          "stack_effect": null,
-          "stack_effect_status": "unverified",
+          "stack_effect": "( left -- )",
+          "stack_effect_status": "source-reviewed through commit 3b333a8",
           "source_stack_comment": null
         },
         {
           "name": "rcget",
-          "line": 47,
+          "line": 58,
           "visibility": "public_or_unspecified",
           "locals": [],
-          "stack_effect": null,
-          "stack_effect_status": "unverified",
+          "stack_effect": "( -- right )",
+          "stack_effect_status": "source-reviewed through commit 3b333a8",
           "source_stack_comment": null
         },
         {
           "name": "rcset",
-          "line": 48,
+          "line": 59,
           "visibility": "public_or_unspecified",
           "locals": [],
-          "stack_effect": null,
-          "stack_effect_status": "unverified",
+          "stack_effect": "( right -- )",
+          "stack_effect_status": "source-reviewed through commit 3b333a8",
           "source_stack_comment": null
         },
         {
           "name": "_clear_channels",
-          "line": 49,
+          "line": 60,
           "visibility": "internal_by_convention",
           "locals": [],
-          "stack_effect": null,
-          "stack_effect_status": "unverified",
+          "stack_effect": "( -- )",
+          "stack_effect_status": "source-reviewed through commit 3b333a8",
           "source_stack_comment": null
         },
         {
           "name": "stereo_in",
-          "line": 55,
+          "line": 66,
           "visibility": "public_or_unspecified",
           "locals": [],
-          "stack_effect": null,
-          "stack_effect_status": "unverified",
+          "stack_effect": "( -- left right )",
+          "stack_effect_status": "source-reviewed through commit 3b333a8",
           "source_stack_comment": null
         },
         {
           "name": "_reset_phasor_count",
-          "line": 67,
+          "line": 78,
           "visibility": "internal_by_convention",
           "locals": [],
-          "stack_effect": null,
-          "stack_effect_status": "unverified",
+          "stack_effect": "( -- )",
+          "stack_effect_status": "source-reviewed through commit 3b333a8",
           "source_stack_comment": null
         },
         {
           "name": "phasor_pointer",
-          "line": 69,
+          "line": 80,
           "visibility": "public_or_unspecified",
           "locals": [],
-          "stack_effect": null,
-          "stack_effect_status": "unverified",
+          "stack_effect": "( -- phase-slot )",
+          "stack_effect_status": "source-reviewed through commit 3b333a8",
           "source_stack_comment": null
         },
         {
           "name": "phasor",
-          "line": 71,
+          "line": 82,
           "visibility": "public_or_unspecified",
-          "locals": [
-            "freq"
-          ],
-          "stack_effect": null,
-          "stack_effect_status": "unverified",
+          "locals": [],
+          "stack_effect": "( frequency -- phase )",
+          "stack_effect_status": "source-reviewed through commit 3b333a8",
           "source_stack_comment": null
         },
         {
           "name": "sawtooth",
-          "line": 99,
+          "line": 86,
           "visibility": "public_or_unspecified",
           "locals": [],
-          "stack_effect": null,
-          "stack_effect_status": "unverified",
+          "stack_effect": "( frequency -- signal )",
+          "stack_effect_status": "source-reviewed through commit 3b333a8",
           "source_stack_comment": "freq -- sig"
         },
         {
           "name": "metro",
-          "line": 107,
+          "line": 92,
           "visibility": "public_or_unspecified",
           "locals": [],
-          "stack_effect": null,
-          "stack_effect_status": "unverified",
+          "stack_effect": "( frequency -- trigger )",
+          "stack_effect_status": "source-reviewed through commit 3b333a8",
           "source_stack_comment": null
         },
         {
           "name": "gate",
-          "line": 111,
+          "line": 99,
           "visibility": "public_or_unspecified",
           "locals": [],
-          "stack_effect": null,
-          "stack_effect_status": "unverified",
+          "stack_effect": "( width frequency -- gate )",
+          "stack_effect_status": "source-reviewed through commit 3b333a8",
           "source_stack_comment": null
         },
         {
           "name": "pulse",
-          "line": 115,
+          "line": 106,
           "visibility": "public_or_unspecified",
           "locals": [],
-          "stack_effect": null,
-          "stack_effect_status": "unverified",
+          "stack_effect": "( width frequency -- signal )",
+          "stack_effect_status": "source-reviewed through commit 3b333a8",
           "source_stack_comment": null
         },
         {
           "name": "pulse_tanh",
-          "line": 117,
+          "line": 111,
           "visibility": "public_or_unspecified",
           "locals": [],
-          "stack_effect": null,
-          "stack_effect_status": "unverified",
+          "stack_effect": "( width frequency -- signal )",
+          "stack_effect_status": "source-reviewed through commit 3b333a8",
           "source_stack_comment": null
         },
         {
           "name": "tri",
-          "line": 122,
+          "line": 116,
           "visibility": "public_or_unspecified",
           "locals": [],
-          "stack_effect": null,
-          "stack_effect_status": "unverified",
+          "stack_effect": "( frequency -- signal )",
+          "stack_effect_status": "source-reviewed through commit 3b333a8",
           "source_stack_comment": "freq -- tri_sig"
         },
         {
           "name": "sine",
-          "line": 129,
+          "line": 121,
           "visibility": "public_or_unspecified",
           "locals": [],
-          "stack_effect": null,
-          "stack_effect_status": "unverified",
+          "stack_effect": "( frequency -- signal )",
+          "stack_effect_status": "source-reviewed through commit 3b333a8",
           "source_stack_comment": null
         },
         {
-          "name": "sine_phase",
+          "name": "fast_sin",
+          "visibility": "public_or_unspecified",
+          "source_stack_comment": null,
+          "line": 128,
+          "locals": [],
+          "stack_effect": "( radians -- approximate-sine )",
+          "stack_effect_status": "source-reviewed through commit 3b333a8"
+        },
+        {
+          "name": "fast_tanh",
+          "visibility": "public_or_unspecified",
+          "source_stack_comment": null,
           "line": 132,
+          "locals": [],
+          "stack_effect": "( value -- approximate-tanh )",
+          "stack_effect_status": "source-reviewed through commit 3b333a8"
+        },
+        {
+          "name": "fast_sine",
+          "visibility": "public_or_unspecified",
+          "source_stack_comment": null,
+          "line": 136,
+          "locals": [],
+          "stack_effect": "( frequency -- approximate-sine )",
+          "stack_effect_status": "source-reviewed through commit 3b333a8"
+        },
+        {
+          "name": "sine_phase",
+          "line": 142,
           "visibility": "public_or_unspecified",
           "locals": [
             "freq",
             "phase"
           ],
-          "stack_effect": null,
-          "stack_effect_status": "unverified",
+          "stack_effect": "( frequency phase-offset -- signal )",
+          "stack_effect_status": "source-reviewed through commit 3b333a8",
           "source_stack_comment": null
         },
         {
+          "name": "fm_init",
+          "visibility": "public_or_unspecified",
+          "source_stack_comment": null,
+          "line": 151,
+          "locals": [
+            "carrier_freq",
+            "mod_ratio"
+          ],
+          "stack_effect": "( carrier-frequency mod-ratio -- carrier-step modulator-step )",
+          "stack_effect_status": "source-reviewed through commit 3b333a8"
+        },
+        {
+          "name": "fm_steps",
+          "visibility": "public_or_unspecified",
+          "source_stack_comment": null,
+          "line": 156,
+          "locals": [],
+          "stack_effect": "( carrier-step modulator-step index -- signal )",
+          "stack_effect_status": "source-reviewed through commit 3b333a8"
+        },
+        {
           "name": "fm",
-          "line": 141,
+          "line": 160,
           "visibility": "public_or_unspecified",
           "locals": [
             "carrier_freq",
             "mod_ratio",
             "index"
           ],
-          "stack_effect": null,
-          "stack_effect_status": "unverified",
+          "stack_effect": "( carrier-frequency mod-ratio index -- signal )",
+          "stack_effect_status": "source-reviewed through commit 3b333a8",
           "source_stack_comment": null
         },
         {
           "name": "sineloop",
-          "line": 153,
+          "line": 165,
           "visibility": "public_or_unspecified",
           "locals": [
             "mem",
             "freq",
             "fb"
           ],
-          "stack_effect": null,
-          "stack_effect_status": "unverified",
+          "stack_effect": "( state-slot frequency feedback -- signal )",
+          "stack_effect_status": "source-reviewed through commit 3b333a8",
           "source_stack_comment": null
         },
         {
           "name": "noise",
-          "line": 169,
+          "line": 176,
           "visibility": "public_or_unspecified",
           "locals": [],
-          "stack_effect": null,
-          "stack_effect_status": "unverified",
+          "stack_effect": "( -- signal )",
+          "stack_effect_status": "source-reviewed through commit 3b333a8",
           "source_stack_comment": "-- sig"
         },
         {
           "name": "randint",
-          "line": 177,
+          "line": 184,
           "visibility": "public_or_unspecified",
           "locals": [
             "range"
           ],
-          "stack_effect": null,
-          "stack_effect_status": "unverified",
+          "stack_effect": "( range -- integer )",
+          "stack_effect_status": "source-reviewed through commit 3b333a8",
           "source_stack_comment": "range -- int"
         },
         {
           "name": "randtrig",
-          "line": 184,
+          "line": 191,
           "visibility": "public_or_unspecified",
           "locals": [
             "compare_val",
@@ -403,39 +458,39 @@
         },
         {
           "name": "make_delay_line",
-          "line": 204,
+          "line": 211,
           "visibility": "public_or_unspecified",
           "locals": [
             "seconds"
           ],
-          "stack_effect": null,
-          "stack_effect_status": "unverified",
+          "stack_effect": "( seconds <name-token> -- )",
+          "stack_effect_status": "source-reviewed through commit 3b333a8",
           "source_stack_comment": null
         },
         {
           "name": "%abs",
-          "line": 218,
+          "line": 225,
           "visibility": "public_or_unspecified",
           "locals": [
             "n",
             "d"
           ],
-          "stack_effect": null,
-          "stack_effect_status": "unverified",
+          "stack_effect": "( numerator denominator -- positive-remainder )",
+          "stack_effect_status": "source-reviewed through commit 3b333a8",
           "source_stack_comment": null
         },
         {
           "name": "_set_delay_value",
-          "line": 220,
+          "line": 227,
           "visibility": "internal_by_convention",
           "locals": [],
-          "stack_effect": null,
-          "stack_effect_status": "unverified",
+          "stack_effect": "( signal delay-struct -- )",
+          "stack_effect_status": "source-reviewed through commit 3b333a8",
           "source_stack_comment": null
         },
         {
           "name": "_get_floor_val",
-          "line": 227,
+          "line": 234,
           "visibility": "internal_by_convention",
           "locals": [],
           "stack_effect": null,
@@ -444,7 +499,7 @@
         },
         {
           "name": "_get_ceil_val",
-          "line": 237,
+          "line": 243,
           "visibility": "internal_by_convention",
           "locals": [],
           "stack_effect": null,
@@ -453,7 +508,7 @@
         },
         {
           "name": "_interpolate",
-          "line": 247,
+          "line": 252,
           "visibility": "internal_by_convention",
           "locals": [
             "real_val",
@@ -466,90 +521,82 @@
         },
         {
           "name": "delay_read",
-          "line": 255,
+          "line": 260,
           "visibility": "public_or_unspecified",
-          "locals": [
-            "delay_struct",
-            "time"
-          ],
-          "stack_effect": null,
-          "stack_effect_status": "unverified",
+          "locals": [],
+          "stack_effect": "( delay-struct seconds -- signal )",
+          "stack_effect_status": "source-reviewed through commit 3b333a8",
           "source_stack_comment": "delay_struct time -- delsig"
         },
         {
           "name": "delay_write",
-          "line": 269,
+          "line": 264,
           "visibility": "public_or_unspecified",
           "locals": [
             "sig",
             "delay_struct"
           ],
-          "stack_effect": null,
-          "stack_effect_status": "unverified",
+          "stack_effect": "( signal delay-struct -- )",
+          "stack_effect_status": "source-reviewed through commit 3b333a8",
           "source_stack_comment": "sig delay_struct --"
         },
         {
           "name": "tau_to_alpha",
-          "line": 286,
+          "line": 280,
           "visibility": "public_or_unspecified",
           "locals": [
             "tau"
           ],
-          "stack_effect": null,
-          "stack_effect_status": "unverified",
+          "stack_effect": "( tau -- alpha )",
+          "stack_effect_status": "source-reviewed through commit 3b333a8",
           "source_stack_comment": null
         },
         {
           "name": "port",
-          "line": 290,
+          "line": 284,
           "visibility": "public_or_unspecified",
-          "locals": [
-            "sig",
-            "mem",
-            "rise_alpha",
-            "fall_alpha"
-          ],
-          "stack_effect": null,
-          "stack_effect_status": "unverified",
+          "locals": [],
+          "stack_effect": "( signal state-slot rise-alpha fall-alpha -- output )",
+          "stack_effect_status": "source-reviewed through commit 3b333a8",
           "source_stack_comment": null
         },
         {
           "name": "lowpass",
-          "line": 303,
+          "line": 291,
           "visibility": "public_or_unspecified",
           "locals": [
             "sig",
             "memvar",
             "pole"
           ],
-          "stack_effect": null,
-          "stack_effect_status": "unverified",
+          "stack_effect": "( signal state-slot pole -- output )",
+          "stack_effect_status": "source-reviewed through commit 3b333a8",
           "source_stack_comment": "sig memvar pole -- newsig"
         },
         {
           "name": "make_dcblock",
-          "line": 315,
+          "line": 303,
           "visibility": "public_or_unspecified",
           "locals": [],
-          "stack_effect": null,
-          "stack_effect_status": "unverified",
+          "stack_effect": "( <name-token> -- )",
+          "stack_effect_status": "source-reviewed through commit 3b333a8",
           "source_stack_comment": null
         },
         {
           "name": "dcblock",
-          "line": 317,
+          "line": 305,
           "visibility": "public_or_unspecified",
           "locals": [
             "sig",
             "dc_struct"
           ],
-          "stack_effect": null,
-          "stack_effect_status": "unverified",
+          "stack_effect": "( signal dc-struct -- output )",
+          "stack_effect_status": "source-reviewed through commit 3b333a8",
           "source_stack_comment": null
         },
         {
           "name": "make_allpass",
-          "line": 341,
+          "line": 329,
           "visibility": "public_or_unspecified",
           "locals": [],
           "stack_effect": null,
@@ -558,7 +605,7 @@
         },
         {
           "name": "allpass",
-          "line": 354,
+          "line": 342,
           "visibility": "public_or_unspecified",
           "locals": [
             "sig",
@@ -566,13 +613,13 @@
             "dltm",
             "coef"
           ],
-          "stack_effect": null,
-          "stack_effect_status": "unverified",
+          "stack_effect": "( signal allpass-struct delay-time coefficient -- output )",
+          "stack_effect_status": "source-reviewed through commit 3b333a8",
           "source_stack_comment": "sig ap_struct dltm coef -- sig_out"
         },
         {
           "name": "_set_bq_type",
-          "line": 405,
+          "line": 393,
           "visibility": "internal_by_convention",
           "locals": [
             "struct",
@@ -584,7 +631,7 @@
         },
         {
           "name": "_set_cf_res_reinit",
-          "line": 426,
+          "line": 414,
           "visibility": "internal_by_convention",
           "locals": [
             "struct",
@@ -598,7 +645,7 @@
         },
         {
           "name": "_calc_theta",
-          "line": 432,
+          "line": 420,
           "visibility": "internal_by_convention",
           "locals": [
             "struct"
@@ -609,7 +656,7 @@
         },
         {
           "name": "_calc_beta",
-          "line": 439,
+          "line": 426,
           "visibility": "internal_by_convention",
           "locals": [
             "struct",
@@ -621,7 +668,7 @@
         },
         {
           "name": "_calc_gamma",
-          "line": 452,
+          "line": 439,
           "visibility": "internal_by_convention",
           "locals": [
             "struct"
@@ -632,7 +679,7 @@
         },
         {
           "name": "_calc_alpha",
-          "line": 459,
+          "line": 445,
           "visibility": "internal_by_convention",
           "locals": [
             "struct"
@@ -643,7 +690,7 @@
         },
         {
           "name": "_reinit_biquad",
-          "line": 468,
+          "line": 453,
           "visibility": "internal_by_convention",
           "locals": [
             "struct"
@@ -654,7 +701,7 @@
         },
         {
           "name": "_init_biquad",
-          "line": 478,
+          "line": 463,
           "visibility": "internal_by_convention",
           "locals": [
             "struct",
@@ -669,19 +716,19 @@
         },
         {
           "name": "biquad_compute",
-          "line": 491,
+          "line": 476,
           "visibility": "public_or_unspecified",
           "locals": [
             "sig",
             "struct"
           ],
-          "stack_effect": null,
-          "stack_effect_status": "unverified",
+          "stack_effect": "( signal biquad-struct -- output )",
+          "stack_effect_status": "source-reviewed through commit 3b333a8",
           "source_stack_comment": null
         },
         {
           "name": "make_biquad",
-          "line": 535,
+          "line": 516,
           "visibility": "public_or_unspecified",
           "locals": [],
           "stack_effect": null,
@@ -690,7 +737,7 @@
         },
         {
           "name": "biquad_lp",
-          "line": 540,
+          "line": 521,
           "visibility": "public_or_unspecified",
           "locals": [
             "sig",
@@ -699,13 +746,13 @@
             "cutoff",
             "res"
           ],
-          "stack_effect": null,
-          "stack_effect_status": "unverified",
+          "stack_effect": "( signal struct reinit cutoff resonance -- output )",
+          "stack_effect_status": "source-reviewed through commit 3b333a8",
           "source_stack_comment": "sig struct reinit cutoff res -- sig_out"
         },
         {
           "name": "biquad_hp",
-          "line": 549,
+          "line": 530,
           "visibility": "public_or_unspecified",
           "locals": [
             "sig",
@@ -714,13 +761,13 @@
             "cutoff",
             "res"
           ],
-          "stack_effect": null,
-          "stack_effect_status": "unverified",
+          "stack_effect": "( signal struct reinit cutoff resonance -- output )",
+          "stack_effect_status": "source-reviewed through commit 3b333a8",
           "source_stack_comment": "sig struct reinit cutoff res -- sig_out"
         },
         {
           "name": "biquad_bp",
-          "line": 558,
+          "line": 539,
           "visibility": "public_or_unspecified",
           "locals": [
             "sig",
@@ -729,13 +776,13 @@
             "cutoff",
             "res"
           ],
-          "stack_effect": null,
-          "stack_effect_status": "unverified",
+          "stack_effect": "( signal struct reinit cutoff resonance -- output )",
+          "stack_effect_status": "source-reviewed through commit 3b333a8",
           "source_stack_comment": "sig struct reinit cutoff res -- sig_out"
         },
         {
           "name": "make_hc_filter",
-          "line": 581,
+          "line": 562,
           "visibility": "public_or_unspecified",
           "locals": [],
           "stack_effect": null,
@@ -744,7 +791,7 @@
         },
         {
           "name": "_hc_common",
-          "line": 583,
+          "line": 564,
           "visibility": "internal_by_convention",
           "locals": [
             "sig",
@@ -752,13 +799,13 @@
             "fc",
             "res"
           ],
-          "stack_effect": null,
-          "stack_effect_status": "unverified",
+          "stack_effect": "( signal struct cutoff resonance -- output )",
+          "stack_effect_status": "source-reviewed through commit 3b333a8",
           "source_stack_comment": "sig struct fc res -- out"
         },
         {
           "name": "hc_lowpass",
-          "line": 621,
+          "line": 602,
           "visibility": "public_or_unspecified",
           "locals": [
             "sig",
@@ -766,13 +813,13 @@
             "fc",
             "res"
           ],
-          "stack_effect": null,
-          "stack_effect_status": "unverified",
+          "stack_effect": "( signal struct cutoff resonance -- output )",
+          "stack_effect_status": "source-reviewed through commit 3b333a8",
           "source_stack_comment": "sig struct fc res -- out"
         },
         {
           "name": "hc_highpass",
-          "line": 626,
+          "line": 607,
           "visibility": "public_or_unspecified",
           "locals": [
             "sig",
@@ -780,13 +827,13 @@
             "fc",
             "res"
           ],
-          "stack_effect": null,
-          "stack_effect_status": "unverified",
+          "stack_effect": "( signal struct cutoff resonance -- output )",
+          "stack_effect_status": "source-reviewed through commit 3b333a8",
           "source_stack_comment": "sig struct fc res -- out"
         },
         {
           "name": "hc_bandpass",
-          "line": 631,
+          "line": 612,
           "visibility": "public_or_unspecified",
           "locals": [
             "sig",
@@ -794,13 +841,13 @@
             "fc",
             "res"
           ],
-          "stack_effect": null,
-          "stack_effect_status": "unverified",
+          "stack_effect": "( signal struct cutoff resonance -- output )",
+          "stack_effect_status": "source-reviewed through commit 3b333a8",
           "source_stack_comment": "sig struct fc res -- out"
         },
         {
           "name": "hc_notch",
-          "line": 636,
+          "line": 617,
           "visibility": "public_or_unspecified",
           "locals": [
             "sig",
@@ -808,22 +855,13 @@
             "fc",
             "res"
           ],
-          "stack_effect": null,
-          "stack_effect_status": "unverified",
+          "stack_effect": "( signal struct cutoff resonance -- output )",
+          "stack_effect_status": "source-reviewed through commit 3b333a8",
           "source_stack_comment": "sig struct fc res -- out"
         },
         {
-          "name": "_fix",
-          "line": 658,
-          "visibility": "internal_by_convention",
-          "locals": [],
-          "stack_effect": null,
-          "stack_effect_status": "unverified",
-          "source_stack_comment": null
-        },
-        {
           "name": "make_reverb_struct",
-          "line": 660,
+          "line": 629,
           "visibility": "public_or_unspecified",
           "locals": [],
           "stack_effect": null,
@@ -832,48 +870,42 @@
         },
         {
           "name": "reverb",
-          "line": 694,
+          "line": 634,
           "visibility": "public_or_unspecified",
-          "locals": [
-            "sigL",
-            "sigR",
-            "reverb_struct",
-            "cutoff",
-            "feedback"
-          ],
-          "stack_effect": null,
-          "stack_effect_status": "unverified",
+          "locals": [],
+          "stack_effect": "( left right struct cutoff feedback -- wet-left wet-right )",
+          "stack_effect_status": "source-reviewed through commit 3b333a8",
           "source_stack_comment": null
         },
         {
           "name": "panmix",
-          "line": 898,
+          "line": 644,
           "visibility": "public_or_unspecified",
           "locals": [],
-          "stack_effect": null,
-          "stack_effect_status": "unverified",
+          "stack_effect": "( signal pan -- )",
+          "stack_effect_status": "source-reviewed through commit 3b333a8",
           "source_stack_comment": null
         },
         {
           "name": "stereo_out",
-          "line": 907,
+          "line": 653,
           "visibility": "public_or_unspecified",
           "locals": [],
-          "stack_effect": null,
-          "stack_effect_status": "unverified",
+          "stack_effect": "( -- )",
+          "stack_effect_status": "source-reviewed through commit 3b333a8",
           "source_stack_comment": null
         },
         {
           "name": "t+",
-          "line": 914,
+          "line": 660,
           "visibility": "public_or_unspecified",
           "locals": [],
-          "stack_effect": null,
-          "stack_effect_status": "unverified",
+          "stack_effect": "( -- )",
+          "stack_effect_status": "source-reviewed through commit 3b333a8",
           "source_stack_comment": null
         }
       ],
-      "word_count": 64
+      "word_count": 69
     },
     {
       "module": "fractions.dc",
