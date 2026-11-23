@@ -222,39 +222,11 @@ var _phasor_array 64 allot
   allot                         # (  )  # reserve the memory
 ;
 
-: %abs { n d } n d % d + d % ;
-
 : _set_delay_value              # ( sig delay_struct )
    dup                          # ( sig delay_struct delay_struct )
    1 +@                         # ( sig delay_struct dpos )
    DELAY_HEADER_SIZE +          # ( sig delay_struct dpos+hdr )
    +setn!                       # ( )
-;
-
-: _get_floor_val                # ( ds val )
-    floor                       # ( ds flr_val )
-      over                      # ( ds flr_val ds )
-      @                         # ( ds flr_val dssize )
-    %abs                        # ( ds flr_wrap )
-    DELAY_HEADER_SIZE +         # ( ds flr_wrap+dhsize )
-  +@                            # ( flr_val )
-;
-
-: _get_ceil_val                 # ( ds val )
-    ceil                        # ( ds ceil_val )
-      over                      # ( ds ceil_val ds )
-      @                         # ( ds ceil_val dssize )
-    %abs                        # ( ds ceil_wrap )
-    DELAY_HEADER_SIZE +         # ( ds ceil_wrap+dhsize )
-  +@                            # ( ceil_val )
-;
-
-: _interpolate { real_val floor_val ceil_val }
-  ceil_val floor_val -
-    real_val 1.0 %
-  *
-    floor_val
-  +
 ;
 
 : delay_read

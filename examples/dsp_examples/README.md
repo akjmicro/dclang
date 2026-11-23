@@ -37,8 +37,8 @@ Have fun!
 ## dclang2c and Bela
 
 `render_frame` words return `( left right )`; the named playback word owns the
-interpreter loop and calls `stereo_out`. The files listed below have bounded
-frame words and have compiled with `dclang2c`.
+interpreter loop and passes those samples to `_stereo_out32`. The files listed
+below have bounded frame words and have compiled with `dclang2c`.
 
 ## `dclang2c` assessment
 

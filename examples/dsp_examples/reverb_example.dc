@@ -28,8 +28,6 @@ make_reverb_struct my_reverb
 
 : reverb_example
   inf times
-    render_frame stereo_out
+    render_frame _stereo_out32
   again
 ;
-
-\n

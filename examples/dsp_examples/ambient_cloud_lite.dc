@@ -260,6 +260,6 @@ make_cloud_voice_struct voice5
 
 : ambient_cloud_lite
   inf times
-    render_frame stereo_out
+    render_frame _stereo_out32
   again
 ;

@@ -143,10 +143,8 @@ var bell_env5
   t+
 ;
 
-: bells
+: otonal_bells
   inf times
-    render_frame stereo_out
+    render_frame _stereo_out32
   again
 ;
-
-\n

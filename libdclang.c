@@ -572,6 +572,8 @@ void dclang_execute() {
     while (1) {
         goto *dispatch_table[prog[iptr].opcode];
 
+        OP_NOOP:
+            return;
         _OP_DSP_PHASOR: {
             if (data_stack_ptr < 3) {
                 return;
@@ -617,7 +619,6 @@ void dclang_execute() {
             push(wet_right);
             NEXT;
         }
-
         _OP_DSP_FM: {
             if (data_stack_ptr < 5)
                 return;
@@ -672,7 +673,6 @@ void dclang_execute() {
             push(sample);
             NEXT;
         }
-
         _OP_DSP_PORT: {
             if (data_stack_ptr < 4)
                 return;
@@ -699,9 +699,6 @@ void dclang_execute() {
         _OP_DSP_REVERB_CELLS:
             push((DCLANG_FLT)DCLANG_PHIVERB_CELLS);
             NEXT;
-
-        OP_NOOP:
-            return;
         // stack ops
         OP_PUSH:
             if (data_stack_ptr >= DATA_STACK_SIZE) {

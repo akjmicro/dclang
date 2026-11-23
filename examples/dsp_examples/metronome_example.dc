@@ -38,8 +38,6 @@ var myport
 
 : metronome_example
   inf times
-    render_frame stereo_out
+    render_frame _stereo_out32
   again
 ;
-
-\n
