@@ -43,8 +43,7 @@ create pitches  1 1  / ,
 var dummy
 var pitches_size  dummy pitches -  pitches_size !
 
-: ping_pong_delay
-  inf times
+: render_frame
     #######################################
     # simple plucked-ish repeating source #
     #######################################
@@ -81,7 +80,7 @@ var pitches_size  dummy pitches -  pitches_size !
     :DELWDT_I panmix   # left out
     drysig @ :DELDRY * rtap @ :DELWET * +
     :DELWDT   panmix   # right out
-    stereo_out
+    lcget rcget
     #############################################
     # cross-feedback:                           #
     # left gets dry injection + feedback from R #
@@ -93,7 +92,12 @@ var pitches_size  dummy pitches -  pitches_size !
     curtrig @ lasttrig !
     # Advance the sample clock
     t+
+;
+
+: ping_pong_delay
+  inf times
+    render_frame stereo_out
   again
 ;
 
-ping_pong_delay
+\n

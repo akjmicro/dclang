@@ -10,6 +10,14 @@ LIBSOOBJ = libdclang.so
 LIBTESTC = libtest.c
 HEADER = dclang.h
 PREFIX ?= /usr/local
+DSP ?= examples/dsp_examples/simple_delay_example.dc
+ENTRY ?= render_frame
+SR ?= 44100
+BELA_HOST ?= root@192.168.7.2
+BELA_HOME ?= /root/Bela
+BELA_PROJECT ?= dclang-$(basename $(notdir $(DSP)))
+DSP_C ?= /tmp/dclang2c-instrument.c
+BELA_CPPFLAGS ?= -Wno-unused-variable -Wno-unknown-pragmas -Wno-tautological-compare
 
 .PHONY: clean lib libtest
 
@@ -23,6 +31,19 @@ dclang: $(OBJECTS)
 
 dclang2c: dclang2c.c libdclang.c dclang.h dclang_dsp.h dclang_osc.h dclang_fast_math.h dclang_phiverb.h token.c $(wildcard noheap/*)
 	$(CC) $(CFLAGS) -o $@ $< $(LDFLAGS)
+
+.PHONY: dsp-c bela-build bela-run
+
+dsp-c: dclang2c
+	SR=$(SR) DCLANG_LIBS="$(CURDIR)/lib" ./dclang2c "$(DSP)" "$(ENTRY)" "$(DSP_C)"
+
+bela-build: dsp-c
+	ssh -o BatchMode=yes $(BELA_HOST) 'mkdir -p "$(BELA_HOME)/projects/$(BELA_PROJECT)"'
+	scp -q "$(DSP_C)" examples/dsp_examples/bela_render.cpp dclang_dsp.h dclang_osc.h dclang_fast_math.h dclang_phiverb.h $(BELA_HOST):"$(BELA_HOME)/projects/$(BELA_PROJECT)/"
+	ssh -o BatchMode=yes $(BELA_HOST) 'make -s -C "$(BELA_HOME)" PROJECT="$(BELA_PROJECT)" CPPFLAGS="$(BELA_CPPFLAGS)" CFLAGS="$(BELA_CPPFLAGS)"'
+
+bela-run:
+	ssh -o BatchMode=yes $(BELA_HOST) '"$(BELA_HOME)/scripts/run_project.sh" "$(BELA_PROJECT)"'
 
 main.o libdclang.o: libdclang.c dclang.h dclang_dsp.h dclang_osc.h dclang_fast_math.h dclang_phiverb.h token.c
 

@@ -3,9 +3,8 @@
 var lpmemL
 var lpmemR
 
-: fm_example
-  inf times
-    # left chn
+: render_frame
+  # left channel
           70 1 0.5
       fm 0.2 *
             70.3 1 0.1
@@ -32,9 +31,14 @@ var lpmemR
         0.7
     panmix
     # output
-    stereo_out
-    t+
+  lcget rcget
+  t+
+;
+
+: fm_example
+  inf times
+    render_frame stereo_out
   again
 ;
 
-fm_example
+\n

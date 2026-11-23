@@ -1,13 +1,15 @@
 "dsp.dc" import
 
+: render_frame
+  noise 0.5 * 0.5 panmix
+  lcget rcget
+  t+
+;
+
 : noise_example
   inf times
-      noise 0.5 *
-        0.5
-    panmix
-    stereo_out
-    t+
+    render_frame stereo_out
   again
 ;
 
-noise_example
+\n

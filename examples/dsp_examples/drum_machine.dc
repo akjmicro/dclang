@@ -215,8 +215,4 @@ _query_drum_parts
   again
 ;
 
-###########
-# Run it! #
-###########
-
-drum_machine
+\n

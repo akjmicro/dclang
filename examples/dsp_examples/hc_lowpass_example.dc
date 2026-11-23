@@ -9,8 +9,7 @@ var modwave
 var res
 var slmem
 
-: hc_lowpass_example
-  inf times
+: render_frame
     # sweeping mod
     # do from 0.08 - 0.02
     0.2 sine 200 * 600 +
@@ -30,10 +29,14 @@ var slmem
     # panning
     0.9 panmix
     # output
-    stereo_out
-    # advance time
-    t+
+  lcget rcget
+  t+
+;
+
+: hc_lowpass_example
+  inf times
+    render_frame stereo_out
   again
 ;
 
-hc_lowpass_example
+\n

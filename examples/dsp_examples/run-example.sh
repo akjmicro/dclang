@@ -9,6 +9,9 @@ then
 fi
 
 EXAMPLE="$1"
+EXAMPLE_DIR="$(cd "$(dirname "$EXAMPLE")" && pwd)"
+EXAMPLE_FILE="$(basename "$EXAMPLE")"
+cd "$EXAMPLE_DIR"
 RATE="${SR:-44100}"
 export SR="$RATE"
 CHANNELS=2
@@ -39,7 +42,7 @@ then
   fi
 
   dclang sync.dc
-  nice -19 dclang "$EXAMPLE" | tee out.raw | pw-cat -p -a \
+  nice -19 dclang -e "\"$EXAMPLE_FILE\" import ${EXAMPLE_FILE%.dc} " | tee out.raw | pw-cat -p -a \
     --rate "$RATE" \
     --channels "$CHANNELS" \
     --format "$FORMAT" \
@@ -51,7 +54,7 @@ then
   echo "PipeWire not detected; using aplay."
 
   dclang sync.dc
-  nice -19 dclang "$EXAMPLE" | tee out.raw | aplay \
+  nice -19 dclang -e "\"$EXAMPLE_FILE\" import ${EXAMPLE_FILE%.dc} " | tee out.raw | aplay \
     -r "$RATE" \
     -c "$CHANNELS" \
     -f "$FORMAT_UPPER" \
@@ -62,7 +65,7 @@ then
   echo "PipeWire and aplay not detected; using pa_play."
 
   dclang sync.dc
-  nice -19 dclang "$EXAMPLE" | tee out.raw | ./pa_play \
+  nice -19 dclang -e "\"$EXAMPLE_FILE\" import ${EXAMPLE_FILE%.dc} " | tee out.raw | ./pa_play \
     --rate "$RATE" \
     --channels "$CHANNELS" \
     --format "$FORMAT"le \

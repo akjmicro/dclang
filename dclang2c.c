@@ -185,6 +185,11 @@ static int emit_range(DCLANG_PTR start, DCLANG_PTR end, int depth,
         case OP_SUB: binary = "-"; break;
         case OP_MUL: binary = "*"; break;
         case OP_DIV: binary = "/"; break;
+        case OP_POWER:
+            require_depth(depth, 2);
+            --depth;
+            emit("s[%d] = pow(s[%d], s[%d]);\n", depth - 1, depth - 1, depth);
+            break;
         case OP_MOD:
             require_depth(depth, 2);
             --depth;
@@ -196,6 +201,26 @@ static int emit_range(DCLANG_PTR start, DCLANG_PTR end, int depth,
         case OP_GT: binary = ">"; break;
         case OP_LTE: binary = "<="; break;
         case OP_GTE: binary = ">="; break;
+        case OP_AND:
+        case OP_OR:
+        case OP_XOR: {
+            require_depth(depth, 2);
+            const char *bitop = instruction.opcode == OP_AND ? "&"
+                              : instruction.opcode == OP_OR ? "|" : "^";
+            --depth;
+            emit("s[%d] = (DCLANG_LONG)s[%d] %s (DCLANG_LONG)s[%d];\n",
+                 depth - 1, depth - 1, bitop, depth);
+            break;
+        }
+        case OP_LSHIFT:
+        case OP_RSHIFT: {
+            require_depth(depth, 2);
+            const char *shift = instruction.opcode == OP_LSHIFT ? "<<" : ">>";
+            --depth;
+            emit("s[%d] = (DCLANG_ULONG)s[%d] %s (DCLANG_ULONG)s[%d];\n",
+                 depth - 1, depth - 1, shift, depth);
+            break;
+        }
         case OP_SINE: unary = "sin"; break;
         case OP_COS: unary = "cos"; break;
         case OP_TANH: unary = "tanh"; break;
@@ -206,6 +231,7 @@ static int emit_range(DCLANG_PTR start, DCLANG_PTR end, int depth,
         case OP_ROUND: unary = "(long)round"; break;
         case OP_FLOOR: unary = "(long)floor"; break;
         case OP_CEIL: unary = "(long)ceil"; break;
+        case OP_NOT: unary = "~(DCLANG_LONG)"; break;
         default:
             for (const struct primitive *primitive = primitives; primitive->name; ++primitive)
                 if (primitive->opcode == instruction.opcode)

@@ -5,9 +5,8 @@ var myport
 0.02 tau_to_alpha const :ATT
 0.35 tau_to_alpha const :REL
 
-: metronome_example
-  inf times
-      400 sine
+: render_frame
+  400 sine
         2.01 metro
         1.2 *
           myport :ATT :REL
@@ -33,9 +32,14 @@ var myport
       *
         0.6
     panmix
-    stereo_out
-    t+
+  lcget rcget
+  t+
+;
+
+: metronome_example
+  inf times
+    render_frame stereo_out
   again
 ;
 
-metronome_example
+\n

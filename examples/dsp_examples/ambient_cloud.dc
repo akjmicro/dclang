@@ -63,7 +63,7 @@ make_dcblock       my_dcblockL
 make_dcblock       my_dcblockR
 
 : rand_dur  # ( -- seconds )
-  :NDURS randint durations swap + @
+  :NDURS randint durations swap +@
 ;
 
 : rand_fb  # ( -- fb )
@@ -72,12 +72,12 @@ make_dcblock       my_dcblockR
 
 : rand_freq  # ( -- hz )
   :NPITCHES randint
-  pitches swap + @
+  pitches swap +@
   :BASE_FREQ *
 ;
 
 : rand_comma
-  :NCOMMAS randint commas swap + @
+  :NCOMMAS randint commas swap +@
 ;
 
 : freq_pan_width  # (freq -- width)
@@ -126,96 +126,96 @@ make_dcblock       my_dcblockR
   rand_dur                   # (rand_dur)
   SAMPLE_RATE * floor        # (rand_dur_smps)
   dup                        # (rand_dur_smps rand_dur_smps)
-  cvs :rem + !               # (rand_dur_smps)
+  cvs :rem +setn!             # (rand_dur_smps)
   2 /                        # (half_smps)
   dup                        # (half_smps half_smps)
   SAMPLE_RATE / tau_to_alpha # (half_smps alpha_lag)
-  cvs :lag  + !              # (half_smps)
-  cvs :half + !              # ()
+  cvs :lag  +setn!            # (half_smps)
+  cvs :half +setn!            # ()
   rand_freq
-  dup                              cvs :freq1 + !
-  dup rand_comma *                 cvs :freq2 + !
-  rand_pan_for_freq                cvs :pan + !
-  rand_fb                          cvs :fb + !
+  dup                              cvs :freq1 +setn!
+  dup rand_comma *                 cvs :freq2 +setn!
+  rand_pan_for_freq                cvs :pan +setn!
+  rand_fb                          cvs :fb +setn!
   rand 0.25 * 0.05 +
     rand :CHANCE < abs
-  *                                cvs :vol + !
-  rand 2 * 0.01 +                  cvs :lfo_freq + !
-  rand 0.005 *                     cvs :lfo_depth + !
-  rand :CHANCE < if 1 else 0 endif cvs :active + !
+  *                                cvs :vol +setn!
+  rand 2 * 0.01 +                  cvs :lfo_freq +setn!
+  rand 0.005 *                     cvs :lfo_depth +setn!
+  rand :CHANCE < if 1 else 0 endif cvs :active +setn!
 ;
 
 : run_voice { cvs }  # cvs = cloud_voice_struct
-  cvs :active + @ 0 =
+  cvs :active +@ 0 =
   if
     cvs init_voice
   endif
   ###########################
   # Active sample countdown #
   ###########################
-  cvs :active + @
+  cvs :active +@
   if
-    cvs :rem + @ 0 >
+    cvs :rem +@ 0 >
     if
-      cvs :rem + @ 1 -
-      cvs :rem + !
+      cvs :rem +@ 1 -
+      cvs :rem +setn!
     else
-      0 cvs :active  + !
+      0 cvs :active  +setn!
     endif
   endif
   ###############################
   # Portamento envelope shaping #
   ###############################
-  cvs :rem + @ cvs :half + @ > abs # gate high for first half, low for release half
-    cvs :vol + @
+  cvs :rem +@ cvs :half +@ > abs # gate high for first half, low for release half
+    cvs :vol +@
   *
     # attack/release times are approximately half the total event
     cvs :env_mem +
-      cvs :lag + @
+      cvs :lag +@
         dup
-  port cvs :env + !
+  port cvs :env +setn!
   ###########################
   # Oscillator sound source #
   ###########################
-  cvs :lfo_freq + @ sine
-    cvs :lfo_depth + @
-  * cvs :lfo_mem + !
+  cvs :lfo_freq +@ sine
+    cvs :lfo_depth +@
+  * cvs :lfo_mem +setn!
   # osc 1
   cvs :sl_mem1 +
-    cvs :freq1 + @  cvs :lfo_mem + @ 1 + *
-      cvs :fb + @
-        cvs :env + @
+    cvs :freq1 +@  cvs :lfo_mem +@ 1 + *
+      cvs :fb +@
+        cvs :env +@
           cvs :fb_mem +
             :LAG_0p1
               dup
         port
       *
   sineloop 0.5 * tanh 0.5 tanh /
-  cvs :env + @ *
+  cvs :env +@ *
   # osc 2
   #cvs :sl_mem2 +
-  cvs :freq2 + @  cvs :lfo_mem + @ 1 + *
+  cvs :freq2 +@  cvs :lfo_mem +@ 1 + *
     1.001
-      cvs :fb + @
-        cvs :env + @
+      cvs :fb +@
+        cvs :env +@
           cvs :fb_mem +
             :LAG_0p1
               dup
         port
       *
   fm 0.5 * tanh 0.5 tanh /
-  cvs :env + @ *
+  cvs :env +@ *
   # osc 3
-  cvs :freq1 + @  cvs :lfo_mem + @ 1 + *
+  cvs :freq1 +@  cvs :lfo_mem +@ 1 + *
   sawtooth 2.0 * tanh
-  cvs :env + @ * 0.66 * :SAW_MIX *
+  cvs :env +@ * 0.66 * :SAW_MIX *
   # osc 4
-  cvs :freq2 + @  cvs :lfo_mem + @ 1 + *
+  cvs :freq2 +@  cvs :lfo_mem +@ 1 + *
   sine
-  cvs :env + @ * 0.33 *
+  cvs :env +@ * 0.33 *
   # add outputs, filter, and pan
   + + + 0.5 *
-  cvs :pan + @
+  cvs :pan +@
   panmix
 ;
 
@@ -278,4 +278,4 @@ make_cloud_voice_struct voice7
   again
 ;
 
-ambient_cloud
+\n

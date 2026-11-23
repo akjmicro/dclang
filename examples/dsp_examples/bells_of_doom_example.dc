@@ -26,8 +26,7 @@ var myport_two
   myport_two :ATT2 :REL2 port
 ;
 
-: bells_of_doom_example
-  inf times
+: render_frame
     # FM oscillator:
     230 mod_ratio_wobble 0.9 fm
     # amplitude envelope:
@@ -45,10 +44,14 @@ var myport_two
     panmix
 
     # send outputs:
-    stereo_out
-    # advance sample clock, clear channels
-    t+
+  lcget rcget
+  t+
+;
+
+: bells_of_doom_example
+  inf times
+    render_frame stereo_out
   again
 ;
 
-bells_of_doom_example
+\n

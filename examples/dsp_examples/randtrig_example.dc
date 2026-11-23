@@ -14,8 +14,7 @@ var pitch
 create choices
   7 , 8 , 9 , 10 , 11 , 12 ,
 
-: randtrig_example
-  inf times
+: render_frame
     0.02 trigval randtrig         # create a trigger
     curtrig !                     # store it
     curtrig @ lasttrig @ >        # check if it crosses a change
@@ -35,10 +34,15 @@ create choices
             :REL
       port *                      # envelope it
     0.5 panmix                    # center pan
-    stereo_out                    # send out
     curtrig @ lasttrig !          # lasttrig = curtrig
-    t+                            # update sample clock
+  lcget rcget
+  t+                            # update sample clock
+;
+
+: randtrig_example
+  inf times
+    render_frame stereo_out
   again
 ;
 
-randtrig_example
+\n

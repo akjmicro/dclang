@@ -3,8 +3,7 @@
 make_hc_filter mylp
 1 make_delay_line mydelay
 
-: ebow_example
-  inf times
+: render_frame
     # trigger, will be nozzled off:
       noise 0.5 *
         mylp
@@ -32,9 +31,14 @@ make_hc_filter mylp
         mydelay
     delay_write             # ( )
     # final output
-    stereo_out
-    t+
+  lcget rcget
+  t+
+;
+
+: ebow_example
+  inf times
+    render_frame stereo_out
   again
 ;
 
-ebow_example
+\n
