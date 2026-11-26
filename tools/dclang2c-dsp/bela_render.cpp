@@ -3,9 +3,9 @@
 #include <vector>
 
 extern "C" void dclang2c_init(void);
-extern "C" void dclang2c_render(double *output, size_t frames);
+extern "C" void dclang2c_render(float *output, size_t frames);
 
-static std::vector<double> block;
+static std::vector<float> block;
 
 bool setup(BelaContext *context, void *)
 {

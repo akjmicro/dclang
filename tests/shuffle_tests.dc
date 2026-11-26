@@ -1,0 +1,23 @@
+"shuffle.dc" import
+
+create shuffle_test_cells
+  0 , 1 , 2 , 3 , 4 , 5 , 6 , 7 ,
+
+: shuffled_mask
+  0
+  8 0 1 for
+    shuffle_test_cells i + @
+    1 swap << or
+  next
+;
+
+# Shuffling may produce any order, but every original cell must occur exactly
+# once. Since the inputs are 0..7, their bit mask must remain 0xff.
+shuffle_test_cells 8 shuffle_cells
+shuffled_mask 0xff = assert
+
+# A single-cell shuffle is a no-op and remains stack-balanced.
+shuffle_test_cells 1 shuffle_cells
+shuffle_test_cells @
+dup 0 >= assert
+7 <= assert

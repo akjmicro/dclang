@@ -7,14 +7,14 @@ var myport
 make_reverb_struct my_reverb
 
 : render_frame
-      noise 0.87 *
+      noise 0.87 f*
         lpmem1 0.37
       lowpass
-        0.01 0.34 rand 0.14 * 0.14 + - gate
+        0.01 0.34 frand 0.14 f* 0.14 f+ f- gate
           myport :ATT :REL
         port
-      *
-      0.5 *
+      f*
+      0.5 f*
     0.5 panmix
       lchan @ rchan @
         my_reverb
@@ -27,7 +27,6 @@ make_reverb_struct my_reverb
 ;
 
 : reverb_example
-  inf times
-    render_frame _stereo_out32
-  again
+  render_frame stereo_out
+  reverb_example
 ;

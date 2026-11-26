@@ -9,38 +9,38 @@ var myport_two
 0.71 tau_to_alpha const :REL2
 
 : mod_ratio_wobble
-  6.37 sine 0.015 * 0.5723 +
+  6.37 sine 0.015 f* 0.5723 f+
 ;
 
 : trigger_env-1
   # trigger for portamento envelope
-  0.2 metro 0.35 *
+  0.2 metro 0.35 f*
   # reference array for port and portamento call
   myport :ATT1 :REL1 port
 ;
 
 : trigger_env-2
   # trigger for 2nd portamento envelope
-  0.5 metro 0.4 *
+  0.5 metro 0.4 f*
   # reference array for port and portamento call
   myport_two :ATT2 :REL2 port
 ;
 
 : render_frame
     # FM oscillator:
-    230 mod_ratio_wobble 0.9 fm
+    230.0 mod_ratio_wobble 0.9 fm
     # amplitude envelope:
-    trigger_env-1 *
+    trigger_env-1 f*
     # moving pan signal
-    0.23 sine 1 + 0.15 * 0.75 +
+    0.23 sine 1.0 f+ 0.15 f* 0.75 f+
     panmix
 
     # another FM oscillator:
-    164 0.7 0.9 fm
+    164.0 0.7 0.9 fm
     # amplitude envelope:
-    trigger_env-2 *
+    trigger_env-2 f*
     # another moving pan signal:
-    0.1 sine 1 + 0.15 * 0.25 +
+    0.1 sine 1.0 f+ 0.15 f* 0.25 f+
     panmix
 
     # send outputs:
@@ -49,7 +49,6 @@ var myport_two
 ;
 
 : bells_of_doom_example
-  inf times
-    render_frame _stereo_out32
-  again
+  render_frame stereo_out
+  bells_of_doom_example
 ;

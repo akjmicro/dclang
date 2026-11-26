@@ -5,26 +5,26 @@ var lpmemR
 
 : render_frame
   # left channel
-          70 1 0.5
-      fm 0.2 *
-            70.3 1 0.1
-                   sine 3 *
-                   6.1 +
-        fm 0.017 *
-      + 0.75 * tanh
+          70.0 1.0 0.5
+      fm 0.2 f*
+            70.3 1.0 0.1
+                   sine 3.0 f*
+                   6.1 f+
+        fm 0.017 f*
+      f+ 0.75 f* ftanh
         lpmemL
           0.75
       lowpass
         0.3
     panmix
     # right chn
-          70.523 1 0.5
-      fm 0.2 *
-            70.533 3 0.1
-                     sine 3 *
-                     6.1 +
-        fm 0.017 *
-      + 0.75 * tanh
+          70.523 1.0 0.5
+      fm 0.2 f*
+            70.533 3.0 0.1
+                     sine 3.0 f*
+                     6.1 f+
+        fm 0.017 f*
+      f+ 0.75 f* ftanh
         lpmemR
           0.75
       lowpass
@@ -36,7 +36,6 @@ var lpmemR
 ;
 
 : fm_example
-  inf times
-    render_frame _stereo_out32
-  again
+  render_frame stereo_out
+  fm_example
 ;

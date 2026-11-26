@@ -1,6 +1,6 @@
 "digit_sum: need <number> and <base> on the stack!" const :DIGIT_SUM_ERROR
 
-: isneg 1 swap / 0 < ;
+: isneg 0 < ;
 
 : absmod
   dup svpush
@@ -15,7 +15,7 @@
 
 : divmod
   2dup % svpush
-  / floor svpop
+  / svpop
 ;
 
 : bounce { n lower upper }
@@ -58,7 +58,7 @@
     dup svpush
     2dup %
     svpush
-    / floor
+    /
     swap svpop
     +
     swap svpop
@@ -139,8 +139,8 @@
 
 : check-higher-than-49
   dup                             # n n
-  sqrt ceil 1 +  6 /              # n n
-  ceil 6 * 12 6 for
+  i>f fsqrt fceil f>i 1 +         # n search-limit
+  5 + 6 / 6 * 12 6 for
     dup i 1 - % 0 =
     over i 1 + % 0 =
     or if
@@ -189,12 +189,11 @@
 ;
 
 : find-next-prime { direction x }
-  inf times
-    x direction + dup is-prime if
-      exittimes return
-    else
-      x! again
-    endif
+  x direction + dup is-prime if
+    return
+  else
+    direction swap find-next-prime
+  endif
 ;
 
 : closest-prime { x }

@@ -86,7 +86,13 @@ var midi_channel_last_note 16 allot
   setout
 ;
 
-check_mididev
+: _maybe_check_mididev
+  "DCLANG_NO_MIDI" envget 0 = if
+    check_mididev
+  endif
+;
+
+_maybe_check_mididev
 
 # update midictl state by polling for incoming messages
 : refresh_midictl
@@ -295,7 +301,7 @@ var current_midi_timestamp
   mfp read_var_length drop
   :TimeSig print :space print
   mfp _read_midi_byte .
-  2 mfp _read_midi_byte pow .
+  1 mfp _read_midi_byte << .
   mfp _read_midi_byte .
   mfp _read_midi_byte . cr
 ;

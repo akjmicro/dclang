@@ -1,33 +1,33 @@
 "dsp.dc" import
 
 make_hc_filter mylp
-1 make_delay_line mydelay
+1.0 make_delay_line mydelay
 
 : render_frame
     # trigger, will be nozzled off:
-      noise 0.5 *
+      noise 0.5 f*
         mylp
-          768
+          768.0
             0.3
       hc_lowpass
-      0.9 *
+      0.9 f*
         0.333
           0.1
         gate
-        0.5 *
-      *
+        0.5 f*
+      f*
         0.3 phasor
-      *
+      f*
     # filtered noise fed into a delay line resonator
         mydelay
-          1 256 /
+          1.0 256.0 f/
         delay_read
-        0.9999999 *         # ( dry wet )
-      +                     # ( dry+wet )
+        0.9999999 f*        # ( dry wet )
+      f+                    # ( dry+wet )
         dup                 # ( dry+wet dry+wet )
         0.5 panmix          # ( dry+wet )
     # mix for delay_write
-      0.99 *                # ((dry+wet)*0.95)
+      0.99 f*               # ((dry+wet)*0.95)
         mydelay
     delay_write             # ( )
     # final output
@@ -36,7 +36,6 @@ make_hc_filter mylp
 ;
 
 : ebow_example
-  inf times
-    render_frame _stereo_out32
-  again
+  render_frame stereo_out
+  ebow_example
 ;

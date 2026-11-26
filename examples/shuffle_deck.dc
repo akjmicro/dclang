@@ -69,7 +69,7 @@ var suit_data 4 allot
         -1
     for
       i deck +
-      rand i * floor deck +
+      frand i i>f f* ffloor deck +
       _cell_swap
   next
 ;
@@ -94,12 +94,12 @@ var suit_data 4 allot
 
 : _get_rank_slice
   deck + @
-  dup 100 / floor 100 * -
+  dup 100 / 100 * -
   2 -
 ;
 
 : _get_suit_slice
-  deck + @ 100 / floor
+  deck + @ 100 /
   1 -
 ;
 
@@ -171,14 +171,14 @@ var simulation_data 10 allot
 
 : _show_simulation_data
   "We ran " print SIMULATIONS . "simulated shuffles. Here are the results:" print cr
-  "One pair:        " print simulation_data PAIR_SLOT            + @ WIDTH PRECISION .rj cr
-  "Two pair:        " print simulation_data TWO_PAIR_SLOT        + @ WIDTH PRECISION .rj cr
-  "Three-of-a-kind: " print simulation_data THREE_OF_A_KIND_SLOT + @ WIDTH PRECISION .rj cr
-  "Straight:        " print simulation_data STRAIGHT_SLOT        + @ WIDTH PRECISION .rj cr
-  "Flush:           " print simulation_data FLUSH_SLOT           + @ WIDTH PRECISION .rj cr
-  "Full House:      " print simulation_data FULL_HOUSE_SLOT      + @ WIDTH PRECISION .rj cr
-  "Four-of-a-kind:  " print simulation_data FOUR_OF_A_KIND_SLOT  + @ WIDTH PRECISION .rj cr
-  "Straight flush:  " print simulation_data STRAIGHT_FLUSH_SLOT  + @ WIDTH PRECISION .rj cr
+  "One pair:        " print simulation_data PAIR_SLOT            + @ i>f WIDTH PRECISION f.rj cr
+  "Two pair:        " print simulation_data TWO_PAIR_SLOT        + @ i>f WIDTH PRECISION f.rj cr
+  "Three-of-a-kind: " print simulation_data THREE_OF_A_KIND_SLOT + @ i>f WIDTH PRECISION f.rj cr
+  "Straight:        " print simulation_data STRAIGHT_SLOT        + @ i>f WIDTH PRECISION f.rj cr
+  "Flush:           " print simulation_data FLUSH_SLOT           + @ i>f WIDTH PRECISION f.rj cr
+  "Full House:      " print simulation_data FULL_HOUSE_SLOT      + @ i>f WIDTH PRECISION f.rj cr
+  "Four-of-a-kind:  " print simulation_data FOUR_OF_A_KIND_SLOT  + @ i>f WIDTH PRECISION f.rj cr
+  "Straight flush:  " print simulation_data STRAIGHT_FLUSH_SLOT  + @ i>f WIDTH PRECISION f.rj cr
 ;
 
 ############################################################

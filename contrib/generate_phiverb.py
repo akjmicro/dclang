@@ -51,7 +51,7 @@ def postprocess(source):
         "/* ------------------------------------------------------------",
         "/* Generated from Aaron Krister Johnson's phiverb.lib. The UI and metadata\n"
         " * entry points were removed so this header can serve the interpreter and\n"
-        " * standalone dclang2c output without a Faust architecture dependency.\n"
+        " * standalone dclang2c-dsp output without a Faust architecture dependency.\n"
         " * ------------------------------------------------------------",
         1,
     )

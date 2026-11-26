@@ -28,16 +28,23 @@ static inline double dclang_fast_sin_unit(double phase)
 
 static inline double dclang_fast_sin(double radians)
 {
+#ifdef DCLANG_MATH_NEON
+    return (double)sinf_neon((float)radians);
+#else
     double phase = radians * DCLANG_FAST_INV_TWO_PI;
     if (!(phase > -1.0 && phase < 1.0))
         phase = fmod(phase, 1.0);
     return dclang_fast_sin_unit(phase);
+#endif
 }
 
 /* [7/6] Pade approximation with explicit saturation. Maximum absolute
  * error on [-4, 4] is about 6.71e-4 and is much smaller near the origin. */
 static inline double dclang_fast_tanh(double x)
 {
+#ifdef DCLANG_MATH_NEON
+    return (double)tanhf_neon((float)x);
+#else
     if (x <= -4.0)
         return -1.0;
     if (x >= 4.0)
@@ -48,6 +55,7 @@ static inline double dclang_fast_tanh(double x)
     double denominator = 135135.0
         + square * (62370.0 + square * (3150.0 + 28.0 * square));
     return numerator / denominator;
+#endif
 }
 
 #endif

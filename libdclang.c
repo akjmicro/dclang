@@ -10,6 +10,78 @@ Born on 2018-05-05 */
 
 // BEGIN HELPERS
 
+static void dclang_print_float(FILE *stream, DCLANG_FLT value, int trailing_space) {
+    char buffer[64];
+    snprintf(buffer, sizeof buffer, "%0.19g", (double)value);
+    fputs(buffer, stream);
+    if (isfinite(value) && strchr(buffer, '.') == NULL &&
+        strchr(buffer, 'e') == NULL && strchr(buffer, 'E') == NULL)
+        fputs(".0", stream);
+    if (trailing_space)
+        fputc(' ', stream);
+}
+
+static int dclang_number_finished(const char *start, char *end) {
+    if (end == start)
+        return 0;
+    while (isspace((unsigned char)*end))
+        ++end;
+    return *end == '\0';
+}
+
+static int dclang_parse_number(const char *token, DCLANG_CELL *number) {
+    char *end = NULL;
+    while (isspace((unsigned char)*token))
+        ++token;
+    const char *unsigned_token =
+        token[0] == '-' || token[0] == '+' ? token + 1 : token;
+    int is_float = strchr(token, '.') != NULL ||
+        (strncasecmp(unsigned_token, "0x", 2) != 0 &&
+         strpbrk(token, "eE") != NULL);
+
+    errno = 0;
+    if (is_float) {
+        DCLANG_FLT floating =
+#if UINTPTR_MAX == UINT64_MAX
+            strtod(token, &end);
+#else
+            strtof(token, &end);
+#endif
+        if (!dclang_number_finished(token, end) || errno == ERANGE)
+            return 0;
+        *number = dclang_float_to_cell(floating);
+        return 1;
+    }
+    if (token[0] == '-') {
+        intmax_t integer = strtoimax(token, &end, 0);
+        if (!dclang_number_finished(token, end) || errno == ERANGE ||
+            integer < INTPTR_MIN || integer > INTPTR_MAX)
+            return 0;
+        *number = (DCLANG_CELL)(intptr_t)integer;
+        return 1;
+    }
+
+    uintmax_t integer = strtoumax(token, &end, 0);
+    if (!dclang_number_finished(token, end) || errno == ERANGE ||
+        integer > UINTPTR_MAX)
+        return 0;
+    *number = (DCLANG_CELL)integer;
+    return 1;
+}
+
+static int dclang_midi_initialize(void) {
+    if (!midi_initialized) {
+        midi_initialize_status = Pm_Initialize();
+        midi_initialized = 1;
+        if (midi_initialize_status < 0) {
+            fprintf(stderr, "PortMidi initialization failed: %s (%d)\n",
+                    Pm_GetErrorText(midi_initialize_status),
+                    midi_initialize_status);
+        }
+    }
+    return midi_initialize_status == pmNoError;
+}
+
 // Input pointer handling
 
 void setinput(FILE *fp) {
@@ -82,7 +154,7 @@ DCLANG_LONG dclang_import(char *infilestr) {
     return -1;
 }
 
-DCLANG_FLT dclang_pop() {
+DCLANG_CELL dclang_pop() {
 // special case -- has a return value b/c it can
 // be used in other calls to give a value, which
 // also means it can be an API call.
@@ -91,15 +163,25 @@ DCLANG_FLT dclang_pop() {
 
 // helper functions for sorting
 
-int compare_doubles (const void *a, const void *b) {
-    const double *da = (const double *) a;
-    const double *db = (const double *) b;
-    return (*da > *db) - (*da < *db);
+int compare_cells (const void *a, const void *b) {
+    intptr_t ia = (intptr_t)*(const DCLANG_CELL *)a;
+    intptr_t ib = (intptr_t)*(const DCLANG_CELL *)b;
+    return (ia > ib) - (ia < ib);
+}
+
+int compare_float_cells(const void *a, const void *b) {
+    DCLANG_FLT fa = dclang_cell_to_float(*(const DCLANG_CELL *)a);
+    DCLANG_FLT fb = dclang_cell_to_float(*(const DCLANG_CELL *)b);
+    if (isnan(fa))
+        return isnan(fb) ? 0 : 1;
+    if (isnan(fb))
+        return -1;
+    return (fa > fb) - (fa < fb);
 }
 
 int compare_strings (const void *a, const void *b) {
-    const char *sa = (const char *) (DCLANG_PTR) * (DCLANG_FLT *) a;
-    const char *sb = (const char *) (DCLANG_PTR) * (DCLANG_FLT *) b;
+    const char *sa = (const char *) *(const DCLANG_CELL *)a;
+    const char *sb = (const char *) *(const DCLANG_CELL *)b;
     return strcmp(sa, sb);
 }
 
@@ -108,7 +190,7 @@ int compare_strings (const void *a, const void *b) {
 // helper functions for trees
 
 struct tree_entry *
-make_tree_entry(char *key, DCLANG_FLT value) {
+make_tree_entry(char *key, DCLANG_CELL value) {
     struct tree_entry *new_tree =
         (struct tree_entry *) dclang_malloc(sizeof(struct tree_entry));
     if(!new_tree) {
@@ -172,6 +254,7 @@ void reverse_array(DCLANG_PTR arr[], int n) {
 
 static unsigned char audio_outbuf[AUDIO_OUTBUF_SIZE];
 static size_t audio_outbuf_pos = 0;
+static int audio_flush_registered = 0;
 
 static void audio_flush(void)
 {
@@ -316,7 +399,8 @@ void dclang_execute() {
     void *hvalue, *confirm;
     FILE *file;
     DCLANG_INT arrsize, precision, width, bufsize, i, ch, regex_flags, fd, sockfd, portno, rc, osclen, oscval_i;
-    DCLANG_FLT value, val, val1, val2, a, b, c, tree_val, oscval_f;
+    DCLANG_CELL value, val, val1, val2, tree_val;
+    DCLANG_FLT a, b, c, oscval_f;
     DCLANG_LONG slot, truth, result, midi_status, midi_data1, midi_data2;
     DCLANG_PTR arrstart, env_key_addr, key_addr, idx, offset, next_var, size, tree_idx, \
                list_ptr, str_ptr_addr, str_ptr_addr2, dest, delim, buflen, strpt, bufaddr, num_bytes;
@@ -347,7 +431,13 @@ void dclang_execute() {
         &&OP_SVDEPTH,
         &&OP_SVCLEAR,
         &&OP_SHOW,
+        &&OP_SHOWUNSIGNED,
+        &&OP_SHOWFLOAT,
         &&OP_SHOWNOSPACE,
+        &&OP_SHOWUNSIGNEDNOSPACE,
+        &&OP_SHOWFLOATNOSPACE,
+        &&OP_SHOWINTRJ,
+        &&OP_SHOWUNSIGNEDRJ,
         &&OP_SHOWRJ,
         &&OP_SHOWPZ,
         &&OP_SHOWSTACK,
@@ -360,6 +450,12 @@ void dclang_execute() {
         &&OP_GT,
         &&OP_LTE,
         &&OP_GTE,
+        &&OP_FEQ,
+        &&OP_FNOTEQ,
+        &&OP_FLT,
+        &&OP_FGT,
+        &&OP_FLTE,
+        &&OP_FGTE,
         &&OP_ASSERT,
         &&OP_AND,
         &&OP_OR,
@@ -370,14 +466,27 @@ void dclang_execute() {
         &&OP_ADD,
         &&OP_SUB,
         &&OP_MUL,
+        &&OP_MULDIV,
+        &&OP_MULDIVMOD,
         &&OP_DIV,
         &&OP_MOD,
+        &&OP_DIVMOD,
         &&OP_ABS,
         &&OP_MIN,
         &&OP_MAX,
+        &&OP_FADD,
+        &&OP_FSUB,
+        &&OP_FMUL,
+        &&OP_FDIV,
+        &&OP_FMOD,
+        &&OP_FABS,
+        &&OP_FMIN,
+        &&OP_FMAX,
         &&OP_ROUND,
         &&OP_CEIL,
         &&OP_FLOOR,
+        &&OP_ITOF,
+        &&OP_FTOI,
         &&OP_POWER,
         &&OP_SQRT,
         &&OP_EXP,
@@ -413,6 +522,7 @@ void dclang_execute() {
         &&OP_ENVSET,
         &&OP_ENVGET,
         &&OP_SORTNUMS,
+        &&OP_SORTFLOATS,
         &&OP_SORTSTRS,
         &&OP_HASHSET,
         &&OP_HASHGET,
@@ -452,6 +562,10 @@ void dclang_execute() {
         &&OP_GET_LOCAL,
         &&OP_RETURN,
         &&OP_CLOCK,
+        &&OP_MONOCLOCK,
+        &&_OP_CLOCK_ADD,
+        &&_OP_CLOCK_MOD,
+        &&_OP_SLEEP_UNTIL,
         &&OP_EPOCH,
         &&OP_EPOCH_TO_DT,
         &&OP_DT_TO_EPOCH,
@@ -563,141 +677,196 @@ void dclang_execute() {
         &&_OP_DSP_SINELOOP,
         &&_OP_DSP_TRI,
         &&_OP_DSP_SAWTOOTH,
+        &&_OP_DSP_WAVETABLE,
         &&_OP_DSP_PORT,
         &&_OP_DSP_FAST_SIN,
         &&_OP_DSP_FAST_TANH,
         &&_OP_DSP_REVERB_CELLS
     };
-
     while (1) {
         goto *dispatch_table[prog[iptr].opcode];
 
         OP_NOOP:
             return;
         _OP_DSP_PHASOR: {
-            if (data_stack_ptr < 3) {
+            if (data_stack_ptr < 4) {
                 return;
             }
-            DCLANG_FLT count = POP;
-            DCLANG_FLT base = POP;
-            DCLANG_FLT step = POP;
-            DCLANG_FLT old_phase;
-            if (!dclang_phase_step(vars, NUMVARS, step, base, count, &old_phase)) {
+            DCLANG_FLT count = (DCLANG_FLT)POP;
+            DCLANG_FLT base = (DCLANG_FLT)POP;
+            DCLANG_FLT sample_rate = dclang_cell_to_float(POP);
+            DCLANG_FLT hz = dclang_cell_to_float(POP);
+            uint32_t old_phase;
+            if (!dclang_phase_step(vars, NUMVARS, hz, sample_rate, base, count, &old_phase)) {
+                fprintf(stderr, "_phasor -- invalid DSP state (hz=%g, sample_rate=%g, base=%g, count=%g)\n",
+                        (double)hz, (double)sample_rate, (double)base, (double)count);
                 return;
             }
-            push(old_phase);
+            push(dclang_float_to_cell((DCLANG_FLT)dclang_phase_unit(old_phase)));
             NEXT;
         }
         _OP_DSP_DELAY: {
             if (data_stack_ptr < 2) {
                 return;
             }
-            DCLANG_FLT distance = POP;
-            DCLANG_FLT base = POP;
+            DCLANG_FLT distance = dclang_cell_to_float(POP);
+            DCLANG_FLT base = (DCLANG_FLT)POP;
             DCLANG_FLT sample;
             if (!dclang_delay_sample(vars, NUMVARS, base, distance, &sample)) {
+                fprintf(stderr, "_delay -- invalid DSP state (base=%g, distance=%g)\n",
+                        (double)base, (double)distance);
                 return;
             }
-            push(sample);
+            push(dclang_float_to_cell(sample));
             NEXT;
         }
         _OP_DSP_REVERB: {
             if (data_stack_ptr < 6) {
                 return;
             }
-            DCLANG_FLT sample_rate = POP;
-            DCLANG_FLT feedback = POP;
-            DCLANG_FLT cutoff = POP;
-            DCLANG_FLT base_arg = POP;
-            DCLANG_FLT right = POP;
-            DCLANG_FLT left = POP;
+            DCLANG_FLT sample_rate = dclang_cell_to_float(POP);
+            DCLANG_FLT feedback = dclang_cell_to_float(POP);
+            DCLANG_FLT cutoff = dclang_cell_to_float(POP);
+            DCLANG_FLT base_arg = (DCLANG_FLT)POP;
+            DCLANG_FLT right = dclang_cell_to_float(POP);
+            DCLANG_FLT left = dclang_cell_to_float(POP);
             double wet_left, wet_right;
             if (!dclang_reverb_sample(vars, NUMVARS, left, right, base_arg, cutoff,
-                                      feedback, sample_rate, &wet_left, &wet_right))
+                                      feedback, sample_rate, &wet_left, &wet_right)) {
+                fprintf(stderr, "_reverb -- invalid DSP state (base=%g, cutoff=%g, feedback=%g, sample_rate=%g)\n",
+                        base_arg, cutoff, feedback, sample_rate);
                 return;
-            push(wet_left);
-            push(wet_right);
+            }
+            push(dclang_float_to_cell(wet_left));
+            push(dclang_float_to_cell(wet_right));
             NEXT;
         }
         _OP_DSP_FM: {
-            if (data_stack_ptr < 5)
+            if (data_stack_ptr < 8)
                 return;
-            double count = POP;
-            double base = POP;
-            double index = POP;
-            double modulator_step = POP;
-            double carrier_step = POP;
+            double count = (double)POP;
+            double base = (double)POP;
+            double table_length = (double)POP;
+            double table = (double)POP;
+            double sample_rate = dclang_cell_to_float(POP);
+            double index = dclang_cell_to_float(POP);
+            double modulator_hz = dclang_cell_to_float(POP);
+            double carrier_hz = dclang_cell_to_float(POP);
             double sample;
-            if (!dclang_fm_sample(vars, NUMVARS, carrier_step, modulator_step, index,
-                                  base, count, &sample))
+            if (!dclang_fm_sample(vars, NUMVARS, carrier_hz, modulator_hz, index,
+                                  sample_rate, table, table_length, base, count, &sample)) {
+                fprintf(stderr, "_fm -- invalid DSP state\n");
                 return;
-            push(sample);
+            }
+            push(dclang_float_to_cell(sample));
             NEXT;
         }
         _OP_DSP_SINELOOP: {
-            if (data_stack_ptr < 5)
+            if (data_stack_ptr < 8)
                 return;
-            double count = POP;
-            double base = POP;
-            double feedback = POP;
-            double step = POP;
-            double address = POP;
+            double count = (double)POP;
+            double base = (double)POP;
+            double table_length = (double)POP;
+            double table = (double)POP;
+            double sample_rate = dclang_cell_to_float(POP);
+            double feedback = dclang_cell_to_float(POP);
+            double hz = dclang_cell_to_float(POP);
+            double address = (double)POP;
             double sample;
-            if (!dclang_sineloop_sample(vars, NUMVARS, address, step, feedback,
-                                        base, count, &sample))
+            if (!dclang_sineloop_sample(vars, NUMVARS, address, hz, feedback,
+                                        sample_rate, table, table_length, base, count, &sample)) {
+                fprintf(stderr, "_sineloop -- invalid DSP state\n");
                 return;
-            push(sample);
+            }
+            push(dclang_float_to_cell(sample));
             NEXT;
         }
         _OP_DSP_TRI: {
-            if (data_stack_ptr < 3)
+            if (data_stack_ptr < 4)
                 return;
-            double count = POP;
-            double base = POP;
-            double step = POP;
+            double count = (double)POP;
+            double base = (double)POP;
+            double sample_rate = dclang_cell_to_float(POP);
+            double hz = dclang_cell_to_float(POP);
             double sample;
-            if (!dclang_tri_sample(vars, NUMVARS, step, base, count, &sample))
+            if (!dclang_tri_sample(vars, NUMVARS, hz, sample_rate, base, count, &sample))
+            {
+                fprintf(stderr, "_tri -- invalid DSP state (step=%g, base=%g, count=%g)\n",
+                        hz, base, count);
                 return;
-            push(sample);
+            }
+            push(dclang_float_to_cell(sample));
             NEXT;
         }
         _OP_DSP_SAWTOOTH: {
-            if (data_stack_ptr < 3)
+            if (data_stack_ptr < 4)
                 return;
-            double count = POP;
-            double base = POP;
-            double step = POP;
+            double count = (double)POP;
+            double base = (double)POP;
+            double sample_rate = dclang_cell_to_float(POP);
+            double hz = dclang_cell_to_float(POP);
             double sample;
-            if (!dclang_sawtooth_sample(vars, NUMVARS, step, base, count, &sample))
+            if (!dclang_sawtooth_sample(vars, NUMVARS, hz, sample_rate, base, count, &sample))
+            {
+                fprintf(stderr, "_sawtooth -- invalid DSP state (step=%g, base=%g, count=%g)\n",
+                        hz, base, count);
                 return;
-            push(sample);
+            }
+            push(dclang_float_to_cell(sample));
+            NEXT;
+        }
+        _OP_DSP_WAVETABLE: {
+            if (data_stack_ptr < 7)
+                return;
+            double count = (double)POP;
+            double base = (double)POP;
+            double table_length = (double)POP;
+            double table = (double)POP;
+            double sample_rate = dclang_cell_to_float(POP);
+            double phase_offset = dclang_cell_to_float(POP);
+            double hz = dclang_cell_to_float(POP);
+            double sample;
+            if (!dclang_wavetable_sample(vars, NUMVARS, hz, phase_offset, sample_rate, table,
+                                         table_length, base, count, &sample)) {
+                fprintf(stderr, "_wavetable -- invalid DSP state\n");
+                return;
+            }
+            push(dclang_float_to_cell(sample));
             NEXT;
         }
         _OP_DSP_PORT: {
             if (data_stack_ptr < 4)
                 return;
-            double fall = POP;
-            double rise = POP;
-            double address = POP;
-            double signal = POP;
+            double fall = dclang_cell_to_float(POP);
+            double rise = dclang_cell_to_float(POP);
+            double address = (double)POP;
+            double signal = dclang_cell_to_float(POP);
             double sample;
             if (!dclang_port_sample(vars, NUMVARS, signal, address, rise, fall, &sample))
+            {
+                fprintf(stderr, "_port -- invalid DSP state (signal=%g, memory=%g, rise=%g, fall=%g)\n",
+                        signal, address, rise, fall);
                 return;
-            push(sample);
+            }
+            push(dclang_float_to_cell(sample));
             NEXT;
         }
         _OP_DSP_FAST_SIN:
             if (data_stack_ptr < 1)
                 return;
-            push(dclang_fast_sin(POP));
+            push(dclang_float_to_cell(dclang_fast_sin(dclang_cell_to_float(POP))));
             NEXT;
         _OP_DSP_FAST_TANH:
             if (data_stack_ptr < 1)
                 return;
-            push(dclang_fast_tanh(POP));
+            push(dclang_float_to_cell(dclang_fast_tanh(dclang_cell_to_float(POP))));
             NEXT;
         _OP_DSP_REVERB_CELLS:
-            push((DCLANG_FLT)DCLANG_PHIVERB_CELLS);
+#ifdef DCLANG_REVERB_CELL_COUNT
+            push((DCLANG_CELL)DCLANG_REVERB_CELL_COUNT);
+#else
+            push((DCLANG_CELL)DCLANG_PHIVERB_CELLS);
+#endif
             NEXT;
         // stack ops
         OP_PUSH:
@@ -781,7 +950,7 @@ void dclang_execute() {
             NEXT;
         OP_DEPTH:
             size = data_stack_ptr;
-            push((DCLANG_FLT)size);
+            push((DCLANG_CELL)size);
             NEXT;
         OP_CLEAR:
             // clears the stack!
@@ -812,7 +981,7 @@ void dclang_execute() {
                return;
           }
           DCLANG_PTR sincn_idx = (DCLANG_PTR)POP;
-          DCLANG_FLT sincn_val = (DCLANG_PTR)POP;
+          DCLANG_CELL sincn_val = POP;
           if (data_stack_ptr < (sincn_idx + 1)) {
               printf("sincn -- stack not deep enough!\n");
               return;
@@ -825,7 +994,7 @@ void dclang_execute() {
                  return;
             }
             DCLANG_PTR ssetn_idx = (DCLANG_PTR)POP;
-            DCLANG_FLT ssetn_val = (DCLANG_PTR)POP;
+            DCLANG_CELL ssetn_val = POP;
             if (data_stack_ptr < (ssetn_idx + 1)) {
                 printf("ssetn -- stack not deep enough!\n");
                 return;
@@ -872,7 +1041,7 @@ void dclang_execute() {
             NEXT;
         OP_SVDEPTH:
             size = save_data_stack_ptr;
-            data_stack[data_stack_ptr++] = (DCLANG_FLT)size;
+            data_stack[data_stack_ptr++] = (DCLANG_CELL)size;
             NEXT;
         OP_SVCLEAR:
             // clears the stack!
@@ -881,45 +1050,100 @@ void dclang_execute() {
         // stack display primitives
         OP_SHOW:
             if (data_stack_ptr < 1) {
-                printf(". (pop) -- stack underflow! ");
+                printf(". -- stack underflow; needs <value>\n");
                 return;
             }
-            val = data_stack[--data_stack_ptr];
-            fprintf(ofp, "%0.19g ", val);
+            fprintf(ofp, "%" PRIdPTR " ",
+                    (intptr_t)data_stack[--data_stack_ptr]);
+            fflush(ofp);
+            NEXT;
+        OP_SHOWUNSIGNED:
+            if (data_stack_ptr < 1) {
+                printf("u. -- stack underflow; needs <value>\n");
+                return;
+            }
+            fprintf(ofp, "%" PRIuPTR " ", data_stack[--data_stack_ptr]);
+            fflush(ofp);
+            NEXT;
+        OP_SHOWFLOAT:
+            if (data_stack_ptr < 1) {
+                printf("f. -- stack underflow; needs <float>\n");
+                return;
+            }
+            dclang_print_float(ofp,
+                               dclang_cell_to_float(data_stack[--data_stack_ptr]),
+                               1);
             fflush(ofp);
             NEXT;
         OP_SHOWNOSPACE:
             if (data_stack_ptr < 1) {
-                printf("stack underflow! ");
+                printf(".. -- stack underflow; needs <value>\n");
                 return;
             }
-            val = data_stack[--data_stack_ptr];
-            fprintf(ofp, "%0.19g", val);
+            fprintf(ofp, "%" PRIdPTR, (intptr_t)data_stack[--data_stack_ptr]);
+            fflush(ofp);
+            NEXT;
+        OP_SHOWUNSIGNEDNOSPACE:
+            if (data_stack_ptr < 1) {
+                printf("u.. -- stack underflow; needs <value>\n");
+                return;
+            }
+            fprintf(ofp, "%" PRIuPTR, data_stack[--data_stack_ptr]);
+            fflush(ofp);
+            NEXT;
+        OP_SHOWFLOATNOSPACE:
+            if (data_stack_ptr < 1) {
+                printf("f.. -- stack underflow; needs <float>\n");
+                return;
+            }
+            dclang_print_float(ofp,
+                               dclang_cell_to_float(data_stack[--data_stack_ptr]),
+                               0);
+            fflush(ofp);
+            NEXT;
+        OP_SHOWINTRJ:
+            if (data_stack_ptr < 2) {
+                printf(".rj -- stack underflow; needs <value> <width>\n");
+                return;
+            }
+            width = (DCLANG_LONG)POP;
+            fprintf(ofp, "%*" PRIdPTR " ", width, (intptr_t)POP);
+            fflush(ofp);
+            NEXT;
+        OP_SHOWUNSIGNEDRJ:
+            if (data_stack_ptr < 2) {
+                printf("u.rj -- stack underflow; needs <value> <width>\n");
+                return;
+            }
+            width = (DCLANG_LONG)POP;
+            fprintf(ofp, "%*" PRIuPTR " ", width, POP);
             fflush(ofp);
             NEXT;
         OP_SHOWRJ:
             if (data_stack_ptr < 3) {
-                printf("Stack underflow! '.rj' needs: value, width, precision on the stack\n");
+                printf("f.rj -- stack underflow; needs <value> <width> <precision> on the stack\n");
                 return;
             }
             // right-justified for pretty printing!
             precision = (DCLANG_LONG)POP;
             width = (DCLANG_LONG)POP;
-            fprintf(ofp, "%*.*f ", width, precision, POP);
+            fprintf(ofp, "%*.*f ", width, precision,
+                    (double)dclang_cell_to_float(POP));
             fflush(ofp);
             NEXT;
         OP_SHOWPZ:
             // left pad with zeros
             if (data_stack_ptr < 3) {
-                printf("Stack underflow! '.pz' needs: value, width, precision on the stack\n");
+                printf("f.pz -- stack underflow; needs <value> <width> <precision> on the stack\n");
                 return;
             }
             precision = (DCLANG_LONG)POP;
             width = (DCLANG_LONG)POP;
-            fprintf(ofp, "%0*.*f ", width, precision, POP);
+            fprintf(ofp, "%0*.*f ", width, precision,
+                    (double)dclang_cell_to_float(POP));
             fflush(ofp);
             NEXT;
-        OP_SHOWSTACK:
+        OP_SHOWSTACK: ;
             DCLANG_LONG shx;
             char *joiner;
             shx = data_stack_ptr > 16 ? data_stack_ptr - 16 : 0;
@@ -927,7 +1151,8 @@ void dclang_execute() {
             fprintf(ofp, "data_stack: <%lu>%s", data_stack_ptr, joiner);
             fflush(ofp);
             for (shx=0; shx < data_stack_ptr; shx++) {
-                fprintf(ofp, "%0.19g ", data_stack[shx]);
+                fprintf(ofp, "0x%0*" PRIxPTR " ",
+                        (int)(sizeof(DCLANG_CELL) * 2), data_stack[shx]);
                 fflush(ofp);
             }
             fprintf(ofp, "\n");
@@ -939,13 +1164,15 @@ void dclang_execute() {
             fprintf(ofp, "save_stack: <%lu>%s", save_data_stack_ptr, sv_joiner);
             fflush(ofp);
             for (shy=0; shy < save_data_stack_ptr; shy++) {
-                fprintf(ofp, "%0.19g ", data_stack[shy + DATA_STACK_SIZE]);
+                fprintf(ofp, "0x%0*" PRIxPTR " ",
+                        (int)(sizeof(DCLANG_CELL) * 2),
+                        data_stack[shy + DATA_STACK_SIZE]);
                 fflush(ofp);
             }
             fprintf(ofp, "\n");
             NEXT;
         // true/false syntactic sugar
-        OP_NULL:
+        OP_NULL: ;
             void *ptr = NULL;
             push((DCLANG_LONG)ptr);
             NEXT;
@@ -962,15 +1189,17 @@ void dclang_execute() {
                 printf("= -- stack underflow; needs <val1> <val2> on the stack!\n");
                 return;
             }
-            push(((DCLANG_FLT)POP == (DCLANG_FLT)POP) * -1);
+            val2 = POP; val1 = POP;
+            push(val1 == val2 ? UINTPTR_MAX : 0);
             NEXT;
         OP_NOTEQ:
             if (data_stack_ptr < 2)
             {
-                printf("!= -- stack underflow; needs <val1> <val2> on the stack!\n");
+                printf("<> -- stack underflow; needs <val1> <val2> on the stack!\n");
                 return;
             }
-            push(((DCLANG_FLT)POP != (DCLANG_FLT)POP) * -1);
+            val2 = POP; val1 = POP;
+            push(val1 != val2 ? UINTPTR_MAX : 0);
             NEXT;
         OP_GT:
             if (data_stack_ptr < 2)
@@ -978,7 +1207,8 @@ void dclang_execute() {
                 printf("> -- stack underflow; needs <val1> <val2> on the stack!\n");
                 return;
             }
-            push(((DCLANG_FLT)POP < (DCLANG_FLT)POP) * -1);
+            val2 = POP; val1 = POP;
+            push((intptr_t)val1 > (intptr_t)val2 ? UINTPTR_MAX : 0);
             NEXT;
         OP_LT:
             if (data_stack_ptr < 2)
@@ -986,7 +1216,8 @@ void dclang_execute() {
                 printf("< -- stack underflow; needs <val1> <val2> on the stack!\n");
                 return;
             }
-            push(((DCLANG_FLT)POP > (DCLANG_FLT)POP) * -1);
+            val2 = POP; val1 = POP;
+            push((intptr_t)val1 < (intptr_t)val2 ? UINTPTR_MAX : 0);
             NEXT;
         OP_GTE:
             if (data_stack_ptr < 2)
@@ -994,7 +1225,8 @@ void dclang_execute() {
                 printf(">= -- stack underflow; needs <val1> <val2> on the stack!\n");
                 return;
             }
-            push(((DCLANG_FLT)POP <= (DCLANG_FLT)POP) * -1);
+            val2 = POP; val1 = POP;
+            push((intptr_t)val1 >= (intptr_t)val2 ? UINTPTR_MAX : 0);
             NEXT;
         OP_LTE:
             if (data_stack_ptr < 2)
@@ -1002,7 +1234,38 @@ void dclang_execute() {
                 printf("<= -- stack underflow; needs <val1> <val2> on the stack!\n");
                 return;
             }
-            push(((DCLANG_FLT)POP >= (DCLANG_FLT)POP) * -1);
+            val2 = POP; val1 = POP;
+            push((intptr_t)val1 <= (intptr_t)val2 ? UINTPTR_MAX : 0);
+            NEXT;
+        OP_FEQ:
+            if (data_stack_ptr < 2) { printf("f= -- stack underflow; needs <float1> <float2>\n"); return; }
+            a = dclang_cell_to_float(POP); b = dclang_cell_to_float(POP);
+            push(a == b ? UINTPTR_MAX : 0);
+            NEXT;
+        OP_FNOTEQ:
+            if (data_stack_ptr < 2) { printf("f<> -- stack underflow; needs <float1> <float2>\n"); return; }
+            a = dclang_cell_to_float(POP); b = dclang_cell_to_float(POP);
+            push(a != b ? UINTPTR_MAX : 0);
+            NEXT;
+        OP_FLT:
+            if (data_stack_ptr < 2) { printf("f< -- stack underflow; needs <float1> <float2>\n"); return; }
+            a = dclang_cell_to_float(POP); b = dclang_cell_to_float(POP);
+            push(b < a ? UINTPTR_MAX : 0);
+            NEXT;
+        OP_FGT:
+            if (data_stack_ptr < 2) { printf("f> -- stack underflow; needs <float1> <float2>\n"); return; }
+            a = dclang_cell_to_float(POP); b = dclang_cell_to_float(POP);
+            push(b > a ? UINTPTR_MAX : 0);
+            NEXT;
+        OP_FLTE:
+            if (data_stack_ptr < 2) { printf("f<= -- stack underflow; needs <float1> <float2>\n"); return; }
+            a = dclang_cell_to_float(POP); b = dclang_cell_to_float(POP);
+            push(b <= a ? UINTPTR_MAX : 0);
+            NEXT;
+        OP_FGTE:
+            if (data_stack_ptr < 2) { printf("f>= -- stack underflow; needs <float1> <float2>\n"); return; }
+            a = dclang_cell_to_float(POP); b = dclang_cell_to_float(POP);
+            push(b >= a ? UINTPTR_MAX : 0);
             NEXT;
         // assertions
         OP_ASSERT:
@@ -1023,7 +1286,8 @@ void dclang_execute() {
                 printf("and -- stack underflow; needs <int1> <int2> on the stack!\n");
                 return;
             }
-            push((DCLANG_LONG)POP & (DCLANG_LONG)POP);
+            val2 = POP; val1 = POP;
+            push(val1 & val2);
             NEXT;
         OP_OR:
             if (data_stack_ptr < 2)
@@ -1031,7 +1295,8 @@ void dclang_execute() {
                 printf("or -- stack underflow; needs <int1> <int2> on the stack!\n");
                 return;
             }
-            push((DCLANG_LONG)POP | (DCLANG_LONG)POP);
+            val2 = POP; val1 = POP;
+            push(val1 | val2);
             NEXT;
         OP_XOR:
             if (data_stack_ptr < 2)
@@ -1039,7 +1304,8 @@ void dclang_execute() {
                 printf("xor -- stack underflow; needs <int1> <int2> on the stack!\n");
                 return;
             }
-            push((DCLANG_LONG)POP ^ (DCLANG_LONG)POP);
+            val2 = POP; val1 = POP;
+            push(val1 ^ val2);
             NEXT;
         OP_NOT:
             if (data_stack_ptr < 1)
@@ -1055,7 +1321,7 @@ void dclang_execute() {
                 printf("<< -- stack underflow; needs <int1> <int2> on the stack!\n");
                 return;
             }
-            shift_amt = (DCLANG_ULONG)POP;
+            shift_amt = (DCLANG_ULONG)POP & (sizeof(DCLANG_CELL) * CHAR_BIT - 1);
             base = (DCLANG_ULONG)POP;
             push((DCLANG_ULONG)base << shift_amt);
             NEXT;
@@ -1065,7 +1331,7 @@ void dclang_execute() {
                 printf(">> -- stack underflow; needs <int1> <int2> on the stack!\n");
                 return;
             }
-            shift_amt = (DCLANG_ULONG)POP;
+            shift_amt = (DCLANG_ULONG)POP & (sizeof(DCLANG_CELL) * CHAR_BIT - 1);
             base = (DCLANG_ULONG)POP;
             push((DCLANG_ULONG)base >> shift_amt);
             NEXT;
@@ -1076,7 +1342,8 @@ void dclang_execute() {
                 printf("+ -- stack underflow; needs <num1> <num2> on the stack!\n");
                 return;
             }
-            push(POP + POP);
+            val2 = POP; val1 = POP;
+            push(val1 + val2);
             NEXT;
         OP_SUB:
             if (data_stack_ptr < 2)
@@ -1084,7 +1351,7 @@ void dclang_execute() {
                 printf("- -- stack underflow; needs <num1> <num2> on the stack!\n");
                 return;
             }
-            DCLANG_FLT subtrahend = POP;
+            DCLANG_CELL subtrahend = POP;
             push(POP - subtrahend);
             NEXT;
         OP_MUL:
@@ -1093,7 +1360,59 @@ void dclang_execute() {
                 printf("* -- stack underflow; needs <num1> <num2> on the stack!\n");
                 return;
             }
-            push(POP * POP);
+            val2 = POP; val1 = POP;
+            push(val1 * val2);
+            NEXT;
+        OP_MULDIV:
+            if (data_stack_ptr < 3)
+            {
+                printf("*/ -- stack underflow; needs <multiplicand> <multiplier> <divisor>\n");
+                return;
+            }
+            intptr_t muldiv_divisor = (intptr_t)POP;
+            intptr_t muldiv_multiplier = (intptr_t)POP;
+            intptr_t muldiv_multiplicand = (intptr_t)POP;
+            if (muldiv_divisor == 0) {
+                printf("*/ -- integer division by zero\n");
+                return;
+            }
+            DCLANG_WIDE_INT muldiv_result =
+                ((DCLANG_WIDE_INT)muldiv_multiplicand *
+                 (DCLANG_WIDE_INT)muldiv_multiplier) /
+                (DCLANG_WIDE_INT)muldiv_divisor;
+            if (muldiv_result < (DCLANG_WIDE_INT)INTPTR_MIN ||
+                muldiv_result > (DCLANG_WIDE_INT)INTPTR_MAX) {
+                printf("*/ -- result outside signed integer range\n");
+                return;
+            }
+            push((DCLANG_CELL)(intptr_t)muldiv_result);
+            NEXT;
+        OP_MULDIVMOD:
+            if (data_stack_ptr < 3)
+            {
+                printf("*/%% -- stack underflow; needs <multiplicand> <multiplier> <divisor>\n");
+                return;
+            }
+            intptr_t muldivmod_divisor = (intptr_t)POP;
+            intptr_t muldivmod_multiplier = (intptr_t)POP;
+            intptr_t muldivmod_multiplicand = (intptr_t)POP;
+            if (muldivmod_divisor == 0) {
+                printf("*/%% -- integer division by zero\n");
+                return;
+            }
+            DCLANG_WIDE_INT muldivmod_product =
+                (DCLANG_WIDE_INT)muldivmod_multiplicand *
+                (DCLANG_WIDE_INT)muldivmod_multiplier;
+            DCLANG_WIDE_INT muldivmod_quotient =
+                muldivmod_product / (DCLANG_WIDE_INT)muldivmod_divisor;
+            if (muldivmod_quotient < (DCLANG_WIDE_INT)INTPTR_MIN ||
+                muldivmod_quotient > (DCLANG_WIDE_INT)INTPTR_MAX) {
+                printf("*/%% -- quotient outside signed integer range\n");
+                return;
+            }
+            push((DCLANG_CELL)(intptr_t)muldivmod_quotient);
+            push((DCLANG_CELL)(intptr_t)
+                 (muldivmod_product % (DCLANG_WIDE_INT)muldivmod_divisor));
             NEXT;
         OP_DIV:
             if (data_stack_ptr < 2)
@@ -1101,8 +1420,13 @@ void dclang_execute() {
                 printf("/ -- stack underflow; needs <num1> <num2> on the stack!\n");
                 return;
             }
-            DCLANG_FLT divisor = POP;
-            push(POP / divisor);
+            intptr_t divisor = (intptr_t)POP;
+            intptr_t division_dividend = (intptr_t)POP;
+            if (divisor == 0 || (division_dividend == INTPTR_MIN && divisor == -1)) {
+                printf("/ -- invalid integer division\n");
+                return;
+            }
+            push((DCLANG_CELL)(division_dividend / divisor));
             NEXT;
         OP_MOD:
             if (data_stack_ptr < 2)
@@ -1110,8 +1434,29 @@ void dclang_execute() {
                 printf("%% -- stack underflow; needs <num1> <num2> on the stack!\n");
                 return;
             }
-            DCLANG_FLT modulus = POP;
-            push(fmod(POP, modulus));
+            intptr_t modulus = (intptr_t)POP;
+            intptr_t modulus_dividend = (intptr_t)POP;
+            if (modulus == 0) {
+                printf("%% -- integer division by zero\n");
+                return;
+            }
+            push((DCLANG_CELL)(modulus_dividend % modulus));
+            NEXT;
+        OP_DIVMOD:
+            if (data_stack_ptr < 2)
+            {
+                printf("/%% -- stack underflow; needs <dividend> <divisor>\n");
+                return;
+            }
+            intptr_t divmod_divisor = (intptr_t)POP;
+            intptr_t divmod_dividend = (intptr_t)POP;
+            if (divmod_divisor == 0 ||
+                (divmod_dividend == INTPTR_MIN && divmod_divisor == -1)) {
+                printf("/%% -- invalid integer division\n");
+                return;
+            }
+            push((DCLANG_CELL)(divmod_dividend / divmod_divisor));
+            push((DCLANG_CELL)(divmod_dividend % divmod_divisor));
             NEXT;
         OP_ABS:
             if (data_stack_ptr < 1)
@@ -1119,7 +1464,9 @@ void dclang_execute() {
                 printf("abs -- stack underflow; needs <num> on the stack!\n");
                 return;
             }
-            push(fabs(POP));
+            intptr_t integer = (intptr_t)POP;
+            push(integer < 0 ? (DCLANG_CELL)(0 - (DCLANG_CELL)integer)
+                             : (DCLANG_CELL)integer);
             NEXT;
         OP_MIN:
             if (data_stack_ptr < 2)
@@ -1127,10 +1474,48 @@ void dclang_execute() {
                 printf("min -- stack underflow; needs <num1> <num2> on the stack!\n");
                 return;
             }
-            a = POP;
-            b = POP;
-            c = (a < b) ? a : b;
-            push(c);
+            val1 = POP;
+            val2 = POP;
+            push((intptr_t)val1 < (intptr_t)val2 ? val1 : val2);
+            NEXT;
+        OP_FADD:
+            if (data_stack_ptr < 2) { printf("f+ -- stack underflow; needs <float1> <float2>\n"); return; }
+            a = dclang_cell_to_float(POP); b = dclang_cell_to_float(POP);
+            push(dclang_float_to_cell(b + a));
+            NEXT;
+        OP_FSUB:
+            if (data_stack_ptr < 2) { printf("f- -- stack underflow; needs <float1> <float2>\n"); return; }
+            a = dclang_cell_to_float(POP); b = dclang_cell_to_float(POP);
+            push(dclang_float_to_cell(b - a));
+            NEXT;
+        OP_FMUL:
+            if (data_stack_ptr < 2) { printf("f* -- stack underflow; needs <float1> <float2>\n"); return; }
+            a = dclang_cell_to_float(POP); b = dclang_cell_to_float(POP);
+            push(dclang_float_to_cell(b * a));
+            NEXT;
+        OP_FDIV:
+            if (data_stack_ptr < 2) { printf("f/ -- stack underflow; needs <float1> <float2>\n"); return; }
+            a = dclang_cell_to_float(POP); b = dclang_cell_to_float(POP);
+            push(dclang_float_to_cell(b / a));
+            NEXT;
+        OP_FMOD:
+            if (data_stack_ptr < 2) { printf("f%% -- stack underflow; needs <float1> <float2>\n"); return; }
+            a = dclang_cell_to_float(POP); b = dclang_cell_to_float(POP);
+            push(dclang_float_to_cell(fmod(b, a)));
+            NEXT;
+        OP_FABS:
+            if (data_stack_ptr < 1) { printf("fabs -- stack underflow; needs <float>\n"); return; }
+            push(dclang_float_to_cell(DCLANG_FABS(dclang_cell_to_float(POP))));
+            NEXT;
+        OP_FMIN:
+            if (data_stack_ptr < 2) { printf("fmin -- stack underflow; needs <float1> <float2>\n"); return; }
+            a = dclang_cell_to_float(POP); b = dclang_cell_to_float(POP);
+            push(dclang_float_to_cell(fmin(b, a)));
+            NEXT;
+        OP_FMAX:
+            if (data_stack_ptr < 2) { printf("fmax -- stack underflow; needs <float1> <float2>\n"); return; }
+            a = dclang_cell_to_float(POP); b = dclang_cell_to_float(POP);
+            push(dclang_float_to_cell(fmax(b, a)));
             NEXT;
         OP_MAX:
             if (data_stack_ptr < 2)
@@ -1138,177 +1523,197 @@ void dclang_execute() {
                 printf("max -- stack underflow; needs <num1> <num2> on the stack!\n");
                 return;
             }
-            a = POP;
-            b = POP;
-            c = (a > b) ? a : b;
-            push(c);
+            val1 = POP;
+            val2 = POP;
+            push((intptr_t)val1 > (intptr_t)val2 ? val1 : val2);
             NEXT;
         OP_ROUND:
             if (data_stack_ptr < 1)
             {
-                printf("round needs a number on the stack!\n");
+                printf("fround -- stack underflow; needs <float>\n");
                 return;
             }
-            push((DCLANG_LONG)round(POP));
+            push((DCLANG_CELL)(intptr_t)round(dclang_cell_to_float(POP)));
             NEXT;
         OP_FLOOR:
             if (data_stack_ptr < 1)
             {
-                printf("floor needs a number on the stack!\n");
+                printf("ffloor -- stack underflow; needs <float>\n");
                 return;
             }
-            push((DCLANG_LONG)floor(POP));
+            push((DCLANG_CELL)(intptr_t)floor(dclang_cell_to_float(POP)));
             NEXT;
         OP_CEIL:
             if (data_stack_ptr < 1)
             {
-                printf("ceil needs a number on the stack!\n");
+                printf("fceil -- stack underflow; needs <float>\n");
                 return;
             }
-            push((DCLANG_LONG)ceil(POP));
+            push((DCLANG_CELL)(intptr_t)ceil(dclang_cell_to_float(POP)));
             NEXT;
+        OP_ITOF:
+            if (data_stack_ptr < 1) {
+                printf("i>f -- stack underflow; needs an integer\n");
+                return;
+            }
+            push(dclang_float_to_cell((DCLANG_FLT)(intptr_t)POP));
+            NEXT;
+        OP_FTOI: {
+            if (data_stack_ptr < 1) {
+                printf("f>i -- stack underflow; needs a float\n");
+                return;
+            }
+            DCLANG_FLT floating = dclang_cell_to_float(POP);
+            if (!isfinite(floating) || floating < (DCLANG_FLT)INTPTR_MIN ||
+                floating >= -(DCLANG_FLT)INTPTR_MIN) {
+                printf("f>i -- floating value outside signed integer range\n");
+                return;
+            }
+            push((DCLANG_CELL)(intptr_t)floating);
+            NEXT;
+        }
         // scientific math words
         OP_POWER:
             if (data_stack_ptr < 2)
             {
-                printf("pow -- stack underflow; needs <num1> <num2> on the stack!\n");
+                printf("fpow -- stack underflow; needs <float1> <float2>\n");
                 return;
             }
-            DCLANG_FLT raise = POP;
-            push(pow(POP, raise));
+            DCLANG_FLT raise = dclang_cell_to_float(POP);
+            push(dclang_float_to_cell(DCLANG_POW(dclang_cell_to_float(POP), raise)));
             NEXT;
         OP_SQRT:
             if (data_stack_ptr < 1)
             {
-                printf("sqrt needs a number on the stack!\n");
+                printf("fsqrt -- stack underflow; needs <float>\n");
                 return;
             }
-            push(sqrt(POP));
+            push(dclang_float_to_cell(DCLANG_SQRT(dclang_cell_to_float(POP))));
             NEXT;
         OP_EXP:
             if (data_stack_ptr < 1)
             {
-                printf("exp needs a number on the stack!\n");
+                printf("fexp -- stack underflow; needs <float>\n");
                 return;
             }
-            push(exp(POP));
+            push(dclang_float_to_cell(DCLANG_EXP(dclang_cell_to_float(POP))));
             NEXT;
         OP_LOG:
             if (data_stack_ptr < 1)
             {
-                printf("log needs a number on the stack!\n");
+                printf("flog -- stack underflow; needs <float>\n");
                 return;
             }
-            push(log(POP));
+            push(dclang_float_to_cell(DCLANG_LOG(dclang_cell_to_float(POP))));
             NEXT;
         OP_LOG2:
             if (data_stack_ptr < 1)
             {
-                printf("log2 needs a number on the stack!\n");
+                printf("flog2 -- stack underflow; needs <float>\n");
                 return;
             }
-            push(log2(POP));
+            push(dclang_float_to_cell(log2(dclang_cell_to_float(POP))));
             NEXT;
         OP_LOG10:
             if (data_stack_ptr < 1)
             {
-                printf("log10 needs a number on the stack!\n");
+                printf("flog10 -- stack underflow; needs <float>\n");
                 return;
             }
-            push(log10(POP));
+            push(dclang_float_to_cell(DCLANG_LOG10(dclang_cell_to_float(POP))));
             NEXT;
         OP_E:
-            push(M_E);
+            push(dclang_float_to_cell((DCLANG_FLT)M_E));
             NEXT;
         // Trig, pi, etc.
         OP_PI:
-            push(M_PI);
+            push(dclang_float_to_cell((DCLANG_FLT)M_PI));
             NEXT;
         OP_SINE:
             if (data_stack_ptr < 1)
             {
-                printf("sin needs a number on the stack!\n");
+                printf("fsin -- stack underflow; needs <float>\n");
                 return;
             }
-            push(sin(POP));
+            push(dclang_float_to_cell(DCLANG_SIN(dclang_cell_to_float(POP))));
             NEXT;
         OP_COS:
             if (data_stack_ptr < 1)
             {
-                printf("cos needs a number on the stack!\n");
+                printf("fcos -- stack underflow; needs <float>\n");
                 return;
             }
-            push(cos(POP));
+            push(dclang_float_to_cell(DCLANG_COS(dclang_cell_to_float(POP))));
             NEXT;
         OP_TAN:
             if (data_stack_ptr < 1)
             {
-                printf("tan needs a number on the stack!\n");
+                printf("ftan -- stack underflow; needs <float>\n");
                 return;
             }
-            push(tan(POP));
+            push(dclang_float_to_cell(DCLANG_TAN(dclang_cell_to_float(POP))));
             NEXT;
         OP_ASINE:
             if (data_stack_ptr < 1)
             {
-                printf("asin needs a number on the stack!\n");
+                printf("fasin -- stack underflow; needs <float>\n");
                 return;
             }
-            push(asin(POP));
+            push(dclang_float_to_cell(asin(dclang_cell_to_float(POP))));
             NEXT;
         OP_ACOS:
             if (data_stack_ptr < 1)
             {
-                printf("acos needs a number on the stack!\n");
+                printf("facos -- stack underflow; needs <float>\n");
                 return;
             }
-            push(acos(POP));
+            push(dclang_float_to_cell(acos(dclang_cell_to_float(POP))));
             NEXT;
         OP_ATAN:
             if (data_stack_ptr < 1)
             {
-                printf("atan needs a number on the stack!\n");
+                printf("fatan -- stack underflow; needs <float>\n");
                 return;
             }
-            push(atan(POP));
+            push(dclang_float_to_cell(atan(dclang_cell_to_float(POP))));
             NEXT;
         OP_ATAN2:
             if (data_stack_ptr < 2)
             {
-                printf("atan2 -- stack underflow; needs <num1> <num2> on the stack!\n");
+                printf("fatan2 -- stack underflow; needs <float1> <float2>\n");
                 return;
             }
-            DCLANG_FLT x = POP;
-            DCLANG_FLT y = POP;
-            push(atan2(y, x));
+            DCLANG_FLT x = dclang_cell_to_float(POP);
+            DCLANG_FLT y = dclang_cell_to_float(POP);
+            push(dclang_float_to_cell(atan2(y, x)));
             NEXT;
         OP_SINH:
             if (data_stack_ptr < 1)
             {
-                printf("sinh needs a number on the stack!\n");
+                printf("fsinh -- stack underflow; needs <float>\n");
                 return;
             }
-            push(sinh(POP));
+            push(dclang_float_to_cell(sinh(dclang_cell_to_float(POP))));
             NEXT;
         OP_COSH:
             if (data_stack_ptr < 1)
             {
-                printf("cosh needs a number on the stack!\n");
+                printf("fcosh -- stack underflow; needs <float>\n");
                 return;
             }
-            push(cosh(POP));
+            push(dclang_float_to_cell(cosh(dclang_cell_to_float(POP))));
             NEXT;
         OP_TANH:
             if (data_stack_ptr < 1)
             {
-                printf("tanh needs a number on the stack!\n");
+                printf("ftanh -- stack underflow; needs <float>\n");
                 return;
             }
-            push(tanh(POP));
+            push(dclang_float_to_cell(DCLANG_TANH(dclang_cell_to_float(POP))));
             NEXT;
         // randomness
         OP_RAND:
-            push((double)rand()/(double)RAND_MAX);
+            push(dclang_float_to_cell((DCLANG_FLT)rand()/(DCLANG_FLT)RAND_MAX));
             NEXT;
         // variables
         OP_VARIABLE:
@@ -1511,7 +1916,17 @@ void dclang_execute() {
             }
             arrsize = (DCLANG_INT)POP;
             arrstart = (DCLANG_PTR)POP;
-            qsort((void *)(vars+arrstart), arrsize, sizeof(DCLANG_FLT), compare_doubles);
+            qsort((void *)(vars+arrstart), arrsize, sizeof(DCLANG_CELL), compare_cells);
+            NEXT;
+        OP_SORTFLOATS:
+            if (data_stack_ptr < 2)
+            {
+                printf("fsortnums -- needs <arrstart_index> <size> on the stack.\n");
+                return;
+            }
+            arrsize = (DCLANG_INT)POP;
+            arrstart = (DCLANG_PTR)POP;
+            qsort((void *)(vars+arrstart), arrsize, sizeof(DCLANG_CELL), compare_float_cells);
             NEXT;
         OP_SORTSTRS:
             if (data_stack_ptr < 2)
@@ -1520,7 +1935,7 @@ void dclang_execute() {
             }
             arrsize = (DCLANG_PTR)POP;
             arrstart = (DCLANG_PTR)POP;
-            qsort((void *)(vars+arrstart), arrsize, sizeof(DCLANG_FLT), compare_strings);
+            qsort((void *)(vars+arrstart), arrsize, sizeof(DCLANG_CELL), compare_strings);
             NEXT;
         // global hash table
         OP_HASHSET:
@@ -1621,7 +2036,7 @@ void dclang_execute() {
             {
                 push((DCLANG_PTR)0);
             } else {
-                push((DCLANG_FLT)((*(struct tree_entry **)retval)->value));
+                push((*(struct tree_entry **)retval)->value);
             }
             NEXT;
         OP_TREESET:
@@ -1633,14 +2048,14 @@ void dclang_execute() {
                 return;
             }
             // Pop args
-            tree_val = (DCLANG_FLT)POP;
+            tree_val = POP;
             search_key = (char *)(DCLANG_PTR)POP;
             tree_idx = (DCLANG_PTR)POP;
             te_del = make_tree_entry(search_key, tree_val);
             tdelete(te_del, &tree_roots[tree_idx], tree_compare_func);
             te = make_tree_entry(search_key, tree_val);
             retval = tsearch(te, &tree_roots[tree_idx], tree_compare_func);
-            push((DCLANG_FLT)((*(struct tree_entry **)retval)->value));
+            push((*(struct tree_entry **)retval)->value);
             NEXT;
         OP_TREEWALK:
             if (data_stack_ptr < 1) {
@@ -1728,7 +2143,7 @@ void dclang_execute() {
             // Remove the tail node from the list
             remque(tail_node);
             // Push the data of the tail node onto the stack
-            push((DCLANG_FLT)tail_node->data);
+            push(tail_node->data);
             // Free the memory of the popped node
             dclang_free(tail_node);
             NEXT;
@@ -1776,7 +2191,7 @@ void dclang_execute() {
                 node = node->next;
             }
             // Push the data of the node onto the stack
-            push((DCLANG_FLT)node->data);
+            push(node->data);
             NEXT;
         OP_LISTINSERT:
             if (data_stack_ptr < 3) {
@@ -1885,8 +2300,7 @@ void dclang_execute() {
             --times_ptr;
             NEXT;
         OP_AGAIN:
-            if (loop_counter[loop_counter_ptr - 1] < times_info[times_ptr - 1] - 1) {
-                loop_counter[loop_counter_ptr - 1] += 1;
+            if (++loop_counter[loop_counter_ptr - 1] < times_info[times_ptr - 1]) {
                 iptr = return_stack[return_stack_ptr - 1];
             } else {
                 loop_counter[--loop_counter_ptr] = 0;
@@ -1960,7 +2374,7 @@ void dclang_execute() {
             prog[iptr].opcode = OP_JUMPZ;
             prog[iptr++].param = 0;
             return;  // only in def_mode = 1
-        OP_ELSE:
+        OP_ELSE: ;
             // get the last starting point of the 'if' clause
             DCLANG_LONG if_val = return_stack[--return_stack_ptr];
             // mark out current location on the return stack
@@ -1972,7 +2386,7 @@ void dclang_execute() {
             // update old if val goto:
             prog[if_val].param = ++iptr;
             return;  // only in def_mode = 1
-        OP_ENDIF:
+        OP_ENDIF: ;
             DCLANG_LONG last_val = return_stack[--return_stack_ptr];
             prog[last_val].param = iptr;
             return;  // only in def_mode = 1
@@ -1998,10 +2412,134 @@ void dclang_execute() {
             iptr = return_stack[--return_stack_ptr];
             NEXT;
         // time and date
-        OP_CLOCK:
-            gettimeofday(&tval, NULL);
-            push( ((DCLANG_FLT)tval.tv_sec) + (((DCLANG_FLT)tval.tv_usec) / 1000000) );
+        OP_CLOCK: {
+            struct timespec now;
+            clock_gettime(CLOCK_REALTIME, &now);
+            push((DCLANG_CELL)(uint64_t)now.tv_sec);
+            push((DCLANG_CELL)now.tv_nsec);
             NEXT;
+        }
+        OP_MONOCLOCK: {
+            struct timespec now;
+            clock_gettime(CLOCK_MONOTONIC, &now);
+            time_t seconds = now.tv_sec - dclang_monoclock_origin.tv_sec;
+            long nanoseconds = now.tv_nsec - dclang_monoclock_origin.tv_nsec;
+            if (nanoseconds < 0) {
+                --seconds;
+                nanoseconds += 1000000000L;
+            }
+            DCLANG_FLT elapsed = (DCLANG_FLT)seconds +
+                (DCLANG_FLT)nanoseconds * (DCLANG_FLT)1e-9;
+            push(dclang_float_to_cell(elapsed));
+            NEXT;
+        }
+        _OP_CLOCK_ADD: {
+            if (data_stack_ptr < 3) {
+                printf("_clock+ -- stack underflow; needs <seconds> <nanoseconds> <duration>\n");
+                return;
+            }
+            DCLANG_FLT duration = dclang_cell_to_float(POP);
+            int64_t nanoseconds = (int64_t)POP;
+            int64_t seconds = (int64_t)(intptr_t)POP;
+            if (!isfinite(duration)) {
+                printf("_clock+ -- duration must be finite\n");
+                return;
+            }
+            double whole_double = floor((double)duration);
+            int64_t whole = (int64_t)whole_double;
+            int64_t fractional = (int64_t)llround(
+                ((double)duration - whole_double) * 1000000000.0);
+            seconds += whole;
+            nanoseconds += fractional;
+            if (nanoseconds >= 1000000000LL) {
+                seconds += nanoseconds / 1000000000LL;
+                nanoseconds %= 1000000000LL;
+            } else if (nanoseconds < 0) {
+                int64_t borrow = (-nanoseconds + 999999999LL) / 1000000000LL;
+                seconds -= borrow;
+                nanoseconds += borrow * 1000000000LL;
+            }
+            push((DCLANG_CELL)seconds);
+            push((DCLANG_CELL)nanoseconds);
+            NEXT;
+        }
+        _OP_CLOCK_MOD: {
+            if (data_stack_ptr < 3) {
+                printf("_clock%% -- stack underflow; needs <seconds> <nanoseconds> <period>\n");
+                return;
+            }
+            DCLANG_FLT period = dclang_cell_to_float(POP);
+            uint64_t nanoseconds = (uint64_t)POP;
+            uint64_t seconds = (uint64_t)POP;
+            if (!(period > 0) || !isfinite(period) || nanoseconds >= 1000000000ULL) {
+                printf("_clock%% -- invalid timestamp or period\n");
+                return;
+            }
+            double phase = fmod((double)seconds + (double)nanoseconds * 1e-9,
+                                (double)period);
+            push(dclang_float_to_cell((DCLANG_FLT)phase));
+            NEXT;
+        }
+        _OP_SLEEP_UNTIL: {
+            if (data_stack_ptr < 2) {
+                printf("_sleep_until -- stack underflow; needs <seconds> <nanoseconds>\n");
+                return;
+            }
+            long nanoseconds = (long)POP;
+            time_t seconds = (time_t)(intptr_t)POP;
+            if (nanoseconds < 0 || nanoseconds >= 1000000000L) {
+                printf("_sleep_until -- nanoseconds out of range\n");
+                return;
+            }
+            struct timespec target = { .tv_sec = seconds, .tv_nsec = nanoseconds };
+            /* Preserve the original clock_sleep.dc timing contract: let the OS
+             * handle the coarse wait, then busy-watch the final five
+             * milliseconds. clock_nanosleep() alone promises not to return
+             * early, but ordinary scheduler wake latency is too large for the
+             * MIDI synchronization this word was designed for. */
+            struct timespec coarse = target;
+            coarse.tv_nsec -= 5000000L;
+            if (coarse.tv_nsec < 0) {
+                --coarse.tv_sec;
+                coarse.tv_nsec += 1000000000L;
+            }
+            int sleep_status;
+#ifdef __APPLE__
+            do {
+                struct timespec now, remaining;
+                clock_gettime(CLOCK_REALTIME, &now);
+                remaining.tv_sec = coarse.tv_sec - now.tv_sec;
+                remaining.tv_nsec = coarse.tv_nsec - now.tv_nsec;
+                if (remaining.tv_nsec < 0) {
+                    --remaining.tv_sec;
+                    remaining.tv_nsec += 1000000000L;
+                }
+                if (remaining.tv_sec < 0 ||
+                    (remaining.tv_sec == 0 && remaining.tv_nsec <= 0)) {
+                    sleep_status = 0;
+                    break;
+                }
+                sleep_status = nanosleep(&remaining, NULL) == 0 ? 0 : errno;
+            } while (sleep_status == EINTR);
+#else
+            do {
+                sleep_status = clock_nanosleep(CLOCK_REALTIME, TIMER_ABSTIME,
+                                               &coarse, NULL);
+            } while (sleep_status == EINTR);
+#endif
+            if (sleep_status != 0)
+                fprintf(stderr, "_sleep_until -- clock_nanosleep failed: %s\n",
+                        strerror(sleep_status));
+            if (sleep_status == 0) {
+                struct timespec now;
+                do {
+                    clock_gettime(CLOCK_REALTIME, &now);
+                } while (now.tv_sec < target.tv_sec ||
+                         (now.tv_sec == target.tv_sec &&
+                          now.tv_nsec < target.tv_nsec));
+            }
+            NEXT;
+        }
         OP_EPOCH:
             gettimeofday(&tval, NULL);
             push(tval.tv_sec);
@@ -2077,7 +2615,7 @@ void dclang_execute() {
                 printf("sleep -- need a <time_in_secs> on the stack!\n");
                 return;
             }
-            DCLANG_FLT sleeptime = POP;
+            DCLANG_FLT sleeptime = dclang_cell_to_float(POP);
             struct timespec t1, t2;
             t1.tv_sec = floor(sleeptime);
             t1.tv_nsec = round(fmod(sleeptime, 1) * 1000000000);
@@ -2128,8 +2666,12 @@ void dclang_execute() {
             fflush(ofp);
             NEXT;
         OP_STEREO_OUT32:
-            double r_out = (double)POP;
-            double l_out = (double)POP;
+            if (data_stack_ptr < 2) {
+                printf("_stereo_out32 -- stack underflow; needs <left> <right>\n");
+                return;
+            }
+            double r_out = dclang_cell_to_float(POP);
+            double l_out = dclang_cell_to_float(POP);
             // clamp
             if (l_out > 1.0)  l_out =  1.0;
             if (l_out < -1.0) l_out = -1.0;
@@ -2140,12 +2682,12 @@ void dclang_execute() {
             int32_t r_int_out = (int32_t)lrint(r_out * 2147483647.0);
             audio_write_stereo_s32le(l_int_out, r_int_out);
             NEXT;
-        OP_STEREO_IN32:
+        OP_STEREO_IN32: ;
             int32_t l_int_in = 0;
             int32_t r_int_in = 0;
             if (!audio_read_stereo_s32le(&l_int_in, &r_int_in)) {
-                push(0.0);
-                push(0.0);
+                push(dclang_float_to_cell(0.0));
+                push(dclang_float_to_cell(0.0));
                 NEXT;
             }
             double l_dbl_in = (double)l_int_in / 2147483647.0;
@@ -2155,8 +2697,8 @@ void dclang_execute() {
             if (l_dbl_in < -1.0) l_dbl_in = -1.0;
             if (r_dbl_in > 1.0) r_dbl_in = 1.0;
             if (r_dbl_in < -1.0) r_dbl_in = -1.0;
-            push(l_dbl_in);
-            push(r_dbl_in);
+            push(dclang_float_to_cell(l_dbl_in));
+            push(dclang_float_to_cell(r_dbl_in));
             NEXT;
         OP_ISALNUM:
             if (data_stack_ptr < 1)
@@ -2394,10 +2936,10 @@ void dclang_execute() {
                 printf("tostr -- needs a <number> on stack!\n");
                 return;
             }
-            DCLANG_FLT var = POP;
-            bufsize = snprintf(NULL, 0, "%g", var);
+            intptr_t var = (intptr_t)POP;
+            bufsize = snprintf(NULL, 0, "%" PRIdPTR, var);
             str = dclang_malloc(bufsize + 1);
-            snprintf(str, bufsize + 1, "%g", var);
+            snprintf(str, bufsize + 1, "%" PRIdPTR, var);
             str_ptr_addr = (DCLANG_PTR)str;
             if (str_ptr_addr < MIN_STR || MIN_STR == 0)
             {
@@ -2422,7 +2964,12 @@ void dclang_execute() {
                 return;
             }
             str = (char *) str_ptr_addr;
-            DCLANG_FLT num = strtod(str, NULL);
+            DCLANG_CELL num;
+            if (!dclang_parse_number(str, &num)) {
+                printf("tonum -- invalid number: %s\n", str);
+                dclang_free(str);
+                return;
+            }
             push(num);
             dclang_free(str);
             NEXT;
@@ -2757,9 +3304,9 @@ void dclang_execute() {
         OP_REWIND:
             dclang_rewind();
             NEXT;
-        OP_MEMUSED:
+        OP_MEMUSED: ;
             DCLANG_FLT memused = (DCLANG_FLT)(((float) unused_mem_idx) / ((float) MEMSIZE));
-            push(memused);
+            push(dclang_float_to_cell(memused));
             NEXT;
         OP_IMPORT:
             if (data_stack_ptr < 1) {
@@ -3456,7 +4003,7 @@ void dclang_execute() {
                 push((DCLANG_LONG)-1);
             }
             NEXT;
-        _OP_SQLITEOPEN:
+        _OP_SQLITEOPEN: ;
             const char* db_path = (const char*)(DCLANG_PTR)POP;
             rc = sqlite3_open(db_path, &db);
             if (rc != SQLITE_OK) {
@@ -3485,7 +4032,7 @@ void dclang_execute() {
             }
             push((DCLANG_PTR)rc);
             NEXT;
-        _OP_SQLITECOLUMN:
+        _OP_SQLITECOLUMN: ;
             int col_index = (int)POP;
             stmt = (sqlite3_stmt *)(DCLANG_PTR)POP;
             // Get the number of columns in the result set
@@ -3517,7 +4064,7 @@ void dclang_execute() {
                 return;
             }
             NEXT;
-        _OP_SQLITEEXEC:
+        _OP_SQLITEEXEC: ;
             char *zErrMsg = 0;
             sql = (char *)(DCLANG_PTR)POP;
             db = (sqlite3 *)(DCLANG_PTR)POP;
@@ -3536,6 +4083,8 @@ void dclang_execute() {
             }
             NEXT;
         _OP_PM_LIST:
+            if (!dclang_midi_initialize())
+                NEXT;
             // list midi_device information
             int default_in = Pm_GetDefaultInputDeviceID();
             int default_out = Pm_GetDefaultOutputDeviceID();
@@ -3555,42 +4104,98 @@ void dclang_execute() {
             }
             NEXT;
         _OP_PM_OPENOUT:
-            Pm_GetDefaultOutputDeviceID();
+            if (!dclang_midi_initialize())
+                NEXT;
             DCLANG_INT midi_out_device = (DCLANG_LONG)POP;
-            Pm_OpenOutput(&midi_out_stream, midi_out_device, NULL, 0, NULL, NULL , 0);
+            int midi_device_count = Pm_CountDevices();
+            const PmDeviceInfo *midi_out_info =
+                midi_out_device >= 0 && midi_out_device < midi_device_count
+                    ? Pm_GetDeviceInfo(midi_out_device) : NULL;
+            if (!midi_out_info || !midi_out_info->output) {
+                fprintf(stderr,
+                        "Cannot open MIDI output %d: %d device(s) available and ID is not an output.\n",
+                        midi_out_device, midi_device_count);
+                midi_out_stream = NULL;
+                NEXT;
+            }
+            PmError output_status = Pm_OpenOutput(&midi_out_stream,
+                midi_out_device, NULL, 0, NULL, NULL, 0);
+            if (output_status < 0) {
+                midi_out_stream = NULL;
+                fprintf(stderr, "Error opening MIDI output %d: %s (%d)\n",
+                        midi_out_device, Pm_GetErrorText(output_status),
+                        output_status);
+            }
             NEXT;
         _OP_PM_WS:
             midi_data2 = (DCLANG_LONG)POP;
             midi_data1 = (DCLANG_LONG)POP;
             midi_status = (DCLANG_LONG)POP;
-            Pm_WriteShort(
+            if (!midi_out_stream) {
+                fprintf(stderr, "MIDI output is not open.\n");
+                NEXT;
+            }
+            PmError write_status = Pm_WriteShort(
                 midi_out_stream,
                 TIME_PROC(TIME_INFO),
                 Pm_Message(midi_status, midi_data1, midi_data2)
             );
+            if (write_status < 0)
+                fprintf(stderr, "MIDI write failed: %s (%d)\n",
+                        Pm_GetErrorText(write_status), write_status);
             NEXT;
         _OP_PM_WSR:
             midi_status = (DCLANG_LONG)POP;
             midi_data1 = (DCLANG_LONG)POP;
             midi_data2 = (DCLANG_LONG)POP;
-            Pm_WriteShort(
+            if (!midi_out_stream) {
+                fprintf(stderr, "MIDI output is not open.\n");
+                NEXT;
+            }
+            PmError reverse_write_status = Pm_WriteShort(
                 midi_out_stream,
                 0,
                 Pm_Message(midi_status, midi_data1, midi_data2)
             );
+            if (reverse_write_status < 0)
+                fprintf(stderr, "MIDI write failed: %s (%d)\n",
+                        Pm_GetErrorText(reverse_write_status),
+                        reverse_write_status);
             NEXT;
         _OP_PM_OPENIN:
-            Pm_GetDefaultInputDeviceID();
+            if (!dclang_midi_initialize())
+                NEXT;
             DCLANG_INT midi_in_device = (DCLANG_LONG)POP;
+            int midi_input_device_count = Pm_CountDevices();
+            const PmDeviceInfo *midi_in_info =
+                midi_in_device >= 0 && midi_in_device < midi_input_device_count
+                    ? Pm_GetDeviceInfo(midi_in_device) : NULL;
+            if (!midi_in_info || !midi_in_info->input) {
+                fprintf(stderr,
+                        "Cannot open MIDI input %d: %d device(s) available and ID is not an input.\n",
+                        midi_in_device, midi_input_device_count);
+                midi_in_stream = NULL;
+                NEXT;
+            }
             PmError open_status;
             open_status = Pm_OpenInput(&midi_in_stream, midi_in_device, NULL, 64, NULL, NULL);
-            if (open_status != 0) fprintf(stderr, "Error opening MIDI input: %i\n", open_status);
-            Pm_SetFilter(midi_in_stream, PM_FILT_ACTIVE | PM_FILT_SYSEX);
+            if (open_status < 0) {
+                midi_in_stream = NULL;
+                fprintf(stderr, "Error opening MIDI input %d: %s (%d)\n",
+                        midi_in_device, Pm_GetErrorText(open_status), open_status);
+                NEXT;
+            }
+            PmError filter_status = Pm_SetFilter(midi_in_stream,
+                                                  PM_FILT_ACTIVE | PM_FILT_SYSEX);
+            if (filter_status < 0)
+                fprintf(stderr, "Error setting MIDI input filter: %s (%d)\n",
+                        Pm_GetErrorText(filter_status), filter_status);
             NEXT;
-        _OP_PM_READ:
+        _OP_PM_READ: ;
             PmError event_status;
             PmEvent event[1];
-            event_status = Pm_Read(midi_in_stream, event, 1);
+            event_status = midi_in_stream ? Pm_Read(midi_in_stream, event, 1)
+                                          : pmBadPtr;
             //if (event_status < 0) fprintf(stderr, "Error receiving MIDI event: %i\n", event_status);
             if (event_status > 0) {
                 push((DCLANG_LONG)Pm_MessageData2(event[0].message));
@@ -3606,10 +4211,15 @@ void dclang_execute() {
         _OP_PM_CLOSE:
             if (midi_out_stream) Pm_Close(midi_out_stream);
             if (midi_in_stream)  Pm_Close(midi_in_stream);
+            midi_out_stream = NULL;
+            midi_in_stream = NULL;
             printf("Portmidi ports closed.\n");
             NEXT;
         _OP_PM_TERMINATE:
-            Pm_Terminate();
+            if (midi_initialized)
+                Pm_Terminate();
+            midi_initialized = 0;
+            midi_initialize_status = pmNoError;
             printf("Portmidi process terminated.\n");
             NEXT;
         _OP_OSC_PUT_STR:
@@ -3657,7 +4267,7 @@ void dclang_execute() {
                 printf("_osc_put_f32 -- need <buffer> <len> <float> on the stack\n");
                 return;
             }
-            oscval_f = POP;
+            oscval_f = dclang_cell_to_float(POP);
             osclen = (DCLANG_INT)POP;
             oscbuf = (unsigned char *)(DCLANG_PTR)POP;
             if ((DCLANG_PTR)oscbuf < MIN_STR || (DCLANG_PTR)oscbuf > MAX_STR || osclen < 0) {
@@ -3763,7 +4373,7 @@ void dclang_execute() {
             uint32_t bits = ntohl(net);
             float value;
             memcpy(&value, &bits, sizeof(value));
-            push((DCLANG_FLT)value);
+            push(dclang_float_to_cell((DCLANG_FLT)value));
             push(offset + 4);
             NEXT;
         }
@@ -3825,9 +4435,15 @@ void add_all_primitives() {
     add_primitive("svclear", "Save Stack Ops", OP_SVCLEAR);
     // stack output
     add_primitive(".", "Stack Output", OP_SHOW);
+    add_primitive("u.", "Stack Output", OP_SHOWUNSIGNED);
+    add_primitive("f.", "Stack Output", OP_SHOWFLOAT);
     add_primitive("..", "Stack Output", OP_SHOWNOSPACE);
-    add_primitive(".rj", "Stack Output", OP_SHOWRJ);
-    add_primitive(".pz", "Stack Output", OP_SHOWPZ);
+    add_primitive("u..", "Stack Output", OP_SHOWUNSIGNEDNOSPACE);
+    add_primitive("f..", "Stack Output", OP_SHOWFLOATNOSPACE);
+    add_primitive(".rj", "Stack Output", OP_SHOWINTRJ);
+    add_primitive("u.rj", "Stack Output", OP_SHOWUNSIGNEDRJ);
+    add_primitive("f.rj", "Stack Output", OP_SHOWRJ);
+    add_primitive("f.pz", "Stack Output", OP_SHOWPZ);
     add_primitive(".s", "Stack Output", OP_SHOWSTACK);
     // boolean logic
     add_primitive("null", "Boolean", OP_NULL);
@@ -3839,6 +4455,12 @@ void add_all_primitives() {
     add_primitive(">", "Boolean", OP_GT);
     add_primitive("<=", "Boolean", OP_LTE);
     add_primitive(">=", "Boolean", OP_GTE);
+    add_primitive("f=", "Float Comparison", OP_FEQ);
+    add_primitive("f<>", "Float Comparison", OP_FNOTEQ);
+    add_primitive("f<", "Float Comparison", OP_FLT);
+    add_primitive("f>", "Float Comparison", OP_FGT);
+    add_primitive("f<=", "Float Comparison", OP_FLTE);
+    add_primitive("f>=", "Float Comparison", OP_FGTE);
     add_primitive("assert", "Boolean", OP_ASSERT);
     // bit manipulation
     add_primitive("and", "Bit manipulation", OP_AND);
@@ -3853,35 +4475,48 @@ void add_all_primitives() {
     add_primitive("*", "Arithmetic", OP_MUL);
     add_primitive("/", "Arithmetic", OP_DIV);
     add_primitive("%", "Arithmetic", OP_MOD);
+    add_primitive("/%", "Arithmetic", OP_DIVMOD);
+    add_primitive("*/", "Arithmetic", OP_MULDIV);
+    add_primitive("*/%", "Arithmetic", OP_MULDIVMOD);
     add_primitive("abs", "Arithmetic", OP_ABS);
     add_primitive("min", "Arithmetic", OP_MIN);
     add_primitive("max", "Arithmetic", OP_MAX);
+    add_primitive("f+", "Float Arithmetic", OP_FADD);
+    add_primitive("f-", "Float Arithmetic", OP_FSUB);
+    add_primitive("f*", "Float Arithmetic", OP_FMUL);
+    add_primitive("f/", "Float Arithmetic", OP_FDIV);
+    add_primitive("f%", "Float Arithmetic", OP_FMOD);
+    add_primitive("fabs", "Float Arithmetic", OP_FABS);
+    add_primitive("fmin", "Float Arithmetic", OP_FMIN);
+    add_primitive("fmax", "Float Arithmetic", OP_FMAX);
     // float -> int
-    add_primitive("round", "Float -> Integer", OP_ROUND);
-    add_primitive("ceil", "Float -> Integer", OP_CEIL);
-    add_primitive("floor", "Float -> Integer", OP_FLOOR);
+    add_primitive("fround", "Float -> Integer", OP_ROUND);
+    add_primitive("fceil", "Float -> Integer", OP_CEIL);
+    add_primitive("ffloor", "Float -> Integer", OP_FLOOR);
+    add_primitive("i>f", "Numeric Conversion", OP_ITOF);
+    add_primitive("f>i", "Numeric Conversion", OP_FTOI);
     // higher math
-    add_primitive("pow", "Higher Math", OP_POWER);
-    add_primitive("sqrt", "Higher Math", OP_SQRT);
-    add_primitive("exp", "Higher Math", OP_EXP);
-    add_primitive("log", "Higher Math", OP_LOG);
-    add_primitive("log2", "Higher Math", OP_LOG2);
-    add_primitive("log10", "Higher Math", OP_LOG10);
-    add_primitive("e", "Higher Math", OP_E);
+    add_primitive("fpow", "Higher Math", OP_POWER);
+    add_primitive("fsqrt", "Higher Math", OP_SQRT);
+    add_primitive("fexp", "Higher Math", OP_EXP);
+    add_primitive("flog", "Higher Math", OP_LOG);
+    add_primitive("flog2", "Higher Math", OP_LOG2);
+    add_primitive("flog10", "Higher Math", OP_LOG10);
+    add_primitive("fe", "Higher Math", OP_E);
     // trig
-    add_primitive("pi", "Trigonometry", OP_PI);
-    add_primitive("sin", "Trigonometry", OP_SINE);
-    add_primitive("cos", "Trigonometry", OP_COS);
-    add_primitive("tan", "Trigonometry", OP_TAN);
-    add_primitive("asin", "Trigonometry", OP_ASINE);
-    add_primitive("acos", "Trigonometry", OP_ACOS);
-    add_primitive("atan", "Trigonometry", OP_ATAN);
-    add_primitive("atan2", "Trigonometry", OP_ATAN2);
-    add_primitive("sinh", "Trigonometry", OP_SINH);
-    add_primitive("cosh", "Trigonometry", OP_COSH);
-    add_primitive("tanh", "Trigonometry", OP_TANH);
+    add_primitive("fpi", "Trigonometry", OP_PI);
+    add_primitive("fsin", "Trigonometry", OP_SINE);
+    add_primitive("fcos", "Trigonometry", OP_COS);
+    add_primitive("ftan", "Trigonometry", OP_TAN);
+    add_primitive("fasin", "Trigonometry", OP_ASINE);
+    add_primitive("facos", "Trigonometry", OP_ACOS);
+    add_primitive("fatan", "Trigonometry", OP_ATAN);
+    add_primitive("fatan2", "Trigonometry", OP_ATAN2);
+    add_primitive("fsinh", "Trigonometry", OP_SINH);
+    add_primitive("fcosh", "Trigonometry", OP_COSH);
+    add_primitive("ftanh", "Trigonometry", OP_TANH);
     // randomness
-    add_primitive("rand", "Randomness", OP_RAND);
+    add_primitive("frand", "Randomness", OP_RAND);
     // variables and arrays
     add_primitive("var", "Variables & Arrays", OP_VARIABLE);
     add_primitive("@", "Variables & Arrays", OP_PEEK);
@@ -3900,6 +4535,7 @@ void add_all_primitives() {
     add_primitive("envset", "Variables & Arrays", OP_ENVSET);
     // sorting
     add_primitive("sortnums", "Array Sorting", OP_SORTNUMS);
+    add_primitive("fsortnums", "Array Sorting", OP_SORTFLOATS);
     add_primitive("sortstrs", "Array Sorting", OP_SORTSTRS);
     // hash set & get
     add_primitive("h!", "Hashes", OP_HASHSET);
@@ -3939,6 +4575,10 @@ void add_all_primitives() {
     add_primitive("return", "Branching", OP_RETURN);
     // time
     add_primitive("clock", "Time", OP_CLOCK);
+    add_primitive("monoclock", "Time", OP_MONOCLOCK);
+    add_primitive("_clock+", "Time", _OP_CLOCK_ADD);
+    add_primitive("_clock%", "Time", _OP_CLOCK_MOD);
+    add_primitive("_sleep_until", "Time", _OP_SLEEP_UNTIL);
     add_primitive("epoch", "Time", OP_EPOCH);
     add_primitive("epoch->dt", "Time", OP_EPOCH_TO_DT);
     add_primitive("dt->epoch", "Time", OP_DT_TO_EPOCH);
@@ -4067,6 +4707,7 @@ void add_all_primitives() {
     add_primitive("_sineloop", "DSP", _OP_DSP_SINELOOP);
     add_primitive("_tri", "DSP", _OP_DSP_TRI);
     add_primitive("_sawtooth", "DSP", _OP_DSP_SAWTOOTH);
+    add_primitive("_wavetable", "DSP", _OP_DSP_WAVETABLE);
     add_primitive("_port", "DSP", _OP_DSP_PORT);
     add_primitive("_fast_sin", "DSP", _OP_DSP_FAST_SIN);
     add_primitive("_fast_tanh", "DSP", _OP_DSP_FAST_TANH);
@@ -4142,8 +4783,7 @@ DCLANG_LONG is_special_form(const char *token) {
 
 // Function to compile (or interpret) each incoming token
 void compile_or_interpret(const char *token) {
-    char *endPointer = 0;
-    double d;
+    DCLANG_CELL number;
     const struct primitive *pr = primitives;
     DCLANG_LONG locals_idx = 0;
     DCLANG_LONG const_search_idx = const_idx - 1;
@@ -4206,9 +4846,9 @@ void compile_or_interpret(const char *token) {
         if (strcmp(const_keys[const_search_idx], token) == 0) {
             if (def_mode) {
                 prog[iptr].opcode = OP_PUSH;
-                prog[iptr++].param = (DCLANG_FLT)const_vals[const_search_idx];
+                prog[iptr++].param = const_vals[const_search_idx];
             } else {
-                push((DCLANG_FLT)const_vals[const_search_idx]);
+                push(const_vals[const_search_idx]);
             }
             return;
         }
@@ -4219,26 +4859,27 @@ void compile_or_interpret(const char *token) {
         if (strcmp(var_keys[var_search_idx], token) == 0) {
             if (def_mode) {
                 prog[iptr].opcode = OP_PUSH;
-                prog[iptr++].param = (DCLANG_FLT)var_vals[var_search_idx];
+                prog[iptr++].param = var_vals[var_search_idx];
             } else {
-                push((DCLANG_FLT)var_vals[var_search_idx]);
+                push(var_vals[var_search_idx]);
             }
             return;
         }
         var_search_idx--;
     }
-    // Try to convert to a number
-    d = strtod(token, &endPointer);
-    if (endPointer != token) {
+    if (!dclang_parse_number(token, &number))
+        goto syntax_error;
+    {
         if (def_mode) {
             prog[iptr].opcode = OP_PUSH;
-            prog[iptr++].param = d;
+            prog[iptr++].param = number;
         } else {
-            push(d);
+            push(number);
         }
         return;
     }
     // Syntax error handling
+syntax_error:
 #ifdef DCLANG_SYNTAX_ERROR
     DCLANG_SYNTAX_ERROR();
 #endif
@@ -4277,7 +4918,7 @@ void _repl() {
                 // onto the locals_vals array:
                 for (int i=0; i<locals_idx; i++) {
                     prog[iptr].opcode = OP_SET_LOCAL;
-                    prog[iptr++].param = (DCLANG_FLT)i;
+                    prog[iptr++].param = (DCLANG_CELL)i;
                 }
             } else {
                 printf("Illegal use of '{' (locals definition) outside of word definition\n");
@@ -4359,8 +5000,13 @@ void _execfunc() {
 }
 
 void dclang_initialize() {
+    clock_gettime(CLOCK_MONOTONIC, &dclang_monoclock_origin);
     setinput(stdin);                       // start input in sane state
     ofp = stdout;                          // start output in sane state
+    if (!audio_flush_registered) {
+        atexit(audio_flush);
+        audio_flush_registered = 1;
+    }
     execfunc = _execfunc;                  // assign the execfunc function to its pointer
     show_primitives = _show_primitives;    // assign the show_primtives function to its pointer
     repl = _repl;                          // assign the repl function to its pointer

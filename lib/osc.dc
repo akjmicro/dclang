@@ -266,3 +266,50 @@ var osc_rx_pos
 : osc_synth_recv
   osc_recv osc_synth_parse
 ;
+
+
+########################################
+# Generic dclang2c-dsp control transport #
+########################################
+#
+# A controller sends the generated variable name followed by its typed value:
+#
+#   /dclang/set ,sf "variable_name" 1.0
+#   /dclang/set ,si "variable_name" 1
+#
+# The receiving wrapper resolves the name with dclang2c_control_index. This
+# keeps instrument-specific names and key/value mappings in the controller.
+
+"/dclang/set" const :DCLANG_CONTROL_SET
+",sf"          const :DCLANG_CONTROL_FLOAT
+",si"          const :DCLANG_CONTROL_INT
+
+: dclang_control_f { value name }
+  :DCLANG_CONTROL_SET :DCLANG_CONTROL_FLOAT osc_message
+  name osc_s
+  value osc_f
+  osc_send
+;
+
+: dclang_control_i { value name }
+  :DCLANG_CONTROL_SET :DCLANG_CONTROL_INT osc_message
+  name osc_s
+  value osc_i
+  osc_send
+;
+
+: dclang_control_f_changed { value name previous }
+  value previous @ f<>
+  if
+    value name dclang_control_f
+    value previous !
+  endif
+;
+
+: dclang_control_i_changed { value name previous }
+  value previous @ <>
+  if
+    value name dclang_control_i
+    value previous !
+  endif
+;

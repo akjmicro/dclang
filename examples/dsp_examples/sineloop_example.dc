@@ -11,19 +11,18 @@ make_hc_filter mylp2
   t 0x8f and 0 = if
       refresh_midictl
   endif
-    0.1 21 midictl 127 / 6 * +
+    0.1 21 midictl 127.0 f/ 6.0 f* f+
     sine
-  0.5 * 0.5 + 1.284 * modwave !
-  sl1 200 modwave @ sineloop 0.53 *
+  0.5 f* 0.5 f+ 1.284 f* modwave !
+  sl1 200.0 modwave @ sineloop 0.53 f*
   0.02 panmix
-  sl2 300 modwave @ sineloop 0.53 *
+  sl2 300.0 modwave @ sineloop 0.53 f*
   0.98 panmix
   lcget rcget
   t+
 ;
 
 : sineloop_example
-  inf times
-    render_frame _stereo_out32
-  again
+  render_frame stereo_out
+  sineloop_example
 ;

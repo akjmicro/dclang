@@ -1,0 +1,23 @@
+"dsp.dc" import
+
+make_reverb_struct  myreverb
+
+: standalone_reverb
+        stereo_in
+        0.5 f* swap 0.5 f* swap
+      1.0 panmix
+    0.0 panmix
+      lchan @
+        rchan @
+          myreverb
+            0.7
+              0.93
+        reverb
+        0.5 f* swap 0.5 f* swap
+      1.0 panmix
+    0.0 panmix
+    lcget rcget
+    stereo_out
+    t+
+  standalone_reverb
+;

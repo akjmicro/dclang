@@ -26,7 +26,7 @@ var transpose_changed
   rhythm_generator get_on_gate
 
   # check if drone volume changed
-  :drone_vol keyval_get tonum_free 127 * round
+  :drone_vol keyval_get tonum_float_free 127.0 f* fround
   dup
     cur_vol @
   <> if

@@ -17,26 +17,22 @@
 _get_sr const SAMPLE_RATE
 
 # more efficient, for multiplication
-1 SAMPLE_RATE / const INV_SAMPLE_RATE
+1.0 SAMPLE_RATE i>f f/ const INV_SAMPLE_RATE
 
 # 32-bit audio sample depth
 0x7fffffff const BIT_DEPTH
 
-# useful for correcting phase drift (see `phasor`)
-1 BIT_DEPTH / const INV_BIT_DEPTH
-1 INV_BIT_DEPTH - const PHASE_UPPER_LIMIT
-
 # definition of 2pi
-pi 2 * const 2PI
+fpi 2.0 f* const 2PI
 
 # definition of 2 / pi
-pi 2 / const PI_DIV_2
+fpi 2.0 f/ const PI_DIV_2
 
 # 1 / 2pi
-1 2 pi * / const INV_2PI
+1.0 2.0 fpi f* f/ const INV_2PI
 
 # useful in normalized frequency calculations:
-2PI SAMPLE_RATE / const 2PIDSR
+2PI SAMPLE_RATE i>f f/ const 2PIDSR
 
 # setup timestamp; unit will be samples.
 var sample_clock
@@ -48,7 +44,7 @@ var rchan
 
 : seconds2samples
   # (seconds -- samples )
-  SAMPLE_RATE * round
+  SAMPLE_RATE i>f f* fround
 ;
 
 # sample clock (timestamp) and channel routines here
@@ -73,54 +69,73 @@ var rchan
 # That happens here. This is so that any new phasor automatically registers
 # its value and allows the next phasor to do the same.
 var _phasor_count
-var _phasor_array 64 allot
+# Each oscillator owns raw uint32 phase, cached Hz, and raw phase increment.
+var _phasor_array 192 allot
 
 : _reset_phasor_count  0 _phasor_count ! ;
 
-: phasor_pointer _phasor_array _phasor_count @ + ;
+: phasor_pointer _phasor_array _phasor_count @ 3 * + ;
 
 : phasor
-  INV_SAMPLE_RATE * _phasor_array _phasor_count _phasor
+  SAMPLE_RATE i>f _phasor_array _phasor_count _phasor
 ;
 
 : sawtooth # ( freq -- sig )
-  INV_SAMPLE_RATE * _phasor_array _phasor_count _sawtooth
+  SAMPLE_RATE i>f _phasor_array _phasor_count _sawtooth
 ;
 
 # a simple metronome trigger:
 # ( freq -- sig )
 : metro
-  INV_SAMPLE_RATE * _phasor_array _phasor_count _phasor
-  0.001 <= abs
+  SAMPLE_RATE i>f _phasor_array _phasor_count _phasor
+  0.001 f<= abs i>f
 ;
 
 # a gate signal:
 # ( width freq -- sig )
 : gate
-  INV_SAMPLE_RATE * _phasor_array _phasor_count _phasor
-  > abs
+  SAMPLE_RATE i>f _phasor_array _phasor_count _phasor
+  f> abs i>f
 ;
 
 # like a gate, but over -1 to 1 range
 # ( width freq -- sig )
 : pulse
-  INV_SAMPLE_RATE * _phasor_array _phasor_count _phasor
-  > if 1 else -1 endif
+  SAMPLE_RATE i>f _phasor_array _phasor_count _phasor
+  f> if 1.0 else -1.0 endif
 ;
 
 : pulse_tanh  # ( width freq )
-  INV_SAMPLE_RATE * _phasor_array _phasor_count _phasor
-  - 12.0 * tanh
+  SAMPLE_RATE i>f _phasor_array _phasor_count _phasor
+  f- 12.0 f* ftanh
 ;
 
 : tri  # ( freq -- tri_sig )
-  INV_SAMPLE_RATE * _phasor_array _phasor_count _tri
+  SAMPLE_RATE i>f _phasor_array _phasor_count _tri
+;
+
+# User wavetables contain packed float samples in variable-space cells.
+1024 const SINE_TABLE_SIZE
+var _sine_table 1024 allot
+
+: _init_sine_table
+  SINE_TABLE_SIZE 0 1 for
+    i i>f SINE_TABLE_SIZE i>f f/ 2PI f* fsin _sine_table i + !
+  next
+;
+_init_sine_table
+
+: wavetable_phase { freq phase table length } # ( freq phase table length -- signal )
+  freq phase SAMPLE_RATE i>f table length _phasor_array _phasor_count _wavetable
+;
+
+: wavetable { freq table length } # ( freq table length -- signal )
+  freq 0.0 table length wavetable_phase
 ;
 
 # ( freq -- sine )
 : sine
-  INV_SAMPLE_RATE * _phasor_array _phasor_count _phasor
-  2PI * sin
+  _sine_table SINE_TABLE_SIZE wavetable
 ;
 
 # Faster approximations for audio-rate work. Exact `sin`, `tanh`, and `sine`
@@ -134,27 +149,22 @@ var _phasor_array 64 allot
 ;
 
 : fast_sine  # ( frequency -- signal )
-  INV_SAMPLE_RATE * _phasor_array _phasor_count _phasor
-  2PI * _fast_sin
+  _sine_table SINE_TABLE_SIZE wavetable
 ;
 
 # ( freq phase -- sine )
 : sine_phase { freq phase }
-  freq INV_SAMPLE_RATE * _phasor_array _phasor_count _phasor
-  phase +
-  1.0 %
-  2PI *
-  sin
+  freq phase _sine_table SINE_TABLE_SIZE wavetable_phase
 ;
 
-# FM phase increments can be computed whenever pitch or ratio changes.
-: fm_init { carrier_freq mod_ratio }  # ( carrier_freq mod_ratio -- carrier_step modulator_step )
-  carrier_freq INV_SAMPLE_RATE *
-  carrier_freq mod_ratio * INV_SAMPLE_RATE *
+# FM frequencies are cached as integer phase increments by the C kernel.
+: fm_init { carrier_freq mod_ratio }  # ( carrier_freq mod_ratio -- carrier_freq modulator_freq )
+  carrier_freq
+  carrier_freq mod_ratio f*
 ;
 
 : fm_steps  # ( carrier_step modulator_step index -- sig )
-  _phasor_array _phasor_count _fm
+  SAMPLE_RATE i>f _sine_table SINE_TABLE_SIZE _phasor_array _phasor_count _fm
 ;
 
 : fm { carrier_freq mod_ratio index }  # ( carrier_freq mod_ratio index -- sig )
@@ -163,7 +173,8 @@ var _phasor_array 64 allot
 
 # sineloop, a feedback sine wave
 : sineloop { mem freq fb }  # ( mem freq fb -- sig )
-  mem freq INV_SAMPLE_RATE * fb _phasor_array _phasor_count _sineloop
+  mem freq fb SAMPLE_RATE i>f _sine_table SINE_TABLE_SIZE
+  _phasor_array _phasor_count _sineloop
 ;
 
 #########
@@ -174,30 +185,30 @@ var _phasor_array 64 allot
 # the randomness we were using here had its own problems, so...
 
 : noise  # ( -- sig )
-  rand
-    2
-  *
+  frand
+    2.0
+  f*
     1.0
-  -
+  f-
 ;
 
 : randint { range }  # ( range -- int )
-  rand
-    range
-  *
-  floor
+  frand
+    range i>f
+  f*
+  ffloor
 ;
 
 : randtrig { compare_val hold_var }
   t 0xff and 0 =
   if
-    rand compare_val < abs dup hold_var !
+    frand compare_val f< abs i>f dup hold_var !
   else
     t 0xff and 30 <
     if
       hold_var @
     else
-      0
+      0.0
     endif
   endif
 ;
@@ -217,27 +228,28 @@ var _phasor_array 64 allot
       dup                       # ( samples samples )
         here                    # ( samples samples var_addr+1 )
         1 -                     # ( samples samples var_addr )
-    !                           # ( samples )  # put the delay sample size in first (0th) slot
+    # The native delay helper stores signal-domain metadata as packed floats.
+    swap i>f swap !             # ( samples )  # put the delay sample size in first (0th) slot
     DELAY_HEADER_SIZE +         # ( samples+hdrsz )
   allot                         # (  )  # reserve the memory
 ;
 
 : _set_delay_value              # ( sig delay_struct )
    dup                          # ( sig delay_struct delay_struct )
-   1 +@                         # ( sig delay_struct dpos )
+   1 +@ f>i                    # ( sig delay_struct dpos )
    DELAY_HEADER_SIZE +          # ( sig delay_struct dpos+hdr )
    +setn!                       # ( )
 ;
 
 : delay_read
-  SAMPLE_RATE * _delay
+  SAMPLE_RATE i>f f* _delay
 ;
 
 : delay_write { sig delay_struct }      # ( sig delay_struct -- )
   # put it into the current write position
   sig delay_struct _set_delay_value
   # increment the write position
-  t delay_struct @ %
+  t delay_struct @ f>i % i>f
   delay_struct 1 +setn!
 ;
 
@@ -250,7 +262,7 @@ var _phasor_array 64 allot
 # See the example file 'bell_of_doom.fs' for an example.
 
 : tau_to_alpha { tau }
-    1 -1 tau SAMPLE_RATE * / exp -
+    1.0 -1.0 tau SAMPLE_RATE i>f f* f/ fexp f-
 ;
 
 : port  # ( sig mem rise_alpha fall_alpha -- sig_out )
@@ -261,9 +273,9 @@ var _phasor_array 64 allot
 # Lowpass (simple non-resonant) #
 #################################
 : lowpass { sig memvar pole }  # (sig memvar pole -- newsig )
-  sig 1 pole - *
-    memvar @ pole *
-  +
+  sig 1.0 pole f- f*
+    memvar @ pole f*
+  f+
     dup
   memvar !
 ;
@@ -272,20 +284,20 @@ var _phasor_array 64 allot
 # dcblock filter #
 ##################
 
-: make_dcblock create 0 , 0 , ;
+: make_dcblock create 0.0 , 0.0 , ;
 
 : dcblock { sig dc_struct }
     # sig - sig_del:
     sig
       dc_struct @
-    -
+    f-
     # save sig for later:
     sig dc_struct !
     # 0.995 * ydel:
       0.995
         dc_struct 1 +@
-      *
-    +
+      f*
+    f+
     # save outsig (y) for later
     dup dc_struct 1 +setn!
 ;
@@ -305,7 +317,7 @@ var _phasor_array 64 allot
       over                      # ( dltm_smps name_var dltm_smps )
       2 + 2 *                   # ( dltm_smps name_var 2*(dltm_smps+2) )
     allot                       # ( dltm_smps name_var )
-        2dup                    # ( dltm_smps name_var dltm_smps name_var )
+        over i>f over           # ( dltm_smps name_var dltm_smps-f name_var )
     !                           # ( dltm_smps name_var )
     over 2 +                    # ( dltm_smps name_var dltm_smps+2 )
   +setn!                        # ( )
@@ -321,13 +333,13 @@ var _phasor_array 64 allot
   +                             # ( ap_struct+delsize+2 )
   dltm                          # ( ap_struct+delsize+2 dltm )
   delay_read                    # ( y_del )
-  coef *                        # ( coef*y_del )
+  coef f*                       # ( coef*y_del )
   ap_struct dltm                # ( coef*ydel ap_struct dltm )
   delay_read                    # ( coef*y_del x_del )
-  sig coef *                    # ( coef*y_del x_del coef*sig )
-  +                             # ( coef*y_del  coef*sig+x_del )
+  sig coef f*                   # ( coef*y_del x_del coef*sig )
+  f+                            # ( coef*y_del  coef*sig+x_del )
   swap                          # ( coef*sig+x_del  coef*y_del )
-  -                             # ( coef*sig+x_del-coef*y_del )
+  f-                            # ( coef*sig+x_del-coef*y_del )
                                 # ( y )
   dup                           # ( y y )
   ap_struct                     # ( y y ap_struct )
@@ -391,34 +403,34 @@ var _phasor_array 64 allot
 
 : _calc_theta  { struct }        # ( struct -- )
   struct :cutoff +@             # ( cutoff_val )
-  2PIDSR *                       # ( cutoff_val*2PIDSR )
+  2PIDSR f*                      # ( cutoff_val*2PIDSR )
   struct :theta +setn!          # poked into theta
 ;
 
 : _calc_beta  { struct tmp }    # ( struct tmp -- )
   struct :res +@                # ( res )
   struct :theta +@              # ( res theta )
-  sin 0.5 *                     # ( res sin(theta)*0.5 )
+  fsin 0.5 f*                   # ( res sin(theta)*0.5 )
   2dup                          # ( res sin(theta)*0.5 res sin(theta)*0.5 )
-  +                             # ( res sin(theta)*0.5 res+sin(theta)*0.5 )
+  f+                            # ( res sin(theta)*0.5 res+sin(theta)*0.5 )
   tmp!                          # ( res sin(theta)*0.5  <in_tmp> )
-  -                             # ( res-sin(theta)*0.5  <in_tmp> )
+  f-                            # ( res-sin(theta)*0.5  <in_tmp> )
   tmp                           # ( res-sin(theta)*0.5 res+sin(theta)*0.5 )
-  /                             # ( (res-sin(theta)*0.5)/(res+sin(theta)*0.5) ) # answer
+  f/                            # ( (res-sin(theta)*0.5)/(res+sin(theta)*0.5) ) # answer
   struct :beta +setn!           # poked into beta
 ;
 
 : _calc_gamma  { struct }       # ( struct -- )
-  struct :beta +@ inc          # ( beta+1 )
-  struct :theta +@ cos *       # ( (beta+1)*cos(theta) )
+  struct :beta +@ 1.0 f+       # ( beta+1 )
+  struct :theta +@ fcos f*     # ( (beta+1)*cos(theta) )
   struct :gamma +setn!          # poked into gamma
 ;
 
 : _calc_alpha { struct }        # ( struct -- )
-  struct :beta +@ inc          # ( beta+1 )
+  struct :beta +@ 1.0 f+       # ( beta+1 )
   struct :gamma +@              # ( beta+1 gamma )
   struct :chi +@                # ( struct beta+1 gamma chi )
-  * + 0.5 *                     # ( (beta+1+(gamma*chi))*0.5 )
+  f* f+ 0.5 f*                  # ( (beta+1+(gamma*chi))*0.5 )
   struct :alpha +setn!          # poked into alpha
 ;
 
@@ -450,22 +462,22 @@ var _phasor_array 64 allot
   # the actual transformative equation:
   struct :mu +@                 # ( mu )
   struct :xt1 +@                # ( mu xt1 )
-  *                             # ( mu*xt1 )
+  f*                            # ( mu*xt1 )
   struct :sigma +@              # ( mu*xt1 sigma )
   struct :xt2 +@                # ( mu*xt1 asigma xt2 )
-  *                             # ( mu*xt1 xt2*sigma)
-  +                             # ( mu*xt1+xt2*sigma)
-  sig +                         # ( sig+mu*xt1+sigma*xt2 )
+  f*                            # ( mu*xt1 xt2*sigma)
+  f+                            # ( mu*xt1+xt2*sigma)
+  sig f+                        # ( sig+mu*xt1+sigma*xt2 )
   struct :alpha +@              # ( sig+mu*xt1+sigma*xt2 alpha )
-  *                             # ( alpha*(sig+mu*xt1+sigma*xt2 alpha) )
+  f*                            # ( alpha*(sig+mu*xt1+sigma*xt2 alpha) )
   struct :gamma +@              # ( alpha*(sig+mu*xt1+sigma*xt2) gamma )
   struct :yt1 +@                # ( alpha*(sig+mu*xt1+sigma*xt2) gamma yt1 )
-  *                             # ( alpha*(sig+mu*xt1+sigma*xt2) gamma*yt1 )
+  f*                            # ( alpha*(sig+mu*xt1+sigma*xt2) gamma*yt1 )
   struct :beta +@               # ( alpha*(sig+mu*xt1+sigma*xt2) gamma*yt1 beta )
   struct :yt2 +@                # ( alpha*(sig+mu*xt1+sigma*xt2) gamma*yt1 beta yt2 )
-  *                             # ( alpha*(sig+mu*xt1+sigma*xt2) gamma*yt1 beta*yt2 )
-  -                             # ( alpha*(sig+mu*xt1+sigma*xt2) gamma*yt1-beta*yt2 )
-  +                             # ( alpha*(sig+mu*xt1+sigma*xt2)+gamma*yt1-beta*yt2 )
+  f*                            # ( alpha*(sig+mu*xt1+sigma*xt2) gamma*yt1 beta*yt2 )
+  f-                            # ( alpha*(sig+mu*xt1+sigma*xt2) gamma*yt1-beta*yt2 )
+  f+                            # ( alpha*(sig+mu*xt1+sigma*xt2)+gamma*yt1-beta*yt2 )
                                 # simplification:
                                 # ( sig_out )
   ##################################
@@ -487,12 +499,13 @@ var _phasor_array 64 allot
 
 : make_biquad
   create
-  0 , 0 , 0 , 0 , 0 , 0 , 0 , 0 , 0 , 0 , 0 , 0 , 0 , 0 ,
+  0.0 , 0.0 , 0.0 , 0.0 , 0.0 , 0.0 , 0.0 ,
+  0.0 , 0.0 , 0.0 , 0.0 , 0.0 , 0.0 , 0.0 ,
 ;
 
 : biquad_lp  { sig struct reinit cutoff res }   # ( sig struct reinit cutoff res -- sig_out )
-  struct :cutoff +@ cutoff <>                  # ( bool_cfdiff  )
-  struct :res +@ res <>                        # ( bool_cfdiff bool_resdiff )
+  struct :cutoff +@ cutoff f<>                 # ( bool_cfdiff  )
+  struct :res +@ res f<>                       # ( bool_cfdiff bool_resdiff )
   or if
     struct reinit cutoff res 0    _init_biquad
   endif
@@ -500,8 +513,8 @@ var _phasor_array 64 allot
 ;
 
 : biquad_hp  { sig struct reinit cutoff res }   # ( sig struct reinit cutoff res -- sig_out )
-  struct :cutoff +@ cutoff <>                  # ( bool_cfdiff  )
-  struct :res +@ res <>                        # ( bool_cfdiff bool_resdiff )
+  struct :cutoff +@ cutoff f<>                 # ( bool_cfdiff  )
+  struct :res +@ res f<>                       # ( bool_cfdiff bool_resdiff )
   or if
     struct reinit cutoff res 1    _init_biquad
   endif
@@ -509,8 +522,8 @@ var _phasor_array 64 allot
 ;
 
 : biquad_bp  { sig struct reinit cutoff res }   # ( sig struct reinit cutoff res -- sig_out )
-  struct :cutoff +@ cutoff <>                  # ( bool_cfdiff  )
-  struct :res +@ res <>                        # ( bool_cfdiff bool_resdiff )
+  struct :cutoff +@ cutoff f<>                 # ( bool_cfdiff  )
+  struct :res +@ res f<>                       # ( bool_cfdiff bool_resdiff )
   or if
     struct reinit cutoff res 1    _init_biquad
   endif
@@ -537,32 +550,32 @@ var _phasor_array 64 allot
   ##################################
   # First,  scale resonance and fc #
   ##################################
-  2 res 1.995 * - res!
-  fc 2PIDSR * fc!
+  2.0 res 1.995 f* f- res!
+  fc 2PIDSR f* fc!
     struct _hc_lpdel +@
       struct _hc_bpdel +@
         fc
-      *
-    +
+      f*
+    f+
       dup
     struct _hc_lpout +setn!
       sig
       swap
-    -
+    f-
       res
         struct _hc_bpdel +@
-      *
-    -
+      f*
+    f-
       dup
     struct _hc_hpout +setn!
       fc
-    *
+    f*
       struct _hc_bpdel +@
-    +
+    f+
   struct _hc_bpout +setn!
     struct _hc_hpout +@
       struct _hc_lpout +@
-    +
+    f+
   struct _hc_ntout +setn!
   # store delays for next go-round
     struct _hc_bpout +@
@@ -604,7 +617,7 @@ var _phasor_array 64 allot
 
 # cutoff and feedback are in the 0-1 range
 : reverb  # ( sigL sigR struct cutoff feedback -- wetL wetR )
-  SAMPLE_RATE _reverb
+  SAMPLE_RATE i>f _reverb
 ;
 
 ##########
@@ -615,16 +628,14 @@ var _phasor_array 64 allot
 # ( sig pan -- )
 : panmix
   2dup
-  PI_DIV_2 * sin
-  * rchan @ + rchan !
-  PI_DIV_2 * cos
-  * lchan @ + lchan !
+  PI_DIV_2 f* fsin
+  f* rchan @ f+ rchan !
+  PI_DIV_2 f* fcos
+  f* lchan @ f+ lchan !
 ;
 
 # stereo version of output
 : stereo_out
-  lchan @
-  rchan @
   _stereo_out32
 ;
 

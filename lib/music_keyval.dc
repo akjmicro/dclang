@@ -5,6 +5,7 @@
 
 "string.dc"      import
 "clock_sleep.dc" import
+"midi.dc"        import
 
 # for file-based reading
 "r"          const :read
@@ -47,6 +48,34 @@ var setvalbuf
 # grab a string, turn it into a number,
 # and free up the string memory
 : tonum_free dup tonum swap free ;
+
+# Key files are untyped text, but their consumers are not. These coercing
+# readers make each getter's numeric contract independent of whether a control
+# writes `3` or `3.0`.
+: _numeric_string_is_hex { s }
+  s "0x" strfind 0 <>
+  s "0X" strfind 0 <> or
+;
+
+: _numeric_string_is_float { s }
+  s "." strfind 0 <>
+  s _numeric_string_is_hex not
+    s "e" strfind 0 <>
+    s "E" strfind 0 <> or
+  and or
+;
+
+: tonum_float_free { s }
+  s _numeric_string_is_float
+  if s tonum else s tonum i>f endif
+  s free
+;
+
+: tonum_int_free { s }
+  s _numeric_string_is_float
+  if s tonum f>i else s tonum endif
+  s free
+;
 
 var remainder 1 remainder !
 
@@ -110,7 +139,7 @@ var remainder 1 remainder !
 ##########################################
 
 : _get_duration
-  60 :BPM keyval_get tonum_free /
+  60.0 :BPM keyval_get tonum_float_free f/
 ;
 
 #############################################
@@ -118,21 +147,24 @@ var remainder 1 remainder !
 #############################################
 
 : synchronized_start
-    _get_duration
-      :BEAT_PERIOD keyval_get tonum_free
-    *
-      dup
-        clock
-        swap
-      %
-    -
-    0.0 -  # empirical adjustment
-  sleep
+  _get_duration
+  :BEAT_PERIOD keyval_get tonum_float_free
+  f*
+  dup
+  clock
+  { period mod_period seconds nanoseconds }
+
+  seconds
+  nanoseconds
+  seconds nanoseconds mod_period _clock%
+  period swap f-
+  _clock+
+  sleep_until
 ;
 
 # This one allows for various instruments to drift
 : get_x_tempo { which_str }
-  which_str keyval_get tonum_free 60 /
+  which_str keyval_get tonum_float_free 60.0 f/
 ;
 
 ##################
@@ -140,15 +172,15 @@ var remainder 1 remainder !
 ##################
 
 : get_drum_vol
-  :DRUM_VOL keyval_get tonum_free
+  :DRUM_VOL keyval_get tonum_float_free
 ;
 
 : get_bass_vol
-  :BASS_VOL keyval_get tonum_free
+  :BASS_VOL keyval_get tonum_float_free
 ;
 
 : get_lead_vol
-  :LEAD_VOL keyval_get tonum_free
+  :LEAD_VOL keyval_get tonum_float_free
 ;
 
 #########################################################################
@@ -161,33 +193,37 @@ var remainder 1 remainder !
 # value and a gate value.                                               #
 #########################################################################
 
-var next_on_time
-var next_off_time
+var next_on_seconds
+var next_on_nanoseconds
+var next_off_seconds
+var next_off_nanoseconds
+
+: _next_on!  next_on_nanoseconds ! next_on_seconds ! ;
+: _next_on@  next_on_seconds @ next_on_nanoseconds @ ;
+: _next_off! next_off_nanoseconds ! next_off_seconds ! ;
+: _next_off@ next_off_seconds @ next_off_nanoseconds @ ;
 
 : set_clock_start
-  clock next_on_time !
+  clock _next_on!
 ;
 
 : _iterate_clock { length gate }
-    next_on_time @
-      dup
-        length _get_duration *
-      +
-    next_on_time !
-      length _get_duration *
-        gate
-      *
-    +
-  next_off_time !
+  length _get_duration f*
+  dup gate f*
+  _next_on@
+  { duration gated_duration seconds nanoseconds }
+
+  seconds nanoseconds duration _clock+ _next_on!
+  seconds nanoseconds gated_duration _clock+ _next_off!
 ;
 
 : get_on_gate { length gate }
   length gate _iterate_clock
-  next_off_time @ sleep_until
+  _next_off@ sleep_until
 ;
 
 : get_off_gate
-  next_on_time @ sleep_until
+  _next_on@ sleep_until
 ;
 
 ########################
@@ -195,11 +231,11 @@ var next_off_time
 ########################
 
 : get_mode
-  :MODE keyval_get tonum_free round
+  :MODE keyval_get tonum_int_free
 ;
 
 : get_transpose
-  :TRANSPOSE keyval_get tonum_free round
+  :TRANSPOSE keyval_get tonum_int_free
 ;
 
 #################
@@ -207,24 +243,22 @@ var next_off_time
 #################
 
 : get_base_pitch
-  :BASE_PITCH keyval_get
-  dup 0 =
+  :BASE_PITCH keyval_get tonum_float_free
+  dup 0.0 f=
   if
     drop
-    "261.625"
+    261.625
   endif
-  tonum_free
 ;
 
 # TODO: make EDOs dynamic
 : get_edo
-  :EDO keyval_get
+  :EDO keyval_get tonum_int_free
   dup 0 =
   if
     drop
-    "31"
+    31
   endif
-  tonum_free
 ;
 
 var sclbuf 16 mkbuf sclbuf !
@@ -274,54 +308,54 @@ var rhythm_type_buf 16 mkbuf rhythm_type_buf !
 : set_remainder remainder ! ;
 
 : get_base
-  :BASE keyval_get tonum_free round
+  :BASE keyval_get tonum_int_free
   dup 0 < if drop 0 endif
 ;
 
 : get_div
-  :DIV keyval_get tonum_free round
+  :DIV keyval_get tonum_int_free
   dup 0 = if drop 1 endif
 ;
 
 : get_mul
-  :MUL keyval_get tonum_free round
+  :MUL keyval_get tonum_int_free
   dup 1 < if drop 1 endif
 ;
 
 : get_chaos
-  :CHAOS keyval_get tonum_free
+  :CHAOS keyval_get tonum_float_free
 ;
 
 : get_wrap
-  :WRAP keyval_get tonum_free round
+  :WRAP keyval_get tonum_int_free
 ;
 
 : get_euclid_n
   # Euclidean total number of pulses to divide
-  :EUCLID_N keyval_get tonum_free
+  :EUCLID_N keyval_get tonum_int_free
   dup 1 < if drop 1 endif
 ;
 
 : get_euclid_k
   # Euclidean number of onset events
-  :EUCLID_K keyval_get tonum_free
+  :EUCLID_K keyval_get tonum_int_free
   dup 1 < if drop 1 endif
 ;
 
 : get_euclid_p
   # Euclidean phase, typically (k - 1)
-  :EUCLID_P keyval_get tonum_free
+  :EUCLID_P keyval_get tonum_int_free
   dup 0 < if drop 0 endif
 ;
 
 : get_euclid_l
   # Euclidean large onset additional pulses
-  :EUCLID_L keyval_get tonum_free
+  :EUCLID_L keyval_get tonum_int_free
   dup 0 < if drop 0 endif
 ;
 
 : get_euclid_s
   # Euclidean small onset additional pulses
-  :EUCLID_S keyval_get tonum_free
+  :EUCLID_S keyval_get tonum_int_free
   dup 0 < if drop 0 endif
 ;

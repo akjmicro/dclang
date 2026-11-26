@@ -1,7 +1,7 @@
 "dsp.dc" import
 "music.dc" import
 
-261 16 15 / *
+261.0 16.0 15.0 f/ f*
         const :BASE_FREQ
 0.5     const :REV_VOL
 0.89    const :REV_CF
@@ -15,44 +15,44 @@
 var lfo_sig
 
 create durations
-  1 13 / ,
-  1  8 / ,
-  1  5 / ,
-  1  3 / ,
-  1  2 / ,
-  1 , 2 , 3 , 5 , 8 , 13 ,
+  1.0 13.0 f/ ,
+  1.0  8.0 f/ ,
+  1.0  5.0 f/ ,
+  1.0  3.0 f/ ,
+  1.0  2.0 f/ ,
+  1.0 , 2.0 , 3.0 , 5.0 , 8.0 , 13.0 ,
 var dummy
 dummy durations -  const :NDURS
 
 create pitches
-  1  4 / ,
-  1  2 / ,
-  3  4 / ,
-  1  1 / ,
-  9  8 / ,
- 32 27 / ,
-  4  3 / ,
-  3  2 / ,
- 27 16 / ,
- 16  9 / ,
-  2  1 / ,
-  9  4 / ,
- 64 27 / ,
-  8  3 / ,
-  3  1 / ,
- 27  8 / ,
- 32  9 / ,
-  4  1 / ,
+  1.0  4.0 f/ ,
+  1.0  2.0 f/ ,
+  3.0  4.0 f/ ,
+  1.0  1.0 f/ ,
+  9.0  8.0 f/ ,
+ 32.0 27.0 f/ ,
+  4.0  3.0 f/ ,
+  3.0  2.0 f/ ,
+ 27.0 16.0 f/ ,
+ 16.0  9.0 f/ ,
+  2.0  1.0 f/ ,
+  9.0  4.0 f/ ,
+ 64.0 27.0 f/ ,
+  8.0  3.0 f/ ,
+  3.0  1.0 f/ ,
+ 27.0  8.0 f/ ,
+ 32.0  9.0 f/ ,
+  4.0  1.0 f/ ,
 var dummy2
 dummy2 pitches -  const :NPITCHES
 
 create commas
-  81  80 / ,
- 100  99 / ,
- 121 120 / ,
- 144 143 / ,
- 169 168 / ,
- 196 195 / ,
+  81.0  80.0 f/ ,
+ 100.0  99.0 f/ ,
+ 121.0 120.0 f/ ,
+ 144.0 143.0 f/ ,
+ 169.0 168.0 f/ ,
+ 196.0 195.0 f/ ,
 var dummy3
 dummy3 commas -  const :NCOMMAS
 
@@ -67,13 +67,13 @@ make_dcblock       my_dcblockR
 ;
 
 : rand_fb  # ( -- fb )
-  rand 1.3 * 0.5 +
+  frand 1.3 f* 0.5 f+
 ;
 
 : rand_freq  # ( -- hz )
   :NPITCHES randint
   pitches swap +@
-  :BASE_FREQ *
+  :BASE_FREQ f*
 ;
 
 : rand_comma
@@ -81,8 +81,8 @@ make_dcblock       my_dcblockR
 ;
 
 : freq_pan_width  # (freq -- width)
-  pitches @ :BASE_FREQ * / :NPITCHES /
-  dup 1 > if drop 1 endif
+  pitches @ :BASE_FREQ f* f/ :NPITCHES i>f f/
+  dup 1.0 f> if drop 1.0 endif
 ;
 
 : rand_pan_for_freq  # (freq -- pan)
@@ -90,11 +90,11 @@ make_dcblock       my_dcblockR
   freq_pan_width     # (0.5 wdt)
   swap               # (wdt 0.5)
   over               # (wdt 0.5 wdt)
-  0.5 *              # (wdt 0.5 half_wdt)
-  -                  # (wdt 0.5-half_wdt)
+  0.5 f*              # (wdt 0.5 half_wdt)
+  f-                  # (wdt 0.5-half_wdt)
   swap               # (centered_min wdt)
-  rand *             # (centered_min wdt*rand)
-  +                  # (res)
+  frand f*             # (centered_min wdt*frand)
+  f+                  # (res)
 ;
 
 0  const :active
@@ -124,25 +124,25 @@ make_dcblock       my_dcblockR
 
 : init_voice { cvs } # cvs = cloud_voice_struct
   rand_dur                   # (rand_dur)
-  SAMPLE_RATE * floor        # (rand_dur_smps)
+  SAMPLE_RATE i>f f* ffloor    # (rand_dur_smps)
   dup                        # (rand_dur_smps rand_dur_smps)
   cvs :rem +setn!             # (rand_dur_smps)
-  2 /                        # (half_smps)
+  2 /                         # (half_smps)
   dup                        # (half_smps half_smps)
-  SAMPLE_RATE / tau_to_alpha # (half_smps alpha_lag)
+  i>f SAMPLE_RATE i>f f/ tau_to_alpha # (half_smps alpha_lag)
   cvs :lag  +setn!            # (half_smps)
   cvs :half +setn!            # ()
   rand_freq
   dup                              cvs :freq1 +setn!
-  dup rand_comma *                 cvs :freq2 +setn!
+  dup rand_comma f*                 cvs :freq2 +setn!
   rand_pan_for_freq                cvs :pan +setn!
   rand_fb                          cvs :fb +setn!
-  rand 0.25 * 0.05 +
-    rand :CHANCE < abs
-  *                                cvs :vol +setn!
-  rand 2 * 0.01 +                  cvs :lfo_freq +setn!
-  rand 0.005 *                     cvs :lfo_depth +setn!
-  rand :CHANCE < if 1 else 0 endif cvs :active +setn!
+  frand 0.25 f* 0.05 f+
+    frand :CHANCE f< abs i>f
+  f*                                cvs :vol +setn!
+  frand 2.0 f* 0.01 f+                cvs :lfo_freq +setn!
+  frand 0.005 f*                     cvs :lfo_depth +setn!
+  frand :CHANCE f< if 1 else 0 endif cvs :active +setn!
 ;
 
 : run_voice { cvs }  # cvs = cloud_voice_struct
@@ -166,9 +166,9 @@ make_dcblock       my_dcblockR
   ###############################
   # Portamento envelope shaping #
   ###############################
-  cvs :rem +@ cvs :half +@ > abs # gate high for first half, low for release half
+  cvs :rem +@ cvs :half +@ > abs i>f # gate high for first half, low for release half
     cvs :vol +@
-  *
+  f*
     # attack/release times are approximately half the total event
     cvs :env_mem +
       cvs :lag +@
@@ -179,22 +179,22 @@ make_dcblock       my_dcblockR
   ###########################
   cvs :lfo_freq +@ sine
     cvs :lfo_depth +@
-  * cvs :lfo_mem +setn!
+  f* cvs :lfo_mem +setn!
   # osc 1
   cvs :sl_mem1 +
-    cvs :freq1 +@  cvs :lfo_mem +@ 1 + *
+    cvs :freq1 +@  cvs :lfo_mem +@ 1.0 f+ f*
       cvs :fb +@
         cvs :env +@
           cvs :fb_mem +
             :LAG_0p1
               dup
         port
-      *
-  sineloop 0.5 * tanh 0.5 tanh /
-  cvs :env +@ *
+      f*
+  sineloop 0.5 f* ftanh 0.5 ftanh f/
+  cvs :env +@ f*
   # osc 2
   #cvs :sl_mem2 +
-  cvs :freq2 +@  cvs :lfo_mem +@ 1 + *
+  cvs :freq2 +@  cvs :lfo_mem +@ 1.0 f+ f*
     1.001
       cvs :fb +@
         cvs :env +@
@@ -202,19 +202,19 @@ make_dcblock       my_dcblockR
             :LAG_0p1
               dup
         port
-      *
-  fm 0.5 * tanh 0.5 tanh /
-  cvs :env +@ *
+      f*
+  fm 0.5 f* ftanh 0.5 ftanh f/
+  cvs :env +@ f*
   # osc 3
-  cvs :freq1 +@  cvs :lfo_mem +@ 1 + *
-  sawtooth 2.0 * tanh
-  cvs :env +@ * 0.66 * :SAW_MIX *
+  cvs :freq1 +@  cvs :lfo_mem +@ 1.0 f+ f*
+  sawtooth 2.0 f* ftanh
+  cvs :env +@ f* 0.66 f* :SAW_MIX f*
   # osc 4
-  cvs :freq2 +@  cvs :lfo_mem +@ 1 + *
+  cvs :freq2 +@  cvs :lfo_mem +@ 1.0 f+ f*
   sine
-  cvs :env +@ * 0.33 *
+  cvs :env +@ f* 0.33 f*
   # add outputs, filter, and pan
-  + + + 0.5 *
+  f+ f+ f+ 0.5 f*
   cvs :pan +@
   panmix
 ;
@@ -229,8 +229,7 @@ make_cloud_voice_struct voice6
 make_cloud_voice_struct voice7
 
 : ambient_cloud
-  inf times
-    0.02 sine 0.5 * 0.51 +  lfo_sig !
+    0.02 sine 0.5 f* 0.51 f+  lfo_sig !
     voice1 run_voice
     voice2 run_voice
     voice3 run_voice
@@ -239,22 +238,22 @@ make_cloud_voice_struct voice7
     voice6 run_voice
     voice7 run_voice
     # post-scaling
-    lchan @ 0.15 * tanh
+    lchan @ 0.15 f* ftanh
       osc_fltL
-        2000
-          5960 lfo_sig @ *
-        +
+        2000.0
+          5960.0 lfo_sig @ f*
+        f+
           :LEAD_RES
-    hc_lowpass tanh
+    hc_lowpass ftanh
     0 lchan !  # zero out previous lchan sig
     0.0 panmix
-    rchan @ 0.15 * tanh
+    rchan @ 0.15 f* ftanh
       osc_fltR
-        2000
-          5960 lfo_sig @ *
-        +
+        2000.0
+          5960.0 lfo_sig @ f*
+        f+
           :LEAD_RES
-    hc_lowpass tanh
+    hc_lowpass ftanh
     0 rchan !  # zero out previous rchan sig
     1.0 panmix
     ##########
@@ -266,14 +265,15 @@ make_cloud_voice_struct voice7
             :REV_CF
               :REV_FB
         reverb
-      :REV_VOL * swap :REV_VOL *
+      :REV_VOL f* swap :REV_VOL f*
         my_dcblockR
       dcblock
       1.0 panmix
       my_dcblockL
     dcblock
     0.0 panmix
+    lcget rcget
     stereo_out
     t+
-  again
+    ambient_cloud
 ;

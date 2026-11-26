@@ -22,24 +22,24 @@ var lpmem
 
 create my_iter 16 , 0 ,
                1 , 1 , 1 , 1 ,
-               1 , 1 , 1 , 7 8 / ,
-               1 , 1 , 1 , 4 3 / ,
-               4 3 / , 3 2 / , 3 2 / , 3 4 / ,
+               1.0 , 1.0 , 1.0 , 7.0 8.0 f/ ,
+               1.0 , 1.0 , 1.0 , 4.0 3.0 f/ ,
+               4.0 3.0 f/ , 3.0 2.0 f/ , 3.0 2.0 f/ , 3.0 4.0 f/ ,
 
-: metronome_simple
+: bassline
     0.1 tempo @ gate  curtrig !
-    curtrig @ lasttrig @ >
+    curtrig @ lasttrig @ f>
     if
       # check if tempo changed
-      :BASS_TEMPO get_x_tempo  dup tempo @ <>
+      :BASS_TEMPO get_x_tempo  dup tempo @ f<>
       if tempo ! else drop endif
       # check if vol changed
-      get_bass_vol dup myvol @ <>
+      get_bass_vol dup myvol @ f<>
       if myvol ! else drop endif
       # simple pitch sequence using `iterator`
         get_base_pitch
           my_iter iterator
-        *
+        f*
       pitch !
     endif
     curtrig @
@@ -52,14 +52,15 @@ create my_iter 16 , 0 ,
           curtrig @
             my_fbport :FB_RISE :FB_FALL
           port
-          0.47 0.05   rand * + *
-          0.2  0.0125 rand * + +
+          0.47 0.05   frand f* f+ f*
+          0.2  0.0125 frand f* f+ f+
       sineloop
-    *
-    lpmem 0.7 lowpass myvol @ *
+    f*
+    lpmem 0.7 lowpass myvol @ f*
   0.5 panmix
+  lcget rcget
   stereo_out
   t+
   curtrig @ lasttrig !
-  metronome_simple
+  bassline
 ;

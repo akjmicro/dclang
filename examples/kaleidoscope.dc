@@ -21,10 +21,10 @@ mybuf !
     0                           # buffer offset, local on the stack
     24 times
       80 times
-        i  160 / 0.25 - dup *   # This is all distance formula stuff:
-        j  48 / 0.25 - dup *    # sqrt(a^2 + b^2)...distance from origin
-        + sqrt sin              # (sine of the distance from origin)
-        k 0.5 * * cos 0.5 * 0.51 + 2.9 * floor
+        i i>f 160.0 f/ 0.25 f- dup f* # This is all distance formula stuff:
+        j i>f 48.0 f/ 0.25 f- dup f*  # sqrt(a^2 + b^2)...distance from origin
+        f+ fsqrt fsin            # (sine of the distance from origin)
+        k i>f 0.5 f* f* fcos 0.5 f* 0.51 f+ 2.9 f* ffloor
         1 + @ bufadd
         1 +                     # increment the buffer offset
       again

@@ -1,0 +1,77 @@
+# Integer literals and raw-cell arithmetic.
+42 8 + 50 = assert
+42 8 - 34 = assert
+7 6 * 42 = assert
+7 3 / 2 = assert
+7 3 % 1 = assert
+-7 3 / -2 = assert
+-7 3 % -1 = assert
+
+# */ keeps the signed intermediate product at twice the cell width.
+6 7 3 */ 14 = assert
+-7 3 2 */ -10 = assert
+-1 1 >> dup 2 2 */ = assert
+
+# /% and */% follow dclang divmod order: quotient below remainder.
+17 5 /% 2 = assert 3 = assert
+-17 5 /% -2 = assert -3 = assert
+17 2 5 */% 4 = assert 6 = assert
+-17 2 5 */% -4 = assert -6 = assert
+-1 1 >> dup 2 2 */% 0 = assert = assert
+
+# Full-width cells survive stack and memory movement without floating point.
+9007199254740993 dup = assert
+var wide-cell
+9007199254740993 wide-cell !
+wide-cell @ 9007199254740993 = assert
+
+# Hexadecimal integers containing e remain integers, not exponent literals.
+0xdead 57005 = assert
+
+# Shift counts are reduced modulo cell width on both supported architectures.
+1 0x40 << 1 = assert
+
+# Floating literals are packed cells and require floating operators.
+1.5 2.25 f+ 3.75 f= assert
+7.5 2.0 f- 5.5 f= assert
+1.5 4.0 f* 6.0 f= assert
+7.5 2.5 f/ 3.0 f= assert
+5.5 2.0 f% 1.5 f= assert
+-3.5 fabs 3.5 f= assert
+
+# Float comparisons produce canonical raw-cell booleans.
+1.0 2.0 f< true = assert
+2.0 1.0 f> true = assert
+2.0 2.0 f= true = assert
+
+# Compiled instruction parameters preserve both representations.
+: typed-literals
+  9007199254740993
+  1.25
+;
+typed-literals
+1.25 f= assert
+9007199254740993 = assert
+
+# String conversion follows the same integer/float grammar as source tokens.
+"5" tonum 5 = assert
+"-5" tonum -5 = assert
+"0xdead" tonum 57005 = assert
+"5.0" tonum 5.0 f= assert
+"5e0" tonum 5.0 f= assert
+" 5\n" tonum 5 = assert
+
+# Numeric conversion changes interpretation rather than merely copying bits.
+5 i>f 5.0 f= assert
+-5 i>f -5.0 f= assert
+5.75 f>i 5 = assert
+-5.75 f>i -5 = assert
+
+# Numeric sorting has explicit signed-integer and packed-float contracts.
+create typed_float_sort
+  3.5 , -1.0 , 2.25 , -4.0 ,
+typed_float_sort 4 fsortnums
+typed_float_sort     @ -4.0 f= assert
+typed_float_sort 1 + @ -1.0 f= assert
+typed_float_sort 2 + @ 2.25 f= assert
+typed_float_sort 3 + @ 3.5 f= assert

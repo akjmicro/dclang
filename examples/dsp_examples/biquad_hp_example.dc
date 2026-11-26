@@ -3,14 +3,13 @@
 make_biquad myflt
 
 : render_frame
-  noise 0.1 * myflt 0 0.2 sine 500 * 1500 + 29.99 biquad_hp
-  0.07 * 0.5 panmix
+  noise 0.1 f* myflt 0 0.2 sine 500.0 f* 1500.0 f+ 29.99 biquad_hp
+  0.07 f* 0.5 panmix
   lcget rcget
   t+
 ;
 
 : biquad_hp_example
-  inf times
-    render_frame _stereo_out32
-  again
+  render_frame stereo_out
+  biquad_hp_example
 ;

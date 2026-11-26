@@ -1,7 +1,7 @@
 80                const  WIDTH
 24                const  HEIGHT
-1 WIDTH /         const  INV_WIDTH
-1 HEIGHT /        const  INV_HEIGHT
+1.0 WIDTH i>f f/  const  INV_WIDTH
+1.0 HEIGHT i>f f/ const  INV_HEIGHT
 WIDTH HEIGHT *    const  AREA
 HEIGHT    2  /    const  HIGHROW
 WIDTH     2  /    const  HIGHCOL
@@ -21,14 +21,14 @@ mybuf !
     0
     HIGHROW LOWROW 1 for
       HIGHCOL LOWCOL 1 for
-          i  INV_WIDTH * dup *    sin
-            j INV_HEIGHT * dup *  cos
-          * sqrt
-            k
-          *
-          sin
+          i i>f INV_WIDTH f* dup f* fsin
+            j i>f INV_HEIGHT f* dup f* fcos
+          f* fsqrt
+            k i>f
+          f*
+          fsin
             0.5
-          <
+          f<
           if 32 else 42 endif   bufadd
           1 +   # increment the original 0 counter
       next

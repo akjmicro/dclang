@@ -9,7 +9,7 @@
         -1
   for
     dup i +
-    over rand i * floor +
+    over frand i i>f f* ffloor +
     _cell_swap
   next
   drop

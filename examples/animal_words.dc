@@ -22,11 +22,11 @@ str_arr_start idx !
 
 # Dynamically sense how many string we've loaded; create a value we
 # can multiply by to stay in range.
-: scale idx @ 1 - * floor ;
+: scale idx @ 1 - i>f f* ffloor ;
 
 # A "loop over the animals" function
 : rand_animals
-1024 times rand scale getstr " " print again
+1024 times frand scale getstr " " print again
 cr
 ;
 

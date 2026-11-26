@@ -1,15 +1,15 @@
 "dsp.dc" import
 
-3 make_delay_line dlyL
-3 make_delay_line dlyR
+3.0 make_delay_line dlyL
+3.0 make_delay_line dlyR
 
-261 3 4 / * const :BASE_PITCH
+261.0 3.0 4.0 f/ f* const :BASE_PITCH
 3.5         const :METRO_FREQ
 1.2         const :BRIGHT
 0.6         const :DELWET
-1 :DELWET - const :DELDRY
+1.0 :DELWET f- const :DELDRY
 0.75        const :DELWDT
-1 :DELWDT - const :DELWDT_I
+1.0 :DELWDT f- const :DELWDT_I
 0.003 tau_to_alpha
             const :RISE_ALPHA
 0.137 tau_to_alpha
@@ -26,20 +26,20 @@ var ltap
 var rtap
 
 # A little Pythagorean 'riff'
-create pitches  1 1  / ,
-                3 2  / ,
-                4 3  / ,
-                3 2  / ,
-               32 27 / ,
-                1 1  / ,
-                9 8  / ,
-                8 9  / ,
-                1 1  / ,
-                1 1  / ,
-               32 27 / ,
-                4 3  / ,
-                3 4  / ,
-                8 9  / ,
+create pitches  1.0  1.0 f/ ,
+                3.0  2.0 f/ ,
+                4.0  3.0 f/ ,
+                3.0  2.0 f/ ,
+               32.0 27.0 f/ ,
+                1.0  1.0 f/ ,
+                9.0  8.0 f/ ,
+                8.0  9.0 f/ ,
+                1.0  1.0 f/ ,
+                1.0  1.0 f/ ,
+               32.0 27.0 f/ ,
+                4.0  3.0 f/ ,
+                3.0  4.0 f/ ,
+                8.0  9.0 f/ ,
 var dummy
 var pitches_size  dummy pitches -  pitches_size !
 
@@ -54,7 +54,7 @@ var pitches_size  dummy pitches -  pitches_size !
     ampenv !
     # Check if we're on the rising edge of a click
     # If so, update pitch
-    curtrig @ lasttrig @ >
+    curtrig @ lasttrig @ f>
     if
       pitch_idx @ 1 + pitches_size @ %
       pitch_idx !
@@ -62,23 +62,23 @@ var pitches_size  dummy pitches -  pitches_size !
     # sineloop sound source
     sl
       pitches pitch_idx @ + @
-      :BASE_PITCH *
+      :BASE_PITCH f*
         :BRIGHT
     sineloop
-    ampenv @ *
-    0.45 *
+    ampenv @ f*
+    0.45 f*
     drysig !
     ########################
     # read current echoes  #
     ########################
-    dlyL 1 :METRO_FREQ / 3 * 2 / delay_read ltap !
-    dlyR 1 :METRO_FREQ / 3 * 2 / delay_read rtap !
+    dlyL 1.0 :METRO_FREQ f/ 3.0 f* 2.0 f/ delay_read ltap !
+    dlyR 1.0 :METRO_FREQ f/ 3.0 f* 2.0 f/ delay_read rtap !
     #################
     # stereo output #
     #################
-    drysig @ :DELDRY * ltap @ :DELWET * +
+    drysig @ :DELDRY f* ltap @ :DELWET f* f+
     :DELWDT_I panmix   # left out
-    drysig @ :DELDRY * rtap @ :DELWET * +
+    drysig @ :DELDRY f* rtap @ :DELWET f* f+
     :DELWDT   panmix   # right out
     lcget rcget
     #############################################
@@ -86,8 +86,8 @@ var pitches_size  dummy pitches -  pitches_size !
     # left gets dry injection + feedback from R #
     # right gets feedback from L                #
     #############################################
-    drysig @ 0.5 *  rtap @ 0.5 * +  dlyL delay_write
-    ltap @ 0.6 *                    dlyR delay_write
+    drysig @ 0.5 f*  rtap @ 0.5 f* f+  dlyL delay_write
+    ltap @ 0.6 f*                       dlyR delay_write
     # update trigger state
     curtrig @ lasttrig !
     # Advance the sample clock
@@ -95,7 +95,6 @@ var pitches_size  dummy pitches -  pitches_size !
 ;
 
 : ping_pong_delay
-  inf times
-    render_frame _stereo_out32
-  again
+  render_frame stereo_out
+  ping_pong_delay
 ;

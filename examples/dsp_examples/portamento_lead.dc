@@ -18,9 +18,9 @@
 "rev_cf"    const :REV_CF
 "rev_fb"    const :REV_FB
 0.95        const :DELWET
-1 :DELWET - const :DELDRY
+1.0 :DELWET f- const :DELDRY
 0.75        const :DELWDT
-1 :DELWDT - const :DELWDT_I
+1.0 :DELWDT f- const :DELWDT_I
 
 var tempo      :LEAD_TEMPO get_x_tempo              tempo !
 var gatevar     :LEAD_GATE keyval_get tonum       gatevar !
@@ -32,7 +32,7 @@ var lead_res     :LEAD_RES keyval_get tonum      lead_res !
 var lead_vol               get_lead_vol          lead_vol !
 var drone_pitch            get_base_pitch     drone_pitch !
 var drone_fb     :DRONE_FB keyval_get tonum      drone_fb !
-var pitch                 drone_pitch @ 4 *         pitch !
+var pitch                 drone_pitch @ 4.0 f*      pitch !
 var drone_vol   :DRONE_VOL keyval_get tonum     drone_vol !
 var rev_cf         :REV_CF keyval_get tonum        rev_cf !
 var rev_fb         :REV_FB keyval_get tonum        rev_fb !
@@ -59,8 +59,8 @@ var slmem3
 var slmem4
 make_hc_filter osc_flt
 
-3 make_delay_line dlyL
-3 make_delay_line dlyR
+3.0 make_delay_line dlyL
+3.0 make_delay_line dlyR
 var ltap
 var rtap
 var drysig
@@ -71,7 +71,6 @@ make_digit_expansion_struct gen_struct
 make_reverb_struct          my_reverb
 
 : portamento_lead
-  inf times
     ####################################################################
     # check control changes (at a decent k-rate) that are not rhythmic #
     ####################################################################
@@ -101,13 +100,13 @@ make_reverb_struct          my_reverb
     # Our main metronome pulse #
     ############################
     gatevar @ tempo @ gate  curtrig !
-    curtrig @ lasttrig @ >  # rising edge detection
+    curtrig @ lasttrig @ f> # rising edge detection
     if
       # has tempo changed?
-      :LEAD_TEMPO get_x_tempo dup tempo @ <>
+      :LEAD_TEMPO get_x_tempo dup tempo @ f<>
       if tempo ! else drop endif
       # has bass pitch changed?
-      get_base_pitch dup base_pitch @ <>
+      get_base_pitch dup base_pitch @ f<>
       if drone_pitch ! else drop endif
       # possibly alter rhythm
       trigcount @ current_euclid @ % 0 =
@@ -127,11 +126,11 @@ make_reverb_struct          my_reverb
     #######
     # LFO #
     #######
-    0.02 sine 0.5 * 0.5 + lfo_sig !
+    0.02 sine 0.5 f* 0.5 f+ lfo_sig !
     ################
     # melody voice #
     ################
-    curtrig @ trigmask @ lead_vol @ * *
+    curtrig @ trigmask @ i>f lead_vol @ f* f*
       amp_port attack @ release @
     port amp_env !
     # OSC 1
@@ -141,42 +140,42 @@ make_reverb_struct          my_reverb
     sineloop
     # OSC 2
       pitch @ pitch_port2 lead_port @ lead_port @ port
-      sine 0.5 *
-    +
-      pitch @ 2.004 * pitch_port3 lead_port @ lead_port @ port
-      sine 0.25 *
-    +
-      pitch @ 3.004 * pitch_port4 lead_port @ lead_port @ port
-      tri 0.12 *
-    +
+      sine 0.5 f*
+    f+
+      pitch @ 2.004 f* pitch_port3 lead_port @ lead_port @ port
+      sine 0.25 f*
+    f+
+      pitch @ 3.004 f* pitch_port4 lead_port @ lead_port @ port
+      tri 0.12 f*
+    f+
     # Apply envelope
-    amp_env @ *
+    amp_env @ f*
     # Apply filter
       osc_flt
-        300
-          2000 lfo_sig @ *
-        +
-        8000
+        300.0
+          2000.0 lfo_sig @ f*
+        f+
+        8000.0
           over
-        - amp_env @ *
-        +
+        f- amp_env @ f*
+        f+
           lead_res @
     hc_lowpass
     0.5 panmix
     ########################
     # read current echoes  #
     ########################
-    dlyL 2 tempo @ / 3 * 2 /         delay_read ltap !
-    dlyR 2 tempo @ / 3 * 2 / 0.002 + delay_read rtap !
+    dlyL 2.0 tempo @ f/ 3.0 f* 2.0 f/         delay_read ltap !
+    dlyR 2.0 tempo @ f/ 3.0 f* 2.0 f/ 0.002 f+ delay_read rtap !
     ##########################
     # mix dry & delayed sigs #
     ##########################
     # Establish dry (mono) signal
-    lchan @ rchan @ +   drysig !
+    lchan @ rchan @ f+  drysig !
     # Mix with delayed
-    drysig @ :DELDRY *  ltap @ :DELWET *  +
+    drysig @ :DELDRY f* ltap @ :DELWET f* f+
     :DELWDT_I panmix   # left out
-    drysig @ :DELDRY *  rtap @ :DELWET *  +
+    drysig @ :DELDRY f* rtap @ :DELWET f* f+
     :DELWDT   panmix   # right out
     ##############
     # bass drone #
@@ -184,42 +183,43 @@ make_reverb_struct          my_reverb
       slmem3
         drone_pitch @
           drone_fb @
-      sineloop drone_vol @ *
+      sineloop drone_vol @ f*
     0.3 panmix
       slmem4
-        drone_pitch @ 1.005 *
+        drone_pitch @ 1.005 f*
           drone_fb @
-      sineloop drone_vol @ *
+      sineloop drone_vol @ f*
     0.7 panmix
     ###################
     # reverb & output #
     ###################
-      lchan @ rev_vol @ *
-        rchan @ rev_vol @ *
+      lchan @ rev_vol @ f*
+        rchan @ rev_vol @ f*
           my_reverb
             rev_cf @
               rev_fb @
         reverb
       1.0 panmix
     0.0 panmix
+    lcget rcget
     stereo_out
     #############################################
     # cross-feedback:                           #
     # left gets dry injection + feedback from R #
     # right gets feedback from L                #
     #############################################
-      drysig @ 0.5 *
-        rtap @ 0.75 *
-      +
+      drysig @ 0.5 f*
+        rtap @ 0.75 f*
+      f+
         dlylpL
-          2600
+          2600.0
             0.35
       hc_lowpass
         dlyL
     delay_write
-      ltap @ 0.85 *
+      ltap @ 0.85 f*
         dlylpR
-          2300
+          2300.0
             0.35
         hc_lowpass
       dlyR
@@ -228,5 +228,5 @@ make_reverb_struct          my_reverb
     curtrig @ lasttrig !
     # Advance the sample clock
     t+
-  again
+  portamento_lead
 ;

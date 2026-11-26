@@ -1,14 +1,13 @@
 "dsp.dc" import
 
 : render_frame
-  300.0 sine 0.4 * 400.0 sine 0.4 * +
-  0.1 sine 0.4 * 0.5 + panmix
+  300.0 sine 0.4 f* 400.0 sine 0.4 f* f+
+  0.1 sine 0.4 f* 0.5 f+ panmix
   lcget rcget
   t+
 ;
 
 : panning_example
-  inf times
-    render_frame _stereo_out32
-  again
+  render_frame stereo_out
+  panning_example
 ;

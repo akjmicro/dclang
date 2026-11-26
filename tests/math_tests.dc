@@ -1,5 +1,16 @@
 "math.dc" import
 
+# signed integer predicates and division
+-10 isneg true = assert
+0 isneg false = assert
+10 isneg false = assert
+17 5 divmod 2 = assert 3 = assert
+-17 5 divmod -2 = assert -3 = assert
+
+# integer digit processing
+123 10 digit_sum 6 = assert
+255 16 digit_sum 30 = assert
+
 # bounce
 0 0 3 bounce 0 = assert
 1 0 3 bounce 1 = assert
@@ -53,3 +64,8 @@
 862913 is-prime 1 = assert
 862917 is-prime 0 = assert
 1782778337 is-prime 1 = assert
+
+# unbounded prime searches use recursion rather than a floating infinity loop
+ 1 100 find-next-prime 101 = assert
+-1 100 find-next-prime  97 = assert
+100 closest-prime 101 = assert

@@ -1,7 +1,9 @@
 "math.dc"         import
-"midi.dc"         import
 "osc.dc"          import
 "linked_list.dc"  import
+###################################################
+# music_keyval.dc imports `midi.dc` along with it #
+###################################################
 "music_keyval.dc" import
 
 var base_pitch  get_base_pitch  base_pitch !
@@ -22,85 +24,86 @@ var bend_depth
     drop
     4096 bend_depth !
   else
-    tonum 8192 swap / round bend_depth !
+    tonum 8192 swap / bend_depth !
   endif
 ;
 
 set_bend_depth
 
-: O- 1 - ;  # subtract an octave
-: O+ 1 + ;  # add an octave
+: O- 1.0 f- ;  # subtract an octave
+: O+ 1.0 f+ ;  # add an octave
 
-64 63 / log2 const 64_63
-28 27 / log2 const 28_27
-21 20 / log2 const 21_20
-16 15 / log2 const 16_15
-10  9 / log2 const 10_9
-11 10 / log2 const 11_10
- 9  8 / log2 const  9_8
- 7  6 / log2 const  7_6
-32 27 / log2 const 32_27
- 6  5 / log2 const  6_5
-11  9 / log2 const 11_9
- 5  4 / log2 const  5_4
-81 64 / log2 const 81_64
- 4  3 / log2 const  4_3
-11  8 / log2 const 11_8
-45 32 / log2 const 45_32
- 3  2 / log2 const  3_2
-32 21 / log2 const 32_21
- 8  5 / log2 const  8_5
-13  8 / log2 const 13_8
- 5  3 / log2 const  5_3
-27 16 / log2 const 27_16
- 7  4 / log2 const  7_4
-16  9 / log2 const 16_9
- 9  5 / log2 const  9_5
-11  6 / log2 const 11_6
-15  8 / log2 const 15_8
+64 i>f 63 i>f f/ flog2 const 64_63
+28 i>f 27 i>f f/ flog2 const 28_27
+21 i>f 20 i>f f/ flog2 const 21_20
+16 i>f 15 i>f f/ flog2 const 16_15
+10 i>f  9 i>f f/ flog2 const 10_9
+11 i>f 10 i>f f/ flog2 const 11_10
+ 9 i>f  8 i>f f/ flog2 const  9_8
+ 7 i>f  6 i>f f/ flog2 const  7_6
+32 i>f 27 i>f f/ flog2 const 32_27
+ 6 i>f  5 i>f f/ flog2 const  6_5
+11 i>f  9 i>f f/ flog2 const 11_9
+ 5 i>f  4 i>f f/ flog2 const  5_4
+81 i>f 64 i>f f/ flog2 const 81_64
+ 4 i>f  3 i>f f/ flog2 const  4_3
+11 i>f  8 i>f f/ flog2 const 11_8
+45 i>f 32 i>f f/ flog2 const 45_32
+ 3 i>f  2 i>f f/ flog2 const  3_2
+32 i>f 21 i>f f/ flog2 const 32_21
+ 8 i>f  5 i>f f/ flog2 const  8_5
+13 i>f  8 i>f f/ flog2 const 13_8
+ 5 i>f  3 i>f f/ flog2 const  5_3
+14 i>f  9 i>f f/ flog2 const 14_9
+27 i>f 16 i>f f/ flog2 const 27_16
+ 7 i>f  4 i>f f/ flog2 const  7_4
+16 i>f  9 i>f f/ flog2 const 16_9
+ 9 i>f  5 i>f f/ flog2 const  9_5
+11 i>f  6 i>f f/ flog2 const 11_6
+15 i>f  8 i>f f/ flog2 const 15_8
 # higher overtones
-17      log2 const 17_1
-18      log2 const 18_1
-19      log2 const 19_1
-20      log2 const 20_1
-21      log2 const 21_1
-22      log2 const 22_1
-23      log2 const 23_1
-24      log2 const 24_1
-25      log2 const 25_1
-26      log2 const 26_1
-27      log2 const 27_1
-28      log2 const 28_1
-29      log2 const 29_1
-30      log2 const 30_1
-31      log2 const 31_1
-32      log2 const 32_1
+17 i>f flog2 const 17_1
+18 i>f flog2 const 18_1
+19 i>f flog2 const 19_1
+20 i>f flog2 const 20_1
+21 i>f flog2 const 21_1
+22 i>f flog2 const 22_1
+23 i>f flog2 const 23_1
+24 i>f flog2 const 24_1
+25 i>f flog2 const 25_1
+26 i>f flog2 const 26_1
+27 i>f flog2 const 27_1
+28 i>f flog2 const 28_1
+29 i>f flog2 const 29_1
+30 i>f flog2 const 30_1
+31 i>f flog2 const 31_1
+32 i>f flog2 const 32_1
 
 #######################################################################
 # Scales defined here. N.B. scales are measured in octaves (via log2) #
 # The idea is that `edo_degree_*` words can dynamically use the `edo` #
-# variables to multiply and round to get a degree.                    #
+# variables to multiply and round to get a degree.                     #
 #######################################################################
 
-create otonal 0 O- O- ,
-              0 O-    ,                               3_2 O- ,
-              0       ,            5_4    ,            3_2    ,  7_4 ,
-              0 O+    ,  9_8  O+ , 5_4 O+ , 11_8 O+ ,  3_2 O+ , 13_8 O+ , 7_4 O+ , 15_8 O+ ,
-              0 O+ O+ , 17_1 , 18_1 , 19_1 , 20_1 , 21_1 , 22_1 , 23_1 , 24_1 , 25_1 ,
-                        26_1 , 27_1 , 28_1 , 29_1 , 30_1 , 31_1 ,
+create otonal 0.0 O- O- ,
+              0.0 O-    ,                                3_2 O- ,
+              0.0       ,            5_4    ,            3_2    ,  7_4 ,
+              0.0 O+    ,  9_8  O+ , 5_4 O+ , 11_8 O+ ,  3_2 O+ , 13_8 O+ , 7_4 O+ , 15_8 O+ ,
+              0.0 O+ O+ , 17_1 , 18_1 , 19_1 , 20_1 , 21_1 , 22_1 , 23_1 , 24_1 , 25_1 ,
+                          26_1 , 27_1 , 28_1 , 29_1 , 30_1 , 31_1 ,
               32_1 ,
 var otonal_size
   here 1 - otonal -
 otonal_size !
 
-create pentatonic 0 O- , 9_8 O- , 4_3 O- , 3_2 O- , 16_9 O- ,
-                  0    , 9_8    , 4_3    , 3_2    , 16_9    ,
-                  0 O+ ,
+create pentatonic 0.0 O- , 9_8 O- , 4_3 O- , 3_2 O- , 16_9 O- ,
+                  0.0    , 9_8    , 4_3    , 3_2    , 16_9    ,
+                  0.0 O+ ,
 var pentatonic_size
   here 1 - pentatonic -
 pentatonic_size !
 
-create s4679 0 O- , 3_2 O- , 7_4 O- , 0 , 9_8 ,
+create s4679 0.0 O- , 3_2 O- , 7_4 O- , 0.0 , 9_8 ,
 var s4679_size
   here 1 - s4679 -
 s4679_size !
@@ -110,81 +113,81 @@ s4679_size !
 # course different flavors, including Pythagorean and 7-limit, etc.      #
 ##########################################################################
 
-create ionian   0 O-       ,                          4_3 O-    , 3_2 O-     ,
-                0          ,  9_8       , 5_4       , 4_3       , 3_2        , 5_3       , 15_8       ,
-                0 O+       ,  9_8 O+    , 5_4 O+    , 4_3 O+    , 3_2 O+     , 5_3 O+    , 15_8 O+    ,
-                0 O+ O+    ,  9_8 O+ O+ , 5_4 O+ O+ , 4_3 O+ O+ , 3_2 O+ O+  , 5_3 O+ O+ , 15_8 O+ O+ ,
-                0 O+ O+ O+ ,
+create ionian   0.0 O-       ,                          4_3 O-    , 3_2 O-     ,
+                0.0          ,  9_8       , 5_4       , 4_3       , 3_2        , 5_3       , 15_8       ,
+                0.0 O+       ,  9_8 O+    , 5_4 O+    , 4_3 O+    , 3_2 O+     , 5_3 O+    , 15_8 O+    ,
+                0.0 O+ O+    ,  9_8 O+ O+ , 5_4 O+ O+ , 4_3 O+ O+ , 3_2 O+ O+  , 5_3 O+ O+ , 15_8 O+ O+ ,
+                0.0 O+ O+ O+ ,
 var ionian_size
   here 1 - ionian -
 ionian_size !
 
-create dorian   0 O-       ,                          4_3 O-    , 3_2 O-     ,
-                0          ,  9_8       , 6_5       , 4_3       , 3_2        , 5_3       , 9_5       ,
-                0 O+       ,  9_8 O+    , 6_5 O+    , 4_3 O+    , 3_2 O+     , 5_3 O+    , 9_5 O+    ,
-                0 O+ O+    ,  9_8 O+ O+ , 6_5 O+ O+ , 4_3 O+ O+ , 3_2 O+ O+  , 5_3 O+ O+ , 9_5 O+ O+ ,
-                0 O+ O+ O+ ,
+create dorian   0.0 O-       ,                          4_3 O-    , 3_2 O-     ,
+                0.0          ,  9_8       , 6_5       , 4_3       , 3_2        , 5_3       , 9_5       ,
+                0.0 O+       ,  9_8 O+    , 6_5 O+    , 4_3 O+    , 3_2 O+     , 5_3 O+    , 9_5 O+    ,
+                0.0 O+ O+    ,  9_8 O+ O+ , 6_5 O+ O+ , 4_3 O+ O+ , 3_2 O+ O+  , 5_3 O+ O+ , 9_5 O+ O+ ,
+                0.0 O+ O+ O+ ,
 var dorian_size
   here 1 - dorian -
 dorian_size !
 
-create phrygian   0 O-       ,                            4_3 O-    , 3_2 O-     ,
-                  0          ,  16_15       , 6_5       , 4_3       , 3_2        , 8_5       , 9_5       ,
-                  0 O+       ,  16_15 O+    , 6_5 O+    , 4_3 O+    , 3_2 O+     , 8_5 O+    , 9_5 O+    ,
-                  0 O+ O+    ,  16_15 O+ O+ , 6_5 O+ O+ , 4_3 O+ O+ , 3_2 O+ O+  , 8_5 O+ O+ , 9_5 O+ O+ ,
-                  0 O+ O+ O+ ,
+create phrygian   0.0 O-       ,                            4_3 O-    , 3_2 O-     ,
+                  0.0          ,  16_15       , 6_5       , 4_3       , 3_2        , 8_5       , 9_5       ,
+                  0.0 O+       ,  16_15 O+    , 6_5 O+    , 4_3 O+    , 3_2 O+     , 8_5 O+    , 9_5 O+    ,
+                  0.0 O+ O+    ,  16_15 O+ O+ , 6_5 O+ O+ , 4_3 O+ O+ , 3_2 O+ O+  , 8_5 O+ O+ , 9_5 O+ O+ ,
+                  0.0 O+ O+ O+ ,
 var phrygian_size
   here 1 - phrygian -
 phrygian_size !
 
-create lydian   0 O-       ,                          45_32 O-    , 3_2 O-     ,
-                0          ,  9_8       , 5_4       , 45_32       , 3_2        , 5_3       , 15_8       ,
-                0 O+       ,  9_8 O+    , 5_4 O+    , 45_32 O+    , 3_2 O+     , 5_3 O+    , 15_8 O+    ,
-                0 O+ O+    ,  9_8 O+ O+ , 5_4 O+ O+ , 45_32 O+ O+ , 3_2 O+ O+  , 5_3 O+ O+ , 15_8 O+ O+ ,
-                0 O+ O+ O+ ,
+create lydian   0.0 O-       ,                          45_32 O-    , 3_2 O-     ,
+                0.0          ,  9_8       , 5_4       , 45_32       , 3_2        , 5_3       , 15_8       ,
+                0.0 O+       ,  9_8 O+    , 5_4 O+    , 45_32 O+    , 3_2 O+     , 5_3 O+    , 15_8 O+    ,
+                0.0 O+ O+    ,  9_8 O+ O+ , 5_4 O+ O+ , 45_32 O+ O+ , 3_2 O+ O+  , 5_3 O+ O+ , 15_8 O+ O+ ,
+                0.0 O+ O+ O+ ,
 var lydian_size
   here 1 - lydian -
 lydian_size !
 
-create mixolydian   0 O-       ,                          4_3 O-    , 3_2 O-     ,
-                    0          ,  9_8       , 5_4       , 4_3       , 3_2        , 5_3       , 16_9       ,
-                    0 O+       ,  9_8 O+    , 5_4 O+    , 4_3 O+    , 3_2 O+     , 5_3 O+    , 16_9 O+    ,
-                    0 O+ O+    ,  9_8 O+ O+ , 5_4 O+ O+ , 4_3 O+ O+ , 3_2 O+ O+  , 5_3 O+ O+ , 16_9 O+ O+ ,
-                    0 O+ O+ O+ ,
+create mixolydian   0.0 O-       ,                          4_3 O-    , 3_2 O-     ,
+                    0.0          ,  9_8       , 5_4       , 4_3       , 3_2        , 5_3       , 16_9       ,
+                    0.0 O+       ,  9_8 O+    , 5_4 O+    , 4_3 O+    , 3_2 O+     , 5_3 O+    , 16_9 O+    ,
+                    0.0 O+ O+    ,  9_8 O+ O+ , 5_4 O+ O+ , 4_3 O+ O+ , 3_2 O+ O+  , 5_3 O+ O+ , 16_9 O+ O+ ,
+                    0.0 O+ O+ O+ ,
 var mixolydian_size
   here 1 - mixolydian -
 mixolydian_size !
 
-create aeolian   0 O-       ,                          4_3 O-    , 3_2 O-     ,
-                 0          ,  9_8       , 6_5       , 4_3       , 3_2        , 8_5       , 9_5       ,
-                 0 O+       ,  9_8 O+    , 6_5 O+    , 4_3 O+    , 3_2 O+     , 8_5 O+    , 9_5 O+    ,
-                 0 O+ O+    ,  9_8 O+ O+ , 6_5 O+ O+ , 4_3 O+ O+ , 3_2 O+ O+  , 8_5 O+ O+ , 9_5 O+ O+ ,
-                 0 O+ O+ O+ ,
+create aeolian   0.0 O-       ,                          4_3 O-    , 3_2 O-     ,
+                 0.0          ,  9_8       , 6_5       , 4_3       , 3_2        , 8_5       , 9_5       ,
+                 0.0 O+       ,  9_8 O+    , 6_5 O+    , 4_3 O+    , 3_2 O+     , 8_5 O+    , 9_5 O+    ,
+                 0.0 O+ O+    ,  9_8 O+ O+ , 6_5 O+ O+ , 4_3 O+ O+ , 3_2 O+ O+  , 8_5 O+ O+ , 9_5 O+ O+ ,
+                 0.0 O+ O+ O+ ,
 var aeolian_size
   here 1 - aeolian -
 aeolian_size !
 
-create archytas  0 O- ,                      4_3 O- , 3_2 O- ,
-                 0    , 28_27     , 7_6    , 4_3    , 3_2    , 14_9 , 7_4 ,
-                 0 O+ , 28_27 O+  , 7_6 O+ , 4_3 O+ , 3_2 O+ ,
+create archytas  0.0 O- ,                      4_3 O- , 3_2 O- ,
+                 0.0    , 28_27     , 7_6    , 4_3    , 3_2    , 14_9 , 7_4 ,
+                 0.0 O+ , 28_27 O+  , 7_6 O+ , 4_3 O+ , 3_2 O+ ,
 var archytas_size
   here 1 - archytas -
 archytas_size !
 
 # Serre's enharmonic
 create enharmonic 4_3 O- O- ,
-                    0 O-    ,
+                    0.0 O-    ,
                   4_3 O-    ,
-                    0       , 64_63    , 16_15    , 4_3    , 3_2 , 32_21 , 8_5 ,
-                    0 O+    , 64_63 O+ , 16_15 O+ , 4_3 O+ ,
+                    0.0       , 64_63    , 16_15    , 4_3    , 3_2 , 32_21 , 8_5 ,
+                    0.0 O+    , 64_63 O+ , 16_15 O+ , 4_3 O+ ,
 var enharmonic_size
   here 1 - enharmonic -
 enharmonic_size !
 
-create equable 0 O-    ,                     4_3 O- , 3_2 O- ,
-               0       , 10_9    , 11_9    , 4_3    , 3_2    , 5_3    , 11_6    ,
-               0 O+    , 10_9 O+ , 11_9 O+ , 4_3 O+ , 3_2 O+ , 5_3 O+ , 11_6 O+ ,
-               0 O+ O+ ,
+create equable 0.0 O-    ,                     4_3 O- , 3_2 O- ,
+               0.0       , 10_9    , 11_9    , 4_3    , 3_2    , 5_3    , 11_6    ,
+               0.0 O+    , 10_9 O+ , 11_9 O+ , 4_3 O+ , 3_2 O+ , 5_3 O+ , 11_6 O+ ,
+               0.0 O+ O+ ,
 var equable_size
   here 1 - equable -
 equable_size !
@@ -248,15 +251,15 @@ var loading_custom_gamut        custom_gamut_0 loading_custom_gamut !
 : frac_to_oct_gamut  { frac_str }
     frac_str :SLASH strfind 0 =
     if
-      1
+      1.0
     else
       frac_str :SLASH __slash_tok_hold__ strtok  tonum
-      _protect_value
+      _protect_value i>f
         null   :SLASH __slash_tok_hold__ strtok  tonum
-        _protect_value
-      /
+        _protect_value i>f
+      f/
     endif
-    log2
+    flog2
       loading_custom_gamut @
         gamut_idx @
       +
@@ -351,7 +354,7 @@ set_scale
 
 : show_scale
   scale_size @ @ times
-    scale @ i + @ . cr
+    scale @ i + @ f. cr
   again
 ;
 
@@ -373,13 +376,13 @@ set_scale
   # Middle-C is assumed to be "0" in all EDOs, so use negative numbers to go
   # below middle-C.
   svpush                      # sequester the channel number away
-  get_edo / 12 *  # scale to 12-EDO with fractional remainder
-  60.5 +                      # shift to middle-C in MIDI, also overshoot fractional
-  dup floor swap              # part on purpose so we can fetch the floor closest
+  i>f get_edo i>f f/ 12.0 f*  # scale to 12-EDO with fractional remainder
+  60.5 f+                     # shift to middle-C in MIDI, also overshoot fractional
+  dup ffloor swap              # part on purpose so we can fetch the floor closest
                               # to the proper midi number; set aside by swap
-  over - 0.5 -                # grab fractional part and cancel previous 0.5 shift
-  bend_depth @ *              # scale by positive half step of bend
-  8192 +                      # center zero at halfway for +/-
+  over i>f f- 0.5 f-          # grab fractional part and cancel previous 0.5 shift
+  bend_depth @ i>f f*         # scale by positive half step of bend
+  8192.0 f+ fround            # center zero at halfway for +/-
   # stack now looks like:
   # ( volume midi_note_number midi_bend ) ( midi_channel )
   _bend_to_MSB_LSB_bytes
@@ -404,12 +407,12 @@ set_scale
 ;
 
 : edo_degree_to_hz { degree }
-  2
-    degree
-      get_edo
-    /
-  pow
-  base_pitch @ *
+  2.0
+    degree i>f
+      get_edo i>f
+    f/
+  fpow
+  base_pitch @ f*
 ;
 
 ##############################
@@ -563,11 +566,11 @@ var __fraction_tok_holder__
   tok _token_has_backslash?
   if
     tok :BACKSLASH __fraction_tok_holder__ strtok tonum
-    _protect_value
+    _protect_value i>f
       null :BACKSLASH __fraction_tok_holder__ strtok tonum
-      _protect_value
-    /
-    4 *
+      _protect_value i>f
+    f/
+    4.0 f*
   else
     tok tonum
   endif
@@ -590,8 +593,8 @@ var __fraction_tok_holder__
       _gate_lgen
         :tonum
   _string_to_lgen
-  dup 0 < if drop 0 endif
-  dup 1 > if drop 1 endif
+  dup 0.0 f< if drop 0.0 endif
+  dup 1.0 f> if drop 1.0 endif
 ;
 
 : rhythm_generator
@@ -602,7 +605,7 @@ var __fraction_tok_holder__
     dup :string str= if
       drop _do_rhythm_string
   else
-    1
+    1.0
   endif endif
   _do_gate_string
 ;
@@ -637,15 +640,15 @@ var __fraction_tok_holder__
       scale @
     +
     @          # value in log2 (octaves) now on stack
-      get_transpose
-        12     # transposition should be in terms of 12-edo standard
-      /
+      get_transpose i>f
+        12.0   # transposition should be in terms of 12-edo standard
+      f/
       # below are extra steps to round the 12-edo transpose in terms of the current EDO:
-      get_edo swap over * round swap /
-    +          # value in octaves, now offset by transposition in octaves (which can be a float)
-      get_edo
-    *
-    round      # integer EDO value now on stack, ready for `edo_degree_to_[midi|hz]`
+      get_edo i>f f* fround i>f get_edo i>f f/
+    f+         # value in octaves, now offset by transposition in octaves
+      get_edo i>f
+    f*
+    fround      # integer EDO value now on stack, ready for `edo_degree_to_[midi|hz]`
 ;
 
 : fraction_music { expansion_struct }
@@ -761,7 +764,7 @@ tmake note_symbol_tree !
 "8" const :oct_8
 
 : _get_edo_3_2 { local_edo }
-  3 2 / log2 local_edo * round
+  3 i>f 2 i>f f/ flog2 local_edo i>f f* fround
 ;
 
 : _update_note_symbol_tree { local_edo }
@@ -908,13 +911,13 @@ var _eq_hold
 ;
 
 : _ratio_to_edo_delta { num den }
-  num _protect_value
-    den _protect_value
-  /
-  log2
-    get_edo
-  *
-  round
+  num _protect_value i>f
+    den _protect_value i>f
+  f/
+  flog2
+    get_edo i>f
+  f*
+  fround
 ;
 
 : _process_keyval_token { tok }
@@ -924,11 +927,10 @@ var _eq_hold
 ;
 
 : _process_duration_token { tok }
-  tok :BACKSLASH _bslash_hold strtok tonum
-    null :BACKSLASH _bslash_hold strtok tonum
-  _protect_value
-  /
-  4 *
+  tok :BACKSLASH _bslash_hold strtok tonum _protect_value i>f
+    null :BACKSLASH _bslash_hold strtok tonum _protect_value i>f
+  f/
+  4.0 f*
   _seq_duration !
 ;
 

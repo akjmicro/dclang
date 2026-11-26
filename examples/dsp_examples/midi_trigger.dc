@@ -8,7 +8,7 @@
 
 : midi_trigger
   t
-    SAMPLE_RATE 60 96 / *
+    SAMPLE_RATE 60 * 96 /
   % dup 0 = if
     100 0 0 edo_degree_to_midi
   else
@@ -20,6 +20,7 @@
   # already 0 -- sent out anyway
   # we're really only linking to
   # aplay for audio sample timing
+  lcget rcget
   stereo_out
   t+
   midi_trigger

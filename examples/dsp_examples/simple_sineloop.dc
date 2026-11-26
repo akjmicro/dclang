@@ -1,0 +1,26 @@
+"dsp.dc" import
+"midi.dc" import
+
+var sl
+var sl2
+
+: simple_sineloop
+    t 0x3f and 0 = if
+        refresh_midictl
+    endif
+      sl
+        256.0
+          21 midictl i>f 2PI f*
+      sineloop
+      #21 midictl 2PI *
+      #fpi > if
+      #  256 sine
+      #  -1 *
+      #+
+      #endif
+    0.5 panmix
+    lcget rcget
+    stereo_out
+    t+
+  simple_sineloop
+;

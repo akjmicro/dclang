@@ -1,0 +1,58 @@
+"dsp.dc" import
+
+# Time conversion crosses explicitly from float seconds to integer samples.
+1.0 seconds2samples SAMPLE_RATE = assert
+0.0 fast_sin 0.0 f= assert
+0.0 fast_tanh 0.0 f= assert
+
+# Stateful signal words retain packed floating-point values in memory cells.
+var dsp_test_lpstate
+0.0 dsp_test_lpstate !
+1.0 dsp_test_lpstate 0.5 lowpass 0.5 f= assert
+
+# Reusing an oscillator across sample frames advances its phase.
+_reset_phasor_count
+SAMPLE_RATE i>f 4.0 f/ sine 0.0 f= assert
+t+
+SAMPLE_RATE i>f 4.0 f/ sine 1.0 f= assert
+
+# User variable-space wavetables use the same uint32 phase engine.  A
+# four-sample quadrature table reaches its second sample after one frame.
+var dsp_test_wave 4 allot
+0.0 dsp_test_wave !
+1.0 dsp_test_wave 1 + !
+0.0 dsp_test_wave 2 + !
+-1.0 dsp_test_wave 3 + !
+_reset_phasor_count
+0 _phasor_array !
+0 _phasor_array 1 + !
+0 _phasor_array 2 + !
+SAMPLE_RATE i>f 4.0 f/ dsp_test_wave 4 wavetable 0.0 f= assert
+t+
+SAMPLE_RATE i>f 4.0 f/ dsp_test_wave 4 wavetable 1.0 f= assert
+
+# FM and feedback sine share the table lookup and integer phase accumulator.
+_reset_phasor_count
+220.0 2.0 0.5 fm dup f= assert
+var dsp_test_sineloop
+0.0 dsp_test_sineloop !
+t+
+dsp_test_sineloop 220.0 0.25 sineloop dup f= assert
+
+# Delay metadata combines integer allocation with packed-float DSP state.
+0.01 make_delay_line dsp_test_delay
+0.25 dsp_test_delay delay_write
+dsp_test_delay 0.0 delay_read dup f= assert
+
+make_dcblock dsp_test_dc
+0.25 dsp_test_dc dcblock dup f= assert
+
+make_biquad dsp_test_bq
+0.25 dsp_test_bq 1 1000.0 0.5 biquad_lp dup f= assert
+
+make_hc_filter dsp_test_hc
+0.25 dsp_test_hc 1000.0 0.5 hc_lowpass dup f= assert
+
+0.25 0.5 panmix
+lcget dup f= assert
+rcget dup f= assert

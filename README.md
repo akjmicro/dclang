@@ -5,8 +5,9 @@ ____________
 
 * Have the gcc (Linux) or clang (Mac) compiler on your machine.
 
-* Install `portmidi` and the `portmidi.h` and `porttime.h` headers onto
-  your system.
+* Install the PortMidi and SQLite 3 development packages. The build needs
+  `portmidi.h`, `porttime.h`, and `sqlite3.h`, plus their corresponding
+  libraries.
 
 * Clone the repo
 
@@ -40,23 +41,22 @@ ____________
   export DCLANG_LIBS=/<this>/<source>/<folder>/<location>/lib
   ```
 
-  If you use the `Makefile` directive `make install`; it will link
-  the libs to `/usr/local/dclang/lib`, so you'd do:
+  If you use the `Makefile` directive `make install`, it will link
+  the libraries at `/usr/local/lib/dclang`, so you'd do:
   ```
-  export DCLANG_LIBS=/usr/local/dclang/lib
+  export DCLANG_LIBS=/usr/local/lib/dclang
   ```
 
   You can add this export statement to your shell (`bash`, `zsh`, etc.) startup script, of course.
 
 * Experiment as you wish with compiler optimizations in the Makefile,
-  particularly with float-point options, since 'dclang' is heavily
-  reliant on them.
+  particularly for numeric and DSP-heavy programs.
 
 * Run an example to test the interpreter
 
   ```
   # try running the primes example:
-  dclang -i examples/some_primes.dc
+  dclang examples/some_primes.dc
   ```
 
 * For interaction, it's nice to use 'rlwrap' to get readline line-history:
@@ -65,13 +65,51 @@ ____________
   ```
   One can also create an alias to `dclang` that uses `rlwrap`:
   ```
-  alias dclang='rlwrap dclang`
+  alias dclang='rlwrap dclang'
   ```
 
 * Interested in using an RPN language for MIDI coding? For MIDI instructions,
   check out the details in `examples/midi/README.md`
 
 ### ABOUT:
+
+#### What's new in major version 7?
+
+Version 7 is an intentional, breaking change to dclang's numeric model. The
+interpreter's stack, variables, constants, locals, and instruction parameters
+now use pointer-sized, untagged `uintptr_t` cells instead of storing every
+value as `DCLANG_FLT`. On a 64-bit target one cell can hold a `double`; on a
+32-bit target, including the intended Bela configuration, one cell can hold a
+`float`. This removes constant conversion through `double` for integer,
+address, counter, and raw-cell work, while retaining one shared stack.
+
+The main source-level changes are:
+
+* Integer operations retain the familiar spellings: `+`, `-`, `*`, `/`, `%`,
+  `abs`, `min`, `max`, and the ordinary comparison words. `*/` computes a
+  signed multiply-then-divide with a double-width intermediate product. `/%`
+  and `*/%` additionally return quotient followed by remainder, leaving the
+  remainder on top in the same order as dclang's library `divmod`.
+* Floating-point operations now say so: `f+`, `f-`, `f*`, `f/`, `f%`,
+  `fsqrt`, `fpow`, `fsin`, `fpi`, `frand`, `f=`, and their related `f...`
+  words. Formatting words are now `f.`, `f.rj`, and `f.pz`.
+* `i>f` and `f>i` perform numeric conversion. Merely applying a different
+  operator reinterprets the same raw bits; it does not convert them.
+* A numeric token containing a decimal point or decimal exponent is parsed as
+  floating point. Other numeric tokens are parsed as integers. Thus `1` and
+  `1.0` intentionally have different cell representations.
+* `.`, `u.`, and `f.` print signed-integer, unsigned-integer, and floating-point
+  interpretations; `..`, `u..`, and `f..` omit the trailing space. `.rj`,
+  `u.rj`, and `f.rj` provide right-justified fields. `.s` now displays
+  non-destructive, type-neutral raw hex.
+* `sortnums` has a signed-integer contract and `fsortnums` has a packed-float
+  contract. Mixed arrays remain the caller's responsibility.
+
+This is a major API jump rather than a compatibility-alias release. Version 6
+programs using unprefixed floating-point words need to be migrated. The bundled
+standard libraries, tests, and tracked examples have been migrated with the
+interpreter. `dclang2c-dsp` now emits the same raw-cell model and can target either
+32-bit/float or 64-bit/double cells as described near the end of this document.
 
 `dclang` is an RPN, stack-based language with near-zero syntax. It is in
 the spirit and tradition of `forth` and the grand ol' RPN calculator
@@ -109,11 +147,10 @@ the interpreter/parser not only simple but faster than one that has to
 do computational gymnastics around parsing things like braces or
 parenthesis, etc.  It also saves memory, since you don't have runaway
 linked-list creation that you have to later garbage-collect.  All
-actions happen on the stack.  Like `forth`, this is not and never will
-be a garbage collected language, but there will be operations to create
-variables and other data structures like lists and hashes (dictionaries)
-and so on, but they will be manually destroyed in memory to make room
-for other structures with other keywords ('free').  No garbage
+actions are coordinated through the stack. Like `forth`, this is not and never
+will be a garbage collected language. Variables use a fixed cell arena;
+strings and buffers use explicit pool-management words such as `free`, `mark`,
+and `rewind`; lists and trees have their own deletion words. No garbage
 collection means things are kept simple, and the programmer is assumed
 to be a thoughtful and responsible adult. :) `forth` is a great
 language, and I mean to follow that lead, even as I simplify certain
@@ -124,10 +161,24 @@ order of operations work in this world (everything being immediate and
 w/o parenthesis). And also, one has to get used to manipulating the
 stack such that defined words make sensible, efficient use of the stack.
 It takes some getting used to. I direct the user to the internet or
-books to search for things relating to the fine art of programming
-`forth`, etc. Everything said there applies here.
+books to search for things relating to the fine art of stack programming.
+Many Forth techniques are useful here, but dclang's syntax, words, stack
+effects, and memory model must be checked on their own terms.
 
 Anyway, due to RPN, things will look like this, when you do math:
+
+The stack and variable memory contain untagged, pointer-sized cells. Integer
+and floating-point values can share the same stack, but the operator you call
+determines how each cell's bits are interpreted. Integer math uses the familiar
+operators; floating-point math uses `f`-prefixed operators. `i>f` and `f>i`
+perform numeric conversion rather than merely reinterpreting bits.
+Numeric literals containing a decimal point or decimal exponent (`e`/`E`) are
+packed as floating-point values. Other numeric literals are cells containing
+integers; hexadecimal integer notation is supported. The same rule applies to
+`tonum`. Cells do not carry runtime type tags, so choosing sensible operators
+for the data is deliberately the programmer's responsibility.
+The floating-point output below is from a 64-bit build, where `DCLANG_FLT` is
+`double`; 32-bit builds use `float` and naturally show different precision.
 
 ```
     4 5 + .
@@ -136,21 +187,22 @@ Anyway, due to RPN, things will look like this, when you do math:
     20 5 / .
     4
 
-    0.523 sin .
-    0.4994813555186418
+    0.523 fsin f.
+    0.4994813555186418119
 
-    3 2.54 pow .
-    16.28875859622752
+    3 i>f 2.54 fpow f.
+    16.28875859622752031
 
     1 2 3 5 + 7 16 / .s
-    <4> 1 2 8 0.4375
+    data_stack: <4> 0x0000000000000001 0x0000000000000002 0x0000000000000008 0x0000000000000000
+    save_stack: <0>
 
     # a function!
     : testif 1 if "true" else "false" endif print cr ;
     testif
     true
 
-    # times/again -- basic, fastest loop type, starts at zero, ascends to cutoff parameter (minus one).
+    # times/again -- basic counted loop, starts at zero, ascends to cutoff parameter (minus one).
     : looptest 7 times i . again ;
     looptest
     0 1 2 3 4 5 6
@@ -171,32 +223,34 @@ Anyway, due to RPN, things will look like this, when you do math:
 
     # create a variable and store a value at it:
     var mynum
-    4.321 3 / mynum !
-    mynum @ .
-    1.3773333333333333
+    4.321 3 i>f f/ mynum !
+    mynum @ f.
+    1.440333333333333243
 
     # low-level approach to do the same -- store a value at slot 11:
     1.15123 11 !
-    0 @ .
-    1.15123
+    11 @ f.
+    1.151229999999999976
 
 ```
 
-Notice the '.' character, which pops/prints the top-of-stack (TOS). This
-comes from `forth`, as does '.s', which non-destructively shows the
-stack contents. This is different from 'dc', where 'p' pops/prints the
-TOS.
+Notice the `.` character, which pops and prints the top-of-stack (TOS) as a
+signed integer. This comes from `forth`, as does `.s`, which non-destructively shows the
+stack contents as fixed-width raw hexadecimal cells. Use `u.` or `f.`
+to pop and print an unsigned-integer or floating-point interpretation.
+The hexadecimal width is 16 digits on a 64-bit build and 8 on a 32-bit build.
+This is different from `dc`, where `p` pops/prints the TOS.
 
 In the looping examples, the block has access to up to 3 hidden
 variables, 'i', 'j', and 'k' which you can use to test conditionally and
 escape the loop. This allows nested loops up to three counters deep.
-Going any futher is a code-smell anyway, and you should refactor to a
+Going any further is a code-smell anyway, and you should refactor to a
 different implementation if you need something more.
 
-The user is encouraged to preuse the `examples/` and `tests/` directory
+The user is encouraged to peruse the `examples/` and `tests/` directories
 to get a feel for the style and syntax of `dclang`. When you first
 launch an interactive commandline session by typing `dclang` (or `rlwrap
-dclang` to enable comand history, if you have `rlwrap`), you will see a
+dclang` to enable command history, if you have `rlwrap`), you will see a
 categorized listing of all the primitives. You can always see the list
 again by calling the `primitives` word, which will show the info listing
 again.
@@ -204,14 +258,18 @@ again.
 A non-exhaustive notes on some of the things implemented thus far:
 
   * Math:
-    * `+`, `-`, `*`, `/`, `%`, `<<`, `>>`
-    * `abs`, `min`, `max`, `round`, `ceil`, `floor` (float-versions only)
-    * `pow`, `sqrt`, `log`, `log2`, `log10`         (float-versions only)
-    * `sin`, `cos`, `tan`, `pi`, `e`                (float-versions only)
-    * `rand`                                        (float-versions only)
+    * signed integer arithmetic: `+`, `-`, `*`, `/`, `%`, `/%`, `*/`, `*/%`, `abs`, `min`, `max`
+    * raw-cell bit operations: `and`, `or`, `not`, `xor`, `<<`, `>>`
+    * float arithmetic: `f+`, `f-`, `f*`, `f/`, `f%`, `fabs`, `fmin`, `fmax`
+    * float-to-integer rounding: `fround`, `fceil`, `ffloor`
+    * higher math: `fpow`, `fsqrt`, `fexp`, `flog`, `flog2`, `flog10`, `fe`
+    * trigonometry: `fsin`, `fcos`, `ftan`, `fasin`, `facos`, `fatan`,
+      `fatan2`, `fsinh`, `fcosh`, `ftanh`, `fpi`
+    * random float: `frand`
+    * numeric conversion: `i>f`, `f>i`
   * Logic:
-    * `and`, `or`, `not`, `xor`
-    * `=`, `<>`, `>`, `<`, `>=`, `<=`
+    * signed integer comparisons: `=`, `<>`, `>`, `<`, `>=`, `<=`
+    * float comparisons: `f=`, `f<>`, `f>`, `f<`, `f>=`, `f<=`
   * Stack operations:
     * `drop`, `dup`, `over`, `swap`, `pick`, `2drop`, `2dup`, `2over`
     * `svpush`, `svpop`, `svdrop`, `svpick`
@@ -222,12 +280,12 @@ A non-exhaustive notes on some of the things implemented thus far:
     * user-defined words (functions)
   * Strings:
     * simple string printing w/ `print`
-    * fancier right-justified numeric output fields: `.rj`
+    * fancier floating-point output fields: `f.rj`, `f.pz`
     * `strtok`, `mempcpy`, `memset`, `mkbuf`, `free`
     * strong comparison with: `strlen`, `str=`, `str<`, `str>`
     * find a substring with `strfind`
     * '#' to end-of-line for comments
-    * `uemit`, a unicode-character emitter which can help to contruct
+    * `uemit`, a unicode-character emitter which can help to construct
     strings that need them.
     * convert character bytes to equivalent numerical value with `ord`
     * convert integers to hex-string with `tohex`.
@@ -240,7 +298,7 @@ A non-exhaustive notes on some of the things implemented thus far:
   * Variables/Arrays:
     * Declare a constant with `const`:
         ```
-        1 pi 2 * / const INV2PI
+        1.0 fpi 2.0 f* f/ const INV2PI
         ```
     * Declare a variable with `var`:
         ```
@@ -254,7 +312,7 @@ A non-exhaustive notes on some of the things implemented thus far:
         or
         ```
         # Declare a variable and advance the variable pointer such
-        # that the variable owns 16 slots, making it an array. You
+        # that the variable owns 16 slots total, making it an array. You
         # are responsible for knowing the bounds of the array yourself.
         # there are no protections keeping you from writing into neighboring
         # cells:
@@ -276,7 +334,7 @@ A non-exhaustive notes on some of the things implemented thus far:
       into `funvar`)
     * `@` (peek a value, copy it to the stack, e.g. `funvar @` will put our
     previously saved '5' onto the top of the stack.
-    * Since the variables exist in an giant global array, there really is
+    * Since the variables exist in a giant global array, there really is
     no distinction between 'arrays' and 'variables' in dclang.
     Arrays are 0-based:
         ```
@@ -303,22 +361,30 @@ A non-exhaustive notes on some of the things implemented thus far:
         11  # result shown
         ```
 
-    * This works in a similar fashion for something like a string variable
-    (which is, in reality an address and a length):
+    * `sortnums` sorts an array as signed integers, `fsortnums` sorts it as
+      packed floating-point values (with NaNs last), and `sortstrs` sorts
+      string addresses by string contents. These operations do not detect or
+      convert mixed numeric arrays.
+
+    * This works in a similar fashion for a string value, which is a cell
+    containing the address of null-terminated string storage:
       ```
       : greeting "Hello there, good people!" ;
       greeting .s
-      <1> 94123539921536
+      data_stack: <1> 0x0000...   # the exact address varies by process
+      save_stack: <0>
       greeting print cr
-       Hello there, good people!
+      Hello there, good people!
       ```
-  * A global hash table (string keys and string values only). This is in the spirit of `redis`, in a way:
+  * A global hash table with string keys and raw-cell values. String values
+    work naturally because their addresses fit in cells. This is in the spirit
+    of `redis`, in a way:
     ```
     "some value" "mykey" h!
     "mykey" h@ print cr
     some value
     ```
-  * Private tree-based key/value stores, similar to the hash above, but access is a slightly slower
+  * Tree-based key/value stores, similar to the hash above, but access is a slightly slower
     (won't be very noticeable in most use-cases) `O(log n)` access time. Based on the `tsearch` `glibc` functions:
     ```
     tmake const :mytree            # make a tree, put it in the constant :mytree
@@ -346,11 +412,14 @@ A non-exhaustive notes on some of the things implemented thus far:
   * Linked lists: `lmake`, `lpush`, `lpop`, `l!`, `l@`, `lins`, `lrem`,
     `lsize`, `ldel`
   * Timing:
-    * a clock function ('clock') so we can time execution in nanoseconds
-      for benchmarking.
-
-    * A hook into CPU-cycle clock, called 'rdtsc'. (not available on RPi)
-    * A sleep function (C's `nanosleep` under-the-hood)
+    * `clock` returns absolute wall time as two integer cells:
+      `( epoch-seconds nanoseconds )`. The musical timing libraries hide this
+      representation behind `synchronized_start`, `set_clock_start`, and the
+      gate words.
+    * `monoclock` returns floating-point seconds elapsed since dclang started;
+      use it for benchmarks and local elapsed-time measurements.
+    * `epoch` returns integer seconds since the Unix epoch.
+    * `sleep` uses C's `nanosleep` under the hood.
   * Importing a file of dclang code:
     * From the interpreter
         ```
@@ -367,7 +436,7 @@ A non-exhaustive notes on some of the things implemented thus far:
     "Some text in my file! Woo-hoo!\n"
     dup strlen myfile @ fwrite            # write a sentence, specifying its length, to the file
     myfile @ fclose                       # close the file
-    "test-file.txt" "r" fopen myfile !    # re-open for reading
+    "test_file.txt" "r" fopen myfile !    # re-open for reading
     var buf 1024 mkbuf buf !              # create a memory buffer
     buf @ 30 myfile @ fread               # read 30 bytes from file, put in 'buf'
     .                                     # print num bytes read
@@ -465,22 +534,87 @@ Please report bugs and successes to <akjmicro@gmail.com>
 
 ### Compiling a DSP word to C
 
-`dclang2c` is an experimental host-side compiler for a bounded stereo DSP
+`dclang2c-dsp` is an experimental host-side patch compiler for a bounded stereo DSP
 entry word with stack effect `( -- left right )`. Build it with the same
-dependencies as dclang.
+dependencies as dclang. It is deliberately not a general-purpose dclang-to-C
+compiler: its supported execution regime and real-time guardrails are part of
+its contract.
+
+Generated programs use raw `uintptr_t` stack, local, and memory cells and
+explicitly pack and unpack their platform floating type. Translation defaults
+to the host cell width. Set `DCLANG2C_CELL_BITS=32` when generating for Bela;
+the generated source contains a compile-time width guard so a mismatched target
+fails rather than silently using an incorrect state layout. `make bela-dsp`
+sets the 32-bit target automatically.
 
 ```sh
-make -f Makefile.linux dclang2c   # use Makefile.mac on macOS
-DCLANG_LIBS="$PWD/lib" SR=44100 ./dclang2c instrument.dc render_frame instrument.c
+make -f Makefile.linux dclang2c-dsp   # use Makefile.mac on macOS
+DCLANG_LIBS="$PWD/lib" SR=44100 \
+  ./dclang2c-dsp instrument.dc render_frame instrument.c
 cc -O3 -ffp-contract=off -I"$PWD" -c instrument.c
 ```
 
-dclang2c evaluates the patch setup at compile time. Use a definition-only audio
+The direct command defaults to the host width. For a manually managed Bela
+build, add `DCLANG2C_CELL_BITS=32` during translation and compile the resulting
+source on Bela. The `make bela-dsp` target performs that selection for you.
+That target also enables Bela's `math_neon` library for supported generated
+scalar math; override `BELA_LIBRARIES` and `BELA_CPPFLAGS` to opt out.
+
+Generated programs expose block-boundary control accessors:
+`dclang2c_control_index`, `dclang2c_get_u32`, `dclang2c_get_float`,
+`dclang2c_set_u32`, and `dclang2c_set_float`. Resolve indexes during setup and
+call setters only from the audio thread between render blocks. An auxiliary
+receiver thread may publish incoming values through atomics, but it must not
+write generated DSP memory concurrently with `dclang2c_render`.
+
+The generic OSC control wrapper demonstrates this division. From the DSP
+examples directory, generate and build the drum-machine Bela project with:
+
+```sh
+./run-bela-example.sh drum_machine.dc
+```
+
+The launcher accepts any migrated DSP example and an optional entry-word. It
+uses the ordinary Bela callback by default. When an instrument has a companion
+`<instrument>_controller.dc`, it automatically selects the generic OSC control
+wrapper. `BELA_HOST`, `BELA_PROJECT`, `BELA_RENDER`, and `SR` may be supplied as
+environment overrides. It invokes the repository's `bela-dsp` target and
+prints commands for starting the resulting executable from an interactive Bela
+shell. Deployment does not start or stop the project process automatically.
+
+Then run the `/tmp/keys` bridge on the laptop:
+
+```sh
+BELA_HOST=192.168.7.2 dclang \
+  examples/dsp_examples/drum_machine_controller.dc
+```
+
+The bridge polls the existing drum key files at 50 Hz. Controllers use the
+shared `dclang_control_f` and `dclang_control_i` words to send generated variable
+names and typed values to `/dclang/set` over UDP port 7562. Instrument-specific
+key names and mappings remain in the controller; the Bela wrapper contains no
+instrument-specific control table.
+
+The blocking receiver pthread resolves each variable with
+`dclang2c_control_index` and publishes updates through a bounded lock-free
+queue. The real-time callback applies them only between audio blocks. It emits
+silence and does not advance generated DSP state until the first valid control
+update has been applied, so starting a companion controller also starts the
+instrument from its initial sequence state.
+
+On 32-bit targets the interpreter uses the native `float` libm entry points.
+Bela builds may additionally define `DCLANG_MATH_NEON` and link
+`-lmathneon` to select Bela's faster approximate NEON backend. This remains
+opt-in because its supported ranges and numerical results differ from libm.
+
+`dclang2c-dsp` evaluates the patch setup at compile time. Use a definition-only audio
 entry point and omit any top-level playback command. Call
 `void dclang2c_init(void)` once, then call
-`void dclang2c_render(double *output, size_t frames)` to fill a caller-owned
-buffer of `2 * frames` interleaved doubles. Link the generated code with
-`-lm`. Copy `dclang_dsp.h`, `dclang_osc.h`, `dclang_fast_math.h`, and
+`void dclang2c_render(float *output, size_t frames)` to fill a caller-owned
+buffer of `2 * frames` interleaved samples. `float` is the default render API
+for Bela; desktop users may compile generated code with
+`-DDCLANG2C_SAMPLE_TYPE=double` and declare a matching `double *` caller API.
+Link the generated code with `-lm`. Copy `dclang_dsp.h`, `dclang_osc.h`, `dclang_fast_math.h`, and
 `dclang_phiverb.h` with the generated source when building on another machine. The generated program does not link against
 `libdclang`.
 
@@ -491,11 +625,11 @@ by hand. After editing `phiverb.lib`, regenerate the integration header with:
 python3 contrib/generate_phiverb.py /path/to/phiverb.lib
 ```
 
-The initial subset supports statically resolved calls, locals, balanced
-conditionals, scalar math, variable reads and writes, and the native
+The current subset supports statically resolved calls, locals, balanced
+conditionals, explicitly typed scalar math, variable reads and writes, and the native
 oscillator, port, delay, and reverb kernels. Loops, dynamic execution, audio
 I/O inside the entry word, and unsupported primitives produce a compile-time
 diagnostic. The frontend evaluates setup, so only compile trusted inputs.
 The sample rate is fixed at compilation, the generated state is single-instance, and
-patches that use `rand` require matching host and target C-library random
+patches that use `frand` require matching host and target C-library random
 sequences for exact reproducibility.

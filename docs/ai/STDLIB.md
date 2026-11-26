@@ -30,34 +30,31 @@ The accompanying `stdlib_additional_results.json` contains 16 additional indepen
 
 ## Module index
 
-| Module | Definitions | Imports |
+| Module | Words | Literal imports |
 |---|---:|---|
-| [`clock_sleep.dc`](#clock_sleepdc) | 2 | — |
-| [`csvlib.dc`](#csvlibdc) | 6 | — |
-| [`deprecated_stack.dc`](#deprecated_stackdc) | 7 | — |
-| [`dsp.dc`](#dspdc) | 70 | — |
-| [`fractions.dc`](#fractionsdc) | 7 | — |
-| [`http_server.dc`](#http_serverdc) | 23 | `string.dc` |
-| [`linked_list.dc`](#linked_listdc) | 8 | — |
-| [`logging.dc`](#loggingdc) | 3 | `string.dc` |
-| [`math.dc`](#mathdc) | 32 | — |
-| [`midi.dc`](#mididc) | 25 | `string.dc` |
-| [`music.dc`](#musicdc) | 50 | `math.dc`, `midi.dc`, `osc.dc`, `linked_list.dc`, `music_keyval.dc` |
-| [`music_keyval.dc`](#music_keyvaldc) | 29 | `string.dc`, `clock_sleep.dc` |
-| [`osc.dc`](#oscdc) | 10 | — |
-| [`permutations.dc`](#permutationsdc) | 20 | `math.dc` |
-| [`redis.dc`](#redisdc) | 10 | `string.dc` |
-| [`regex.dc`](#regexdc) | 4 | `string.dc` |
-| [`sequencer.dc`](#sequencerdc) | 5 | — |
-| [`shuffle.dc`](#shuffledc) | 2 | — |
-| [`sqlite3.dc`](#sqlite3dc) | 7 | — |
-| [`string.dc`](#stringdc) | 15 | `deprecated_stack.dc` |
+| `clock_sleep.dc` | 1 | — |
+| `csvlib.dc` | 6 | — |
+| `deprecated_stack.dc` | 7 | — |
+| `dsp.dc` | 65 | — |
+| `fractions.dc` | 6 | `math.dc` |
+| `http_server.dc` | 23 | `string.dc` |
+| `linked_list.dc` | 8 | — |
+| `logging.dc` | 3 | `string.dc` |
+| `math.dc` | 31 | — |
+| `midi.dc` | 27 | `string.dc` |
+| `music.dc` | 69 | `math.dc`, `midi.dc`, `osc.dc`, `linked_list.dc`, `music_keyval.dc` |
+| `music_keyval.dc` | 40 | `string.dc`, `clock_sleep.dc` |
+| `osc.dc` | 27 | — |
+| `permutations.dc` | 20 | `math.dc` |
+| `redis.dc` | 10 | `string.dc` |
+| `regex.dc` | 4 | `string.dc` |
+| `sequencer.dc` | 5 | — |
+| `shuffle.dc` | 2 | — |
+| `sqlite3.dc` | 7 | — |
+| `string.dc` | 16 | `deprecated_stack.dc` |
 
 ## Name collisions
 
-These names are defined in more than one module; verify import order and redefinition semantics before using them.
-
-- `gcd`: `fractions.dc`, `math.dc`
 
 ## Module definitions
 
@@ -67,8 +64,7 @@ These names are defined in more than one module; verify import order and redefin
 
 | Word | Source line | Locals | Stack effect / status |
 |---|---:|---|---|
-| `_tight_watch` | 9 | `clock_target` | **Unverified** |
-| `sleep_until` | 21 | `clock_target` | **Unverified** |
+| `sleep_until` | 4 | — | `( epoch-seconds nanoseconds -- )` (runtime-verified) |
 
 ### csvlib.dc
 
@@ -76,12 +72,12 @@ These names are defined in more than one module; verify import order and redefin
 
 | Word | Source line | Locals | Stack effect / status |
 |---|---:|---|---|
-| `csv_open_input_file` | 21 | — | **Unverified** |
-| `_csv_init_col_buf` | 28 | — | **Unverified** |
-| `csv_next_input_line` | 41 | — | **Unverified** |
-| `csv_column_loop` | 56 | — | **Unverified** |
-| `csv_find_col_x` | 84 | — | **Unverified** |
-| `csv_cleanup` | 90 | — | **Unverified** |
+| `csv_open_input_file` | 19 | — | **Unverified** |
+| `_csv_init_col_buf` | 27 | — | **Unverified** |
+| `csv_next_input_line` | 40 | — | **Unverified** |
+| `csv_column_loop` | 55 | — | **Unverified** |
+| `csv_find_col_x` | 83 | — | **Unverified** |
+| `csv_cleanup` | 89 | — | **Unverified** |
 
 ### deprecated_stack.dc
 
@@ -89,105 +85,100 @@ These names are defined in more than one module; verify import order and redefin
 
 | Word | Source line | Locals | Stack effect / status |
 |---|---:|---|---|
-| `nip` | 16 | — | **Unverified** |
-| `tuck` | 18 | — | **Unverified** |
-| `rot` | 21 | — | **Unverified** |
-| `-rot` | 27 | — | **Unverified** |
-| `2swap` | 34 | — | **Unverified** |
-| `2rot` | 40 | — | **Unverified** |
-| `-2rot` | 46 | — | **Unverified** |
+| `nip` | 16 | — | `( a b -- b )` (source_reviewed_and_runtime_sampled_v1.7) |
+| `tuck` | 17 | — | `( a b -- b a b )` (source_reviewed_and_runtime_sampled_v1.7) |
+| `rot` | 21 | — | `( a b c -- b c a )` (source_reviewed_and_runtime_sampled_v1.7) |
+| `-rot` | 26 | — | `( a b c -- c a b )` (source_reviewed_and_runtime_sampled_v1.7) |
+| `2swap` | 34 | — | `( a b c d -- c d a b )` (source_reviewed_and_runtime_sampled_v1.7) |
+| `2rot` | 39 | — | `( a b c d e f -- c d e f a b )` (source_reviewed_and_runtime_sampled_v1.7) |
+| `-2rot` | 45 | — | `( a b c d e f -- e f a b c d )` (source_reviewed_and_runtime_sampled_v1.7) |
 
 ### dsp.dc
 
 **Imports:** none detected via literal imports.
 
-The public oscillator and effect APIs retain their prior stack interfaces. Several now delegate to private native kernels. `fm_init` and `fm_steps` expose cached phase increments for compiled or control-rate DSP paths; ordinary callers may continue using `fm`.
-
 | Word | Source line | Locals | Stack effect / status |
 |---|---:|---|---|
-| `_get_sr` | 7 | — | `( -- sample-rate )` (source-reviewed) |
-| `seconds2samples` | 49 | — | `( seconds -- samples )` (source-reviewed) |
-| `t` | 55 | — | `( -- sample-index )` (source-reviewed) |
-| `lcget` | 56 | — | `( -- left )` (source-reviewed) |
-| `lcset` | 57 | — | `( left -- )` (source-reviewed) |
-| `rcget` | 58 | — | `( -- right )` (source-reviewed) |
-| `rcset` | 59 | — | `( right -- )` (source-reviewed) |
-| `_clear_channels` | 60 | — | `( -- )` (source-reviewed) |
-| `stereo_in` | 66 | — | `( -- left right )` (source-reviewed) |
-| `_reset_phasor_count` | 78 | — | `( -- )` (source-reviewed) |
-| `phasor_pointer` | 80 | — | `( -- phase-slot )` (source-reviewed) |
-| `phasor` | 82 | — | `( frequency -- phase )` (source-reviewed) |
-| `sawtooth` | 86 | — | `( frequency -- signal )` (source-reviewed) |
-| `metro` | 92 | — | `( frequency -- trigger )` (source-reviewed) |
-| `gate` | 99 | — | `( width frequency -- gate )` (source-reviewed) |
-| `pulse` | 106 | — | `( width frequency -- signal )` (source-reviewed) |
-| `pulse_tanh` | 111 | — | `( width frequency -- signal )` (source-reviewed) |
-| `tri` | 116 | — | `( frequency -- signal )` (source-reviewed) |
-| `sine` | 121 | — | `( frequency -- signal )` (source-reviewed) |
-| `fast_sin` | 128 | — | `( radians -- approximate-sine )` (source-reviewed) |
-| `fast_tanh` | 132 | — | `( value -- approximate-tanh )` (source-reviewed) |
-| `fast_sine` | 136 | — | `( frequency -- approximate-sine )` (source-reviewed) |
-| `sine_phase` | 142 | `freq`, `phase` | `( frequency phase-offset -- signal )` (source-reviewed) |
-| `fm_init` | 151 | `carrier_freq`, `mod_ratio` | `( carrier-frequency mod-ratio -- carrier-step modulator-step )` (source-reviewed) |
-| `fm_steps` | 156 | — | `( carrier-step modulator-step index -- signal )` (source-reviewed) |
-| `fm` | 160 | `carrier_freq`, `mod_ratio`, `index` | `( carrier-frequency mod-ratio index -- signal )` (source-reviewed) |
-| `sineloop` | 165 | `mem`, `freq`, `fb` | `( state-slot frequency feedback -- signal )` (source-reviewed) |
-| `noise` | 176 | — | `( -- signal )` (source-reviewed) |
-| `randint` | 184 | `range` | `( range -- integer )` (source-reviewed) |
-| `randtrig` | 191 | `compare_val`, `hold_var` | **Unverified** |
-| `make_delay_line` | 211 | `seconds` | `( seconds <name-token> -- )` (source-reviewed) |
-| `%abs` | 225 | `n`, `d` | `( numerator denominator -- positive-remainder )` (source-reviewed) |
-| `_set_delay_value` | 227 | — | `( signal delay-struct -- )` (source-reviewed) |
-| `_get_floor_val` | 234 | — | **Unverified** |
-| `_get_ceil_val` | 243 | — | **Unverified** |
-| `_interpolate` | 252 | `real_val`, `floor_val`, `ceil_val` | **Unverified** |
-| `delay_read` | 260 | — | `( delay-struct seconds -- signal )` (source-reviewed) |
-| `delay_write` | 264 | `sig`, `delay_struct` | `( signal delay-struct -- )` (source-reviewed) |
-| `tau_to_alpha` | 280 | `tau` | `( tau -- alpha )` (source-reviewed) |
-| `port` | 284 | — | `( signal state-slot rise-alpha fall-alpha -- output )` (source-reviewed) |
-| `lowpass` | 291 | `sig`, `memvar`, `pole` | `( signal state-slot pole -- output )` (source-reviewed) |
-| `make_dcblock` | 303 | — | `( <name-token> -- )` (source-reviewed) |
-| `dcblock` | 305 | `sig`, `dc_struct` | `( signal dc-struct -- output )` (source-reviewed) |
-| `make_allpass` | 329 | — | **Unverified** |
-| `allpass` | 342 | `sig`, `ap_struct`, `dltm`, `coef` | `( signal allpass-struct delay-time coefficient -- output )` (source-reviewed) |
-| `_set_bq_type` | 393 | `struct`, `type` | **Unverified** |
-| `_set_cf_res_reinit` | 414 | `struct`, `reinit`, `cutoff`, `res` | **Unverified** |
-| `_calc_theta` | 420 | `struct` | **Unverified** |
-| `_calc_beta` | 426 | `struct`, `tmp` | **Unverified** |
-| `_calc_gamma` | 439 | `struct` | **Unverified** |
-| `_calc_alpha` | 445 | `struct` | **Unverified** |
-| `_reinit_biquad` | 453 | `struct` | **Unverified** |
-| `_init_biquad` | 463 | `struct`, `reinit`, `cutoff`, `res`, `type` | **Unverified** |
-| `biquad_compute` | 476 | `sig`, `struct` | `( signal biquad-struct -- output )` (source-reviewed) |
-| `make_biquad` | 516 | — | **Unverified** |
-| `biquad_lp` | 521 | `sig`, `struct`, `reinit`, `cutoff`, `res` | `( signal struct reinit cutoff resonance -- output )` (source-reviewed) |
-| `biquad_hp` | 530 | `sig`, `struct`, `reinit`, `cutoff`, `res` | `( signal struct reinit cutoff resonance -- output )` (source-reviewed) |
-| `biquad_bp` | 539 | `sig`, `struct`, `reinit`, `cutoff`, `res` | `( signal struct reinit cutoff resonance -- output )` (source-reviewed) |
-| `make_hc_filter` | 562 | — | **Unverified** |
-| `_hc_common` | 564 | `sig`, `struct`, `fc`, `res` | `( signal struct cutoff resonance -- output )` (source-reviewed) |
-| `hc_lowpass` | 602 | `sig`, `struct`, `fc`, `res` | `( signal struct cutoff resonance -- output )` (source-reviewed) |
-| `hc_highpass` | 607 | `sig`, `struct`, `fc`, `res` | `( signal struct cutoff resonance -- output )` (source-reviewed) |
-| `hc_bandpass` | 612 | `sig`, `struct`, `fc`, `res` | `( signal struct cutoff resonance -- output )` (source-reviewed) |
-| `hc_notch` | 617 | `sig`, `struct`, `fc`, `res` | `( signal struct cutoff resonance -- output )` (source-reviewed) |
-| `make_reverb_struct` | 629 | — | **Unverified** |
-| `reverb` | 634 | — | `( left right struct cutoff feedback -- wet-left wet-right )` (source-reviewed) |
-| `panmix` | 644 | — | `( signal pan -- )` (source-reviewed) |
-| `stereo_out` | 653 | — | `( -- )` (source-reviewed) |
-| `t+` | 660 | — | `( -- )` (source-reviewed) |
+| `_get_sr` | 7 | — | `( -- sample-rate )` (source-reviewed through commit 3b333a8) |
+| `seconds2samples` | 48 | — | `( seconds -- samples )` (source-reviewed through commit 3b333a8) |
+| `t` | 55 | — | `( -- sample-index )` (source-reviewed through commit 3b333a8) |
+| `lcget` | 56 | — | `( -- left )` (source-reviewed through commit 3b333a8) |
+| `lcset` | 57 | — | `( left -- )` (source-reviewed through commit 3b333a8) |
+| `rcget` | 58 | — | `( -- right )` (source-reviewed through commit 3b333a8) |
+| `rcset` | 59 | — | `( right -- )` (source-reviewed through commit 3b333a8) |
+| `_clear_channels` | 60 | — | `( -- )` (source-reviewed through commit 3b333a8) |
+| `stereo_in` | 65 | — | `( -- left right )` (source-reviewed through commit 3b333a8) |
+| `_reset_phasor_count` | 77 | — | `( -- )` (source-reviewed through commit 3b333a8) |
+| `phasor_pointer` | 79 | — | `( -- phase-slot )` (source-reviewed through commit 3b333a8) |
+| `phasor` | 81 | — | `( frequency -- phase )` (source-reviewed through commit 3b333a8) |
+| `sawtooth` | 85 | — | `( frequency -- signal )` (source-reviewed through commit 3b333a8) |
+| `metro` | 92 | — | `( frequency -- trigger )` (source-reviewed through commit 3b333a8) |
+| `gate` | 99 | — | `( width frequency -- gate )` (source-reviewed through commit 3b333a8) |
+| `pulse` | 106 | — | `( width frequency -- signal )` (source-reviewed through commit 3b333a8) |
+| `pulse_tanh` | 110 | — | `( width frequency -- signal )` (source-reviewed through commit 3b333a8) |
+| `tri` | 115 | — | `( frequency -- signal )` (source-reviewed through commit 3b333a8) |
+| `wavetable_phase` | 128 | `freq`, `phase`, `table`, `length` | `( frequency phase-offset table table-length -- signal )` (source-reviewed) |
+| `wavetable` | 132 | `freq`, `table`, `length` | `( frequency table table-length -- signal )` (source-reviewed) |
+| `sine` | 121 | — | `( frequency -- signal )` (source-reviewed through commit 3b333a8) |
+| `fast_sin` | 128 | — | `( radians -- approximate-sine )` (source-reviewed through commit 3b333a8) |
+| `fast_tanh` | 131 | — | `( value -- approximate-tanh )` (source-reviewed through commit 3b333a8) |
+| `fast_sine` | 135 | — | `( frequency -- approximate-sine )` (source-reviewed through commit 3b333a8) |
+| `sine_phase` | 142 | `freq`, `phase` | `( frequency phase-offset -- signal )` (source-reviewed through commit 3b333a8) |
+| `fm_init` | 151 | `carrier_freq`, `mod_ratio` | `( carrier-frequency mod-ratio -- carrier-frequency modulator-frequency )` (source-reviewed) |
+| `fm_steps` | 155 | — | `( carrier-frequency modulator-frequency index -- signal )` (source-reviewed) |
+| `fm` | 159 | `carrier_freq`, `mod_ratio`, `index` | `( carrier-frequency mod-ratio index -- signal )` (source-reviewed through commit 3b333a8) |
+| `sineloop` | 165 | `mem`, `freq`, `fb` | `( state-slot frequency feedback -- signal )` (source-reviewed through commit 3b333a8) |
+| `noise` | 175 | — | `( -- signal )` (source-reviewed through commit 3b333a8) |
+| `randint` | 183 | `range` | `( range -- integer )` (source-reviewed through commit 3b333a8) |
+| `randtrig` | 190 | `compare_val`, `hold_var` | **Unverified** |
+| `make_delay_line` | 210 | `seconds` | `( seconds <name-token> -- )` (source-reviewed through commit 3b333a8) |
+| `_set_delay_value` | 225 | — | `( signal delay-struct -- )` (source-reviewed through commit 3b333a8) |
+| `delay_read` | 232 | — | `( delay-struct seconds -- signal )` (source-reviewed through commit 3b333a8) |
+| `delay_write` | 236 | `sig`, `delay_struct` | `( signal delay-struct -- )` (source-reviewed through commit 3b333a8) |
+| `tau_to_alpha` | 252 | `tau` | `( tau -- alpha )` (source-reviewed through commit 3b333a8) |
+| `port` | 256 | — | `( signal state-slot rise-alpha fall-alpha -- output )` (source-reviewed through commit 3b333a8) |
+| `lowpass` | 264 | `sig`, `memvar`, `pole` | `( signal state-slot pole -- output )` (source-reviewed through commit 3b333a8) |
+| `make_dcblock` | 275 | — | `( <name-token> -- )` (source-reviewed through commit 3b333a8) |
+| `dcblock` | 277 | `sig`, `dc_struct` | `( signal dc-struct -- output )` (source-reviewed through commit 3b333a8) |
+| `make_allpass` | 301 | — | **Unverified** |
+| `allpass` | 314 | `sig`, `ap_struct`, `dltm`, `coef` | `( signal allpass-struct delay-time coefficient -- output )` (source-reviewed through commit 3b333a8) |
+| `_set_bq_type` | 365 | `struct`, `type` | **Unverified** |
+| `_set_cf_res_reinit` | 386 | `struct`, `reinit`, `cutoff`, `res` | **Unverified** |
+| `_calc_theta` | 392 | `struct` | **Unverified** |
+| `_calc_beta` | 398 | `struct`, `tmp` | **Unverified** |
+| `_calc_gamma` | 411 | `struct` | **Unverified** |
+| `_calc_alpha` | 417 | `struct` | **Unverified** |
+| `_reinit_biquad` | 425 | `struct` | **Unverified** |
+| `_init_biquad` | 436 | `struct`, `reinit`, `cutoff`, `res`, `type` | **Unverified** |
+| `biquad_compute` | 448 | `sig`, `struct` | `( signal biquad-struct -- output )` (source-reviewed through commit 3b333a8) |
+| `make_biquad` | 488 | — | **Unverified** |
+| `biquad_lp` | 494 | `sig`, `struct`, `reinit`, `cutoff`, `res` | `( signal struct reinit cutoff resonance -- output )` (source-reviewed through commit 3b333a8) |
+| `biquad_hp` | 503 | `sig`, `struct`, `reinit`, `cutoff`, `res` | `( signal struct reinit cutoff resonance -- output )` (source-reviewed through commit 3b333a8) |
+| `biquad_bp` | 512 | `sig`, `struct`, `reinit`, `cutoff`, `res` | `( signal struct reinit cutoff resonance -- output )` (source-reviewed through commit 3b333a8) |
+| `make_hc_filter` | 535 | — | **Unverified** |
+| `_hc_common` | 537 | `sig`, `struct`, `fc`, `res` | `( signal struct cutoff resonance -- output )` (source-reviewed through commit 3b333a8) |
+| `hc_lowpass` | 575 | `sig`, `struct`, `fc`, `res` | `( signal struct cutoff resonance -- output )` (source-reviewed through commit 3b333a8) |
+| `hc_highpass` | 580 | `sig`, `struct`, `fc`, `res` | `( signal struct cutoff resonance -- output )` (source-reviewed through commit 3b333a8) |
+| `hc_bandpass` | 585 | `sig`, `struct`, `fc`, `res` | `( signal struct cutoff resonance -- output )` (source-reviewed through commit 3b333a8) |
+| `hc_notch` | 590 | `sig`, `struct`, `fc`, `res` | `( signal struct cutoff resonance -- output )` (source-reviewed through commit 3b333a8) |
+| `make_reverb_struct` | 603 | — | **Unverified** |
+| `reverb` | 608 | — | `( left right struct cutoff feedback -- wet-left wet-right )` (source-reviewed through commit 3b333a8) |
+| `panmix` | 618 | — | `( signal pan -- )` (source-reviewed through commit 3b333a8) |
+| `stereo_out` | 627 | — | `( -- )` (source-reviewed through commit 3b333a8) |
+| `t+` | 634 | — | `( -- )` (source-reviewed through commit 3b333a8) |
 
 ### fractions.dc
 
-**Imports:** none detected via literal imports.
+**Imports:** `math.dc`.
 
 | Word | Source line | Locals | Stack effect / status |
 |---|---:|---|---|
-| `gcd` | 7 | — | **Unverified** |
-| `simplify` | 9 | `n`, `d` | `( n d -- n_reduced d_reduced )` (source-reviewed) |
-| `fracadd` | 13 | `n1`, `d1`, `n2`, `d2` | `( n1 d1 n2 d2 -- n d )` (source-reviewed) |
-| `fracsub` | 17 | — | **Unverified** |
-| `fracmul` | 19 | `n1`, `d1`, `n2`, `d2` | `( n1 d1 n2 d2 -- n d )` (source-reviewed) |
-| `fracdiv` | 23 | — | **Unverified** |
-| `fracmediant` | 25 | `n1`, `d1`, `n2`, `d2` | `( n1 d1 n2 d2 -- n d )` (source-reviewed) |
+| `simplify` | 8 | `n`, `d` | `( n d -- reduced_n reduced_d )` (runtime_observed_source_reviewed) |
+| `fracadd` | 12 | `n1`, `d1`, `n2`, `d2` | `( n1 d1 n2 d2 -- n d )` (runtime_observed_source_reviewed) |
+| `fracsub` | 16 | — | `( n1 d1 n2 d2 -- n d )` (runtime_observed_source_reviewed) |
+| `fracmul` | 18 | `n1`, `d1`, `n2`, `d2` | `( n1 d1 n2 d2 -- n d )` (runtime_observed_source_reviewed) |
+| `fracdiv` | 22 | — | `( n1 d1 n2 d2 -- n d )` (runtime_observed_source_reviewed) |
+| `fracmediant` | 24 | `n1`, `d1`, `n2`, `d2` | `( n1 d1 n2 d2 -- n d )` (runtime_observed_source_reviewed) |
 
 ### http_server.dc
 
@@ -204,20 +195,20 @@ The public oscillator and effect APIs retain their prior stack interfaces. Sever
 | `get_httpversion` | 46 | — | **Unverified** |
 | `get_path` | 47 | — | **Unverified** |
 | `get_query` | 48 | — | **Unverified** |
-| `read_request` | 54 | — | **Unverified** |
+| `read_request` | 53 | — | **Unverified** |
 | `split_request_topline` | 63 | — | **Unverified** |
-| `split_path_and_query` | 69 | — | **Unverified** |
-| `hash_assign` | 74 | — | **Unverified** |
-| `_split_query_string_helper` | 86 | — | **Unverified** |
-| `split_query_string` | 96 | — | **Unverified** |
+| `split_path_and_query` | 68 | — | **Unverified** |
+| `hash_assign` | 73 | — | **Unverified** |
+| `_split_query_string_helper` | 85 | — | **Unverified** |
+| `split_query_string` | 95 | — | **Unverified** |
 | `process_request` | 117 | — | **Unverified** |
-| `_print_hash_table_helper` | 123 | — | **Unverified** |
-| `print_hash_table` | 142 | — | **Unverified** |
-| `copy_header_to_buffer` | 149 | — | **Unverified** |
-| `copy_footer_to_buffer` | 155 | — | **Unverified** |
-| `write_response` | 159 | — | **Unverified** |
+| `_print_hash_table_helper` | 122 | — | **Unverified** |
+| `print_hash_table` | 141 | — | **Unverified** |
+| `copy_header_to_buffer` | 148 | — | **Unverified** |
+| `copy_footer_to_buffer` | 154 | — | **Unverified** |
+| `write_response` | 158 | — | **Unverified** |
 | `_acceptloop` | 170 | — | **Unverified** |
-| `acceptloop` | 177 | — | **Unverified** |
+| `acceptloop` | 176 | — | **Unverified** |
 
 ### linked_list.dc
 
@@ -225,14 +216,14 @@ The public oscillator and effect APIs retain their prior stack interfaces. Sever
 
 | Word | Source line | Locals | Stack effect / status |
 |---|---:|---|---|
-| `_list_init_helper` | 4 | `list_obj`, `token_method` | **Unverified** |
-| `_lmap_helper` | 16 | — | **Unverified** |
-| `_lshow_helper` | 30 | — | **Unverified** |
-| `linit` | 45 | — | **Unverified** |
-| `lmap` | 67 | — | **Unverified** |
-| `lshow` | 82 | — | **Unverified** |
-| `make_lgen_struct` | 92 | — | **Unverified** |
-| `lgen` | 99 | `lgen_struct`, `infinite?` | **Unverified** |
+| `_list_init_helper` | 3 | `list_obj`, `token_method` | **Unverified** |
+| `_lmap_helper` | 15 | — | **Unverified** |
+| `_lshow_helper` | 29 | — | **Unverified** |
+| `linit` | 44 | — | `( mutable_token_buffer token_word_name -- list )` (source_reviewed_and_runtime_sampled_v1.8) |
+| `lmap` | 66 | — | `( list word_name -- new_list )` (source_reviewed_and_runtime_sampled_v1.8) |
+| `lshow` | 81 | — | **Unverified** |
+| `make_lgen_struct` | 91 | — | **Unverified** |
+| `lgen` | 98 | `lgen_struct`, `infinite?` | **Unverified** |
 
 ### logging.dc
 
@@ -240,9 +231,9 @@ The public oscillator and effect APIs retain their prior stack interfaces. Sever
 
 | Word | Source line | Locals | Stack effect / status |
 |---|---:|---|---|
-| `open_log` | 11 | — | **Unverified** |
-| `to_log` | 17 | — | **Unverified** |
-| `close_log` | 31 | — | **Unverified** |
+| `open_log` | 10 | — | **Unverified** |
+| `to_log` | 16 | — | **Unverified** |
+| `close_log` | 30 | — | **Unverified** |
 
 ### math.dc
 
@@ -250,38 +241,37 @@ The public oscillator and effect APIs retain their prior stack interfaces. Sever
 
 | Word | Source line | Locals | Stack effect / status |
 |---|---:|---|---|
-| `isneg` | 3 | — | `( x -- flag )` (source-reviewed) |
-| `absmod` | 5 | — | `( a b -- remainder )` (source-reviewed) |
-| `divmod` | 16 | — | `( dividend divisor -- quotient remainder )` (source-reviewed) |
-| `bounce` | 21 | `n`, `lower`, `upper` | **Unverified** |
-| `?dup` | 36 | — | `( x -- x [x if nonzero] )` (source-reviewed) |
-| `gcd` | 41 | — | **Unverified** |
-| `factorial` | 51 | `x` | **Unverified** |
-| `_digit_sum_helper` | 58 | — | **Unverified** |
-| `digit_sum` | 74 | — | **Unverified** |
-| `make_digit_expansion_struct` | 90 | — | **Unverified** |
-| `_get_base` | 92 | — | **Unverified** |
-| `_set_base` | 93 | — | **Unverified** |
-| `_get_div` | 94 | — | **Unverified** |
-| `_set_div` | 95 | — | **Unverified** |
-| `_get_old_base` | 96 | — | **Unverified** |
-| `_set_old_base` | 97 | — | **Unverified** |
-| `_get_old_div` | 98 | — | **Unverified** |
-| `_set_old_div` | 99 | — | **Unverified** |
-| `_get_remainder` | 100 | — | **Unverified** |
-| `_set_remainder` | 101 | — | **Unverified** |
-| `_base_changed?` | 102 | — | **Unverified** |
-| `_reset_old_base` | 103 | — | **Unverified** |
-| `_div_changed?` | 104 | — | **Unverified** |
-| `_reset_old_div` | 105 | — | **Unverified** |
-| `gen_digit_expansion` | 107 | `exp_struct` | **Unverified** |
-| `is-2-3-5-7?` | 131 | — | **Unverified** |
-| `check-higher-than-49` | 143 | — | **Unverified** |
-| `is-not-div-otherwise?` | 156 | — | **Unverified** |
-| `is-not-div-by-2-3-5-7?` | 165 | — | **Unverified** |
-| `is-prime` | 182 | — | **Unverified** |
-| `find-next-prime` | 194 | `direction`, `x` | **Unverified** |
-| `closest-prime` | 203 | `x` | **Unverified** |
+| `isneg` | 2 | — | `( x -- flag )` (source_reviewed_not_executed) |
+| `absmod` | 4 | — | `( a modulus -- nonnegative_remainder )` (runtime_observed_source_reviewed) |
+| `divmod` | 15 | — | `( dividend divisor -- quotient remainder )` (runtime_observed_source_reviewed) |
+| `bounce` | 20 | `n`, `lower`, `upper` | **Unverified** |
+| `gcd` | 35 | — | `( a b -- gcd )` (runtime_observed_source_reviewed) |
+| `factorial` | 47 | `x` | `( n -- factorial )` (runtime_observed_source_reviewed) |
+| `_digit_sum_helper` | 54 | — | **Unverified** |
+| `digit_sum` | 70 | — | `( n base -- sum )` (runtime_observed_source_reviewed) |
+| `make_digit_expansion_struct` | 86 | — | **Unverified** |
+| `_get_base` | 88 | — | **Unverified** |
+| `_set_base` | 90 | — | **Unverified** |
+| `_get_div` | 91 | — | **Unverified** |
+| `_set_div` | 92 | — | **Unverified** |
+| `_get_old_base` | 93 | — | **Unverified** |
+| `_set_old_base` | 94 | — | **Unverified** |
+| `_get_old_div` | 95 | — | **Unverified** |
+| `_set_old_div` | 96 | — | **Unverified** |
+| `_get_remainder` | 97 | — | **Unverified** |
+| `_set_remainder` | 98 | — | **Unverified** |
+| `_base_changed?` | 99 | — | **Unverified** |
+| `_reset_old_base` | 100 | — | **Unverified** |
+| `_div_changed?` | 101 | — | **Unverified** |
+| `_reset_old_div` | 102 | — | **Unverified** |
+| `gen_digit_expansion` | 103 | `exp_struct` | **Unverified** |
+| `is-2-3-5-7?` | 127 | — | **Unverified** |
+| `check-higher-than-49` | 139 | — | **Unverified** |
+| `is-not-div-otherwise?` | 152 | — | **Unverified** |
+| `is-not-div-by-2-3-5-7?` | 161 | — | **Unverified** |
+| `is-prime` | 178 | — | **Unverified** |
+| `find-next-prime` | 190 | `direction`, `x` | **Unverified** |
+| `closest-prime` | 198 | `x` | **Unverified** |
 
 ### midi.dc
 
@@ -289,31 +279,33 @@ The public oscillator and effect APIs retain their prior stack interfaces. Sever
 
 | Word | Source line | Locals | Stack effect / status |
 |---|---:|---|---|
-| `populate_midi_channel` | 11 | — | **Unverified** |
-| `make_channel_string` | 33 | `prefix` | **Unverified** |
-| `midi_shutdown` | 48 | — | **Unverified** |
-| `check_mididev` | 53 | — | **Unverified** |
-| `refresh_midictl` | 92 | — | **Unverified** |
-| `midictl` | 104 | — | **Unverified** |
-| `send_midi` | 107 | — | **Unverified** |
-| `send_midi_reverse` | 109 | — | **Unverified** |
-| `panic` | 112 | — | **Unverified** |
-| `_bend_to_MSB_LSB_bytes` | 131 | — | **Unverified** |
-| `_read_midi_byte` | 170 | `mfp` | **Unverified** |
-| `_read_var_length` | 176 | — | **Unverified** |
-| `read_var_length` | 193 | `mfp` | **Unverified** |
-| `_read_chunk_length` | 197 | — | **Unverified** |
-| `read_midi_header` | 204 | `mfp` | **Unverified** |
-| `_output_as_hex` | 241 | — | **Unverified** |
-| `_handle_sysex` | 245 | `mfp` | **Unverified** |
-| `_handle_track_name` | 254 | `mfp` | **Unverified** |
-| `_handle_tempo` | 263 | `mfp` | **Unverified** |
-| `_handle_timesig` | 274 | `mfp` | **Unverified** |
-| `_handle_meta` | 284 | `meta_byte`, `mfp` | **Unverified** |
-| `_handle_status` | 309 | `status_byte`, `mfp` | **Unverified** |
-| `_track_loop` | 353 | `mfp` | **Unverified** |
-| `read_midi_track` | 407 | `mfp` | **Unverified** |
-| `read_midi_file` | 427 | `midi_filename` | **Unverified** |
+| `populate_midi_channel` | 10 | — | **Unverified** |
+| `make_channel_string` | 32 | `prefix` | **Unverified** |
+| `midi_shutdown` | 47 | — | **Unverified** |
+| `check_mididev` | 52 | — | **Unverified** |
+| `_maybe_check_mididev` | 88 | — | **Unverified** |
+| `refresh_midictl` | 98 | — | **Unverified** |
+| `midi_cc_event` | 112 | — | **Unverified** |
+| `midictl` | 129 | — | **Unverified** |
+| `send_midi` | 132 | — | **Unverified** |
+| `send_midi_reverse` | 133 | — | **Unverified** |
+| `panic` | 137 | — | **Unverified** |
+| `_bend_to_MSB_LSB_bytes` | 155 | — | **Unverified** |
+| `_read_midi_byte` | 194 | `mfp` | **Unverified** |
+| `_read_var_length` | 200 | — | **Unverified** |
+| `read_var_length` | 217 | `mfp` | **Unverified** |
+| `_read_chunk_length` | 221 | — | **Unverified** |
+| `read_midi_header` | 228 | `mfp` | **Unverified** |
+| `_output_as_hex` | 265 | — | **Unverified** |
+| `_handle_sysex` | 269 | `mfp` | **Unverified** |
+| `_handle_track_name` | 278 | `mfp` | **Unverified** |
+| `_handle_tempo` | 287 | `mfp` | **Unverified** |
+| `_handle_timesig` | 298 | `mfp` | **Unverified** |
+| `_handle_meta` | 308 | `meta_byte`, `mfp` | **Unverified** |
+| `_handle_status` | 333 | `status_byte`, `mfp` | **Unverified** |
+| `_track_loop` | 377 | `mfp` | **Unverified** |
+| `read_midi_track` | 431 | `mfp` | **Unverified** |
+| `read_midi_file` | 451 | `midi_filename` | **Unverified** |
 
 ### music.dc
 
@@ -321,11 +313,11 @@ The public oscillator and effect APIs retain their prior stack interfaces. Sever
 
 | Word | Source line | Locals | Stack effect / status |
 |---|---:|---|---|
-| `set_bend_depth` | 19 | — | **Unverified** |
-| `O-` | 31 | — | **Unverified** |
+| `set_bend_depth` | 18 | — | **Unverified** |
+| `O-` | 30 | — | **Unverified** |
 | `O+` | 32 | — | **Unverified** |
 | `_reset_gamut_idx` | 231 | — | **Unverified** |
-| `_update_gamut_idx` | 232 | — | **Unverified** |
+| `_update_gamut_idx` | 233 | — | **Unverified** |
 | `_toggle_gamuts` | 234 | — | **Unverified** |
 | `_protect_value` | 246 | — | **Unverified** |
 | `frac_to_oct_gamut` | 248 | `frac_str` | **Unverified** |
@@ -336,41 +328,60 @@ The public oscillator and effect APIs retain their prior stack interfaces. Sever
 | `show_scale` | 352 | — | **Unverified** |
 | `edo_degree_to_midi` | 366 | — | **Unverified** |
 | `edo_degree_to_hz` | 406 | `degree` | **Unverified** |
-| `euclidean_rhythm` | 422 | — | **Unverified** |
-| `euclidean_test_loop` | 448 | — | **Unverified** |
-| `_string_to_lgen` | 467 | `str_to_check`, `cur_str`, `lgen_struct`, `method` | **Unverified** |
-| `_token_has_backslash?` | 517 | — | **Unverified** |
-| `_process_rhythm` | 519 | `tok` | **Unverified** |
-| `_do_rhythm_string` | 535 | — | **Unverified** |
-| `_do_gate_string` | 544 | — | **Unverified** |
-| `rhythm_generator` | 554 | — | **Unverified** |
-| `data_player` | 575 | — | **Unverified** |
-| `fraction_music` | 608 | `expansion_struct` | **Unverified** |
-| `digit_sum_music` | 619 | — | **Unverified** |
-| `primes_music` | 639 | — | **Unverified** |
-| `do_attack_string` | 662 | — | **Unverified** |
-| `do_gain_string` | 676 | — | **Unverified** |
-| `_get_edo_3_2` | 720 | `local_edo` | **Unverified** |
-| `_update_note_symbol_tree` | 724 | `local_edo` | **Unverified** |
-| `symbol_to_edo_int` | 752 | `pitch_token` | **Unverified** |
-| `_reset_sym_str_ptr` | 777 | — | **Unverified** |
-| `_process_next_symbol` | 781 | — | **Unverified** |
-| `do_symbol_string` | 811 | — | **Unverified** |
-| `_reset_seq_str_ptr` | 863 | — | **Unverified** |
-| `_ratio_to_edo_delta` | 867 | `num`, `den` | **Unverified** |
-| `_process_keyval_token` | 877 | `tok` | **Unverified** |
-| `_process_duration_token` | 883 | `tok` | **Unverified** |
-| `_parse_abs_ratio_token` | 892 | `tok` | **Unverified** |
-| `_parse_rel_ratio_token` | 898 | `tok` | **Unverified** |
-| `_parse_rel_ratio_token_silent` | 907 | `tok` | **Unverified** |
-| `_token_has_equals?` | 914 | — | **Unverified** |
-| `_token_has_semicolon?` | 915 | — | **Unverified** |
-| `_token_has_colon?` | 916 | — | **Unverified** |
-| `_token_has_slash?` | 917 | — | **Unverified** |
-| `_token_has_letter?` | 918 | — | **Unverified** |
-| `_copy_next_token` | 920 | — | **Unverified** |
-| `_process_next_event` | 956 | — | **Unverified** |
-| `do_seq_string` | 1034 | — | **Unverified** |
+| `make_euc_space` | 419 | — | **Unverified** |
+| `_get_euc_n` | 424 | — | **Unverified** |
+| `_get_euc_k` | 426 | — | **Unverified** |
+| `_get_euc_usr_p` | 427 | — | **Unverified** |
+| `_get_euc_l` | 428 | — | **Unverified** |
+| `_get_euc_s` | 429 | — | **Unverified** |
+| `_get_euc_q` | 430 | — | **Unverified** |
+| `_get_euc_r` | 431 | — | **Unverified** |
+| `_get_euc_p` | 432 | — | **Unverified** |
+| `_set_euc_n` | 433 | — | **Unverified** |
+| `_set_euc_k` | 435 | — | **Unverified** |
+| `_set_euc_usr_p` | 436 | — | **Unverified** |
+| `_set_euc_l` | 437 | — | **Unverified** |
+| `_set_euc_s` | 438 | — | **Unverified** |
+| `_set_euc_q` | 439 | — | **Unverified** |
+| `_set_euc_r` | 440 | — | **Unverified** |
+| `_set_euc_p` | 441 | — | **Unverified** |
+| `euc_init` | 442 | — | **Unverified** |
+| `_euc_conf_check_init` | 455 | — | **Unverified** |
+| `_euc` | 467 | — | **Unverified** |
+| `euclidean_rhythm` | 495 | — | **Unverified** |
+| `_string_to_lgen` | 510 | `str_to_check`, `cur_str`, `lgen_struct`, `method` | **Unverified** |
+| `_token_has_backslash?` | 560 | — | **Unverified** |
+| `_process_rhythm` | 562 | `tok` | **Unverified** |
+| `_do_rhythm_string` | 578 | — | **Unverified** |
+| `_do_gate_string` | 587 | — | **Unverified** |
+| `rhythm_generator` | 597 | — | **Unverified** |
+| `data_player` | 618 | — | **Unverified** |
+| `fraction_music` | 651 | `expansion_struct` | **Unverified** |
+| `digit_sum_music` | 662 | — | **Unverified** |
+| `primes_music` | 683 | — | **Unverified** |
+| `do_attack_string` | 705 | — | **Unverified** |
+| `do_gain_string` | 719 | — | **Unverified** |
+| `_get_edo_3_2` | 763 | `local_edo` | **Unverified** |
+| `_update_note_symbol_tree` | 767 | `local_edo` | **Unverified** |
+| `symbol_to_edo_int` | 795 | `pitch_token` | **Unverified** |
+| `_reset_sym_str_ptr` | 820 | — | **Unverified** |
+| `_process_next_symbol` | 824 | — | **Unverified** |
+| `do_symbol_string` | 854 | — | **Unverified** |
+| `_reset_seq_str_ptr` | 906 | — | **Unverified** |
+| `_ratio_to_edo_delta` | 910 | `num`, `den` | **Unverified** |
+| `_process_keyval_token` | 920 | `tok` | **Unverified** |
+| `_process_duration_token` | 926 | `tok` | **Unverified** |
+| `_parse_abs_ratio_token` | 934 | `tok` | **Unverified** |
+| `_parse_rel_ratio_token` | 940 | `tok` | **Unverified** |
+| `_parse_rel_ratio_token_silent` | 949 | `tok` | **Unverified** |
+| `_token_has_equals?` | 956 | — | **Unverified** |
+| `_token_has_semicolon?` | 958 | — | **Unverified** |
+| `_token_has_colon?` | 959 | — | **Unverified** |
+| `_token_has_slash?` | 960 | — | **Unverified** |
+| `_token_has_letter?` | 961 | — | **Unverified** |
+| `_copy_next_token` | 962 | — | **Unverified** |
+| `_process_next_event` | 998 | — | **Unverified** |
+| `do_seq_string` | 1076 | — | **Unverified** |
 
 ### music_keyval.dc
 
@@ -378,35 +389,46 @@ The public oscillator and effect APIs retain their prior stack interfaces. Sever
 
 | Word | Source line | Locals | Stack effect / status |
 |---|---:|---|---|
-| `keyval_get` | 21 | `key` | **Unverified** |
-| `keyval_set` | 33 | `val`, `key` | **Unverified** |
+| `keyval_get` | 20 | `key` | **Unverified** |
+| `keyval_set` | 32 | `val`, `key` | **Unverified** |
 | `tonum_free` | 49 | — | **Unverified** |
-| `_get_duration` | 106 | — | **Unverified** |
-| `synchronized_start` | 114 | — | **Unverified** |
-| `get_x_tempo` | 128 | `which_str` | **Unverified** |
-| `get_drum_vol` | 136 | — | **Unverified** |
-| `get_bass_vol` | 140 | — | **Unverified** |
-| `get_lead_vol` | 144 | — | **Unverified** |
-| `set_clock_start` | 161 | — | **Unverified** |
-| `_iterate_clock` | 165 | `length`, `gate` | **Unverified** |
-| `get_on_gate` | 178 | `length`, `gate` | **Unverified** |
-| `get_off_gate` | 183 | — | **Unverified** |
-| `get_mode` | 191 | — | **Unverified** |
-| `get_transpose` | 195 | — | **Unverified** |
-| `get_base_pitch` | 203 | — | **Unverified** |
-| `get_edo` | 214 | — | **Unverified** |
-| `get_scale` | 225 | — | **Unverified** |
-| `get_gamut` | 237 | — | **Unverified** |
-| `get_rhythm_type` | 249 | — | **Unverified** |
-| `get_remainder` | 267 | — | **Unverified** |
-| `set_remainder` | 268 | — | **Unverified** |
-| `get_base` | 270 | — | **Unverified** |
-| `get_div` | 275 | — | **Unverified** |
-| `get_mul` | 280 | — | **Unverified** |
-| `get_chaos` | 285 | — | **Unverified** |
-| `get_wrap` | 289 | — | **Unverified** |
-| `get_euclid_n` | 293 | — | **Unverified** |
-| `get_euclid_d` | 298 | — | **Unverified** |
+| `_numeric_string_is_hex` | 54 | — | **Unverified** |
+| `_numeric_string_is_float` | 58 | — | **Unverified** |
+| `tonum_float_free` | 66 | — | **Unverified** |
+| `tonum_int_free` | 72 | — | **Unverified** |
+| `_get_duration` | 139 | — | **Unverified** |
+| `synchronized_start` | 149 | `period`, `mod_period`, `seconds`, `nanoseconds` | `( -- )` (runtime-verified) |
+| `get_x_tempo` | 162 | `which_str` | **Unverified** |
+| `get_drum_vol` | 169 | — | **Unverified** |
+| `get_bass_vol` | 173 | — | **Unverified** |
+| `get_lead_vol` | 177 | — | **Unverified** |
+| `_next_on!` | 201 | — | `( epoch-seconds nanoseconds -- )` (source-reviewed) |
+| `_next_on@` | 202 | — | `( -- epoch-seconds nanoseconds )` (source-reviewed) |
+| `_next_off!` | 203 | — | `( epoch-seconds nanoseconds -- )` (source-reviewed) |
+| `_next_off@` | 204 | — | `( -- epoch-seconds nanoseconds )` (source-reviewed) |
+| `set_clock_start` | 206 | — | `( -- )` (source-reviewed) |
+| `_iterate_clock` | 210 | `length`, `gate` | `( length gate -- )` (runtime-verified) |
+| `get_on_gate` | 220 | `length`, `gate` | `( length gate -- )` (source-reviewed) |
+| `get_off_gate` | 225 | — | `( -- )` (source-reviewed) |
+| `get_mode` | 224 | — | **Unverified** |
+| `get_transpose` | 228 | — | **Unverified** |
+| `get_base_pitch` | 236 | — | **Unverified** |
+| `get_edo` | 247 | — | **Unverified** |
+| `get_scale` | 257 | — | **Unverified** |
+| `get_gamut` | 269 | — | **Unverified** |
+| `get_rhythm_type` | 281 | — | **Unverified** |
+| `get_remainder` | 298 | — | **Unverified** |
+| `set_remainder` | 300 | — | **Unverified** |
+| `get_base` | 301 | — | **Unverified** |
+| `get_div` | 306 | — | **Unverified** |
+| `get_mul` | 311 | — | **Unverified** |
+| `get_chaos` | 316 | — | **Unverified** |
+| `get_wrap` | 320 | — | **Unverified** |
+| `get_euclid_n` | 324 | — | **Unverified** |
+| `get_euclid_k` | 330 | — | **Unverified** |
+| `get_euclid_p` | 336 | — | **Unverified** |
+| `get_euclid_l` | 342 | — | **Unverified** |
+| `get_euclid_s` | 348 | — | **Unverified** |
 
 ### osc.dc
 
@@ -414,16 +436,33 @@ The public oscillator and effect APIs retain their prior stack interfaces. Sever
 
 | Word | Source line | Locals | Stack effect / status |
 |---|---:|---|---|
-| `osc_connect` | 16 | `host`, `port` | **Unverified** |
-| `osc_message` | 21 | `path`, `types` | **Unverified** |
-| `osc_s` | 27 | `strval` | **Unverified** |
-| `osc_i` | 31 | `val` | **Unverified** |
-| `osc_f` | 35 | `val` | **Unverified** |
-| `osc_send` | 39 | — | **Unverified** |
-| `osc_close` | 43 | — | **Unverified** |
-| `_make_path` | 57 | `path_prefix`, `path_suffix` | **Unverified** |
-| `osc_synth_note_on` | 69 | `path_prefix`, `freq`, `gain` | **Unverified** |
-| `osc_synth_note_off` | 81 | `path_prefix` | **Unverified** |
+| `osc_connect` | 15 | `host`, `port` | **Unverified** |
+| `osc_message` | 20 | `path`, `types` | **Unverified** |
+| `osc_s` | 26 | `strval` | **Unverified** |
+| `osc_i` | 30 | `val` | **Unverified** |
+| `osc_f` | 34 | `val` | **Unverified** |
+| `osc_send` | 38 | — | **Unverified** |
+| `osc_close` | 42 | — | **Unverified** |
+| `osc_listen` | 69 | — | **Unverified** |
+| `osc_recv` | 77 | — | **Unverified** |
+| `osc_parse` | 83 | — | **Unverified** |
+| `osc_parse_ok?` | 90 | — | **Unverified** |
+| `osc_get_s` | 99 | — | **Unverified** |
+| `osc_get_i` | 108 | — | **Unverified** |
+| `osc_get_f` | 117 | — | **Unverified** |
+| `osc_rx_close` | 125 | — | **Unverified** |
+| `_make_path` | 139 | `path_prefix`, `path_suffix` | **Unverified** |
+| `osc_synth_note_on` | 151 | `path_prefix`, `freq`, `gain` | **Unverified** |
+| `osc_synth_note_off` | 163 | `path_prefix` | **Unverified** |
+| `osc_synth_get` | 203 | — | **Unverified** |
+| `osc_synth_floats` | 211 | — | **Unverified** |
+| `osc_synth_typed` | 228 | — | **Unverified** |
+| `osc_synth_parse` | 239 | — | **Unverified** |
+| `osc_synth_recv` | 266 | — | **Unverified** |
+| `dclang_control_f` | 287 | `value`, `name` | `( value name -- )` (source-reviewed) |
+| `dclang_control_i` | 294 | `value`, `name` | `( value name -- )` (source-reviewed) |
+| `dclang_control_f_changed` | 301 | `value`, `name`, `previous` | `( value name previous -- )` (source-reviewed) |
+| `dclang_control_i_changed` | 309 | `value`, `name`, `previous` | `( value name previous -- )` (source-reviewed) |
 
 ### permutations.dc
 
@@ -431,26 +470,26 @@ The public oscillator and effect APIs retain their prior stack interfaces. Sever
 
 | Word | Source line | Locals | Stack effect / status |
 |---|---:|---|---|
-| `setup_permutation` | 28 | — | **Unverified** |
-| `show_permutation_data` | 35 | — | **Unverified** |
-| `show_permutation` | 41 | — | **Unverified** |
-| `_return_current_cell` | 48 | — | **Unverified** |
-| `_advance_output_index` | 52 | — | **Unverified** |
-| `_needs_permuting?` | 56 | — | **Unverified** |
+| `setup_permutation` | 27 | — | `( count -- permutation_object )` (source_reviewed_and_runtime_sampled_v1.8) |
+| `show_permutation_data` | 34 | — | **Unverified** |
+| `show_permutation` | 40 | — | **Unverified** |
+| `_return_current_cell` | 47 | — | **Unverified** |
+| `_advance_output_index` | 51 | — | **Unverified** |
+| `_needs_permuting?` | 55 | — | **Unverified** |
 | `_get_perm_val_i` | 57 | — | **Unverified** |
 | `_set_perm_val_i` | 58 | — | **Unverified** |
 | `_get_curr_high_val` | 59 | — | **Unverified** |
 | `_set_curr_high_val` | 60 | — | **Unverified** |
 | `_get_curr_high_slot` | 61 | — | **Unverified** |
 | `_set_curr_high_slot` | 62 | — | **Unverified** |
-| `_common_compare` | 64 | — | **Unverified** |
-| `_set_largest_mobile_cell` | 78 | — | **Unverified** |
-| `_setup_swap` | 109 | — | **Unverified** |
-| `_pmswap` | 123 | — | **Unverified** |
-| `_swap_neighbor_cells` | 125 | — | **Unverified** |
-| `_reverse_direction_of_greater_values` | 130 | — | **Unverified** |
-| `next_permutation_item` | 148 | — | **Unverified** |
-| `print_next_permutation` | 162 | — | **Unverified** |
+| `_common_compare` | 63 | — | **Unverified** |
+| `_set_largest_mobile_cell` | 77 | — | **Unverified** |
+| `_setup_swap` | 108 | — | **Unverified** |
+| `_pmswap` | 122 | — | **Unverified** |
+| `_swap_neighbor_cells` | 124 | — | **Unverified** |
+| `_reverse_direction_of_greater_values` | 129 | — | **Unverified** |
+| `next_permutation_item` | 147 | — | **Unverified** |
+| `print_next_permutation` | 161 | — | **Unverified** |
 
 ### redis.dc
 
@@ -458,16 +497,16 @@ The public oscillator and effect APIs retain their prior stack interfaces. Sever
 
 | Word | Source line | Locals | Stack effect / status |
 |---|---:|---|---|
-| `_zero_redis_buffer` | 44 | — | **Unverified** |
-| `_write_redis_buffer` | 48 | — | **Unverified** |
-| `_read_redis_buffer` | 57 | — | **Unverified** |
-| `_redis_write_read` | 66 | — | **Unverified** |
-| `_redis_auth` | 71 | — | **Unverified** |
-| `redis_connect` | 94 | — | **Unverified** |
-| `redis_set` | 116 | — | **Unverified** |
-| `redis_get` | 139 | — | **Unverified** |
-| `redis_keys` | 160 | — | **Unverified** |
-| `redis_del` | 179 | — | **Unverified** |
+| `_zero_redis_buffer` | 43 | — | **Unverified** |
+| `_write_redis_buffer` | 47 | — | **Unverified** |
+| `_read_redis_buffer` | 56 | — | **Unverified** |
+| `_redis_write_read` | 65 | — | **Unverified** |
+| `_redis_auth` | 70 | — | **Unverified** |
+| `redis_connect` | 93 | — | **Unverified** |
+| `redis_set` | 115 | — | **Unverified** |
+| `redis_get` | 138 | — | **Unverified** |
+| `redis_keys` | 159 | — | **Unverified** |
+| `redis_del` | 178 | — | **Unverified** |
 
 ### regex.dc
 
@@ -475,10 +514,10 @@ The public oscillator and effect APIs retain their prior stack interfaces. Sever
 
 | Word | Source line | Locals | Stack effect / status |
 |---|---:|---|---|
-| `_match` | 51 | — | **Unverified** |
-| `_derive_real_needle_and_flags` | 78 | `needle_with_options` | **Unverified** |
-| `match` | 98 | — | **Unverified** |
-| `matches?` | 112 | — | **Unverified** |
+| `_match` | 50 | — | **Unverified** |
+| `_derive_real_needle_and_flags` | 77 | `needle_with_options` | **Unverified** |
+| `match` | 97 | — | **Unverified** |
+| `matches?` | 111 | — | **Unverified** |
 
 ### sequencer.dc
 
@@ -486,11 +525,11 @@ The public oscillator and effect APIs retain their prior stack interfaces. Sever
 
 | Word | Source line | Locals | Stack effect / status |
 |---|---:|---|---|
-| `_seq_ptr_incr` | 9 | `seq` | **Unverified** |
-| `_seq_cur_val` | 17 | `seq` | **Unverified** |
-| `seq_cnt_incr` | 21 | `seq` | **Unverified** |
-| `seq_signal` | 43 | `seq` | **Unverified** |
-| `iterator` | 64 | `iter_array` | **Unverified** |
+| `_seq_ptr_incr` | 8 | `seq` | **Unverified** |
+| `_seq_cur_val` | 16 | `seq` | **Unverified** |
+| `seq_cnt_incr` | 20 | `seq` | **Unverified** |
+| `seq_signal` | 42 | `seq` | **Unverified** |
+| `iterator` | 63 | `iter_array` | **Unverified** |
 
 ### shuffle.dc
 
@@ -499,7 +538,7 @@ The public oscillator and effect APIs retain their prior stack interfaces. Sever
 | Word | Source line | Locals | Stack effect / status |
 |---|---:|---|---|
 | `_cell_swap` | 1 | — | **Unverified** |
-| `shuffle_cells` | 5 | — | **Unverified** |
+| `shuffle_cells` | 4 | — | **Unverified** |
 
 ### sqlite3.dc
 
@@ -508,12 +547,12 @@ The public oscillator and effect APIs retain their prior stack interfaces. Sever
 | Word | Source line | Locals | Stack effect / status |
 |---|---:|---|---|
 | `sqlite3_open` | 1 | — | **Unverified** |
-| `sqlite3_prepare` | 10 | — | **Unverified** |
-| `sqlite3_step` | 19 | — | **Unverified** |
-| `sqlite3_column` | 28 | — | **Unverified** |
-| `sqlite3_finalize` | 37 | — | **Unverified** |
-| `sqlite3_exec` | 46 | — | **Unverified** |
-| `sqlite3_close` | 55 | — | **Unverified** |
+| `sqlite3_prepare` | 9 | — | **Unverified** |
+| `sqlite3_step` | 18 | — | **Unverified** |
+| `sqlite3_column` | 27 | — | **Unverified** |
+| `sqlite3_finalize` | 36 | — | **Unverified** |
+| `sqlite3_exec` | 45 | — | **Unverified** |
+| `sqlite3_close` | 54 | — | **Unverified** |
 
 ### string.dc
 
@@ -521,17 +560,18 @@ The public oscillator and effect APIs retain their prior stack interfaces. Sever
 
 | Word | Source line | Locals | Stack effect / status |
 |---|---:|---|---|
-| `strdup` | 37 | — | `( string_addr -- copied_string_addr )` (source-reviewed) |
-| `str+` | 46 | — | **Unverified** |
-| `strslice` | 53 | — | **Unverified** |
-| `str_between` | 97 | — | **Unverified** |
-| `_strreplace_helper` | 110 | `buf`, `s`, `find`, `repl` | **Unverified** |
-| `strreplace` | 127 | `buf`, `s`, `find`, `repl` | **Unverified** |
-| `_get_next_num_from_line` | 138 | — | **Unverified** |
-| `next_num_from_file` | 159 | — | **Unverified** |
-| `uuid` | 194 | — | **Unverified** |
-| `hex8token` | 238 | — | **Unverified** |
-| `_str_split_real` | 259 | `in_str`, `split_token` | **Unverified** |
+| `strdup` | 36 | — | `( string -- copy_ptr )` (source_reviewed_and_runtime_sampled_v1.8) |
+| `str+` | 45 | — | **Unverified** |
+| `strslice` | 52 | — | `( string start_idx end_idx -- slice_ptr )` (source_reviewed_and_runtime_sampled_v1.8) |
+| `str_between` | 96 | — | `( string lower_bound upper_bound -- flag )` (source_reviewed_and_runtime_sampled_v1.8) |
+| `_strreplace_helper` | 109 | `buf`, `s`, `find`, `repl` | **Unverified** |
+| `strreplace` | 126 | `buf`, `s`, `find`, `repl` | `( dest_buf haystack needle replacement -- dest_buf )` (source_reviewed_and_runtime_sampled_v1.8) |
+| `_get_next_num_from_line` | 137 | — | **Unverified** |
+| `next_num_from_file` | 158 | — | **Unverified** |
+| `uuid` | 193 | — | **Unverified** |
+| `hex8token` | 237 | — | **Unverified** |
+| `_str_split_next` | 258 | — | **Unverified** |
+| `_str_split_real` | 269 | `in_str`, `split_token` | **Unverified** |
 | `str_split` | 281 | — | **Unverified** |
 | `chop_head` | 290 | — | **Unverified** |
 | `chop_tail` | 315 | — | **Unverified** |

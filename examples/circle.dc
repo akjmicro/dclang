@@ -11,13 +11,13 @@ mybuf !
     0
     24 times
       80 times
-        i 80 1.666 / / 0.8 - dup *
-          j 24 / 0.5 - dup *
-        + sqrt
+        i i>f 80.0 1.666 f/ f/ 0.8 f- dup f*
+          j i>f 24.0 f/ 0.5 f- dup f*
+        f+ fsqrt
         # radius
-        k 32 / pi * cos 0.5 * 0.5 +
-        0.46 *
-        < if 42 else 32 endif bufadd
+        k i>f 32.0 f/ fpi f* fcos 0.5 f* 0.5 f+
+        0.46 f*
+        f< if 42 else 32 endif bufadd
         1 +
       again
     again

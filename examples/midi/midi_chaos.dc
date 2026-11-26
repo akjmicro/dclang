@@ -11,20 +11,20 @@ var x
 
 : tent_chaos { chaos epsilon }
   x @
-  dup 0.5 >= if 1 swap - endif
-  chaos *  epsilon +   1 %
+  dup 0.5 f>= if 1.0 swap f- endif
+  chaos f* epsilon f+ 1.0 f%
   dup x !
 ;
 
 "eps" make_channel_string const :EPSILON
 
 : get_epsilon
-  :EPSILON keyval_get tonum
+  :EPSILON keyval_get tonum_float_free
 ;
 
 : chaos_music
   get_chaos get_epsilon tent_chaos
-  get_mul * floor
+  get_mul i>f f* ffloor
   data_player
 ;
 

@@ -1,8 +1,8 @@
 # dclang Language Semantics
 
-**Status:** AI reference draft v0.1  
-**Evidence:** `README.md`, `token.c`, `libdclang.c` from the supplied source archive (2026-11-06).  
-**Scope:** Core syntax and execution model, not a complete primitive reference.  
+**Status:** AI reference for the experimental typed-cell branch
+**Evidence:** `README.md`, `token.c`, `dclang.h`, and `libdclang.c` (2026-11-23).
+**Scope:** Core syntax and execution model, not a complete primitive reference.
 **Verification:** Source-reviewed unless explicitly marked as an executable test. No interpreter execution was performed for this draft.
 
 ## 1. Identity and programming model
@@ -17,7 +17,7 @@ dclang is a minimal, stack-based, reverse Polish notation (RPN) language. Its sy
 - `#` starts a comment through the end of the line.
 - Double quotes delimit string literals, which push a pointer/address value onto the stack. A string is not an implicit `(address length)` pair.
 - Escapes implemented by `token.c:stringfunc`: `\\b`, `\\t`, `\\n`, `\\r`, `\\xHH`, `\\uHHHH`, and `\\UHHHHHHHH`. Other backslash-escaped characters are passed through literally by the current implementation.
-- Numeric token parsing uses `strtod`; consult source before assuming integer-only semantics or strict rejection of trailing nonnumeric characters.
+- Decimal-point or decimal-exponent tokens are parsed as `DCLANG_FLT` and packed into a cell. Other numeric tokens are parsed as integers: a leading `-` selects signed parsing, while nonnegative input selects unsigned parsing. Hex integers are supported. The entire token must be valid.
 - Unknown tokens produce a syntax error; the current `compile_or_interpret` implementation clears the data stack on this path.
 - End-of-file terminates and executes a buffered final token even when the input has no trailing whitespace. This applies to files and `dclang -e` strings.
 
@@ -29,14 +29,23 @@ dclang is a minimal, stack-based, reverse Polish notation (RPN) language. Its sy
 
 ## 3. Data stack and output
 
-The data stack is the central mechanism for passing arguments and results. Examples:
+The data stack is the central mechanism for passing arguments and results. Every stack and variable slot is one raw `uintptr_t` cell. The cell carries no runtime type tag: operators determine how its bits are interpreted. `DCLANG_FLT` is `double` when cells are 64-bit and `float` when cells are 32-bit.
+
+`clock` returns the absolute realtime timestamp as two integer cells,
+`( epoch-seconds nanoseconds )`, with identical representation on 32- and
+64-bit targets. `monoclock` returns packed floating seconds elapsed since
+interpreter initialization and is intended for benchmarks. Musical callers
+should prefer the synchronization and gate API in `music_keyval.dc`, which
+hides timestamp-pair arithmetic.
 
 ```dclang
 4 5 + .              # prints 9, consuming the result
 1 2 3 5 + 7 16 / .s  # shows the stack without consuming it
 ```
 
-`.` pops and prints the top of stack. `.s` displays stack contents non-destructively. Do not treat printing as a universal non-destructive operation.
+`.` pops and prints the cell as a signed integer, `u.` as an unsigned integer, and `f.` as `DCLANG_FLT` (always with a decimal point). `.s` displays every cell non-destructively as fixed-width hexadecimal, which is deliberately neutral about type. `i>f` numerically converts a signed integer to packed float; `f>i` converts packed float to signed integer.
+
+Integer arithmetic and comparisons use `+ - * / % /% */ */% abs min max` and `= <> < > <= >=`. `*/ ( a b divisor -- quotient )` uses a signed double-width intermediate product. `/% ( dividend divisor -- quotient remainder )` and `*/% ( a b divisor -- quotient remainder )` match dclang's library `divmod` order, deliberately differing from Forth `/MOD`; the remainder is on top. They reject zero divisors and unrepresentable quotients. Floating-point operations use `f+ f- f* f/ f% fabs fmin fmax` and `f= f<> f< f> f<= f>=`; `f%` implements C `fmod` semantics. Higher math, trigonometry, and randomness likewise use the `f` prefix (`fsqrt`, `fpow`, `fsin`, `fpi`, `frand`, and so on). Bitwise operations and `<<`/`>>` operate on raw unsigned cell bits.
 
 **Stack-effect convention for future reference:** `( before -- after )`, with the top of stack on the **right**. For example `dup ( x -- x x )`, `swap ( a b -- b a )`. These examples are conventional and must still be checked against implementation when generating the primitive registry.
 
@@ -49,7 +58,7 @@ The fused stack mutators avoid sequences of stack shuffles and arithmetic:
 10 20 30 99 1 ssetn  # 10 99 30
 ```
 
-For `sinc`, `sincn`, and `ssetn`, the zero-based index addresses the stack after the index and any value operand have been consumed. `0` therefore changes the top remaining item. The assertion fixtures cover integer values. The current C bodies for `sincn` and `ssetn` cast the value through `DCLANG_PTR`, so do not infer fractional-value preservation from the word names.
+For `sinc`, `sincn`, and `ssetn`, the zero-based index addresses the stack after the index and any value operand have been consumed. `0` therefore changes the top remaining item. They manipulate raw cells; `sinc` and `sincn` perform integer-domain increments.
 
 ## 4. User-defined words
 
@@ -118,7 +127,7 @@ myarray 1 + @ .
 create initialized 3 , 5 , 7 , 11 ,
 ```
 
-Variables and arrays share a global cell-storage model. `var` declares a named slot; `allot` advances allocation for additional cells; `!` stores using `( value slot -- )`; `@` fetches using `( slot -- value )`. Arrays are zero-indexed and the README warns that bounds are not automatically protected. `create` with `,` provides an alternative sequential initialization pattern. `,` is an **operator**, not punctuation.
+Variables and arrays share a global cell-storage model. `var` declares a named slot; immediately following it with `n allot` reserves `n` total cells for that variable; `!` stores using `( value slot -- )`; `@` fetches using `( slot -- value )`. Arrays are zero-indexed and the README warns that bounds are not automatically protected. `create` with `,` provides an alternative sequential initialization pattern. `,` is an **operator**, not punctuation.
 
 Offset and fused mutation primitives avoid separate address arithmetic, fetches, and stores:
 
@@ -167,14 +176,24 @@ Libraries are ordinary `.dc` files loaded using `import`. `DCLANG_LIBS` is the d
 
 ## 11. Ahead-of-time DSP compilation
 
-`dclang2c` is a separate host-side compiler for a bounded stereo DSP entry word with stack effect `( -- left right )`. It uses the dclang frontend to import and execute setup, then statically traces the selected compiled word and emits standalone C. Generated code exposes:
+`dclang2c-dsp` is a separate host-side patch compiler for a bounded stereo DSP entry word with stack effect `( -- left right )`. It is not a general dclang-to-C compiler. It uses the dclang frontend to import and execute setup, then statically traces the selected compiled word and emits standalone C. Generated code exposes:
 
 ```c
 void dclang2c_init(void);
-void dclang2c_render(double *interleaved_output, size_t frames);
+void dclang2c_render(float *interleaved_output, size_t frames);
 ```
 
-The current subset supports statically resolved word calls, locals, balanced conditionals, selected scalar operations, variable reads and writes, `rand`, and the private oscillator, port, delay, and reverb kernels. The reverb kernel embeds the generated Phiverb implementation and processes one sample per call. It rejects loops, dynamic execution, audio I/O in the entry word, and unsupported primitives. The generated program has one state instance and fixes `SR` when the source is compiled. Setup code is executed by the compiler, so compile only trusted `.dc` input.
+The generated VM uses raw `uintptr_t` cells and explicit integer/float operations. The render API defaults to interleaved `float` for Bela and can be compiled with `DCLANG2C_SAMPLE_TYPE=double` for a matching desktop caller. Set `DCLANG2C_CELL_BITS=32` during translation for Bela or `64` for a 64-bit target; generated C rejects a mismatched target width. The current subset supports statically resolved word calls, locals, balanced conditionals, selected scalar operations, variable reads and writes, `frand`, and the private oscillator, port, delay, and reverb kernels. The reverb kernel embeds the generated Phiverb implementation and processes one sample per call. It rejects loops, dynamic execution, audio I/O in the entry word, and unsupported primitives. The generated program has one state instance and fixes `SR` when the source is compiled. Setup code is executed by the compiler, so compile only trusted `.dc` input.
+
+Generated 32-bit code uses float libm by default. Defining
+`DCLANG_MATH_NEON` selects Bela's approximate `math_neon` functions for the
+supported scalar operations; the `bela-dsp` targets enable this backend and
+request the `math_neon` Bela library automatically.
+
+Generated programs expose name-resolved integer and float control accessors.
+Only the render thread may apply setters, between audio blocks; receiver
+threads should communicate with it through atomics or a bounded queue. The
+OSC-controlled drum-machine example follows this ownership rule.
 
 An ordinary infinite playback word is not a valid entry point. Refactor one-sample work into a bounded helper that leaves exactly two samples. Control-rate or note-rate calculations should update explicit variables outside the per-sample oscillator work when their values do not need audio-rate recomputation.
 
@@ -203,7 +222,7 @@ Before producing nontrivial dclang code:
 - `for` termination is checked after body execution; test zero/negative/overshooting cases before depending on them.
 - Exact local-variable assignment examples need executable confirmation.
 - Error handling and stack underflow behavior are primitive-specific.
-- Numeric coercion, representation, and string/address interactions need a dedicated type-system section.
+- Raw cells are intentionally untagged; mixed-domain arrays and applying the wrong typed operator are caller responsibility.
 - The primitive and standard-library inventories belong in separate reference documents; **this file does not claim to list all supported words**.
 
 ## 15. Source map
@@ -221,7 +240,7 @@ Before producing nontrivial dclang code:
 | DSP wrappers and state layout | `lib/dsp.dc`, `dclang_osc.h`, `dclang_dsp.h`, `dclang_phiverb.h` |
 | Faust reverb generation | `contrib/generate_phiverb.py` |
 | Approximate DSP math | `dclang_fast_math.h` |
-| Ahead-of-time DSP compilation | `dclang2c.c` |
+| Ahead-of-time DSP compilation | `tools/dclang2c-dsp/dclang2c-dsp.c` |
 
 *Next phase: extend runtime verification beyond the current assertion fixtures and source-reviewed DSP signatures.*
 

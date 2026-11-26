@@ -1,6 +1,6 @@
 /* Generated from Aaron Krister Johnson's phiverb.lib. The UI and metadata
  * entry points were removed so this header can serve the interpreter and
- * standalone dclang2c output without a Faust architecture dependency.
+ * standalone dclang2c-dsp output without a Faust architecture dependency.
  * ------------------------------------------------------------
 name: "dclang-phiverb"
 Code generated with Faust 2.92.3 (https://faust.grame.fr)

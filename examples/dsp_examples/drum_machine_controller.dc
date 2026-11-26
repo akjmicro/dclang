@@ -1,0 +1,58 @@
+"music.dc" import
+
+# Laptop-side bridge from the familiar /tmp/keys controls to Bela OSC.
+# Usage:
+#   BELA_HOST=192.168.7.2 dclang drum_machine_controller.dc
+
+"BELA_HOST" envget 7562 osc_connect
+
+"op_hihat" const :op_hihat
+"cl_hihat" const :cl_hihat
+"snare_drum" const :snare_drum
+"bass_drum" const :bass_drum
+
+: _ensure_key { default key }
+  key keyval_get dup "0" str=
+  if
+    free
+    default key keyval_set
+  else
+    free
+  endif
+;
+
+: init_drum_controls
+  "120.0" :DRUM_TEMPO _ensure_key
+  "0.8" :DRUM_VOL _ensure_key
+  "0x00020002" :op_hihat _ensure_key
+  "0x41413513" :cl_hihat _ensure_key
+  "0x0808080c" :snare_drum _ensure_key
+  "0x80818082" :bass_drum _ensure_key
+;
+
+var last_tempo    -1.0 last_tempo !
+var last_volume   -1.0 last_volume !
+var last_op       -1 last_op !
+var last_cl       -1 last_cl !
+var last_snare    -1 last_snare !
+var last_bass     -1 last_bass !
+
+: send_drum_controls
+  :DRUM_TEMPO get_x_tempo "tempo" last_tempo dclang_control_f_changed
+  get_drum_vol "drum_vol" last_volume dclang_control_f_changed
+  :op_hihat keyval_get tonum_int_free "op_hihat" last_op dclang_control_i_changed
+  :cl_hihat keyval_get tonum_int_free "cl_hihat" last_cl dclang_control_i_changed
+  :snare_drum keyval_get tonum_int_free "snare_drum" last_snare dclang_control_i_changed
+  :bass_drum keyval_get tonum_int_free "bass_drum" last_bass dclang_control_i_changed
+;
+
+: drum_machine_controller
+  send_drum_controls
+  0.02 sleep
+  drum_machine_controller
+;
+
+init_drum_controls
+synchronized_start
+set_clock_start
+drum_machine_controller

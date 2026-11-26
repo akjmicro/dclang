@@ -21,7 +21,7 @@ perfect 5th (3/2 ratio) is.
 53 13 !
 
 # perfect 5th to compare, store in slot 14:
-3 2 / log2 14 !
+3.0 2.0 f/ flog2 14 !
 
 : fifth 14 ;
 : degree 15 ;
@@ -30,7 +30,7 @@ perfect 5th (3/2 ratio) is.
 
 "
 perfect 5th is: " print
-fifth @ 1200 * 7 6 .rj "cents" print cr cr
+fifth @ 1200.0 f* 7 6 f.rj "cents" print cr cr
 
 # print table header:
 "   edo | deg | cents for 3/2 |   error " print cr
@@ -39,11 +39,11 @@ fifth @ 1200 * 7 6 .rj "cents" print cr cr
 # loop through data
 : main
   13 times
-    i @ 4 3 .rj "\bedo" print                         # edo
-    fifth @ i @ * round dup degree ! 3 3 .rj          # degree
+    i @ dup i>f 4 3 f.rj drop "\bedo" print           # edo
+    fifth @ i @ i>f f* fround dup degree ! i>f 3 3 f.rj
         "\bdeg" print
-    degree @ i @ / 1200 * dup fifth-cents ! 12 6 .rj  # cents value of 5th
-    fifth-cents @ fifth @ 1200 * - 12 6 .rj cr        # difference from pure
+    degree @ i>f i @ i>f f/ 1200.0 f* dup fifth-cents ! 12 6 f.rj
+    fifth-cents @ fifth @ 1200.0 f* f- 12 6 f.rj cr
   again
 ;
 

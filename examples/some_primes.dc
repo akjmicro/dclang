@@ -5,7 +5,7 @@
   8192 2 1 for
     i is-prime
     if
-      i 4 0 .rj
+      i i>f 4 0 f.rj
     else
     endif
   next

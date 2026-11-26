@@ -5,31 +5,32 @@
 #include "dclang_phiverb.h"
 #include <stdint.h>
 
-static inline int dclang_port_sample(double *memory, size_t cells, double signal,
+static inline int dclang_port_sample(DCLANG_CELL *memory, size_t cells, double signal,
                                      double address, double rise, double fall, double *sample)
 {
     if (!(address >= 0 && address < cells))
         return 0;
-    double *state = memory + (size_t)address;
-    double delta = signal - *state;
+    DCLANG_CELL *state = memory + (size_t)address;
+    double old_state = dclang_cell_to_float(*state);
+    double delta = signal - old_state;
     // Preserve the VM's separate multiply and add rounding.
     volatile double adjustment = delta * (delta > 0.0 ? rise : fall);
-    *sample = adjustment + *state;
-    *state = *sample;
+    *sample = adjustment + old_state;
+    *state = dclang_float_to_cell(*sample);
     return 1;
 }
 
-static inline int dclang_delay_sample(double *memory, size_t cells, double delay_addr,
+static inline int dclang_delay_sample(DCLANG_CELL *memory, size_t cells, double delay_addr,
                                       double distance, double *sample)
 {
     if (cells < 3 || !(delay_addr >= 0 && delay_addr <= cells - 2))
         return 0;
     size_t delay = (size_t)delay_addr;
-    double length = memory[delay];
+    double length = dclang_cell_to_float(memory[delay]);
     if (!(length >= 1 && length <= cells - delay - 2)) {
         return 0;
     }
-    double position = memory[delay + 1] - distance;
+    double position = dclang_cell_to_float(memory[delay + 1]) - distance;
     size_t lower, upper;
     double fraction;
     if (length <= INT32_MAX / 2 && position >= -length && position < 2 * length
@@ -62,8 +63,8 @@ static inline int dclang_delay_sample(double *memory, size_t cells, double delay
         upper = (size_t)high;
         fraction = fmod(position, 1.0);
     }
-    double first = memory[delay + 2 + lower];
-    double second = memory[delay + 2 + upper];
+    double first = dclang_cell_to_float(memory[delay + 2 + lower]);
+    double second = dclang_cell_to_float(memory[delay + 2 + upper]);
     // Match the interpreter's separate multiply and add rounding.
     volatile double interpolated = (second - first) * fraction;
     *sample = interpolated + first;
@@ -71,9 +72,9 @@ static inline int dclang_delay_sample(double *memory, size_t cells, double delay
 }
 
 #define DCLANG_PHIVERB_CELLS \
-    ((sizeof(dclang_phiverb) + sizeof(double) - 1) / sizeof(double))
+    ((sizeof(dclang_phiverb) + sizeof(DCLANG_CELL) - 1) / sizeof(DCLANG_CELL))
 
-static inline int dclang_reverb_sample(double *memory, size_t cells, double left,
+static inline int dclang_reverb_sample(DCLANG_CELL *memory, size_t cells, double left,
                                        double right, double base_arg, double cutoff,
                                        double feedback, double sample_rate,
                                        double *wet_left, double *wet_right)

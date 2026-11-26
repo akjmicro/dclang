@@ -3,8 +3,9 @@
 var local_edo
 17 local_edo !
 
-: generate_interval
-  / log2 local_edo @ * round
+: generate_interval { numerator denominator }
+  numerator i>f denominator i>f f/ flog2
+  local_edo @ i>f f* fround
 ;
 
 9 8 generate_interval const STEP

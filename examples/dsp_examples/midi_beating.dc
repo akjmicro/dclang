@@ -1,7 +1,7 @@
 "dsp.dc" import
 "midi.dc" import
 
-1 127 / const MIDINORM
+1.0 127.0 f/ const MIDINORM
 60 const BASE
 
 var sl1
@@ -21,49 +21,49 @@ var port3vol
 var port4pch
 var port4brt
 var port4vol
-1.0 tau_to_alpha :ALPHA_ONE
-2.0 tau_to_alpha :ALPHA_TWO
+1.0 tau_to_alpha const :ALPHA_ONE
+2.0 tau_to_alpha const :ALPHA_TWO
 
 make_dcblock lchan_dcfilt
 make_dcblock rchan_dcfilt
 
 make_reverb_struct rev_struct
 
-create commas  15  16 / ,  39  41 / ,
-               24  25 / ,  59  61 / ,
-               35  36 / ,  83  85 / ,
-               48  49 / , 111 113 / ,
-               63  64 / , 143 145 / ,
-               80  81 / , 179 181 / ,
-               99 100 / , 219 221 / ,
-              120 121 / , 263 265 / ,
-              143 144 / , 311 313 / ,
-              168 169 / , 363 365 / ,
-              195 196 / , 419 421 / ,
-              224 225 / , 479 481 / ,
-              255 256 / , 543 545 / ,
-                1   1 / ,
-              545 543 / , 256 255 / ,
-              481 479 / , 225 224 / ,
-              421 419 / , 196 195 / ,
-              365 363 / , 169 168 / ,
-              313 311 / , 144 143 / ,
-              265 263 / , 121 120 / ,
-              221 219 / , 100  99 / ,
-              181 179 / ,  81  80 / ,
-              145 143 / ,  64  63 / ,
-              113 111 / ,  49  48 / ,
-               85  83 / ,  36  35 / ,
-               61  59 / ,  25  24 / ,
-               41  39 / ,  16  15 / ,
+create commas  15.0 16.0 f/ ,  39.0 41.0 f/ ,
+               24.0 25.0 f/ ,  59.0 61.0 f/ ,
+               35.0 36.0 f/ ,  83.0 85.0 f/ ,
+               48.0 49.0 f/ , 111.0 113.0 f/ ,
+               63.0 64.0 f/ , 143.0 145.0 f/ ,
+               80.0 81.0 f/ , 179.0 181.0 f/ ,
+               99.0 100.0 f/ , 219.0 221.0 f/ ,
+              120.0 121.0 f/ , 263.0 265.0 f/ ,
+              143.0 144.0 f/ , 311.0 313.0 f/ ,
+              168.0 169.0 f/ , 363.0 365.0 f/ ,
+              195.0 196.0 f/ , 419.0 421.0 f/ ,
+              224.0 225.0 f/ , 479.0 481.0 f/ ,
+              255.0 256.0 f/ , 543.0 545.0 f/ ,
+                1.0 1.0 f/ ,
+              545.0 543.0 f/ , 256.0 255.0 f/ ,
+              481.0 479.0 f/ , 225.0 224.0 f/ ,
+              421.0 419.0 f/ , 196.0 195.0 f/ ,
+              365.0 363.0 f/ , 169.0 168.0 f/ ,
+              313.0 311.0 f/ , 144.0 143.0 f/ ,
+              265.0 263.0 f/ , 121.0 120.0 f/ ,
+              221.0 219.0 f/ , 100.0 99.0 f/ ,
+              181.0 179.0 f/ ,  81.0 80.0 f/ ,
+              145.0 143.0 f/ ,  64.0 63.0 f/ ,
+              113.0 111.0 f/ ,  49.0 48.0 f/ ,
+               85.0 83.0 f/ ,  36.0 35.0 f/ ,
+               61.0 59.0 f/ ,  25.0 24.0 f/ ,
+               41.0 39.0 f/ ,  16.0 15.0 f/ ,
 
-: overtone_ctl midictl MIDINORM * 15 * round 1 + BASE * ;
+: overtone_ctl midictl i>f MIDINORM f* 15.0 f* fround 1 + BASE * i>f ;
 
-: beat_ctl midictl MIDINORM * 52 * round commas + @ ;
+: beat_ctl midictl i>f MIDINORM f* 52.0 f* fround commas + @ ;
 
-: bright_ctl midictl MIDINORM * pi * ;
+: bright_ctl midictl i>f MIDINORM f* fpi f* ;
 
-: vol_ctl midictl MIDINORM * 0.47 * ;
+: vol_ctl midictl i>f MIDINORM f* 0.47 f* ;
 
 : midi_beating
   # get a midi control signal every 128 samples
@@ -72,47 +72,47 @@ create commas  15  16 / ,  39  41 / ,
     refresh_midictl
   endif
     sl1
-      21 overtone_ctl 41 beat_ctl *
+      21 overtone_ctl 41 beat_ctl f*
       port1pch :ALPHA_ONE :ALPHA_ONE port
         25 bright_ctl
         port1brt :ALPHA_TWO :ALPHA_TWO port
     sineloop
       45 vol_ctl
       port1vol :ALPHA_TWO :ALPHA_TWO port
-    *
+    f*
   0.4 panmix
     sl2
-      22 overtone_ctl 42 beat_ctl *
+      22 overtone_ctl 42 beat_ctl f*
       port2pch :ALPHA_ONE :ALPHA_ONE port
         26 bright_ctl
         port2brt :ALPHA_TWO :ALPHA_TWO port
     sineloop
       46 vol_ctl
       port2vol :ALPHA_TWO :ALPHA_TWO port
-    *
+    f*
   0.6 panmix
     sl3
-      23 overtone_ctl 43 beat_ctl *
+      23 overtone_ctl 43 beat_ctl f*
       port3pch :ALPHA_ONE :ALPHA_ONE port
         27 bright_ctl
         port3brt :ALPHA_TWO :ALPHA_TWO port
     sineloop
       47 vol_ctl
       port3vol :ALPHA_TWO :ALPHA_TWO port
-    *
+    f*
   0.05 panmix
     sl4
-      24 overtone_ctl 44 beat_ctl *
+      24 overtone_ctl 44 beat_ctl f*
       port4pch :ALPHA_ONE :ALPHA_ONE port
         28 bright_ctl
         port4brt :ALPHA_TWO :ALPHA_TWO port
     sineloop
       48 vol_ctl
       port4vol :ALPHA_TWO :ALPHA_TWO port
-    *
+    f*
   0.95 panmix
   # reverb
-    lcget 0.5 * rcget 0.5 *
+    lcget 0.5 f* rcget 0.5 f*
       rev_struct 0.9 0.97
         reverb
       0.2 panmix
@@ -127,6 +127,7 @@ create commas  15  16 / ,  39  41 / ,
     dcblock
   rchan !
   # output
+  lcget rcget
   stereo_out
   t+
   midi_beating

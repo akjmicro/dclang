@@ -35,19 +35,19 @@
     },
     {
       "name": "constant.language.dclang",
-      "match": "(?<!\\S)(?:false|null|true|pi|e)(?!\\S)"
+      "match": "(?<!\\S)(?:false|null|true|fpi|fe)(?!\\S)"
     },
     {
       "name": "keyword.operator.dclang",
-      "match": "(?<!\\S)(?:assert|atan2|floor|log10|round|acos|asin|atan|ceil|cosh|log2|rand|sinh|sqrt|tanh|abs|and|cos|exp|log|max|min|not|pow|sin|tan|xor|<<|<=|<>|>=|>>|or|%|\\*|\\+|\\-|/|<|=|>)(?!\\S)"
+      "match": "(?<!\\S)(?:assert|fatan2|ffloor|flog10|fround|facos|fasin|fatan|fceil|fcosh|flog2|frand|fsinh|fsqrt|ftanh|fabs|fcos|fexp|flog|fmax|fmin|f%|fpow|fsin|ftan|f<>|f<=|f>=|f>|f<|f=|f\\*|f\\+|f\\-|f/|f>i|i>f|abs|and|max|min|not|xor|<<|<=|<>|>=|>>|or|\\*/%|\\*/|/%|%|\\*|\\+|\\-|/|<|=|>)(?!\\S)"
     },
     {
       "name": "support.function.stack.dclang",
-      "match": "(?<!\\S)(?:svclear|svdepth|svdrop|svpick|svpush|2drop|2over|clear|depth|svpop|2dup|drop|over|pick|swap|\\.pz|\\.rj|dup|\\.\\.|\\.s|\\.)(?!\\S)"
+      "match": "(?<!\\S)(?:svclear|svdepth|svdrop|svpick|svpush|2drop|2over|clear|depth|svpop|2dup|drop|over|pick|swap|inc|sinc|sincn|ssetn|f\\.pz|f\\.rj|u\\.rj|\\.rj|f\\.\\.|u\\.\\.|f\\.|u\\.|dup|\\.\\.|\\.s|\\.)(?!\\S)"
     },
     {
       "name": "support.function.memory.dclang",
-      "match": "(?<!\\S)(?:sortnums|sortstrs|tdestroy|create|envget|envset|allot|const|hkeys|lmake|lpush|lsize|tmake|twalk|here|ldel|lins|lpop|lrem|tdel|var|h!|h@|l!|l@|t!|t@|!|,|@)(?!\\S)"
+      "match": "(?<!\\S)(?:sortnums|fsortnums|sortstrs|tdestroy|create|envget|envset|allot|const|hkeys|lmake|lpush|lsize|tmake|twalk|here|ldel|lins|lpop|lrem|tdel|var|h!|h@|l!|l@|t!|t@|inc!|\\+inc!|\\+incn!|\\+setn!|\\+@|!|,|@)(?!\\S)"
     },
     {
       "name": "keyword.control.dclang",
@@ -55,7 +55,7 @@
     },
     {
       "name": "support.function.other.dclang",
-      "match": "(?<!\\S)(?:unblock_sigint|block_sigint|tcpconnect|udpconnect|dt\\->epoch|epoch\\->dt|freadline|tcpaccept|tcplisten|udpsocket|fmemopen|freadall|isxdigit|redirect|udpclose|isalnum|isalpha|iscntrl|isdigit|isgraph|islower|isprint|ispunct|isspace|isupper|mempcpy|memused|strcspn|strfind|tolower|toupper|udpbind|udprecv|udpsend|fclose|fflush|fwrite|memset|rewind|seterr|setout|strlen|strspn|strtok|clock|close|epoch|flush|fopen|fread|fseek|ftell|mkbuf|print|sleep|tohex|tonum|tostr|uemit|write|emit|exit|fork|free|mark|open|read|str<|str=|str>|ord|cr)(?!\\S)"
+      "match": "(?<!\\S)(?:unblock_sigint|block_sigint|tcpconnect|udpconnect|dt\\->epoch|epoch\\->dt|freadline|tcpaccept|tcplisten|udpsocket|fmemopen|freadall|isxdigit|redirect|udpclose|isalnum|isalpha|iscntrl|isdigit|isgraph|islower|isprint|ispunct|isspace|isupper|mempcpy|memused|strcspn|strfind|tolower|toupper|udpbind|udprecv|udpsend|fclose|fflush|fwrite|memset|rewind|seterr|setout|strlen|strspn|strtok|monoclock|clock|close|epoch|flush|fopen|fread|fseek|ftell|mkbuf|print|sleep|tohex|tonum|tostr|uemit|write|emit|exit|fork|free|mark|open|read|str<|str=|str>|ord|cr)(?!\\S)"
     },
     {
       "name": "support.function.meta.dclang",

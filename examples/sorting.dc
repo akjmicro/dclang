@@ -5,7 +5,7 @@ var myarr iters @ allot
 
 : create_rand_arr
   iters @ times
-    rand 256 * round myarr i + !
+    frand 256.0 f* fround myarr i + !
   again
 ;
 

@@ -13,7 +13,7 @@
 # Can of course change these to be what one likes
 # or is in the mood for...was, at one point
 # 19:23:29:31:37:41, for example
-256 2 4 / * const ROOT
+256.0 2.0 4.0 f/ f* const ROOT
 3   const OTONE0
 5   const OTONE1
 7   const OTONE2
@@ -21,31 +21,31 @@
 11   const OTONE4
 15   const OTONE5
 
-10 3 / const BELL_RATIO
+10.0 3.0 f/ const BELL_RATIO
 
 # flip between two octaves, for interest
-var oct0   rand 2 * ceil        oct0 !
-var oct1   rand 2 * ceil        oct1 !
-var oct2   rand 2 * ceil        oct2 !
-var oct3   rand 2 * ceil        oct3 !
-var oct4   rand 2 * ceil        oct4 !
-var oct5   rand 2 * ceil        oct5 !
+var oct0   frand 2.0 f* fceil     oct0 !
+var oct1   frand 2.0 f* fceil     oct1 !
+var oct2   frand 2.0 f* fceil     oct2 !
+var oct3   frand 2.0 f* fceil     oct3 !
+var oct4   frand 2.0 f* fceil     oct4 !
+var oct5   frand 2.0 f* fceil     oct5 !
 
-var det0   rand 0.04 * 0.02 -   det0 !
-var det1   rand 0.04 * 0.02 -   det1 !
-var det2   rand 0.04 * 0.02 -   det2 !
-var det3   rand 0.04 * 0.02 -   det3 !
-var det4   rand 0.04 * 0.02 -   det4 !
-var det5   rand 0.04 * 0.02 -   det5 !
+var det0   frand 0.04 f* 0.02 f- det0 !
+var det1   frand 0.04 f* 0.02 f- det1 !
+var det2   frand 0.04 f* 0.02 f- det2 !
+var det3   frand 0.04 f* 0.02 f- det3 !
+var det4   frand 0.04 f* 0.02 f- det4 !
+var det5   frand 0.04 f* 0.02 f- det5 !
 
 #"Made it" print cr
 
-var vol0   rand 0.75 * 0.25 +   vol0 !
-var vol1   rand 0.75 * 0.25 +   vol1 !
-var vol2   rand 0.75 * 0.25 +   vol2 !
-var vol3   rand 0.75 * 0.25 +   vol3 !
-var vol4   rand 0.75 * 0.25 +   vol4 !
-var vol5   rand 0.75 * 0.25 +   vol5 !
+var vol0   frand 0.75 f* 0.25 f+ vol0 !
+var vol1   frand 0.75 f* 0.25 f+ vol1 !
+var vol2   frand 0.75 f* 0.25 f+ vol2 !
+var vol3   frand 0.75 f* 0.25 f+ vol3 !
+var vol4   frand 0.75 f* 0.25 f+ vol4 !
+var vol5   frand 0.75 f* 0.25 f+ vol5 !
 
 # One persistent envelope state per voice.
 var bell_env0
@@ -72,32 +72,32 @@ var bell_env5
 #"About to define bell_fm" print cr
 : bell_fm { envin cyc h oct d }
     #"Here in bell_fm" print cr
-    t cyc SPEED / seconds2samples % 0 =
+    t cyc SPEED i>f f/ seconds2samples % 0 =
     if
-      rand 2 * ceil oct !
-      rand 0.04 * 0.02 - d !
+      frand 2.0 f* fceil oct !
+      frand 0.04 f* 0.02 f- d !
     endif
-    h ROOT * oct @ * OTONE0 /
-      BELL_RATIO d @ +
-        0.3 envin dup * *
+    h i>f ROOT f* oct @ i>f f* OTONE0 i>f f/
+      BELL_RATIO d @ f+
+        0.3 envin dup f* f*
     fm
 ;
 
 #"About to define bell_env" print cr
 : bell_env { cyc off v mem att_a rel_a }
   #"Here in bell_env" print cr
-  t cyc SPEED / seconds2samples % 0 =
+  t cyc SPEED i>f f/ seconds2samples % 0 =
   if
-    rand 0.75 * 0.25 + v !
+    frand 0.75 f* 0.25 f+ v !
   endif
   0.001
-    SPEED cyc /
+    SPEED i>f cyc f/
   gate
     v @
-  *
-  t INV_SAMPLE_RATE * off <
+  f*
+  t i>f INV_SAMPLE_RATE f* off f<
   if
-    drop 0
+    drop 0.0
   endif
   mem att_a rel_a port
 ;
@@ -105,38 +105,38 @@ var bell_env5
 : render_frame
       8.0   0.000 vol0 bell_env0 ATT0 REL0 bell_env
         dup 8.0   OTONE0 oct0 det0 bell_fm
-      *
-      0.2 *
+      f*
+      0.2 f*
         0.33
     panmix
       11.0  2.125 vol1 bell_env1 ATT1 REL1 bell_env
         dup 11.0  OTONE1 oct1 det1 bell_fm
-      *
-      0.2 *
+      f*
+      0.2 f*
         0.66
     panmix
       13.0  4.125 vol2 bell_env2 ATT2 REL2 bell_env
         dup 13.0  OTONE2 oct2 det2 bell_fm
-      *
-      0.2 *
+      f*
+      0.2 f*
         0.25
     panmix
       17.0  6.375 vol3 bell_env3 ATT3 REL3 bell_env
         dup 17.0  OTONE3 oct3 det3 bell_fm
-      *
-      0.2 *
+      f*
+      0.2 f*
         0.75
     panmix
       19.0  9.125 vol4 bell_env4 ATT4 REL4 bell_env
         dup 19.0  OTONE4 oct4 det4 bell_fm
-      *
-      0.2 *
+      f*
+      0.2 f*
         0.10
     panmix
       23.0 12.125 vol5 bell_env5 ATT5 REL5 bell_env
         dup 23.0 OTONE5 oct5 det5 bell_fm
-      *
-      0.2 *
+      f*
+      0.2 f*
         0.90
     panmix
   lcget rcget
@@ -144,7 +144,6 @@ var bell_env5
 ;
 
 : otonal_bells
-  inf times
-    render_frame _stereo_out32
-  again
+  render_frame stereo_out
+  otonal_bells
 ;

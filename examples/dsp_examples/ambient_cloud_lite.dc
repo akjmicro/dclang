@@ -2,57 +2,62 @@
 # this patch within a practical Bela callback budget.
 "dsp.dc" import
 
-261 16 15 / *
+261.0 16.0 15.0 f/ f*
         const :BASE_FREQ
 0.5     const :REV_VOL
 0.89    const :REV_CF
 0.987   const :REV_FB
-0.29    const :CHANCE
+0.37    const :CHANCE
 0.92    const :LEAD_RES
 0.1 tau_to_alpha
         const :LAG_0p1
 0.5 fast_tanh const :SHAPE_NORM
 
+# Host-controlled output parameters. Both use a normalized 0.0--1.0 range so
+# midi_to_osc can provide soft takeover from a LaunchControl knob.
+var master_volume 1.0 master_volume !
+var ms_width      1.0 ms_width !
+
 32 const :CONTROL_FRAMES
-1 :CONTROL_FRAMES / const :CONTROL_RAMP
-:CONTROL_FRAMES INV_SAMPLE_RATE * const :CONTROL_SECONDS
-0.02 :CONTROL_SECONDS * const :FILTER_PHASE_STEP
+1.0 :CONTROL_FRAMES i>f f/ const :CONTROL_RAMP
+:CONTROL_FRAMES i>f INV_SAMPLE_RATE f* const :CONTROL_SECONDS
+0.02 :CONTROL_SECONDS f* const :FILTER_PHASE_STEP
 
 var next_control
 var filter_phase
 var filter_cutoff
 var filter_delta
-0.51 5960 * 2000 + filter_cutoff !
+0.51 5960.0 f* 2000.0 f+ filter_cutoff !
 
 create durations
-  1 13 / ,
-  1  8 / ,
-  1  5 / ,
-  1  3 / ,
-  1  2 / ,
-  1 , 2 , 3 , 5 , 8 , 13 ,
+  1.0 13.0 f/ ,
+  1.0  8.0 f/ ,
+  1.0  5.0 f/ ,
+  1.0  3.0 f/ ,
+  1.0  2.0 f/ ,
+  1.0 , 2.0 , 3.0 , 5.0 , 8.0 , 13.0 ,
 var dummy
 dummy durations -  const :NDURS
 
 create pitches
-  1  4 / ,
-  1  2 / ,
-  3  4 / ,
-  1  1 / ,
-  9  8 / ,
- 32 27 / ,
-  4  3 / ,
-  3  2 / ,
- 27 16 / ,
- 16  9 / ,
-  2  1 / ,
-  9  4 / ,
- 64 27 / ,
-  8  3 / ,
-  3  1 / ,
- 27  8 / ,
- 32  9 / ,
-  4  1 / ,
+  1.0  4.0 f/ ,
+  1.0  2.0 f/ ,
+  3.0  4.0 f/ ,
+  1.0  1.0 f/ ,
+  9.0  8.0 f/ ,
+ 32.0 27.0 f/ ,
+  4.0  3.0 f/ ,
+  3.0  2.0 f/ ,
+ 27.0 16.0 f/ ,
+ 16.0  9.0 f/ ,
+  2.0  1.0 f/ ,
+  9.0  4.0 f/ ,
+ 64.0 27.0 f/ ,
+  8.0  3.0 f/ ,
+  3.0  1.0 f/ ,
+ 27.0  8.0 f/ ,
+ 32.0  9.0 f/ ,
+  4.0  1.0 f/ ,
 var dummy2
 dummy2 pitches -  const :NPITCHES
 
@@ -67,18 +72,18 @@ make_dcblock       my_dcblockR
 ;
 
 : rand_fb  # ( -- fb )
-  rand 1.3 * 0.5 +
+  frand 1.3 f* 0.5 f+
 ;
 
 : rand_freq  # ( -- hz )
   :NPITCHES randint
   pitches swap +@
-  :BASE_FREQ *
+  :BASE_FREQ f*
 ;
 
 : freq_pan_width  # (freq -- width)
-  pitches @ :BASE_FREQ * / :NPITCHES /
-  dup 1 > if drop 1 endif
+  pitches @ :BASE_FREQ f* f/ :NPITCHES i>f f/
+  dup 1.0 f> if drop 1.0 endif
 ;
 
 : rand_pan_for_freq  # (freq -- pan)
@@ -86,11 +91,11 @@ make_dcblock       my_dcblockR
   freq_pan_width     # (0.5 wdt)
   swap               # (wdt 0.5)
   over               # (wdt 0.5 wdt)
-  0.5 *              # (wdt 0.5 half_wdt)
-  -                  # (wdt 0.5-half_wdt)
+  0.5 f*             # (wdt 0.5 half_wdt)
+  f-                 # (wdt 0.5-half_wdt)
   swap               # (centered_min wdt)
-  rand *             # (centered_min wdt*rand)
-  +                  # (res)
+  frand f*            # (centered_min wdt*frand)
+  f+                  # (res)
 ;
 
 0  const :active
@@ -122,39 +127,39 @@ make_dcblock       my_dcblockR
 
 : init_voice { cvs } # cvs = cloud_voice_struct
   rand_dur                   # (rand_dur)
-  SAMPLE_RATE * floor        # (rand_dur_smps)
+  SAMPLE_RATE i>f f* ffloor  # (rand_dur_smps)
   dup                        # (rand_dur_smps rand_dur_smps)
   cvs :rem +setn!             # (rand_dur_smps)
   2 /                        # (half_smps)
   dup                        # (half_smps half_smps)
-  SAMPLE_RATE / tau_to_alpha # (half_smps alpha_lag)
+  i>f SAMPLE_RATE i>f f/ tau_to_alpha # (half_smps alpha_lag)
   cvs :lag  +setn!            # (half_smps)
   cvs :half +setn!            # ()
   rand_freq
   dup                              cvs :freq +setn!
-  rand_pan_for_freq PI_DIV_2 * dup
-  sin cvs :pan_right +setn!
-  cos cvs :pan_left +setn!
+  rand_pan_for_freq PI_DIV_2 f* dup
+  fsin cvs :pan_right +setn!
+  fcos cvs :pan_left +setn!
   rand_fb                          cvs :fb +setn!
-  rand 0.25 * 0.05 +
-    rand :CHANCE < abs
-  *                                cvs :vol +setn!
-  rand 2 * 0.01 +                  cvs :lfo_freq +setn!
-  rand 0.005 *                     cvs :lfo_depth +setn!
-  rand :CHANCE < if 1 else 0 endif cvs :active +setn!
+  frand 0.25 f* 0.05 f+
+    frand :CHANCE f< abs i>f
+  f*                               cvs :vol +setn!
+  frand 2.0 f* 0.01 f+             cvs :lfo_freq +setn!
+  frand 0.005 f*                   cvs :lfo_depth +setn!
+  frand :CHANCE f< if 1 else 0 endif cvs :active +setn!
 ;
 
 # These phases have dedicated cells because control ticks skip audio frames.
 : slow_sine { phase step }  # ( phase_addr step -- next_value )
-  phase @ step + 1.0 %
+  phase @ step f+ 1.0 f%
   dup phase !
-  2PI * sin
+  2PI f* fsin
 ;
 
 : update_pitch_lfo { cvs }
-  cvs :lfo_phase + cvs :lfo_freq +@ :CONTROL_SECONDS * slow_sine
-  cvs :lfo_depth +@ *
-  cvs :lfo_value +@ - :CONTROL_RAMP *
+  cvs :lfo_phase + cvs :lfo_freq +@ :CONTROL_SECONDS f* slow_sine
+  cvs :lfo_depth +@ f*
+  cvs :lfo_value +@ f- :CONTROL_RAMP f*
   cvs :lfo_delta +setn!
 ;
 
@@ -179,9 +184,9 @@ make_dcblock       my_dcblockR
   ###############################
   # Portamento envelope shaping #
   ###############################
-  cvs :rem +@ cvs :half +@ > abs # gate high for first half, low for release half
+  cvs :rem +@ cvs :half +@ > abs i>f # gate high for first half, low for release half
     cvs :vol +@
-  *
+  f*
     # attack/release times are approximately half the total event
     cvs :env_mem +
       cvs :lag +@
@@ -190,19 +195,19 @@ make_dcblock       my_dcblockR
   # Pitch LFO and feedback sine.
   cvs :sl_mem +
     cvs :freq +@
-      cvs :lfo_value +@ 1 +
-    *
+      cvs :lfo_value +@ 1.0 f+
+    f*
       cvs :fb +@
         cvs :env +@
           cvs :fb_mem + :LAG_0p1 dup
         port
-      *
-  sineloop 0.5 * fast_tanh :SHAPE_NORM /
-  cvs :env +@ *
-  0.5 *
-  dup cvs :pan_right +@ * rchan @ + rchan !
-  cvs :pan_left +@ * lchan @ + lchan !
-  cvs :lfo_value +@ cvs :lfo_delta +@ + cvs :lfo_value +setn!
+      f*
+  sineloop 0.5 f* fast_tanh :SHAPE_NORM f/
+  cvs :env +@ f*
+  0.5 f*
+  dup cvs :pan_right +@ f* rchan @ f+ rchan !
+  cvs :pan_left +@ f* lchan @ f+ lchan !
+  cvs :lfo_value +@ cvs :lfo_delta +@ f+ cvs :lfo_value +setn!
 ;
 
 # setup voices first
@@ -214,14 +219,24 @@ make_cloud_voice_struct voice5
 
 # Refresh the endpoints once per control tick and ramp in the sample loop.
 : update_cloud_controls
-  filter_phase :FILTER_PHASE_STEP slow_sine 0.5 * 0.51 + 5960 * 2000 +
-  filter_cutoff @ - :CONTROL_RAMP * filter_delta !
+  filter_phase :FILTER_PHASE_STEP slow_sine 0.5 f* 0.51 f+ 5960.0 f* 2000.0 f+
+  filter_cutoff @ f- :CONTROL_RAMP f* filter_delta !
   voice1 update_pitch_lfo
   voice2 update_pitch_lfo
   voice3 update_pitch_lfo
   voice4 update_pitch_lfo
   voice5 update_pitch_lfo
   next_control @ :CONTROL_FRAMES + next_control !
+;
+
+# Mid/side output width: 0.0 is mono and 1.0 preserves the original stereo
+# image. Master volume is applied after reconstruction.
+: apply_output_controls { left right }
+  left right f+ 0.5 f*
+  left right f- 0.5 f* ms_width @ f*
+  { mid side }
+  mid side f+ master_volume @ f*
+  mid side f- master_volume @ f*
 ;
 
 : render_frame
@@ -232,14 +247,14 @@ make_cloud_voice_struct voice5
   voice4 run_voice
   voice5 run_voice
   # post-scaling
-  lchan @ 0.4 * fast_tanh
+  lchan @ 0.4 f* fast_tanh
     osc_fltL
       filter_cutoff @
       :LEAD_RES
   hc_lowpass fast_tanh
   0 lchan !
   0.0 panmix
-  rchan @ 0.4 * fast_tanh
+  rchan @ 0.4 f* fast_tanh
     osc_fltR
       filter_cutoff @
       :LEAD_RES
@@ -248,18 +263,25 @@ make_cloud_voice_struct voice5
   1.0 panmix
   # Reverb
   lchan @ rchan @ my_reverb :REV_CF :REV_FB reverb
-  :REV_VOL * swap :REV_VOL *
+  :REV_VOL f* swap :REV_VOL f*
     my_dcblockR dcblock
   1.0 panmix
   my_dcblockL dcblock
   0.0 panmix
-  lcget rcget
-  filter_cutoff @ filter_delta @ + filter_cutoff !
+  lcget rcget apply_output_controls
+  filter_cutoff @ filter_delta @ f+ filter_cutoff !
   t+
 ;
 
-: ambient_cloud_lite
-  inf times
-    render_frame _stereo_out32
+# Render a bounded number of stereo frames. This is useful for offline output
+# and for comparing render time with the equivalent audio duration.
+: render_frames  # ( frame-count -- )
+  times
+    render_frame stereo_out
   again
+;
+
+: ambient_cloud_lite
+  render_frame stereo_out
+  ambient_cloud_lite
 ;

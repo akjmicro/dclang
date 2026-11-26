@@ -1,13 +1,16 @@
 "dsp.dc" import
 
 : render_frame
-  noise 0.5 * 0.5 panmix
+  noise 0.5 f* 0.5 panmix
   lcget rcget
   t+
 ;
 
 : noise_example
-  inf times
-    render_frame _stereo_out32
+  2 30 << times
+  noise 0.5 f* 0.5 panmix
+  lchan @ rchan @
+  t+
+  stereo_out
   again
 ;

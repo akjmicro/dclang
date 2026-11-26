@@ -17,7 +17,7 @@ filename_to_open @ "r" fopen myfile !
 var master_array 128 allot
 var idx 0 idx !
 
-261 const HZ_BASE
+261.0 const HZ_BASE
 
 : is_bang_alone? { textline }
     textline strlen 2 =
@@ -48,12 +48,12 @@ var idx 0 idx !
   :slash str_split
     dup  lpop tonum
     swap lpop tonum
-  swap /
+  swap i>f swap i>f f/
   write_and_advance
 ;
 
 : calc_and_write_cents
-  tonum 1200 / 2 swap pow
+  tonum 1200.0 f/ 2.0 swap fpow
   write_and_advance
 ;
 
@@ -80,8 +80,8 @@ var myline  # place to put line of text
   6 -5 1 for
     idx @ times
         master_array i + @
-        HZ_BASE 2 j pow *
-      * . cr
+        HZ_BASE 2.0 j i>f fpow f*
+      f* f. cr
     again
   next
 ;

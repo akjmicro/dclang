@@ -194,7 +194,7 @@ create hexchars 48 , 49 , 50 , 51 , 52 , 53 , 54 , 55 , 56 , 57 ,
 : uuid
   37 mkbuf dup svpush
   8 times
-      rand 16 * floor hexchars + @
+      frand 16.0 f* ffloor hexchars + @
         1
     memset
     1 +
@@ -202,7 +202,7 @@ create hexchars 48 , 49 , 50 , 51 , 52 , 53 , 54 , 55 , 56 , 57 ,
   45 1 memset
   1 +
   4 times
-      rand 16 * floor hexchars + @
+      frand 16.0 f* ffloor hexchars + @
         1
     memset
     1 +
@@ -210,7 +210,7 @@ create hexchars 48 , 49 , 50 , 51 , 52 , 53 , 54 , 55 , 56 , 57 ,
   45 1 memset
   1 +
   4 times
-      rand 16 * floor hexchars + @
+      frand 16.0 f* ffloor hexchars + @
         1
     memset
     1 +
@@ -218,7 +218,7 @@ create hexchars 48 , 49 , 50 , 51 , 52 , 53 , 54 , 55 , 56 , 57 ,
   45 1 memset
   1 +
   4 times
-      rand 16 * floor hexchars + @
+      frand 16.0 f* ffloor hexchars + @
         1
     memset
     1 +
@@ -226,7 +226,7 @@ create hexchars 48 , 49 , 50 , 51 , 52 , 53 , 54 , 55 , 56 , 57 ,
   45 1 memset
   1 +
   12 times
-      rand 16 * floor hexchars + @
+      frand 16.0 f* ffloor hexchars + @
         1
     memset
     1 +
@@ -238,7 +238,7 @@ create hexchars 48 , 49 , 50 , 51 , 52 , 53 , 54 , 55 , 56 , 57 ,
 : hex8token
   9 mkbuf dup svpush
   8 times
-      rand 16 * floor hexchars + @
+      frand 16.0 f* ffloor hexchars + @
         1
     memset
     1 +
@@ -256,6 +256,17 @@ create hexchars 48 , 49 , 50 , 51 , 52 , 53 , 54 , 55 , 56 , 57 ,
 var _split_list
 var _strtok_state
 
+: _str_split_next { split_token }
+  null split_token _strtok_state strtok dup
+  0 = if
+    drop
+    _split_list @
+    return
+  endif
+  _split_list @ swap lpush
+  split_token _str_split_next
+;
+
 : _str_split_real { in_str split_token }
   lmake _split_list !
   in_str split_token _strtok_state strtok dup
@@ -264,17 +275,7 @@ var _strtok_state
     return
   else
     _split_list @ swap lpush
-    inf times
-      null split_token _strtok_state strtok dup
-      0 =
-    if
-      drop
-      _split_list @
-      exittimes
-    else
-      _split_list @ swap lpush
-      again
-    endif
+    split_token _str_split_next
   endif
 ;
 

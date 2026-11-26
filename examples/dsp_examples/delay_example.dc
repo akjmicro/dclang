@@ -1,7 +1,7 @@
 "dsp.dc" import
 
 # a local constant for 'change_frequency'
-0.7575 1.333333 * const CHANGE_FREQ
+0.7575 1.333333 f* const CHANGE_FREQ
 
 # amp envelope stuff:
 var env_port
@@ -19,7 +19,7 @@ var mysl
 make_hc_filter mylp
 
 # delay setup:
-1 make_delay_line mydelay
+1.0 make_delay_line mydelay
 
 # random pitch setup:
 # A Wilson CPS hexany (2, 3, 5, 9)
@@ -30,7 +30,7 @@ var lasttrig
 var curtrig
 var rntrg
 
-: octfac 31 / 2 swap pow ;
+: octfac 31.0 f/ 2.0 swap fpow ;
 
 : render_frame
     # random trigger
@@ -40,34 +40,34 @@ var rntrg
     # route to 'ampenv' variable:
     ampenv !
     # change the pitch variable randomly, in sync with the trigger:
-    curtrig @ lasttrig @ >
+    curtrig @ lasttrig @ f>
     if
       pitch_choices 8 randint + @ current_pitch !
     else
     endif
     # sineloop oscillator:
     mysl
-      current_pitch @ octfac 256 *
+      current_pitch @ i>f octfac 256.0 f*
       pitch_port :PCH_RISE :PCH_FALL port
-        ampenv @ 0.89 * 0.4 +
+        ampenv @ 0.89 f* 0.4 f+
     sineloop
-    ampenv @ *
+    ampenv @ f*
     # boost amplitude
-    2.3 *
+    2.3 f*
     # cut the highs a bit:
-    mylp 2750 0.3 hc_lowpass
+    mylp 2750.0 0.3 hc_lowpass
     # osc/filter amplification
-    1.8 *
+    1.8 f*
     mydelay 0.95 delay_read
     # delay amplification
-    0.65 *
+    0.65 f*
     2dup
     0.35 panmix
     0.65 panmix
     # output
     lcget rcget
     # feed the delay feedback!
-    + 0.5 * mydelay delay_write
+    f+ 0.5 f* mydelay delay_write
     # update trigger state
     curtrig @ lasttrig !
     # update clock
@@ -75,7 +75,6 @@ var rntrg
 ;
 
 : delay_example
-  inf times
-    render_frame _stereo_out32
-  again
+  render_frame stereo_out
+  delay_example
 ;

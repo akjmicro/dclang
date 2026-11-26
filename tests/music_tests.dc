@@ -1,7 +1,118 @@
 # Meant to be called via the bash script, `run_tests.sh`
 # ...in case /tmp/keys doesn't exist, that script will create it
 
+"1" "DCLANG_NO_MIDI" envset
 "music.dc" import
+
+: test_keyval_numeric_contracts
+  "7" tonum_float_free 7.0 f= assert
+  "7.0" tonum_float_free 7.0 f= assert
+  "1e2" tonum_float_free 100.0 f= assert
+  "7.9" tonum_int_free 7 = assert
+  "0xdead" tonum_int_free 57005 = assert
+  "0xdead" tonum_float_free 57005.0 f= assert
+
+  # Float-domain controls accept either integer-looking or decimal text.
+  "120" :BPM keyval_set
+  _get_duration 0.5 f= assert
+  "120.0" :BPM keyval_set
+  _get_duration 0.5 f= assert
+
+  "120" :LEAD_TEMPO keyval_set
+  :LEAD_TEMPO get_x_tempo 2.0 f= assert
+  "120.0" :LEAD_TEMPO keyval_set
+  :LEAD_TEMPO get_x_tempo 2.0 f= assert
+
+  "3" :DRUM_VOL keyval_set
+  get_drum_vol 3.0 f= assert
+  "3.0" :DRUM_VOL keyval_set
+  get_drum_vol 3.0 f= assert
+
+  "261" :BASE_PITCH keyval_set
+  get_base_pitch 261.0 f= assert
+  "261.625" :BASE_PITCH keyval_set
+  get_base_pitch 261.625 f= assert
+
+  # Integer-domain controls accept decimal-form text without leaking floats.
+  "31.0" :EDO keyval_set
+  get_edo 31 = assert
+  "16.0" :EUCLID_N keyval_set
+  get_euclid_n 16 = assert
+
+  # Clock iteration keeps an absolute integer seconds/nanoseconds pair.
+  "120" :BPM keyval_set
+  10 next_on_seconds !
+  0 next_on_nanoseconds !
+  2.0 0.25 _iterate_clock
+  next_on_seconds @ 11 = assert
+  next_on_nanoseconds @ 0 = assert
+  next_off_seconds @ 10 = assert
+  next_off_nanoseconds @ 250000000 = assert
+
+  10 250000000 1.0 _clock% 0.25 f= assert
+;
+
+test_keyval_numeric_contracts
+
+: test_synchronized_start_contract
+  "120" :BPM keyval_set
+  "0.1" :BEAT_PERIOD keyval_set
+  monoclock
+  synchronized_start
+  monoclock swap f-
+  0.08 f< assert
+
+  clock
+  { seconds nanoseconds }
+  seconds nanoseconds 0.05 _clock%
+  0.02 f< assert
+;
+
+test_synchronized_start_contract
+
+: test_tuning_math
+  # Octave values are packed floats; EDO counts remain integers.
+  0.0 O- -1.0 f= assert
+  0.0 O+  1.0 f= assert
+  3_2 3 i>f 2 i>f f/ flog2 f= assert
+  12 _get_edo_3_2 7 = assert
+
+  # Fraction-list parsing stores octave-valued floats.
+  "1/1 5/4 3/2" process_fraction_list
+  gamut_idx @ 3 = assert
+  loading_custom_gamut @     @ 0.0 f= assert
+  loading_custom_gamut @ 1 + @ 5_4 f= assert
+  loading_custom_gamut @ 2 + @ 3_2 f= assert
+
+  # Named scales contain float octave values and integer metadata.
+  "ionian" "scale" keyval_set
+  set_scale
+  scale @ ionian = assert
+  scale @ @ -1.0 f= assert
+
+  # Frequency conversion crosses from integer EDO into float arithmetic.
+  "12" "edo" keyval_set
+  261.625 base_pitch !
+  0  edo_degree_to_hz 261.625 f= assert
+  12 edo_degree_to_hz 523.25  f= assert
+;
+
+test_tuning_math
+
+make_euc_space test_euc
+: test_euclidean_state
+  test_euc 8 3 1 2 1 euc_init
+  test_euc _get_euc_n 8 = assert
+  test_euc _get_euc_k 3 = assert
+  test_euc _get_euc_usr_p 1 = assert
+  test_euc _get_euc_l 2 = assert
+  test_euc _get_euc_s 1 = assert
+  test_euc _get_euc_q 2 = assert
+  test_euc _get_euc_r 2 = assert
+  test_euc _get_euc_p 1 = assert
+;
+
+test_euclidean_state
 
 : test_do_symbol_string
   # set to standard 12-edo and make a little arpeggio
@@ -58,13 +169,13 @@ test_do_symbol_string
   "6:5" _test_token _parse_rel_ratio_token -3 = assert
 
   "1\\4" _test_token _process_duration_token
-  _seq_duration @ 1 = assert
+  _seq_duration @ 1.0 f= assert
 
   "1\\8" _test_token _process_duration_token
-  _seq_duration @ 0.5 = assert
+  _seq_duration @ 0.5 f= assert
 
   "3\\16" _test_token _process_duration_token
-  _seq_duration @ 0.75 = assert
+  _seq_duration @ 0.75 f= assert
 ;
 
 test_seq_helpers
@@ -73,7 +184,7 @@ test_seq_helpers
   "12" "edo" keyval_set
   "1\\4 1/1 4:5 5:6 6:5 C G" "seq1" keyval_set
   do_seq_string   0 = assert
-  _seq_duration @  1 = assert
+  _seq_duration @  1.0 f= assert
   do_seq_string   4 = assert
   do_seq_string   7 = assert
   do_seq_string   4 = assert
@@ -88,7 +199,7 @@ test_seq_helpers
   "31" "edo" keyval_set
   "1\\16 1/1 4:5 5:6 6:5 edo=12 4:5" "seq1" keyval_set
   do_seq_string   0 = assert
-  _seq_duration @ 0.25 = assert
+  _seq_duration @ 0.25 f= assert
   do_seq_string  10 = assert
   do_seq_string  18 = assert
   do_seq_string  10 = assert

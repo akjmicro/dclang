@@ -2,12 +2,19 @@
 
 make_digit_expansion_struct  digits
 
-: show_digit_expansion { base div cols }
+: show_digit_expansion # ( base div cols -- )
+  depth 3 <
+  if
+    "show_digit_expansion - stack underflow;" print
+    " needs <base> <div> <cols> on the stack\n" print cr
+    return
+  endif
+  { base div cols }
   base digits _set_base
   div  digits _set_div
   16 times
     cols times
-      digits gen_digit_expansion 3 0 .rj
+      digits gen_digit_expansion 3 .rj
     again
     cr
   again
@@ -76,7 +83,14 @@ var coverage_count
 ;
 
 # ( b d -- period coverage )
-: find_period_and_coverage { b d }
+: find_period_and_coverage
+  depth 2 <
+  if
+    "find_period_and_coverage - stack underflow; " print
+    "needs <base> <div> on the stack." print cr
+    return
+  endif
+  { b d }
   b d _reset_data_vars
   b d gcd 1 > if
     0 0 return

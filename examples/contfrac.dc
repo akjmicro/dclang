@@ -65,10 +65,10 @@ drop
   # no. of times will be grabbed from the stack!
   times
     dup               # ( num num )
-    floor dup         # ( num fl fl )
+    ffloor dup        # ( num fl fl )
     expansion-put     # ( num fl )
     show-frac         # ( num f1 )
-    - 1 swap /        # ( newnum )
+    i>f f- 1.0 swap f/ # ( newnum )
     advance-indices
   again
   cr
@@ -76,16 +76,16 @@ drop
 
 # show the expansion for pi
 "The continued fraction expansion of PI is: " print cr
-pi 7 continued-fraction
+fpi 7 continued-fraction
 
 # show the expansion for sqrt of 2
 "The continued fraction expansion of the square-root of 2 is: " print cr
-2 sqrt 12 continued-fraction
+2.0 fsqrt 12 continued-fraction
 
 # show the expansion of phi
 "The continued fraction expansion of Phi is: " print cr
-: phi 1 5 sqrt + 2 / ;
+: phi 1.0 5.0 fsqrt f+ 2.0 f/ ;
 phi 16 continued-fraction
 
 "Expansion of a step of 5-edo: " print cr
-2 1 5 / pow 12 continued-fraction
+2.0 1.0 5.0 f/ fpow 12 continued-fraction

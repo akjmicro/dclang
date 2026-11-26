@@ -1,0 +1,21 @@
+"clock_sleep.dc" import
+
+# Manual timing probe. Each line reports the signed nanoseconds by which
+# sleep_until returned after its absolute target. This is intentionally not a
+# normal pass/fail test: scheduler preemption can produce outliers on any
+# general-purpose operating system.
+
+: clock_precision
+  13 times
+    clock
+    2dup 1 sinc
+    2dup sleep_until
+    clock
+    { target_seconds target_nanoseconds actual_seconds actual_nanoseconds }
+    actual_seconds target_seconds - 1000000000 *
+    actual_nanoseconds target_nanoseconds - +
+    . cr
+  again
+;
+
+clock_precision

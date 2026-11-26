@@ -8,7 +8,7 @@
 const :FAREY_SEQ_ARGS_ERROR
 
 : _farey_next { n a b c d }
-  n b + d / floor    # (fl)
+  n b + d /          # (fl)
 
   dup  c * a -       # (fl fl*c-a)
   swap d * b -       # (fl*c-a fl*d-b)
@@ -17,20 +17,14 @@ const :FAREY_SEQ_ARGS_ERROR
 : _farey_seq { n a b c d }
 
   a .. :slash print b .
-
-  inf times
-    c .. :slash print d .
-
-    c 1 = d 1 = and
-    if
-      exittimes
-    endif
-    n a b c d _farey_next  # (next_a next_b)
-    c a!
-    d b!                   # (next_a next_b)
-    d!                     # (next_a)
-    c!                     # ()
-  again
+  a 1 = b 1 = and
+  if return endif
+  n a b c d _farey_next  # (next_a next_b)
+  c a!
+  d b!                   # (next_a next_b)
+  d!                     # (next_a)
+  c!                     # ()
+  n a b c d _farey_seq
 ;
 
 : farey_seq # ( n - ) prints out sequence as side-effect

@@ -13,7 +13,10 @@ len_idx lengths - const RHYTHM_CYCLE
 var local_edo
 get_edo local_edo !
 
-: generate_interval / log2 local_edo @ * round ;
+: generate_interval { numerator denominator }
+  numerator i>f denominator i>f f/ flog2
+  local_edo @ i>f f* fround
+;
 
 1 4 generate_interval const 1_4
 1 2 generate_interval const 1_2

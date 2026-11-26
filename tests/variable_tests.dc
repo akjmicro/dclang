@@ -24,7 +24,7 @@ bar @ 30 = assert
 
 testfuncvar alpha
 2632.12 alpha !
-alpha @ 2632.12 = assert
+alpha @ 2632.12 f= assert
 
 testfuncvar beta
 1111 beta !
@@ -33,7 +33,7 @@ beta @ 1111 = assert
 beta alpha - 4 = assert
 
 create arr_to_sort
-510 , 83 , 20053 , -19 , 1.618 ,
+510 , 83 , 20053 , -19 , 1618 ,
 arr_to_sort @ 510 = assert
 arr_to_sort 3 + @ -19 = assert
 arr_to_sort 5 sortnums

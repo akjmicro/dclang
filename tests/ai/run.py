@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """Consolidated dclang evidence inventory and integrity checks (not a runtime replayer)."""
-import argparse, json
+import argparse, json, re
 from pathlib import Path
 ROOT=Path(__file__).resolve().parents[2]
 def load(p):return json.loads((ROOT/p).read_text())
@@ -9,7 +9,9 @@ def main():
  prim=load('docs/ai/data/primitives.json');std=load('docs/ai/data/stdlib.json')
  pc=load('tests/ai/primitives.json');sc=load('tests/ai/stdlib.json')
  names=[x['name'] for x in prim['primitives']]
- assert len(names)==236 and len(set(names))==236, 'primitive inventory mismatch'
+ assert len(names)==267 and len(set(names))==267, 'primitive inventory mismatch'
+ live=re.findall(r'add_primitive\("([^"]+)"', (ROOT/'libdclang.c').read_text())
+ assert names==live, 'primitive registry is stale relative to libdclang.c'
  assert all(x.get('stack_effect') for x in prim['primitives']), 'missing primitive stack signature'
  assert len(std['modules'])==20, 'module inventory mismatch'
  assert all('record' in x and 'source' in x for x in pc['cases']+sc['cases'])

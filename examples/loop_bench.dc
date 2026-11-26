@@ -2,8 +2,8 @@
 
 : present-results
   "The sum is: " print . cr
-  swap -
-  "The time difference is: " print . "seconds" print cr
+  swap f-
+  "The time difference is: " print f. "seconds" print cr
 ;
 
 : recur-loop  # ( n sum cur )
@@ -16,38 +16,38 @@
 ;
 
 : test-recur
-  clock
+  monoclock
   20000000 0 0 recur-loop
-  clock            # ( clock sum clock' )
+  monoclock        # ( clock sum clock' )
   swap
 ;
 
 : testfor
-  clock 0
+  monoclock 0
   20000001 0 1 for
     i +
   next
-  clock
+  monoclock
   swap
 ;
 
 : testtimes
-  clock 0
+  monoclock 0
   20000001 times
     i +
   again
-  clock
+  monoclock
   swap
 ;
 
 : testtimes-var
-  clock
+  monoclock
   0 0 !
   20000001 times
     0 @ i + 0 !
   again
   0 @
-  clock
+  monoclock
   swap
 ;
 

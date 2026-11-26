@@ -17,9 +17,9 @@ create choices
 : render_frame
     0.02 trigval randtrig         # create a trigger
     curtrig !                     # store it
-    curtrig @ lasttrig @ >        # check if it crosses a change
+    curtrig @ lasttrig @ f>       # check if it crosses a change
     if                            # does it?
-      choices 6 randint + @ 50 *  # calculate a new pitch if so
+      choices 6 randint + @ 50 * i>f # calculate a new pitch if so
       pitch !                     # and set it
     endif
       pitch @
@@ -28,11 +28,11 @@ create choices
             :PCH_FALL
       port                        # get the pitch, portamento it
     sine                          # assign the portamento-pitch to a sine wave
-      curtrig @ 0.7 *             # grab the same trigger signal
+      curtrig @ 0.7 f*            # grab the same trigger signal
         myampport
           :ATT
             :REL
-      port *                      # envelope it
+      port f*                     # envelope it
     0.5 panmix                    # center pan
     curtrig @ lasttrig !          # lasttrig = curtrig
   lcget rcget
@@ -40,7 +40,6 @@ create choices
 ;
 
 : randtrig_example
-  inf times
-    render_frame _stereo_out32
-  again
+  render_frame stereo_out
+  randtrig_example
 ;

@@ -58,7 +58,7 @@ var wrap
 
 # `scale` is an experimental scaling extension
 var scale
-1 scale !
+1.0 scale !
 
 # `shift` offsets the resulting digit_sum by the assigned amount.
 # If in a musical scale/gamut situation, this would be a "mode".
@@ -84,8 +84,8 @@ var drawchars
 
 : _show_figures
   slots @ times
-    i 2 0 .pz "\b: " print
-    figures i + @ 5 0 .pz cr
+    i i>f 2 0 f.pz "\b: " print
+    figures i + @ i>f 5 0 f.pz cr
   again
 ;
 
@@ -114,8 +114,8 @@ var drawchars
   end @ start @ 1
   for
     mul @ i * base @ digit_sum
-      scale @
-    * round
+      i>f scale @
+    f* fround
     wrap @ absmod
       shift @
     +
@@ -196,13 +196,13 @@ var drawchars
     _clear_figures
     _run_sample_inner
     figures slots @ sortnums
-    i 3 0 .pz
-    _get_non_zero_size 2 0 .pz
+    i i>f 3 0 f.pz
+    _get_non_zero_size i>f 2 0 f.pz
     _get_highest_figure _get_lowest_figure
     2dup
-    4 0 .pz
-    4 0 .pz
-    / .  cr
+    i>f 4 0 f.pz
+    i>f 4 0 f.pz
+    swap i>f swap i>f f/ f. cr
   next
 ;
 
@@ -214,12 +214,12 @@ var drawchars
     _clear_figures
     _run_sample_inner
     figures slots @ sortnums
-    i 3 0 .pz
-    _get_non_zero_size 2 0 .pz
+    i i>f 3 0 f.pz
+    _get_non_zero_size i>f 2 0 f.pz
     _get_highest_figure _get_lowest_figure
     2dup
-    4 0 .pz
-    4 0 .pz
-    / .  cr
+    i>f 4 0 f.pz
+    i>f 4 0 f.pz
+    swap i>f swap i>f f/ f. cr
   next
 ;

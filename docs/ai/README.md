@@ -1,8 +1,8 @@
 # dclang AI reference
 
-This is the **consolidated reference layout**. The canonical references are `LANGUAGE.md`, `PRIMITIVES.md`, `STDLIB.md`, and `GOTCHAS.md`. The registries in `data/` contain structured entries for 236 primitives and the standard-library module inventory.
+This is the **consolidated reference layout**. The canonical references are `LANGUAGE.md`, `PRIMITIVES.md`, `STDLIB.md`, and `GOTCHAS.md`. The registries in `data/` contain structured entries for 267 primitives and the standard-library module inventory.
 
-The current references are reconciled through commit `3b333a8` plus the fast-math and Phiverb working tree. This includes the fused stack and variable operations, private OSC readers, native DSP kernels, fast sine and tanh approximations, the Faust-generated Phiverb core behind the existing public `reverb` interface, the updated `dsp.dc` wrappers, and the initial `dclang2c` ahead-of-time compiler.
+The current references are reconciled with the `dclang-typed` working tree as of 2026-11-23. This includes the `uintptr_t` cell model, explicit integer/float operators and conversions, typed numeric parsing, integer and float array sorting, native DSP kernels, the updated standard libraries, and the `dclang2c-dsp` bounded DSP patch compiler.
 
 `../../AGENTS.md` is the agent entry point. Test observations and audit provenance are retained in `../../tests/ai/`.
 

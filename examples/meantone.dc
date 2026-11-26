@@ -63,20 +63,20 @@ const :SHOW_MEANTONE_HZ_HELP
 "|"       const :pipe
 "error: " const :error
 
- 3  2 / log2 const PERFECT_FIFTH
-81 80 / log2 const SYNTONIC_COMMA
+ 3.0  2.0 f/ flog2 const PERFECT_FIFTH
+81.0 80.0 f/ flog2 const SYNTONIC_COMMA
 
 var fifth
 
 : set_fifth { comma_frac }
-  1.5 log2  SYNTONIC_COMMA comma_frac *   -
+  1.5 flog2 SYNTONIC_COMMA comma_frac f* f-
   fifth !
 ;
 
 #################################
 # 1/4-comma meantone by default #
 #################################
-1 4 /  set_fifth
+1.0 4.0 f/ set_fifth
 
 var gamut_size  12 gamut_size  !
 var neg_fifths  -3 neg_fifths  !
@@ -85,24 +85,28 @@ var gamut  256 allot
 
 var max_error
 
+: _octave_wrap
+  1.0 f%
+  dup 0.0 f< if 1.0 f+ endif
+;
+
 : _make_meantone
   gamut_size @ times
     fifth @
-      i neg_fifths @ +
-    *
-      1
-    absmod
+      i neg_fifths @ + i>f
+    f*
+    _octave_wrap
       gamut i +
     !
   again
-  gamut  gamut_size @  sortnums
+  gamut gamut_size @ fsortnums
 ;
 
 : show_meantone
   _make_meantone
   gamut_size @ times
-    2  gamut i + @  pow
-    . cr
+    2.0 gamut i + @ fpow
+    f. cr
   again
 ;
 
@@ -115,65 +119,65 @@ var max_error
   _make_meantone
   num_octaves times
     gamut_size @ times
-      2  gamut i + @  pow
-        2 j pow
-      *
-      base_hz *
-      . cr
+      2.0 gamut i + @ fpow
+        2.0 j i>f fpow
+      f*
+      base_hz f*
+      f. cr
     again
   again
-  2 num_octaves pow
-    base_hz *
-  . cr
+  2.0 num_octaves i>f fpow
+    base_hz f*
+  f. cr
 ;
 
 : meantone2int { scale }
   _make_meantone
   gamut_size @ times
-    2
+    2.0
       gamut i + @
-    pow
-      scale
-    *
-    round
+    fpow
+      scale i>f
+    f*
+    fround
     dup
     .
     :error print
-      scale
-    /
-    log2
+      i>f scale i>f
+    f/
+    flog2
       gamut i + @
-    -
-    . cr
+    f-
+    f. cr
   again
 ;
 
 : meantone2int_survey { min_scale max_scale }
   _make_meantone
   max_scale min_scale 1 for
-    0 max_error !
+    0.0 max_error !
     gamut_size @ times
-      2
+      2.0
         gamut i + @
-      pow
-        j
-      *
-      round
-        j
-      /
-      log2
+      fpow
+        j i>f
+      f*
+      fround i>f
+        j i>f
+      f/
+      flog2
         gamut i + @
-      -
-      abs
+      f-
+      fabs
         dup
           max_error @
-        >
+        f>
       if
         max_error !
       else
         drop
       endif
     again
-    i .. :pipe print max_error @ . cr
+    i .. :pipe print max_error @ f. cr
   next
 ;

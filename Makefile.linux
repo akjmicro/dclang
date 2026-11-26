@@ -9,14 +9,26 @@ LIBSOOBJ = libdclang.so
 LIBTESTC = libtest.c
 HEADER = dclang.h
 PREFIX ?= /usr/local
-DSP ?= examples/dsp_examples/simple_delay_example.dc
+DSP_DIR ?= examples/dsp_examples
+DSP ?= simple_delay_example.dc
 ENTRY ?= render_frame
 SR ?= 44100
 BELA_HOST ?= root@192.168.7.2
 BELA_HOME ?= /root/Bela
-BELA_PROJECT ?= dclang-$(basename $(notdir $(DSP)))
-DSP_C ?= /tmp/dclang2c-instrument.c
-BELA_CPPFLAGS ?= -Wno-unused-variable -Wno-unknown-pragmas -Wno-tautological-compare
+BELA_PROJECT ?= dclang-$(basename $(notdir $(DSP_DIR)/$(DSP)))
+DSP_C ?= /tmp/dclang2c-dsp-instrument.c
+DSP_TOOL_DIR ?= tools/dclang2c-dsp
+LOCAL_DSP ?= /tmp/dclang-$(basename $(notdir $(DSP_DIR)/$(DSP)))
+LOCAL_RENDER ?= $(DSP_TOOL_DIR)/local_render.c
+LOCAL_OSC_CONFIG ?= $(basename $(DSP_DIR)/$(DSP))_osc.conf
+LOCAL_OSC_DEFINE = $(if $(wildcard $(LOCAL_OSC_CONFIG)),-DDCLANG_OSC_CONFIG=\"$(abspath $(LOCAL_OSC_CONFIG))\")
+LOCAL_CPPFLAGS ?= -I$(CURDIR) $(shell pkg-config --cflags jack) -DDCLANG_LOCAL_SR=$(SR) $(LOCAL_OSC_DEFINE)
+LOCAL_CFLAGS ?= $(filter-out -static,$(CFLAGS)) -ffp-contract=off -pthread
+LOCAL_LDFLAGS ?= $(shell pkg-config --libs jack) -lm -pthread
+BELA_RENDER ?= $(if $(wildcard $(basename $(DSP_DIR)/$(DSP))_controller.dc),$(DSP_TOOL_DIR)/bela_osc_render.cpp,$(DSP_TOOL_DIR)/bela_render.cpp)
+DCLANG2C_CELL_BITS ?= $(shell getconf LONG_BIT)
+BELA_CPPFLAGS ?= -DDCLANG_MATH_NEON -Wno-unused-variable -Wno-unknown-pragmas -Wno-tautological-compare
+BELA_LIBRARIES ?= math_neon
 
 .PHONY: clean lib libtest
 
@@ -28,22 +40,30 @@ default: dclang
 dclang: $(OBJECTS)
 	$(CC) $(OBJECTS) -o $@ $(LDFLAGS)
 
-dclang2c: dclang2c.c libdclang.c dclang.h dclang_dsp.h dclang_osc.h dclang_fast_math.h dclang_phiverb.h token.c $(wildcard noheap/*)
-	$(CC) $(CFLAGS) -o $@ $< $(LDFLAGS)
+dclang2c-dsp: $(DSP_TOOL_DIR)/dclang2c-dsp.c libdclang.c dclang.h dclang_dsp.h dclang_osc.h dclang_fast_math.h dclang_phiverb.h token.c $(wildcard noheap/*)
+	$(CC) -I$(CURDIR) $(filter-out -static,$(CFLAGS)) -o $@ $< $(LDFLAGS)
 
-.PHONY: dsp-c bela-build bela-run
+.PHONY: dsp-c local-dsp bela-dsp
 
-dsp-c: dclang2c
-	SR=$(SR) DCLANG_LIBS="$(CURDIR)/lib" ./dclang2c "$(DSP)" "$(ENTRY)" "$(DSP_C)"
+dsp-c: dclang2c-dsp
+	SR=$(SR) DCLANG2C_CELL_BITS=$(DCLANG2C_CELL_BITS) DCLANG_LIBS="$(CURDIR)/lib" ./dclang2c-dsp "$(DSP_DIR)/$(DSP)" "$(ENTRY)" "$(DSP_C)"
+
+# Build the generated instrument as a native JACK client for this host.
+local-dsp: dsp-c
+	$(CC) $(LOCAL_CPPFLAGS) $(LOCAL_CFLAGS) \
+		"$(DSP_C)" "$(LOCAL_RENDER)" \
+		-o "$(LOCAL_DSP)" $(LOCAL_LDFLAGS)
+	@echo "Built $(LOCAL_DSP) ($(SR) Hz, JACK stereo outputs)"
 
 # Create a standard Bela project containing the generated C and callback.
-bela-build: dsp-c
+bela-dsp: DCLANG2C_CELL_BITS=32
+bela-dsp: dsp-c
 	ssh -o BatchMode=yes $(BELA_HOST) 'mkdir -p "$(BELA_HOME)/projects/$(BELA_PROJECT)"'
-	scp -q "$(DSP_C)" examples/dsp_examples/bela_render.cpp dclang_dsp.h dclang_osc.h dclang_fast_math.h dclang_phiverb.h $(BELA_HOST):"$(BELA_HOME)/projects/$(BELA_PROJECT)/"
-	ssh -o BatchMode=yes $(BELA_HOST) 'make -s -C "$(BELA_HOME)" PROJECT="$(BELA_PROJECT)" CPPFLAGS="$(BELA_CPPFLAGS)" CFLAGS="$(BELA_CPPFLAGS)"'
-
-bela-run:
-	ssh -o BatchMode=yes $(BELA_HOST) '"$(BELA_HOME)/scripts/run_project.sh" "$(BELA_PROJECT)"'
+	ssh -o BatchMode=yes $(BELA_HOST) 'rm -f "$(BELA_HOME)/projects/$(BELA_PROJECT)/$(BELA_PROJECT).c" "$(BELA_HOME)/projects/$(BELA_PROJECT)/dclang2c-dsp-instrument.c" "$(BELA_HOME)/projects/$(BELA_PROJECT)/render.cpp"'
+	scp -q "$(DSP_C)" $(BELA_HOST):"$(BELA_HOME)/projects/$(BELA_PROJECT)/dclang2c-dsp-instrument.c"
+	scp -q dclang_dsp.h dclang_osc.h dclang_fast_math.h dclang_phiverb.h $(BELA_HOST):"$(BELA_HOME)/projects/$(BELA_PROJECT)/"
+	scp -q "$(BELA_RENDER)" $(BELA_HOST):"$(BELA_HOME)/projects/$(BELA_PROJECT)/render.cpp"
+	ssh -o BatchMode=yes $(BELA_HOST) 'make -s -C "$(BELA_HOME)" PROJECT="$(BELA_PROJECT)" LIBRARIES="$(BELA_LIBRARIES)" CPPFLAGS="$(BELA_CPPFLAGS)" CFLAGS="$(BELA_CPPFLAGS)"'
 
 main.o libdclang.o: libdclang.c dclang.h dclang_dsp.h dclang_osc.h dclang_fast_math.h dclang_phiverb.h token.c
 
@@ -65,7 +85,7 @@ install: lib dclang
 	cp -a $(EXECUTABLE) $(PREFIX)/bin/
 
 clean:
-	rm -rf examples/*~ *~ dclang dclang2c libtest *.o *.so
+	rm -rf examples/*~ *~ dclang dclang2c-dsp libtest *.o *.so
 
 docker-image:
 	docker build --network host \

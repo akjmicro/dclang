@@ -23,11 +23,11 @@
 
 : fibonacci-benchmark
   "Running `24 fibonacci`:" print cr
-  clock
+  monoclock
   24 fibonacci
-  clock
-  swap -
-  "`24 fibonacci` finished in: " print . "seconds" print cr
+  monoclock
+  swap f-
+  "`24 fibonacci` finished in: " print f. "seconds" print cr
 ;
 
 fibonacci-benchmark

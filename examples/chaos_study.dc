@@ -47,8 +47,8 @@ var wrap
 
 : tent_chaos { chaos epsilon }
   x @
-  dup 0.5 >= if 1 swap - endif
-  chaos *  epsilon +   1 %
+  dup 0.5 f>= if 1.0 swap f- endif
+  chaos f* epsilon f+ 1.0 f%
   dup x !
 ;
 
@@ -58,8 +58,8 @@ var wrap
     _clear_figures
     wrap @ 2 * 0 1
     for
-      j 1000 /  0.00001 tent_chaos
-      wrap @ * floor                 # convert and scale to int
+      j i>f 1000.0 f/ 0.00001 tent_chaos
+      wrap @ i>f f* ffloor           # convert and scale to int
       figures + dup @ 1 + swap !
     next
     _show_figures " : " print i . cr
@@ -88,11 +88,11 @@ var drawchars
 
 : _draw_chaos_infinite
   get_chaos
-    :EPSILON keyval_get tonum
+    :EPSILON keyval_get tonum_float_free
   tent_chaos
-  get_mul
-  *
-  floor
+  get_mul i>f
+  f*
+  ffloor
   get_wrap
   %
   _draw_row

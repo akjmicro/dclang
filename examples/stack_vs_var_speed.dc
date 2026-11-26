@@ -14,50 +14,50 @@ var myvar
 
 : time_stack
   "Timing the stack:                  " print
-  clock
+  monoclock
   1
   TESTCOUNT times
     dup drop
   again
   drop
-  clock swap - 2 6 .rj cr
+  monoclock swap f- 2 6 f.rj cr
 ;
 
 : time_svstack
   "Timing the save stack:             " print
-  clock
+  monoclock
   1 svpush
   TESTCOUNT times
     0 svpick drop
   again
-  clock swap - 2 6 .rj cr
+  monoclock swap f- 2 6 f.rj cr
 ;
 
 : time_locals { somevar }
   "Timing local variables:            " print
-  clock
+  monoclock
   TESTCOUNT times
     somevar drop
   again
-  clock swap - 2 6 .rj cr
+  monoclock swap f- 2 6 f.rj cr
 ;
 
 : time_var_raw_int
   "Timing variables using integers:   " print
-  clock
+  monoclock
   TESTCOUNT times
     4 @ drop
   again
-  clock swap - 2 6 .rj cr
+  monoclock swap f- 2 6 f.rj cr
 ;
 
 : time_var
   "Timing normal named variables:     " print
-  clock
+  monoclock
   TESTCOUNT times
     myvar @ drop
   again
-  clock swap - 2 6 .rj cr
+  monoclock swap f- 2 6 f.rj cr
 ;
 
 : time_hash
@@ -72,11 +72,11 @@ var myvar
   ########################
   # end fill with values #
   ########################
-  clock
+  monoclock
   TESTCOUNT times
     :mykey h@ drop
   again
-  clock swap - 2 6 .rj cr
+  monoclock swap f- 2 6 f.rj cr
 ;
 
 : time_tree
@@ -86,16 +86,16 @@ var myvar
     0 hex8token hex8token t! drop
   again
   0 :mykey 23 t! drop
-  clock
+  monoclock
   TESTCOUNT times
     0 :mykey t@ drop
   again
-  clock swap - 2 6 .rj cr
+  monoclock swap f- 2 6 f.rj cr
 ;
 
 : do_math_swap
   "Timing math with swap:             " print
-  clock
+  monoclock
     TESTCOUNT times
         1 2 +
           3 4 +
@@ -103,12 +103,12 @@ var myvar
         /
       drop
     again
-  clock swap - 2 6 .rj cr
+  monoclock swap f- 2 6 f.rj cr
 ;
 
 : do_math_save
   "Timing math with svpush and svpop: " print
-  clock
+  monoclock
     TESTCOUNT times
         1 2 + svpush
         3 4 +
@@ -116,12 +116,12 @@ var myvar
         /
       drop
     again
-  clock swap - 2 6 .rj cr
+  monoclock swap f- 2 6 f.rj cr
 ;
 
 : do_math_var
   "Timing math with ! and @:          " print
-  clock
+  monoclock
     TESTCOUNT times
         1 2 + 0 !
         3 4 +
@@ -129,7 +129,7 @@ var myvar
         /
       drop
     again
-  clock swap - 2 6 .rj cr
+  monoclock swap f- 2 6 f.rj cr
 ;
 
 #################

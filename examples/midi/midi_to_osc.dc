@@ -21,10 +21,10 @@
 " \t\r"              const :FIELDS
 "\n"                 const :NEWLINE
 ":"                  const :COLON
-"127.0.0.1"          const :OSC_HOST
 ",f"                 const :OSC_FLOAT_TYPE
 
 "Missing controller" const :MISSING_CONTROLLER
+"Missing host"       const :MISSING_HOST
 "Missing port"       const :MISSING_PORT
 "Missing OSC path"   const :MISSING_OSC_PATH
 
@@ -48,9 +48,11 @@
 "Invalid MIDI channel/controller"
                      const :INVALID_MIDI_CHAN
 "Invalid OSC port"   const :INVALID_OSC_PORT
+"OSC command port already assigned to another host: "
+                     const :DUPLICATE_RESPONSE_PORT
 
 16                   const MAX_OSC_RECEIVERS
-2                    const PICKUP_TOLERANCE
+2.0                  const PICKUP_TOLERANCE
 
 0.5                  const POLL_INTERVAL
 0.15                 const SEND_GRACE
@@ -62,16 +64,17 @@
 # Mapping record offsets.
 0 const MAP_CHANNEL
 1 const MAP_CC
-2 const MAP_PORT
-3 const MAP_PATH
-4 const MAP_CURRENT
-5 const MAP_MINIMUM
-6 const MAP_MAXIMUM
-7 const MAP_INITIALIZED
-8 const MAP_LATCHED
-9 const MAP_EXPECTED
+2 const MAP_HOST
+3 const MAP_PORT
+4 const MAP_PATH
+5 const MAP_CURRENT
+6 const MAP_MINIMUM
+7 const MAP_MAXIMUM
+8 const MAP_INITIALIZED
+9 const MAP_LATCHED
+10 const MAP_EXPECTED
 
-10 const MAP_RECORD_SIZE
+11 const MAP_RECORD_SIZE
 
 tmake const MIDI_TREE
 
@@ -88,6 +91,7 @@ var current_midi_channel
 var rx_count
 0 rx_count !
 
+var rx_hosts  MAX_OSC_RECEIVERS allot
 var rx_ports  MAX_OSC_RECEIVERS allot
 var rx_socks  MAX_OSC_RECEIVERS allot
 var rx_active MAX_OSC_RECEIVERS allot
@@ -129,10 +133,11 @@ var last_send
   :KEY_BUF
 ;
 
-# ( channel cc port path -- )
-: store_mapping { channel cc port path }
+# ( channel cc host port path -- )
+: store_mapping { channel cc host port path }
   channel ,
   cc ,
+  host ,
   port ,
   path ,
   0 ,  # current
@@ -143,8 +148,8 @@ var last_send
   0 ,  # expected
 ;
 
-# ( channel cc port path -- )
-: add_mapping { channel cc port path }
+# ( channel cc host port path -- )
+: add_mapping { channel cc host port path }
   MIDI_TREE channel cc make_key t@
   if
     :DUPLICATE_MIDI_MAPPING print
@@ -152,7 +157,7 @@ var last_send
     return
   endif
 
-  channel cc port path store_mapping
+  channel cc host port path store_mapping
 
   MIDI_TREE
   channel cc make_key
@@ -160,14 +165,13 @@ var last_send
   t! drop
 
   :MAPPED print
-  channel . cc . port .
-  path print cr
+  channel . cc . host print " " print port . path print cr
 
-  mapping_count @ 1 + mapping_count !
+  mapping_count inc!
 ;
 
-# ( channel cc port path -- )
-: validate_mapping { channel cc port path }
+# ( channel cc host port path -- )
+: validate_mapping { channel cc host port path }
   channel 1 < channel 16 > or
   cc 0 < cc 127 > or
   or
@@ -182,13 +186,14 @@ var last_send
     return
   endif
 
-  channel cc port path add_mapping
+  channel cc host port path  add_mapping
 ;
 
-# ( channel-str cc-str port-str path -- )
-: parse_mapping_fields { channel cc port path }
+# ( channel-str cc-str host-str port-str path -- )
+: parse_mapping_fields { channel cc host port path }
   channel tonum
   cc tonum
+  host
   port tonum
   path
   validate_mapping
@@ -227,6 +232,14 @@ var last_send
   dup 0 =
   if
     drop 2drop
+    :MISSING_HOST print cr
+    return
+  endif
+
+  null :FIELDS field_save strtok
+  dup 0 =
+  if
+    2drop 2drop
     :MISSING_PORT print cr
     return
   endif
@@ -234,7 +247,7 @@ var last_send
   null :FIELDS field_save strtok
   dup 0 =
   if
-    drop 2drop drop
+    2drop 2drop drop
     :MISSING_OSC_PATH print cr
     return
   endif
@@ -296,30 +309,51 @@ var last_send
 # OSC endpoint registry
 ##################################################
 
-# ( port idx -- index | -1 )
-: find_endpoint_from { port idx }
+# ( host port idx -- index | -1 )
+: find_endpoint_from { host port idx }
   idx rx_count @ >=
   if
     -1
     return
   endif
 
-  port rx_ports idx + @ =
+  host rx_hosts idx +@ str=
+    port rx_ports idx +@ =
+  and
   if
     idx
   else
-    port idx 1 + find_endpoint_from
+    host port idx inc find_endpoint_from
   endif
 ;
 
-# ( port -- index | -1 )
-: find_endpoint { port }
-  port 0 find_endpoint_from
+# ( host port -- index | -1 )
+: find_endpoint { host port }
+  host port 0 find_endpoint_from
 ;
 
-# ( port -- flag )
-: endpoint_active { port }
-  port find_endpoint
+# A response receiver binds locally to command
+# port + 1. Two remote hosts therefore cannot
+# share one command port in the same bridge.
+# ( port idx -- index | -1 )
+: find_response_port_from { port idx }
+  idx rx_count @ >=
+  if
+    -1
+    return
+  endif
+
+  port rx_ports idx +@ =
+  if
+    idx
+  else
+    port idx inc find_response_port_from
+  endif
+;
+
+# ( host port -- flag )
+: endpoint_active { host port }
+  host port find_endpoint
 
   dup 0 <
   if
@@ -328,12 +362,12 @@ var last_send
     return
   endif
 
-  rx_active + @
+  rx_active swap +@
 ;
 
-# ( port -- )
-: mark_endpoint_active { port }
-  port find_endpoint
+# ( host port -- )
+: mark_endpoint_active { host port }
+  host port find_endpoint
 
   dup 0 <
   if
@@ -344,10 +378,17 @@ var last_send
   rx_active + 1 swap !
 ;
 
-# ( port path -- )
-: add_response_socket { port path }
-  port find_endpoint 0 >=
+# ( host port path -- )
+: add_response_socket { host port path }
+  host port find_endpoint 0 >=
   if
+    return
+  endif
+
+  port 0 find_response_port_from 0 >=
+  if
+    :DUPLICATE_RESPONSE_PORT print
+    port . cr
     return
   endif
 
@@ -360,36 +401,36 @@ var last_send
   # Faust responds on command port + 1.
   port 1 + osc_listen
 
-  :OSC_HOST port osc_connect
+  host port osc_connect
 
+  host          rx_hosts  rx_count @ + !
   port          rx_ports  rx_count @ + !
   osc_rx_sock @ rx_socks  rx_count @ + !
   osc_sock @    tx_socks  rx_count @ + !
   0             rx_active rx_count @ + !
   path          rx_paths  rx_count @ + !
 
-  rx_count @ 1 + rx_count !
+  rx_count inc!
 ;
 
-# ( port -- )
-: select_osc_port { port }
-  port find_endpoint
+# ( host port -- )
+: select_osc_host_and_port { host port }
+  host port find_endpoint
   dup 0 <
   if
     drop
     return
   endif
-  tx_socks + @ osc_sock !
+  tx_socks swap +@ osc_sock !
 ;
 
 ##################################################
 # OSC sending
 ##################################################
 
-# ( port path scaled_value -- )
-: send_scaled_osc { port path scaled_value }
-  port select_osc_port
-
+# ( host port path scaled_value -- )
+: send_scaled_osc { host port path scaled_value }
+  host port  select_osc_host_and_port
   path :OSC_FLOAT_TYPE osc_message
   scaled_value osc_f
   osc_send
@@ -397,16 +438,19 @@ var last_send
 
 # ( record_address -- )
 : request_mapping { record }
-  record MAP_PORT + @ select_osc_port
-  record MAP_PATH + @ osc_synth_get
+  record MAP_HOST +@
+    record MAP_PORT +@
+  select_osc_host_and_port
+  record MAP_PATH +@ osc_synth_get
 ;
 
 # ( -- )
 : init_response_sockets
   mapping_count @ 0 1 for
-    i 1 + mapping_record
-    dup MAP_PORT + @
-    swap MAP_PATH + @
+    i 1 + mapping_record  # ( record )
+    dup MAP_HOST +@       # ( record host )
+    swap dup MAP_PORT +@  # ( host record port )
+    swap MAP_PATH +@      # ( host port path )
     add_response_socket
   next
 
@@ -418,30 +462,32 @@ var last_send
 # Response lookup and introspection
 ##################################################
 
-# ( input_port path idx -- record | -1 )
-: lookup_response_from { input_port path idx }
+# ( input_host input_port path idx -- record | -1 )
+: lookup_response_from { input_host input_port path idx }
   idx mapping_count @ >=
   if
     -1
     return
   endif
 
-  idx 1 + mapping_record
+  idx 1 + mapping_record              # ( record )
 
-  dup MAP_PORT + @ input_port =
-  over MAP_PATH + @ path str=
-  and
+  dup MAP_HOST +@ input_host str=     # ( record host= )
+    over MAP_PORT +@ input_port =     # ( record host= port= )
+  and                                 # ( record host+port= )
+    over MAP_PATH +@ path str=        # ( record host+port= path= )
+  and                                 # ( record all= )
   if
     # Return record address.
   else
     drop
-    input_port path idx 1 + lookup_response_from
+    input_host input_port path idx inc   lookup_response_from
   endif
 ;
 
-# ( input_port path -- record | -1 )
-: lookup_response { input_port path }
-  input_port path 0 lookup_response_from
+# ( input_host input_port path -- record | -1 )
+: lookup_response { input_host input_port path }
+  input_host input_port path 0 lookup_response_from
 ;
 
 # ( record current minim maxim -- )
@@ -454,43 +500,44 @@ var last_send
   1 record MAP_INITIALIZED + !
 
   :INIT_MSG print
-  record MAP_PORT + @ .
-  record MAP_PATH + @ print
-  " current=" print current .
-  " min=" print minim .
-  " max=" print maxim . cr
+  record MAP_HOST +@ print " " print
+  record MAP_PORT +@ .
+  record MAP_PATH +@ print
+  " current=" print current f.
+  " min=" print minim f.
+  " max=" print maxim f. cr
 ;
 
 # ( record current -- difference_in_midi_steps )
 : observed_difference { record current }
   record MAP_MAXIMUM + @
-  record MAP_MINIMUM + @ -
-  abs
+  record MAP_MINIMUM + @ f-
+  fabs
 
-  dup 0 =
+  dup 0.0 f=
   if
     drop
-    current record MAP_EXPECTED + @ -
-    abs
+    current record MAP_EXPECTED + @ f-
+    fabs
     return
   endif
 
-  current record MAP_EXPECTED + @ -
-  abs
-  swap /
-  127.0 *
+  current record MAP_EXPECTED + @ f-
+  fabs
+  swap f/
+  127.0 f*
 ;
 
 # ( record current -- )
 : update_record { record current }
-  clock last_send @ -
-  SEND_GRACE <
+  monoclock last_send @ f-
+  SEND_GRACE f<
   if
     return
   endif
 
   record current observed_difference
-  CHANGE_TOLERANCE >
+  CHANGE_TOLERANCE f>
   if
     record MAP_LATCHED + @
     if
@@ -498,7 +545,7 @@ var last_send
 
       :UNLATCH_MSG print
       record MAP_PATH + @ print
-      " current=" print current . cr
+      " current=" print current f. cr
     endif
 
     current record MAP_CURRENT + !
@@ -506,13 +553,13 @@ var last_send
   endif
 ;
 
-# ( path current minim maxim input_port -- )
-: initialize_mapping { path current minim maxim input_port }
+# ( path current minim maxim input_host input_port -- )
+: initialize_mapping { path current minim maxim input_host input_port }
   # Any valid introspection response establishes
   # that the endpoint is available.
-  input_port mark_endpoint_active
+  input_host input_port         mark_endpoint_active
 
-  input_port path lookup_response
+  input_host input_port path    lookup_response
 
   dup 0 <
   if
@@ -528,13 +575,13 @@ var last_send
   endif
 ;
 
-# ( socket input_port -- )
-: poll_response_socket { sock input_port }
+# ( socket input_host input_port -- )
+: poll_response_socket { sock input_host input_port }
   sock osc_rx_sock !
 
   osc_synth_recv
   if
-    input_port initialize_mapping
+    input_host input_port initialize_mapping
   endif
 ;
 
@@ -542,8 +589,9 @@ var last_send
 # only during the startup discovery window.
 : poll_discovery_responses
   rx_count @ 0 1 for
-    rx_socks i + @
-    rx_ports i + @
+    rx_socks i +@
+    rx_hosts i +@
+    rx_ports i +@
     poll_response_socket
   next
 ;
@@ -551,10 +599,11 @@ var last_send
 # Poll only confirmed active endpoints.
 : poll_responses
   rx_count @ 0 1 for
-    rx_active i + @
+    rx_active i +@
     if
-      rx_socks i + @
-      rx_ports i + @
+      rx_socks i +@
+      rx_hosts i +@
+      rx_ports i +@
       poll_response_socket
     endif
   next
@@ -568,8 +617,10 @@ var last_send
 # per unique OSC command port.
 : probe_endpoints
   rx_count @ 0 1 for
-    rx_ports i + @ select_osc_port
-    rx_paths i + @ osc_synth_get
+    rx_hosts i +@
+      rx_ports i +@
+    select_osc_host_and_port
+    rx_paths i +@ osc_synth_get
   next
 ;
 
@@ -588,13 +639,15 @@ var last_send
   "OSC discovery results:" print cr
 
   rx_count @ 0 1 for
-    rx_active i + @
+    rx_active i +@
     if
       :ONLINE_MSG print
-      rx_ports i + @ . cr
+      rx_hosts i +@ print " " print
+      rx_ports i +@ . cr
     else
       :OFFLINE_MSG print
-      rx_ports i + @ .
+      rx_hosts i +@ print " " print
+      rx_ports i +@ .
       :IGNORING_MSG print cr
     endif
   next
@@ -608,8 +661,9 @@ var last_send
 : request_all
   mapping_count @ 0 1 for
     i 1 + mapping_record
-
-    dup MAP_PORT + @ endpoint_active
+    dup  MAP_HOST +@
+      over MAP_PORT +@
+    endpoint_active
     if
       request_mapping
     else
@@ -625,35 +679,36 @@ var last_send
 # ( record_address -- target )
 : mapping_target { record }
   record MAP_CURRENT + @
-  record MAP_MINIMUM + @ -
+  record MAP_MINIMUM + @ f-
   record MAP_MAXIMUM + @
-  record MAP_MINIMUM + @ -
-  /
-  127.0 *
+  record MAP_MINIMUM + @ f-
+  f/
+  127.0 f*
 ;
 
 # ( record_address midi_value -- )
 : send_mapping { record midi_value }
-  record MAP_MINIMUM + @
-  midi_value 127.0 /
-  record MAP_MAXIMUM + @
-  record MAP_MINIMUM + @ -
-  *
-  +
+  # Arrange the final send arguments first so
+  # no Forth-style rot word is needed.
+  record MAP_HOST +@
+  record MAP_PORT +@
+  record MAP_PATH +@
+
+  record MAP_MINIMUM +@
+  midi_value i>f 127.0 f/
+  record MAP_MAXIMUM +@
+  record MAP_MINIMUM +@ f-
+  f*
+  f+
 
   dup record MAP_EXPECTED + !
   dup record MAP_CURRENT + !
 
   :SEND_MSG print
-  record MAP_PATH + @ print
-  :VALUE_EQ print dup . cr
+  record MAP_PATH +@ print
+  :VALUE_EQ print dup f. cr
 
-  clock last_send !
-
-  record MAP_PORT + @
-  record MAP_PATH + @
-  rot
-
+  monoclock last_send !
   send_scaled_osc
 ;
 
@@ -661,7 +716,10 @@ var last_send
 : process_mapping { record midi_value }
   # Ignore mappings belonging to unavailable
   # endpoints, without logging or sending.
-  record MAP_PORT + @ endpoint_active 0 =
+  record
+    dup MAP_HOST +@
+  swap MAP_PORT +@
+  endpoint_active 0 =
   if
     return
   endif
@@ -675,8 +733,8 @@ var last_send
 
   record MAP_LATCHED + @ 0 =
   if
-    midi_value record mapping_target - abs
-    PICKUP_TOLERANCE <=
+    midi_value i>f record mapping_target f- fabs
+    PICKUP_TOLERANCE f<=
     if
       1 record MAP_LATCHED + !
 
@@ -688,7 +746,7 @@ var last_send
       :WAIT_MSG print
       record MAP_PATH + @ print
       :CC_EQ print midi_value .
-      :TARGET_EQ print record mapping_target . cr
+      :TARGET_EQ print record mapping_target f. cr
       return
     endif
   endif
@@ -736,23 +794,25 @@ var last_send
 ##################################################
 
 : poll_due
-  clock last_poll @ -
-  POLL_INTERVAL >=
+  monoclock last_poll @ f-
+  POLL_INTERVAL f>=
   if
     request_all
-    clock last_poll !
+    monoclock last_poll !
   endif
+;
+
+: _routing_loop
+  poll_midi
+  poll_responses
+  poll_due
+  0.001 sleep
+  _routing_loop
 ;
 
 : run
   "MIDI->OSC routing running..." print cr
-
-  inf times
-    poll_midi
-    poll_responses
-    poll_due
-    0.001 sleep
-  again
+  _routing_loop
 ;
 
 ##################################################
@@ -774,7 +834,7 @@ discover_endpoints
 # Initialize remaining parameters of active synths.
 request_all
 
-clock last_poll !
+monoclock last_poll !
 0 last_send !
 
 run

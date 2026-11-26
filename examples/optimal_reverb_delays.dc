@@ -21,11 +21,11 @@
 
 var phi_array 16 allot
 
-5 sqrt 2 / 0.5 - const PHI_M1
+5.0 fsqrt 2.0 f/ 0.5 f- const PHI_M1
 
 : populate_phi_array
   SLOTS 1 - times
-    PHI_M1 i * 1 %
+    PHI_M1 i i>f f* 1.0 f%
       phi_array i +
     !
   again
@@ -36,7 +36,7 @@ var phi_array 16 allot
 
 populate_phi_array
 
-phi_array @ SLOTS sortnums
+phi_array @ SLOTS fsortnums
 
 : show_phi_array
   SLOTS times
@@ -47,12 +47,12 @@ phi_array @ SLOTS sortnums
 
 : scale_and_snap_phi_array { lowval highval }
   SLOTS times
-    highval lowval -
+    highval i>f lowval i>f f-
       phi_array i + @
-    *
-      lowval
-    +
-    round
+    f*
+      lowval i>f
+    f+
+    fround
     closest-prime
       phi_array i +
     !

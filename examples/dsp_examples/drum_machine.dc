@@ -1,5 +1,4 @@
 "dsp.dc" import
-"music.dc" import
 
 ############################
 # Make a 32-step sequencer #
@@ -15,20 +14,12 @@ var seq_bit       top_bit @ seq_bit !
 #################
 # Set the tempo #
 #################
-var tempo  :DRUM_TEMPO get_x_tempo  tempo !
+var tempo  2.0 tempo !
 
 ###############
 # Drum Volume #
 ###############
-var drum_vol get_drum_vol  drum_vol !
-
-###################################
-# String constants for key lookup #
-###################################
-"op_hihat"   const   :op_hihat
-"cl_hihat"   const   :cl_hihat
-"snare_drum" const :snare_drum
-"bass_drum"  const  :bass_drum
+var drum_vol 0.8 drum_vol !
 
 ###########################
 # Bit patterns for beats! #
@@ -37,27 +28,10 @@ var op_hihat
 var cl_hihat
 var snare_drum
 var bass_drum
-
-: _init_drum_parts
-  :op_hihat keyval_get
-  0 = if
-    "0x00020002" :op_hihat   keyval_set
-  endif
-  :cl_hihat keyval_get
-  0 = if
-    "0x41413513" :cl_hihat   keyval_set
-  endif
-  :snare_drum keyval_get
-  0 = if
-    "0x0808080c" :snare_drum keyval_set
-  endif
-  :bass_drum keyval_get
-  0 = if
-    "0x80818082" :bass_drum  keyval_set
-  endif
-;
-
-_init_drum_parts
+0x00020002 op_hihat !
+0x41413513 cl_hihat !
+0x0808080c snare_drum !
+0x80818082 bass_drum !
 
 ##################################
 # Masking volumes for each sound #
@@ -91,18 +65,6 @@ var bass_drum_port
 make_hc_filter  cl_hihat_flt
 make_hc_filter  op_hihat_flt
 
-######################################################
-# Every sequencer cycle, check key for a new pattern #
-######################################################
-: _query_drum_parts
-  :op_hihat   keyval_get tonum    op_hihat !
-  :cl_hihat   keyval_get tonum    cl_hihat !
-  :snare_drum keyval_get tonum  snare_drum !
-  :bass_drum  keyval_get tonum   bass_drum !
-;
-
-_query_drum_parts
-
 #############################################################
 # `_next_bit` r-shifts which bit in the hexbeat to inspect  #
 # Also, conditionally resets back to the top bit if it      #
@@ -114,7 +76,6 @@ _query_drum_parts
   0 = if
     drop
     top_bit @ seq_bit !
-    _query_drum_parts
   else
     seq_bit !
   endif
@@ -132,26 +93,11 @@ _query_drum_parts
   = abs
 ;
 
-########################################################################
-# All `dsp.dc` central words are an infinite loop that return a single #
-# sample per iteration.                                                #
-########################################################################
-: drum_machine
-  inf times
+# One bounded stereo frame. dclang2c-dsp exposes tempo, drum_vol, and the four
+# pattern variables as block-rate controls to the Bela wrapper.
+: render_frame
     tempo @ metro    curtrig !
-    curtrig @ lasttrig @ > if
-      :DRUM_TEMPO get_x_tempo dup tempo @ <>
-      if
-        tempo !
-      else
-        drop
-      endif
-      get_drum_vol dup drum_vol @ <>
-      if
-        drum_vol !
-      else
-        drop
-      endif
+    curtrig @ lasttrig @ f> if
       bass_drum  _bit_on?   bass_drum_mask !
       snare_drum _bit_on?  snare_drum_mask !
       cl_hihat   _bit_on?    cl_hihat_mask !
@@ -161,56 +107,60 @@ _query_drum_parts
     ###################
     # bass drum sound #
     ###################
-    curtrig @ bass_drum_mask @ *
+    curtrig @ bass_drum_mask @ i>f f*
       bass_drum_port :ATT :REL1
     port
-      dup 90 * 90 + sine
-    *
-    drum_vol @ *
+      dup 90.0 f* 90.0 f+ sine
+    f*
+    drum_vol @ f*
     0.5 panmix
     ####################
     # snare drum sound #
     ####################
-    curtrig @ snare_drum_mask @ *
+    curtrig @ snare_drum_mask @ i>f f*
       snare_drum_port :ATT :REL1
     port
-      noise 0.4 *
-        383 sine 0.3 *
-      +
-    *
-    drum_vol @ *
+      noise 0.4 f*
+        383.0 sine 0.3 f*
+      f+
+    f*
+    drum_vol @ f*
     0.3 panmix
     ######################
     # closed hihat sound #
     ######################
-    curtrig @ cl_hihat_mask @ *
+    curtrig @ cl_hihat_mask @ i>f f*
       cl_hihat_port :ATT :REL1
     port
-      noise 0.2 *
+      noise 0.2 f*
         cl_hihat_flt
-          3610 0.6
+          3610.0 0.6
       hc_bandpass
-    *
-    drum_vol @ *
+    f*
+    drum_vol @ f*
     0.7 panmix
     ####################
     # open hihat sound #
     ####################
-    curtrig @ op_hihat_mask @ *
+    curtrig @ op_hihat_mask @ i>f f*
       op_hihat_port :ATT :REL2
     port
-      noise 0.3 *
+      noise 0.3 f*
         op_hihat_flt
-          3800 0.7
+          3800.0 0.7
       hc_bandpass
-    *
-    drum_vol @ *
+    f*
+    drum_vol @ f*
     0.7 panmix
     ############################
     # output & variable update #
     ############################
-    stereo_out
+    lcget rcget
     curtrig @ lasttrig !
     t+
-  again
+;
+
+: drum_machine
+  render_frame stereo_out
+  drum_machine
 ;

@@ -11,6 +11,7 @@ Born on 2018-05-05 */
 #include <stdio.h>
 #include <stdlib.h>
 #include <inttypes.h>
+#include <limits.h>
 #include <errno.h>
 #include <string.h>
 #include <regex.h>
@@ -37,18 +38,17 @@ Born on 2018-05-05 */
 #include "./noheap/trees.c"
 #include "./noheap/llist.c"
 
-/*
-  These type macros should be changed based on architecture. For instance,
-  on my x86_64 system, best performance was squeezed by making the integer
-  type and the float type to both be optimized in alignment to 8-bytes,
-  which turns out to be 'long' for integers, and 'double' for
-  floating-point values. On the Raspberry Pi 3, probably best to use
-  'long' and 'double' as well. I've found it crawls to a halt on the
-  benchmarks if you use 'float'!
-*/
-
 // data type macros
+#if UINTPTR_MAX == UINT64_MAX
 #define DCLANG_FLT   double
+typedef __int128 DCLANG_WIDE_INT;
+#elif UINTPTR_MAX == UINT32_MAX
+#define DCLANG_FLT   float
+typedef int64_t DCLANG_WIDE_INT;
+#else
+#error "dclang requires 32-bit or 64-bit uintptr_t"
+#endif
+#define DCLANG_CELL  uintptr_t
 #define DCLANG_LONG  long
 #define DCLANG_INT   int
 #define DCLANG_PTR   uintptr_t
@@ -56,12 +56,71 @@ Born on 2018-05-05 */
 #define DCLANG_UINT  unsigned int
 // end of data type macros
 
+#if defined(DCLANG_MATH_NEON)
+#include <math_neon.h>
+#define DCLANG_SIN sinf_neon
+#define DCLANG_COS cosf_neon
+#define DCLANG_TAN tanf_neon
+#define DCLANG_TANH tanhf_neon
+#define DCLANG_EXP expf_neon
+#define DCLANG_LOG logf_neon
+#define DCLANG_LOG2 log2f
+#define DCLANG_LOG10 log10f_neon
+#define DCLANG_POW powf_neon
+#define DCLANG_SQRT sqrtf_neon
+#define DCLANG_FABS fabsf_neon
+#define DCLANG_FLOOR floorf_neon
+#define DCLANG_CEIL ceilf_neon
+#elif UINTPTR_MAX == UINT32_MAX
+#define DCLANG_SIN sinf
+#define DCLANG_COS cosf
+#define DCLANG_TAN tanf
+#define DCLANG_TANH tanhf
+#define DCLANG_EXP expf
+#define DCLANG_LOG logf
+#define DCLANG_LOG2 log2f
+#define DCLANG_LOG10 log10f
+#define DCLANG_POW powf
+#define DCLANG_SQRT sqrtf
+#define DCLANG_FABS fabsf
+#define DCLANG_FLOOR floorf
+#define DCLANG_CEIL ceilf
+#else
+#define DCLANG_SIN sin
+#define DCLANG_COS cos
+#define DCLANG_TAN tan
+#define DCLANG_TANH tanh
+#define DCLANG_EXP exp
+#define DCLANG_LOG log
+#define DCLANG_LOG2 log2
+#define DCLANG_LOG10 log10
+#define DCLANG_POW pow
+#define DCLANG_SQRT sqrt
+#define DCLANG_FABS fabs
+#define DCLANG_FLOOR floor
+#define DCLANG_CEIL ceil
+#endif
+
+static inline DCLANG_CELL dclang_float_to_cell(DCLANG_FLT value) {
+    DCLANG_CELL cell;
+    _Static_assert(sizeof cell == sizeof value,
+                   "DCLANG_FLT must occupy exactly one cell");
+    memcpy(&cell, &value, sizeof cell);
+    return cell;
+}
+
+static inline DCLANG_FLT dclang_cell_to_float(DCLANG_CELL cell) {
+    DCLANG_FLT value;
+    memcpy(&value, &cell, sizeof value);
+    return value;
+}
+
 // constants
 #define DATA_STACK_SIZE   32
 #define RETURN_STACK_SIZE 128
 #define MAXWORD           1048576
 #define EXEC_TRAMPOLINE   (MAXWORD - 4)
-#define MAX_OPCODES       239
+#define MAX_OPCODES       272
 #define IBUFSIZE          128
 #define NUMLOCALS         8
 #define NUMVARS           16777216
@@ -71,15 +130,17 @@ Born on 2018-05-05 */
 // function-like macros
 
 #define push(item) { \
+    DCLANG_CELL push_value__ = (DCLANG_CELL)(item); \
     if (data_stack_ptr >= DATA_STACK_SIZE) { \
         printf("push -- stack overflow!\n"); \
         data_stack_ptr = 0; \
     } \
-    data_stack[data_stack_ptr++] = item; \
+    data_stack[data_stack_ptr++] = push_value__; \
 }
 
 #define push_no_check(item) { \
-    data_stack[data_stack_ptr++] = item; \
+    DCLANG_CELL push_value__ = (DCLANG_CELL)(item); \
+    data_stack[data_stack_ptr++] = push_value__; \
 }
 
 #define POP data_stack[--data_stack_ptr]
@@ -89,7 +150,7 @@ Born on 2018-05-05 */
 // compiled tokens get saved and put into an array of type 'inst_struct'
 typedef struct {
     int opcode;
-    DCLANG_FLT param;
+    DCLANG_CELL param;
 } inst_struct;
 
 // an array of inst_struct instructions. This is where the user's commands,
@@ -98,7 +159,7 @@ inst_struct  prog[MAXWORD];
 DCLANG_PTR   iptr;
 
 // data stack
-DCLANG_FLT   data_stack[DATA_STACK_SIZE * 2];
+DCLANG_CELL  data_stack[DATA_STACK_SIZE * 2];
 DCLANG_PTR   data_stack_ptr;
 DCLANG_PTR   save_data_stack_ptr;
 // return stack
@@ -119,7 +180,7 @@ DCLANG_LONG times_info[3];
 DCLANG_LONG times_ptr;
 // local variables
 DCLANG_PTR  locals_keys[NUMLOCALS];
-DCLANG_FLT  locals_vals[NUMLOCALS * RETURN_STACK_SIZE];
+DCLANG_CELL locals_vals[NUMLOCALS * RETURN_STACK_SIZE];
 DCLANG_PTR  locals_base_idx;
 // global variables
 // track variables - mapping from name to index
@@ -127,12 +188,12 @@ char        *var_keys[NUMVARS];
 DCLANG_PTR   var_vals[NUMVARS];
 DCLANG_PTR   var_map_idx;
 // variable actual data stored here
-DCLANG_FLT   vars[NUMVARS];
+DCLANG_CELL  vars[NUMVARS];
 DCLANG_PTR   vars_idx;
 // global constants
 // track constants - mapping from name to index
 char        *const_keys[1024];
-DCLANG_FLT   const_vals[1024];
+DCLANG_CELL  const_vals[1024];
 DCLANG_PTR   const_idx;
 
 // hashwords
@@ -151,7 +212,7 @@ DCLANG_ULONG hashwords_cnt = 0;
 struct tree_entry
 {
     char *key;
-    DCLANG_FLT value;
+    DCLANG_CELL value;
 };
 
 void *tree_roots[NUM_TREE_ROOTS] = {NULL};
@@ -161,7 +222,7 @@ int tree_roots_idx = -1;
 struct Node {
     struct Node *next;
     struct Node *prev;
-    DCLANG_FLT data;  // New member for data
+    DCLANG_CELL data;  // New member for data
 };
 
 // min and max string buffer addresses
@@ -207,7 +268,13 @@ enum dclang_opcodes {
     OP_SVDEPTH,
     OP_SVCLEAR,
     OP_SHOW,
+    OP_SHOWUNSIGNED,
+    OP_SHOWFLOAT,
     OP_SHOWNOSPACE,
+    OP_SHOWUNSIGNEDNOSPACE,
+    OP_SHOWFLOATNOSPACE,
+    OP_SHOWINTRJ,
+    OP_SHOWUNSIGNEDRJ,
     OP_SHOWRJ,
     OP_SHOWPZ,
     OP_SHOWSTACK,
@@ -221,6 +288,12 @@ enum dclang_opcodes {
     OP_GT,
     OP_LTE,
     OP_GTE,
+    OP_FEQ,
+    OP_FNOTEQ,
+    OP_FLT,
+    OP_FGT,
+    OP_FLTE,
+    OP_FGTE,
     OP_ASSERT,
     // bit manipulation
     OP_AND,
@@ -233,15 +306,28 @@ enum dclang_opcodes {
     OP_ADD,
     OP_SUB,
     OP_MUL,
+    OP_MULDIV,
+    OP_MULDIVMOD,
     OP_DIV,
     OP_MOD,
+    OP_DIVMOD,
     OP_ABS,
     OP_MIN,
     OP_MAX,
+    OP_FADD,
+    OP_FSUB,
+    OP_FMUL,
+    OP_FDIV,
+    OP_FMOD,
+    OP_FABS,
+    OP_FMIN,
+    OP_FMAX,
     // float -> int
     OP_ROUND,
     OP_CEIL,
     OP_FLOOR,
+    OP_ITOF,
+    OP_FTOI,
     // higher math
     OP_POWER,
     OP_SQRT,
@@ -282,6 +368,7 @@ enum dclang_opcodes {
     OP_ENVGET,
     // sorting
     OP_SORTNUMS,
+    OP_SORTFLOATS,
     OP_SORTSTRS,
     // hash set & get
     OP_HASHSET,
@@ -325,6 +412,10 @@ enum dclang_opcodes {
     OP_GET_LOCAL,
     OP_RETURN,
     OP_CLOCK,
+    OP_MONOCLOCK,
+    _OP_CLOCK_ADD,
+    _OP_CLOCK_MOD,
+    _OP_SLEEP_UNTIL,
     OP_EPOCH,
     OP_EPOCH_TO_DT,
     OP_DT_TO_EPOCH,
@@ -449,6 +540,7 @@ enum dclang_opcodes {
     _OP_DSP_SINELOOP,
     _OP_DSP_TRI,
     _OP_DSP_SAWTOOTH,
+    _OP_DSP_WAVETABLE,
     _OP_DSP_PORT,
     _OP_DSP_FAST_SIN,
     _OP_DSP_FAST_TANH,
@@ -490,12 +582,15 @@ FILE *file_stack[32];
 DCLANG_PTR fsp;
 
 struct timeval tval;
+struct timespec dclang_monoclock_origin;
 struct sockaddr_in serv_addr, cli_addr;
 struct sockaddr_in udp_serv_addr, udp_cli_addr, dest_addr;
 sigset_t block_sigint;
 
 // will be the private pointer to the working MIDI stream
 PmStream *midi_out_stream, *midi_in_stream;
+int midi_initialized;
+PmError midi_initialize_status;
 #define TIME_PROC ((int32_t (*)(void *)) Pt_Time)
 #define TIME_INFO NULL
 
@@ -517,4 +612,4 @@ extern void dclang_initialize();
 extern DCLANG_LONG dclang_import(char *infilestr);
 extern DCLANG_LONG dclang_findword(const char *word);
 extern void dclang_callword(DCLANG_PTR where);
-extern DCLANG_FLT dclang_pop();
+extern DCLANG_CELL dclang_pop();

@@ -1,4 +1,5 @@
 dclang
-/dclang2c
+/dclang2c-dsp
+/Makefile
 main.o
 
